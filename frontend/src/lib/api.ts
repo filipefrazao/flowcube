@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import type { Workflow } from '@/types/workflow.types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -40,6 +41,9 @@ apiClient.interceptors.response.use(
 // ============================================================================
 // Types
 // ============================================================================
+
+// Export Workflow from types
+export type { Workflow };
 
 // Chat Types
 export interface ChatMessage {
@@ -88,17 +92,6 @@ export interface Execution {
   completed_at?: string;
   duration_ms?: number;
   error_message?: string;
-}
-
-// Workflow Types
-export interface Workflow {
-  id: number;
-  name: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-  is_active: boolean;
-  execution_count: number;
 }
 
 // Credential Types
@@ -219,7 +212,7 @@ export const workflowApi = {
   /**
    * Get a specific workflow
    */
-  getWorkflow: async (workflowId: number): Promise<Workflow> => {
+  getWorkflow: async (workflowId: string): Promise<Workflow> => {
     const response = await apiClient.get(`/workflows/${workflowId}/`);
     return response.data;
   },
@@ -235,7 +228,7 @@ export const workflowApi = {
   /**
    * Update a workflow
    */
-  updateWorkflow: async (workflowId: number, data: Partial<Workflow>): Promise<Workflow> => {
+  updateWorkflow: async (workflowId: string, data: Partial<Workflow>): Promise<Workflow> => {
     const response = await apiClient.patch(`/workflows/${workflowId}/`, data);
     return response.data;
   },
@@ -243,7 +236,7 @@ export const workflowApi = {
   /**
    * Delete a workflow
    */
-  deleteWorkflow: async (workflowId: number): Promise<void> => {
+  deleteWorkflow: async (workflowId: string): Promise<void> => {
     await apiClient.delete(`/workflows/${workflowId}/`);
   },
 };
@@ -295,9 +288,6 @@ export const credentialApi = {
     await apiClient.delete(`/credentials/${credentialId}/`);
   },
 };
-
-// Export the axios instance for custom requests
-export default apiClient;
 
 // ============================================================================
 // Auth API
@@ -375,3 +365,6 @@ export const settingsApi = {
     return response.data;
   },
 };
+
+// Export the axios instance for custom requests
+export default apiClient;
