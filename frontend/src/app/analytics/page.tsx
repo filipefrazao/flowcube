@@ -430,7 +430,7 @@ export default function AnalyticsPage() {
                       </div>
                     )}
 
-                    {executionStats && executionStats.avg_duration_ms??0 > 0 && (
+                    {executionStats && (executionStats.avg_duration_ms ?? 0) > 0 && (
                       <div className="mt-4 pt-4 border-t border-gray-700/50">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-400">Tempo medio de execucao</span>
