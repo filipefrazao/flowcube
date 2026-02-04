@@ -15,6 +15,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/v1/", include("workflows.urls")),
+    path("api/v1/marketplace/", include("marketplace.urls")),
     path("api/v1/auth/token/", obtain_auth_token, name="api_token_auth"),
     path("api/flowcube/", include("flowcube.urls")),
     path("api/telegram/", include("telegram_integration.urls")),

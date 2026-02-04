@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "flowcube",
     "workflows",
     "telegram_integration",
+    "billing",  # SaaS billing & subscriptions
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,8 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
 # FlowCube Webhook Base URL (for Telegram webhooks)
 FLOWCUBE_WEBHOOK_BASE_URL = os.environ.get("FLOWCUBE_WEBHOOK_BASE_URL", "https://flowcube.frzgroup.com.br")
+
+# Stripe Configuration (SaaS Billing)
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")

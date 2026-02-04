@@ -43,3 +43,6 @@ Jinja2>=3.1.0
 # Pydantic for schemas
 pydantic>=2.0.0
 aiosmtplib>=3.0.0
+
+# Payment Processing - Stripe
+stripe>=11.0.0
