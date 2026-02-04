@@ -7,13 +7,16 @@ from rest_framework_nested import routers as nested_routers
 
 from .views import (
     WorkflowViewSet, GroupViewSet, BlockViewSet, EdgeViewSet,
-    VariableViewSet, ExecutionViewSet
+    VariableViewSet, ExecutionViewSet,
+    AIAssistantViewSet, BrazilianContextViewSet
 )
 
 # Main router
 router = DefaultRouter()
 router.register(r"workflows", WorkflowViewSet, basename="workflow")
 router.register(r"executions", ExecutionViewSet, basename="execution")
+router.register(r"ai-assistant", AIAssistantViewSet, basename="ai-assistant")
+router.register(r"brazilian-contexts", BrazilianContextViewSet, basename="brazilian-context")
 
 # Nested routers for workflow resources
 workflow_router = nested_routers.NestedDefaultRouter(router, r"workflows", lookup="workflow")

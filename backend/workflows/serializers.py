@@ -3,6 +3,7 @@ FlowCube 3.0 Serializers
 """
 from rest_framework import serializers
 from .models import (
+    AIAssistant, BrazilianContext, AutomationSuggestion,
     Workflow, WorkflowVersion, Execution, NodeExecutionLog,
     NodeAnalytics, Group, Block, Edge, Variable
 )
@@ -182,3 +183,103 @@ class PublishWorkflowSerializer(serializers.Serializer):
         workflow.save()
         
         return version
+
+
+# ==========================================
+# AI Assistant Serializers
+# ==========================================
+
+class AIAssistantSerializer(serializers.ModelSerializer):
+    """Serializer para AIAssistant"""
+    suggestions_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AIAssistant
+        fields = [
+            'id', 'name', 'description', 'context_patterns',
+            'is_active', 'created_at', 'updated_at', 'suggestions_count'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def get_suggestions_count(self, obj):
+        return obj.suggestions.count()
+
+
+class BrazilianContextSerializer(serializers.ModelSerializer):
+    """Serializer para BrazilianContext"""
+    context_type_display = serializers.CharField(source='get_context_type_display', read_only=True)
+    
+    class Meta:
+        model = BrazilianContext
+        fields = [
+            'id', 'context_type', 'context_type_display',
+            'patterns', 'templates', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class AutomationSuggestionSerializer(serializers.ModelSerializer):
+    """Serializer para AutomationSuggestion"""
+    confidence_level = serializers.ReadOnlyField()
+    assistant_name = serializers.CharField(source='assistant.name', read_only=True)
+    workflow_name = serializers.CharField(source='applied_to_workflow.name', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = AutomationSuggestion
+        fields = [
+            'id', 'assistant', 'assistant_name', 'workflow_template',
+            'confidence_score', 'confidence_level', 'context_type',
+            'user_context', 'explanation', 'is_applied',
+            'applied_to_workflow', 'workflow_name',
+            'created_at', 'applied_at'
+        ]
+        read_only_fields = ['created_at', 'applied_at', 'confidence_level']
+
+
+class AutomationSuggestionListSerializer(serializers.ModelSerializer):
+    """Serializer simplificado para listagem de sugestões"""
+    confidence_level = serializers.ReadOnlyField()
+    assistant_name = serializers.CharField(source='assistant.name', read_only=True)
+    
+    class Meta:
+        model = AutomationSuggestion
+        fields = [
+            'id', 'assistant_name', 'context_type',
+            'confidence_score', 'confidence_level', 'explanation',
+            'is_applied', 'created_at'
+        ]
+
+
+class AIAnalyzeRequestSerializer(serializers.Serializer):
+    """Serializer para requisição de análise de contexto"""
+    context = serializers.JSONField(
+        help_text="Contexto do usuário: descrição do negócio, objetivo, etc."
+    )
+    business_description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Descrição detalhada do negócio"
+    )
+    automation_goal = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Objetivo da automação"
+    )
+    preferred_channels = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        help_text="Canais preferidos: whatsapp, email, sms, etc."
+    )
+
+
+class AIAnalyzeResponseSerializer(serializers.Serializer):
+    """Serializer para resposta de análise"""
+    suggestions = AutomationSuggestionSerializer(many=True)
+    brazilian_contexts = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Contextos brasileiros identificados"
+    )
+    recommendations = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Recomendações gerais"
+    )

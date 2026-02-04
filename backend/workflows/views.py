@@ -210,3 +210,196 @@ class ExecutionViewSet(viewsets.ReadOnlyModelViewSet):
             'daily_counts': daily_counts,
         }
         return Response(stats)
+
+
+# ==========================================
+# AI Assistant Views
+# ==========================================
+
+from .models import AIAssistant, BrazilianContext, AutomationSuggestion
+from .serializers import (
+    AIAssistantSerializer, BrazilianContextSerializer,
+    AutomationSuggestionSerializer, AutomationSuggestionListSerializer,
+    AIAnalyzeRequestSerializer, AIAnalyzeResponseSerializer
+)
+from .ai_service import ai_service
+
+
+class AIAssistantViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gerenciamento de assistentes IA
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = AIAssistantSerializer
+    queryset = AIAssistant.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['name', 'description']
+    ordering = ['-created_at']
+
+    @action(detail=False, methods=['post'])
+    def analyze(self, request):
+        """
+        Analisa o contexto fornecido e retorna sugestões de automação
+        
+        POST /api/v1/ai-assistant/analyze/
+        {
+            "context": {...},
+            "business_description": "E-commerce de roupas",
+            "automation_goal": "Automatizar confirmação de pagamento",
+            "preferred_channels": ["whatsapp", "email"]
+        }
+        """
+        # Valida request
+        request_serializer = AIAnalyzeRequestSerializer(data=request.data)
+        if not request_serializer.is_valid():
+            return Response(
+                request_serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Analisa com IA
+        user_context = request_serializer.validated_data
+        ai_result = ai_service.analyze_context(user_context)
+        
+        # Cria ou pega assistente padrão
+        assistant, _ = AIAssistant.objects.get_or_create(
+            name="Assistente FlowCube",
+            defaults={
+                'description': 'Assistente IA contextual para automações brasileiras',
+                'context_patterns': {
+                    'pix': ['pix', 'pagamento', 'payment'],
+                    'whatsapp': ['whatsapp', 'wpp', 'zap'],
+                    'nfe': ['nfe', 'nota fiscal', 'invoice'],
+                    'ecommerce': ['ecommerce', 'loja', 'shop'],
+                    'crm': ['crm', 'leads', 'vendas']
+                }
+            }
+        )
+        
+        # Salva sugestões no banco
+        suggestions_objs = []
+        for suggestion_data in ai_result['suggestions']:
+            suggestion = AutomationSuggestion.objects.create(
+                assistant=assistant,
+                workflow_template=suggestion_data['workflow_template'],
+                confidence_score=suggestion_data['confidence_score'],
+                context_type=suggestion_data['context_type'],
+                user_context=suggestion_data['user_context'],
+                explanation=suggestion_data['explanation']
+            )
+            suggestions_objs.append(suggestion)
+        
+        # Serializa resposta
+        response_data = {
+            'suggestions': AutomationSuggestionSerializer(suggestions_objs, many=True).data,
+            'brazilian_contexts': ai_result['brazilian_contexts'],
+            'recommendations': ai_result['recommendations']
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def suggestions(self, request):
+        """
+        Lista todas as sugestões de automação
+        
+        GET /api/v1/ai-assistant/suggestions/
+        GET /api/v1/ai-assistant/suggestions/?is_applied=false
+        GET /api/v1/ai-assistant/suggestions/?context_type=whatsapp
+        """
+        queryset = AutomationSuggestion.objects.all().select_related('assistant')
+        
+        # Filtros
+        is_applied = request.query_params.get('is_applied')
+        if is_applied is not None:
+            is_applied_bool = is_applied.lower() == 'true'
+            queryset = queryset.filter(is_applied=is_applied_bool)
+        
+        context_type = request.query_params.get('context_type')
+        if context_type:
+            queryset = queryset.filter(context_type=context_type)
+        
+        # Ordena por score
+        queryset = queryset.order_by('-confidence_score', '-created_at')
+        
+        # Paginação
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = AutomationSuggestionListSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = AutomationSuggestionListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='apply/(?P<suggestion_id>[^/.]+)')
+    def apply_suggestion(self, request, suggestion_id=None):
+        """
+        Aplica uma sugestão criando um novo workflow
+        
+        POST /api/v1/ai-assistant/apply/{suggestion_id}/
+        {
+            "workflow_name": "Meu Workflow Custom" (opcional)
+        }
+        """
+        # Busca sugestão
+        try:
+            suggestion = AutomationSuggestion.objects.get(id=suggestion_id)
+        except AutomationSuggestion.DoesNotExist:
+            return Response(
+                {'error': 'Sugestão não encontrada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if suggestion.is_applied:
+            return Response(
+                {'error': 'Esta sugestão já foi aplicada'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Nome do workflow
+        workflow_name = request.data.get('workflow_name')
+        if not workflow_name:
+            workflow_name = suggestion.workflow_template.get('name', 'Workflow IA')
+        
+        # Cria workflow
+        workflow_graph = ai_service.generate_workflow_from_template(
+            suggestion.workflow_template
+        )
+        
+        workflow = Workflow.objects.create(
+            name=workflow_name,
+            description=suggestion.workflow_template.get('description', suggestion.explanation),
+            owner=request.user,
+            graph=workflow_graph,
+            is_published=False,
+            is_active=False,
+            tags=['ai-generated', suggestion.context_type]
+        )
+        
+        # Atualiza sugestão
+        suggestion.is_applied = True
+        suggestion.applied_to_workflow = workflow
+        suggestion.applied_at = timezone.now()
+        suggestion.save()
+        
+        # Retorna workflow criado
+        from .serializers import WorkflowDetailSerializer
+        return Response(
+            {
+                'success': True,
+                'workflow': WorkflowDetailSerializer(workflow).data,
+                'suggestion': AutomationSuggestionSerializer(suggestion).data
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+class BrazilianContextViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet somente leitura para contextos brasileiros pré-configurados
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = BrazilianContextSerializer
+    queryset = BrazilianContext.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['context_type']

@@ -340,3 +340,155 @@ class Variable(models.Model):
     
     def __str__(self):
         return f"{self.workflow.name}.{self.name}"
+
+
+# ==========================================
+# AI Assistant Models - Automação Contextual
+# ==========================================
+
+class AIAssistant(models.Model):
+    """
+    Assistente IA para sugestões de automação contextual
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, help_text="Nome do assistente")
+    description = models.TextField(blank=True, help_text="Descrição do assistente")
+    
+    # Padrões de contexto que o assistente reconhece
+    context_patterns = models.JSONField(
+        default=dict,
+        help_text="Padrões de contexto brasileiro: {'pix': [...], 'whatsapp': [...], 'nfe': [...]}"
+    )
+    
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Assistente IA"
+        verbose_name_plural = "Assistentes IA"
+    
+    def __str__(self):
+        return self.name
+
+
+class BrazilianContext(models.Model):
+    """
+    Contextos brasileiros pré-configurados para automações
+    Ex: Pix, WhatsApp Business, NFe, etc.
+    """
+    class ContextType(models.TextChoices):
+        PIX = "pix", "Pix"
+        WHATSAPP = "whatsapp", "WhatsApp Business"
+        NFE = "nfe", "Nota Fiscal Eletrônica"
+        ECOMMERCE = "ecommerce", "E-commerce"
+        CRM = "crm", "CRM"
+        LEADS = "leads", "Gestão de Leads"
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    context_type = models.CharField(max_length=50, choices=ContextType.choices, unique=True)
+    
+    # Padrões de reconhecimento
+    patterns = models.JSONField(
+        default=list,
+        help_text="Lista de padrões/keywords para identificar este contexto"
+    )
+    
+    # Templates de workflow pré-configurados
+    templates = models.JSONField(
+        default=list,
+        help_text="Templates de workflow para este contexto"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Contexto Brasileiro"
+        verbose_name_plural = "Contextos Brasileiros"
+    
+    def __str__(self):
+        return self.get_context_type_display()
+
+
+class AutomationSuggestion(models.Model):
+    """
+    Sugestão de automação gerada pelo assistente IA
+    """
+    class ConfidenceLevel(models.TextChoices):
+        LOW = "low", "Baixa"
+        MEDIUM = "medium", "Média"
+        HIGH = "high", "Alta"
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    assistant = models.ForeignKey(
+        AIAssistant,
+        on_delete=models.CASCADE,
+        related_name="suggestions"
+    )
+    
+    # Template de workflow sugerido
+    workflow_template = models.JSONField(
+        default=dict,
+        help_text="Template completo do workflow (nodes, edges, config)"
+    )
+    
+    # Score de confiança da sugestão (0-100)
+    confidence_score = models.FloatField(
+        default=0.0,
+        help_text="Score de 0 a 100 indicando confiança na sugestão"
+    )
+    
+    # Tipo de contexto identificado
+    context_type = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Tipo de contexto brasileiro identificado"
+    )
+    
+    # Contexto original do usuário
+    user_context = models.JSONField(
+        default=dict,
+        help_text="Contexto fornecido pelo usuário para análise"
+    )
+    
+    # Explicação da sugestão
+    explanation = models.TextField(
+        blank=True,
+        help_text="Explicação de por que esta automação foi sugerida"
+    )
+    
+    # Status da sugestão
+    is_applied = models.BooleanField(
+        default=False,
+        help_text="Se a sugestão foi aplicada ao workflow"
+    )
+    
+    applied_to_workflow = models.ForeignKey(
+        Workflow,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ai_suggestions"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    applied_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Sugestão de Automação"
+        verbose_name_plural = "Sugestões de Automação"
+    
+    def __str__(self):
+        return f"Sugestão {self.context_type} - Score: {self.confidence_score}"
+    
+    @property
+    def confidence_level(self):
+        """Retorna nível de confiança baseado no score"""
+        if self.confidence_score >= 80:
+            return self.ConfidenceLevel.HIGH
+        elif self.confidence_score >= 50:
+            return self.ConfidenceLevel.MEDIUM
+        return self.ConfidenceLevel.LOW
