@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'email_sequences',
     'instagram_automation',
     'ai_agents',
+    'achievements',
 ]
 
 MIDDLEWARE = [
