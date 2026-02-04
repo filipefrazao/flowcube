@@ -94,9 +94,9 @@ class Command(BaseCommand):
                 'price_monthly': 99,
                 'price_yearly': 950.40,  # 20% discount
                 'yearly_discount_percentage': 20,
-                'max_workflows': None,  # Unlimited
+                'max_workflows': 999999,  # Unlimited
                 'max_executions_per_month': 100000,
-                'max_nodes_per_workflow': None,  # Unlimited
+                'max_nodes_per_workflow': 999999,  # Unlimited
                 'max_active_workflows': 100,
                 'max_ai_requests_per_month': 1000,
                 'max_storage_mb': 10000,
@@ -138,13 +138,13 @@ class Command(BaseCommand):
                 'price_monthly': 499,
                 'price_yearly': 4790.40,  # 20% discount
                 'yearly_discount_percentage': 20,
-                'max_workflows': None,  # Unlimited
-                'max_executions_per_month': None,  # Unlimited
-                'max_nodes_per_workflow': None,  # Unlimited
-                'max_active_workflows': None,  # Unlimited
-                'max_ai_requests_per_month': None,  # Unlimited
-                'max_storage_mb': None,  # Unlimited
-                'max_team_members': None,  # Unlimited
+                'max_workflows': 999999,  # Unlimited
+                'max_executions_per_month': 999999,  # Unlimited
+                'max_nodes_per_workflow': 999999,  # Unlimited
+                'max_active_workflows': 999999,  # Unlimited
+                'max_ai_requests_per_month': 999999,  # Unlimited
+                'max_storage_mb': 999999,  # Unlimited
+                'max_team_members': 999999,  # Unlimited
                 'has_ai_features': True,
                 'has_marketplace_access': True,
                 'has_marketplace_publish': True,

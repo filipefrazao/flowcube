@@ -1,0 +1,146 @@
+services:
+  flowcube-postgres:
+    image: postgres:16-alpine
+    container_name: flowcube-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: flowcube
+      POSTGRES_PASSWORD: FlowCube2026!
+      POSTGRES_DB: flowcube
+    volumes:
+      - flowcube-postgres-data:/var/lib/postgresql/data
+    networks:
+      - flowcube-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowcube"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flowcube-redis:
+    image: redis:7-alpine
+    container_name: flowcube-redis
+    restart: unless-stopped
+    networks:
+      - flowcube-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flowcube-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowcube-backend
+    restart: unless-stopped
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=flowcube-production-secret-key-change-me-2026
+      - POSTGRES_DB=flowcube
+      - POSTGRES_USER=flowcube
+      - POSTGRES_PASSWORD=FlowCube2026!
+      - POSTGRES_HOST=flowcube-postgres
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgres://flowcube:FlowCube2026!@flowcube-postgres:5432/flowcube
+      - REDIS_HOST=flowcube-redis
+      - CELERY_BROKER_URL=redis://flowcube-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://flowcube-redis:6379/1
+      - ALLOWED_HOSTS=flowcube.frzgroup.com.br,localhost,127.0.0.1
+      - CORS_ALLOWED_ORIGINS=https://flowcube.frzgroup.com.br,http://localhost:3000
+      - EVOLUTION_API_URL=https://evolution.frzgroup.com.br
+      - EVOLUTION_API_KEY=429683C4C977415CAAFCCE10F7D57E11
+      - SALESCUBE_API_URL=https://api.frzglobal.com.br
+      - SALESCUBE_API_TOKEN=6550a421c3efbb107bfd4d1ef68a3320e06345ae
+      - N8N_WEBHOOK_URL=https://n8n.frzgroup.com.br/webhook
+    depends_on:
+      flowcube-postgres:
+        condition: service_healthy
+      flowcube-redis:
+        condition: service_healthy
+    networks:
+      - flowcube-network
+      - coolify
+
+  flowcube-celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowcube-celery
+    restart: unless-stopped
+    command: celery -A flowcube_project worker -l info -Q default,webhooks,http,ai,whatsapp,workflows
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=flowcube-production-secret-key-change-me-2026
+      - POSTGRES_DB=flowcube
+      - POSTGRES_USER=flowcube
+      - POSTGRES_PASSWORD=FlowCube2026!
+      - POSTGRES_HOST=flowcube-postgres
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgres://flowcube:FlowCube2026!@flowcube-postgres:5432/flowcube
+      - REDIS_HOST=flowcube-redis
+      - CELERY_BROKER_URL=redis://flowcube-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://flowcube-redis:6379/1
+      - EVOLUTION_API_URL=https://evolution.frzgroup.com.br
+      - EVOLUTION_API_KEY=429683C4C977415CAAFCCE10F7D57E11
+      - SALESCUBE_API_URL=https://api.frzglobal.com.br
+      - SALESCUBE_API_TOKEN=6550a421c3efbb107bfd4d1ef68a3320e06345ae
+      - N8N_WEBHOOK_URL=https://n8n.frzgroup.com.br/webhook
+    depends_on:
+      flowcube-postgres:
+        condition: service_healthy
+      flowcube-redis:
+        condition: service_healthy
+    networks:
+      - flowcube-network
+
+  flowcube-celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowcube-celery-beat
+    restart: unless-stopped
+    command: celery -A flowcube_project beat -l info
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=flowcube-production-secret-key-change-me-2026
+      - POSTGRES_DB=flowcube
+      - POSTGRES_USER=flowcube
+      - POSTGRES_PASSWORD=FlowCube2026!
+      - POSTGRES_HOST=flowcube-postgres
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgres://flowcube:FlowCube2026!@flowcube-postgres:5432/flowcube
+      - REDIS_HOST=flowcube-redis
+      - CELERY_BROKER_URL=redis://flowcube-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://flowcube-redis:6379/1
+    depends_on:
+      flowcube-postgres:
+        condition: service_healthy
+      flowcube-redis:
+        condition: service_healthy
+    networks:
+      - flowcube-network
+
+  flowcube-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: flowcube-frontend
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=https://flowcube.frzgroup.com.br
+    depends_on:
+      - flowcube-backend
+    networks:
+      - flowcube-network
+      - coolify
+
+networks:
+  flowcube-network:
+    driver: bridge
+  coolify:
+    external: true
+
+volumes:
+  flowcube-postgres-data:

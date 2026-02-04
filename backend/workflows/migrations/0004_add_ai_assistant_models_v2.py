@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflows', '0004_add_ai_assistant_models_v2'),
+        ('workflows', '0002_flowcube_30_upgrade'),
     ]
 
     operations = [
