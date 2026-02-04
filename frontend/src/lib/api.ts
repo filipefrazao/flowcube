@@ -76,13 +76,7 @@ export interface ChatStats {
 }
 
 // Execution Types
-export interface ExecutionStats {
-  total_executions: number;
-  successful_executions: number;
-  failed_executions: number;
-  avg_execution_time_ms: number;
-  executions_last_24h: number;
-}
+export interface ExecutionStats {  total_executions: number;  successful_executions: number;  failed_executions: number;  avg_execution_time_ms: number;  executions_last_24h: number;  daily_counts?: Array<{ date: string; count: number }>;}
 
 export interface Execution {
   id: number;
