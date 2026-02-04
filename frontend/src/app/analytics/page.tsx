@@ -217,7 +217,7 @@ export default function AnalyticsPage() {
               >
                 <MetricCard
                   title="Total Conversas"
-                  value={chatStats?.total.toLocaleString() || "--"}
+                  value={chatStats?.total?.toLocaleString() || "--"}
                   icon={<MessageSquare className="w-5 h-5" />}
                   color="purple"
                   loading={isLoading}
