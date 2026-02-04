@@ -104,7 +104,7 @@ export default function ConversationsPage() {
       loadSessions();
       loadStats();
       if (selectedSession) {
-        loadSessionDetails(selectedSession.id);
+        loadSessionDetails(String(selectedSession.id));
       }
     }, 30000);
     return () => clearInterval(interval);
