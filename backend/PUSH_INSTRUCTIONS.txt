@@ -1,0 +1,66 @@
+INSTRUCOES PARA PUSH DO BRANCH feature/ai-assistant
+====================================================
+
+O branch feature/ai-assistant esta commitado localmente com sucesso.
+Para fazer push para o GitHub, siga os passos abaixo:
+
+OPCAO 1: Configurar SSH (Recomendado)
+--------------------------------------
+1. Verificar se a chave SSH esta no GitHub:
+   cat ~/.ssh/id_ed25519.pub
+   
+2. Adicionar a chave no GitHub:
+   - Acessar: https://github.com/settings/keys
+   - Clicar em "New SSH key"
+   - Colar o conteudo da chave publica
+   
+3. Fazer o push:
+   cd /mnt/HC_Volume_104489558/flowcube/backend
+   git push -u origin feature/ai-assistant
+
+OPCAO 2: Usar HTTPS com Token
+-------------------------------
+1. Criar Personal Access Token no GitHub:
+   - Acessar: https://github.com/settings/tokens
+   - Gerar novo token com permissao "repo"
+   
+2. Configurar remote para HTTPS:
+   git remote set-url origin https://github.com/filipefrazao/flowcube.git
+   
+3. Fazer o push (sera solicitado usuario e senha):
+   git push -u origin feature/ai-assistant
+   Usuario: filipefrazao
+   Senha: [seu_token]
+
+OPCAO 3: Push de outro computador
+-----------------------------------
+1. Fazer clone do repositorio:
+   git clone git@github.com:filipefrazao/flowcube.git
+   
+2. Adicionar remote do servidor Hetzner:
+   git remote add hetzner root@46.224.59.249:/mnt/HC_Volume_104489558/flowcube
+   
+3. Fazer fetch do branch:
+   git fetch hetzner feature/ai-assistant
+   
+4. Fazer push para origin:
+   git push origin feature/ai-assistant
+
+VERIFICAR COMMITS
+-----------------
+cd /mnt/HC_Volume_104489558/flowcube/backend
+git log feature/ai-assistant --oneline -10
+
+Commits esperados:
+- test: Adiciona script de teste da API do Assistente IA
+- docs: Adiciona documentacao da feature AI Assistant  
+- feat: Adiciona Assistente IA de Automacao Contextual
+
+APOS O PUSH
+-----------
+1. Criar Pull Request no GitHub
+2. Revisar codigo
+3. Merge para main
+4. Deploy
+
+====================================================
