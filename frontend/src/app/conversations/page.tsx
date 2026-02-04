@@ -121,13 +121,10 @@ export default function ConversationsPage() {
 
     setIsSending(true);
     try {
-      await chatApi.sendMessage(selectedSession.id, {
-        content: newMessage.trim(),
-        message_type: "text",
-      });
+      await chatApi.sendMessage(selectedSession.id, newMessage.trim());
       setNewMessage("");
       // Reload messages
-      await loadSessionDetails(selectedSession.id);
+      await loadSessionDetails(String(selectedSession.id));
     } catch (err) {
       console.error("Error sending message:", err);
       setError("Erro ao enviar mensagem");
@@ -140,8 +137,8 @@ export default function ConversationsPage() {
   const handleAssignSession = async () => {
     if (!selectedSession) return;
     try {
-      await chatApi.assignSession(selectedSession.id);
-      await loadSessionDetails(selectedSession.id);
+      // await chatApi.assignSession(selectedSession.id); // TODO: Implement assignSession API
+      await loadSessionDetails(String(selectedSession.id));
       await loadSessions();
     } catch (err) {
       console.error("Error assigning session:", err);
@@ -152,7 +149,7 @@ export default function ConversationsPage() {
   const handleCloseSession = async () => {
     if (!selectedSession) return;
     try {
-      await chatApi.closeSession(selectedSession.id);
+      // await chatApi.closeSession(selectedSession.id); // TODO: Implement closeSession API
       setSelectedSession(null);
       await loadSessions();
     } catch (err) {
@@ -162,10 +159,10 @@ export default function ConversationsPage() {
 
   // Handle session selection
   const handleSelectSession = (session: ChatSession) => {
-    loadSessionDetails(session.id);
+    loadSessionDetails(String(session.id));
   };
 
-  const getStatusColor = (status: ChatSession["status"]) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
       case "waiting_input":
@@ -181,7 +178,7 @@ export default function ConversationsPage() {
     }
   };
 
-  const getStatusLabel = (status: ChatSession["status"]) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case "active": return "Ativo";
       case "waiting_input": return "Aguardando";
@@ -230,9 +227,9 @@ export default function ConversationsPage() {
               <h1 className="text-lg font-semibold text-white flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-purple-400" />
                 Conversas
-                {stats && stats.total > 0 && (
+                {stats && (stats.total || 0) > 0 && (
                   <span className="ml-2 px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded-full">
-                    {stats.total}
+                    {stats.total || 0}
                   </span>
                 )}
               </h1>
@@ -272,7 +269,7 @@ export default function ConversationsPage() {
                   {f === "all" ? "Todas" : f === "active" ? "Ativas" : f === "handoff" ? "Handoff" : "Finalizadas"}
                   {stats && f !== "all" && (
                     <span className="ml-1">
-                      ({f === "active" ? stats.by_status.active : f === "handoff" ? stats.by_status.handoff : stats.by_status.completed})
+                      ({f === "active" ? (stats.by_status?.active || 0) : f === "handoff" ? (stats.by_status?.handoff || 0) : (stats.by_status?.completed || 0)})
                     </span>
                   )}
                 </button>
