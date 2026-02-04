@@ -24,7 +24,7 @@ export function useCommandPalette() {
     };
 
     setRecentCommands(prev => {
-      const filtered = prev.filter(cmd => cmd.id \!== id);
+      const filtered = prev.filter(cmd => cmd.id !== id);
       const updated = [newCommand, ...filtered].slice(0, 10);
       localStorage.setItem('flowcube_recent_commands', JSON.stringify(updated));
       return updated;

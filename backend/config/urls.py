@@ -22,6 +22,7 @@ def api_root(request):
             "email": "/api/v1/email/",
             "instagram": "/api/v1/instagram/",
             "ai-agents": "/api/v1/ai-agents/",
+            "pix": "/api/v1/pix/",
             "admin": "/admin/",
         }
     })
@@ -36,6 +37,7 @@ urlpatterns = [
     path('api/v1/email/', include('email_sequences.urls')),
     path('api/v1/instagram/', include('instagram_automation.urls')),
     path('api/v1/ai-agents/', include('ai_agents.urls')),
+    path('api/v1/pix/', include('payments.urls')),
     path('api/', api_root, name='api-root'),
     path('', api_root, name='root'),
 ]

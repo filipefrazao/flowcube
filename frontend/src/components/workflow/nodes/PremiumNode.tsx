@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Zap, MessageSquare, GitBranch, Brain, Sparkles } from 'lucide-react';
-import { nodeVariants } from '@/lib/animations/node-animations';
+import { nodeVariants } from '@/utils/animations/node-animations';
 
 interface PremiumNodeData {
   label: string;
