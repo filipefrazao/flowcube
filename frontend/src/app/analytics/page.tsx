@@ -135,8 +135,8 @@ export default function AnalyticsPage() {
   
   // Calculate containment rate (sessions handled by AI without handoff)
   const containmentRate = chatStats ? (
-    chatStats.total > 0 
-      ? ((chatStats.total - chatStats.by_status.handoff) / chatStats.total * 100).toFixed(1)
+    chatStats.total ?? 0 > 0 
+      ? (((chatStats.total ?? 0) - (chatStats.by_status?.handoff ?? 0)) / (chatStats.total ?? 1) * 100).toFixed(1)
       : "100"
   ) : "--";
 
