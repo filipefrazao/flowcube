@@ -23,7 +23,7 @@ import { nodeTypes, createNode } from './nodes';
 import ElementsPalette from './panels/ElementsPalette';
 import PropertiesPanel from './panels/PropertiesPanel';
 import { EditorToolbar } from './EditorToolbar';
-import { CommandPalette } from ../command-palette;
+import { CommandPalette } from '../command-palette';
 import { cn } from '../../lib/utils';
 import {
   Undo2,
