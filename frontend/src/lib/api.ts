@@ -71,17 +71,7 @@ export interface ChatSessionDetail extends ChatSession {
 export interface ChatStats {  total_sessions: number;  total_messages: number;  avg_messages_per_session: number;  active_sessions_today: number;  total?: number;  by_status?: {    handoff: number;    [key: string]: number;  };}
 
 // Execution Types
-export interface ExecutionStats {  total_executions: number;  successful_executions: number;  failed_executions: number;  avg_execution_time_ms: number;  executions_last_24h: number;  daily_counts?: Array<{ date: string; count: number }>;}
-
-export interface Execution {
-  id: number;
-  workflow_id: number;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  started_at: string;
-  completed_at?: string;
-  duration_ms?: number;
-  error_message?: string;
-}
+export interface ExecutionStats {  total_executions: number;  successful_executions: number;  failed_executions: number;  avg_execution_time_ms: number;  executions_last_24h: number;  daily_counts?: Array<{ date: string; count: number }>;  by_status?: {    completed: number;    failed: number;    pending: number;    running: number;  };  last_30_days?: number;  avg_duration_ms?: number;  success_rate?: number;}
 
 // Credential Types
 export interface Credential {
