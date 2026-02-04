@@ -298,3 +298,80 @@ export const credentialApi = {
 
 // Export the axios instance for custom requests
 export default apiClient;
+
+// ============================================================================
+// Auth API
+// ============================================================================
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+  };
+}
+
+export const authApi = {
+  /**
+   * Login with email and password
+   */
+  login: async (data: LoginRequest): Promise<LoginResponse> => {
+    const response = await apiClient.post('/auth/login/', data);
+    if (response.data.token) {
+      localStorage.setItem('authToken', response.data.token);
+    }
+    return response.data;
+  },
+
+  /**
+   * Logout
+   */
+  logout: async (): Promise<void> => {
+    localStorage.removeItem('authToken');
+    await apiClient.post('/auth/logout/');
+  },
+
+  /**
+   * Get current user
+   */
+  me: async () => {
+    const response = await apiClient.get('/auth/me/');
+    return response.data;
+  },
+};
+
+// ============================================================================
+// Settings API
+// ============================================================================
+
+export interface UserSettings {
+  id: number;
+  theme: 'light' | 'dark' | 'auto';
+  notifications_enabled: boolean;
+  email_notifications: boolean;
+  language: string;
+}
+
+export const settingsApi = {
+  /**
+   * Get user settings
+   */
+  getSettings: async (): Promise<UserSettings> => {
+    const response = await apiClient.get('/settings/');
+    return response.data;
+  },
+
+  /**
+   * Update user settings
+   */
+  updateSettings: async (data: Partial<UserSettings>): Promise<UserSettings> => {
+    const response = await apiClient.patch('/settings/', data);
+    return response.data;
+  },
+};

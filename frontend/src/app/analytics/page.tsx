@@ -105,8 +105,8 @@ export default function AnalyticsPage() {
       setError(null);
       const [chatData, execData, workflowData] = await Promise.all([
         chatApi.getStats(),
-        executionApi.stats(),
-        workflowApi.list(),
+        executionApi.getStats(),
+        workflowApi.getWorkflows(),
       ]);
       setChatStats(chatData);
       setExecutionStats(execData);
