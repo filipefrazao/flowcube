@@ -322,25 +322,25 @@ export default function AnalyticsPage() {
                       <div className="space-y-4">
                         <StatusBar 
                           label="Ativas" 
-                          value={chatStats?.by_status.active || 0} 
+                          value={chatStats?.by_status?.active || 0} 
                           total={chatStats?.total || 1}
                           color="bg-green-500"
                         />
                         <StatusBar 
                           label="Aguardando" 
-                          value={chatStats?.by_status.waiting || 0} 
+                          value={chatStats?.by_status?.waiting || 0} 
                           total={chatStats?.total || 1}
                           color="bg-yellow-500"
                         />
                         <StatusBar 
                           label="Handoff" 
-                          value={chatStats?.by_status.handoff || 0} 
+                          value={chatStats?.by_status?.handoff || 0} 
                           total={chatStats?.total || 1}
                           color="bg-red-500"
                         />
                         <StatusBar 
                           label="Finalizadas" 
-                          value={chatStats?.by_status.completed || 0} 
+                          value={chatStats?.by_status?.completed || 0} 
                           total={chatStats?.total || 1}
                           color="bg-gray-500"
                         />
@@ -423,10 +423,10 @@ export default function AnalyticsPage() {
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
-                        <StatBox label="Completas" value={executionStats?.by_status.completed || 0} color="text-green-400" />
-                        <StatBox label="Falhas" value={executionStats?.by_status.failed || 0} color="text-red-400" />
-                        <StatBox label="Executando" value={executionStats?.by_status.running || 0} color="text-cyan-400" />
-                        <StatBox label="Pendentes" value={executionStats?.by_status.pending || 0} color="text-yellow-400" />
+                        <StatBox label="Completas" value={executionStats?.by_status?.completed || 0} color="text-green-400" />
+                        <StatBox label="Falhas" value={executionStats?.by_status?.failed || 0} color="text-red-400" />
+                        <StatBox label="Executando" value={executionStats?.by_status?.running || 0} color="text-cyan-400" />
+                        <StatBox label="Pendentes" value={executionStats?.by_status?.pending || 0} color="text-yellow-400" />
                       </div>
                     )}
 
