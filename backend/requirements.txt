@@ -46,3 +46,5 @@ aiosmtplib>=3.0.0
 
 # Payment Processing - Stripe
 stripe>=11.0.0
+django-csp==3.8
+django-ratelimit==4.1.0

@@ -2,6 +2,7 @@
 FlowCube 3.0 Serializers
 """
 from rest_framework import serializers
+from django.utils.html import escape
 from .models import (
     AIAssistant, BrazilianContext, AutomationSuggestion,
     Workflow, WorkflowVersion, Execution, NodeExecutionLog,
@@ -141,6 +142,16 @@ class WorkflowCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
         fields = ['id', 'name', 'description', 'graph', 'is_published', 'is_active', 'folder', 'tags']
+    
+    def validate_name(self, value):
+        """Sanitize name field to prevent XSS"""
+        return escape(value)
+    
+    def validate_description(self, value):
+        """Sanitize description field to prevent XSS"""
+        if value:
+            return escape(value)
+        return value
     
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
