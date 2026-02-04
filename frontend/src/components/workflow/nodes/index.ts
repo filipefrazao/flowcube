@@ -11,6 +11,7 @@ import WebhookTriggerNode from "./WebhookTriggerNode";
 import TextResponseNode from "./TextResponseNode";
 import ConditionNode from "./ConditionNode";
 import SalesCubeNode from "./SalesCubeNode";
+import { PremiumNode } from "./PremiumNode";
 
 // Telegram nodes
 import {
@@ -28,6 +29,12 @@ export const nodeTypes: NodeTypes = {
   // Default node
   analyticsNode: AnalyticsNode as any,
   default: AnalyticsNode as any,
+
+  // Premium nodes
+  premium_trigger: PremiumNode as any,
+  premium_action: PremiumNode as any,
+  premium_condition: PremiumNode as any,
+  premium_ai: PremiumNode as any,
 
   // Specialized nodes
   http_request: HttpRequestNode as any,
@@ -75,6 +82,18 @@ export const nodeTypes: NodeTypes = {
 
 // Node categories for the palette
 export const nodeCategories = [
+  {
+    id: "premium",
+    label: "Premium Nodes",
+    color: "#A855F7",
+    description: "Premium glassmorphism nodes with neon effects",
+    nodes: [
+      { type: "premium_trigger", label: "Premium Trigger", description: "Webhook with neon glow" },
+      { type: "premium_action", label: "Premium Action", description: "Action with glassmorphism" },
+      { type: "premium_condition", label: "Premium Condition", description: "Logic with animations" },
+      { type: "premium_ai", label: "Premium AI", description: "AI node with sparkles" },
+    ],
+  },
   {
     id: "triggers",
     label: "Triggers",
@@ -201,6 +220,12 @@ function getDefaultConfig(type: string): Record<string, unknown> {
     return getTelegramNodeDefaultConfig(type);
   }
 
+  // Check Premium nodes
+  if (type.startsWith('premium_')) {
+    const nodeType = type.replace('premium_', '') as 'trigger' | 'action' | 'condition' | 'ai';
+    return { type: nodeType, label: '', description: '' };
+  }
+
   switch (type) {
     case "http_request":
     case "webhook":
@@ -254,6 +279,7 @@ export {
   TextResponseNode,
   ConditionNode,
   SalesCubeNode,
+  PremiumNode,
   // Telegram nodes
   TelegramTriggerNode,
   TelegramSendNode,
