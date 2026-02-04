@@ -224,14 +224,14 @@ export default function AnalyticsPage() {
                 />
                 <MetricCard
                   title="Execucoes (30d)"
-                  value={executionStats?.last_30_days.toLocaleString() || "--"}
+                  value={executionStats?.last_30_days?.toLocaleString() || "--"}
                   icon={<Zap className="w-5 h-5" />}
                   color="cyan"
                   loading={isLoading}
                 />
                 <MetricCard
                   title="Taxa de Sucesso"
-                  value={executionStats ? `${executionStats.success_rate.toFixed(1)}%` : "--"}
+                  value={executionStats ? `${executionStats.success_rate?.toFixed(1)}%` : "--"}
                   icon={<CheckCircle className="w-5 h-5" />}
                   color="green"
                   loading={isLoading}
