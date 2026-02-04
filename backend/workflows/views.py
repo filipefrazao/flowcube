@@ -12,6 +12,7 @@ from django.db.models import Count, Avg
 from django.utils import timezone
 from datetime import timedelta
 
+from .pagination import WorkflowPagination
 from .models import Workflow, Group, Block, Edge, Variable, Execution
 from .serializers import (
     WorkflowListSerializer, WorkflowDetailSerializer, WorkflowCreateSerializer,
@@ -31,6 +32,12 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     destroy: Delete workflow
     """
     permission_classes = [IsAuthenticated]
+    pagination_class = WorkflowPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["is_active", "is_published"]
+    search_fields = ["name", "description"]
+    ordering_fields = ["created_at", "updated_at", "name"]
+    ordering = ["-created_at"]
     
     def get_queryset(self):
         return Workflow.objects.filter(owner=self.request.user)
