@@ -23,6 +23,7 @@ import { nodeTypes, createNode } from './nodes';
 import ElementsPalette from './panels/ElementsPalette';
 import PropertiesPanel from './panels/PropertiesPanel';
 import { EditorToolbar } from './EditorToolbar';
+import { CommandPalette } from ../command-palette;
 import { cn } from '../../lib/utils';
 import {
   Undo2,
@@ -155,6 +156,63 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
     [screenToFlowPosition, addNode, setSelectedNodeId]
   );
 
+
+  // Command Palette - Add Node Handler
+  const handleCommandAddNode = useCallback(
+    (type: string) => {
+      const nodeLabels: Record<string, string> = {
+        trigger: 'Webhook Trigger',
+        action: 'HTTP Request',
+        condition: 'IF Condition',
+        ai: 'AI Assistant',
+      };
+
+      const label = nodeLabels[type] || 'New Node';
+      handleAddNodeFromPalette(type, label);
+    },
+    [handleAddNodeFromPalette]
+  );
+
+  // Command Palette - Action Handler
+  const handleCommandAction = useCallback(
+    (action: string) => {
+      switch (action) {
+        case 'duplicate':
+          if (selectedNodeId) {
+            const selectedNode = nodes.find(n => n.id === selectedNodeId);
+            if (selectedNode) {
+              const newNode = {
+                ...selectedNode,
+                id: `${selectedNode.type}-${Date.now()}`,
+                position: {
+                  x: selectedNode.position.x + 50,
+                  y: selectedNode.position.y + 50,
+                },
+              };
+              addNode(newNode);
+              setSelectedNodeId(newNode.id);
+            }
+          }
+          break;
+
+        case 'delete':
+          if (selectedNodeId) {
+            useWorkflowStore.getState().removeNode(selectedNodeId);
+            setSelectedNodeId(null);
+          }
+          break;
+
+        case 'test':
+          console.log('Testing workflow...', getGraph());
+          break;
+
+        default:
+          console.log('Unknown action:', action);
+      }
+    },
+    [selectedNodeId, nodes, addNode, setSelectedNodeId, getGraph]
+  );
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -204,6 +262,12 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <EditorToolbar />
+      {/* Command Palette (Cmd+K) */}
+      <CommandPalette 
+        onAddNode={handleCommandAddNode}
+        onAction={handleCommandAction}
+      />
+
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">

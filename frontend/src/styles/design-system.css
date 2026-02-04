@@ -1,0 +1,135 @@
+/* FlowCube Nexus Design System */
+:root {
+  /* Neon Colors */
+  --neon-purple: #A855F7;
+  --neon-cyan: #00ffff;
+  --neon-green: #c8eb2d;
+  --neon-blue: #3B82F6;
+  --neon-pink: #EC4899;
+
+  /* Base Colors */
+  --bg-dark: hsl(220, 20%, 8%);
+  --bg-darker: hsl(220, 20%, 4%);
+  --glass-bg: rgba(39, 39, 39, 0.1);
+
+  /* Shadows */
+  --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.3),
+                    0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-neon-purple: 0 0 20px rgba(168, 85, 247, 0.4),
+                        0 0 40px rgba(168, 85, 247, 0.2);
+  --shadow-neon-cyan: 0 0 20px rgba(0, 255, 255, 0.4),
+                      0 0 40px rgba(0, 255, 255, 0.2);
+  --shadow-neon-green: 0 0 20px rgba(200, 235, 45, 0.4),
+                       0 0 40px rgba(200, 235, 45, 0.2);
+  --shadow-neon-blue: 0 0 20px rgba(59, 130, 246, 0.4),
+                      0 0 40px rgba(59, 130, 246, 0.2);
+}
+
+/* Glassmorphism Base */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-premium);
+}
+
+/* Neon Glow Effects */
+.neon-glow-purple {
+  box-shadow: var(--shadow-neon-purple);
+}
+
+.neon-glow-cyan {
+  box-shadow: var(--shadow-neon-cyan);
+}
+
+.neon-glow-green {
+  box-shadow: var(--shadow-neon-green);
+}
+
+.neon-glow-blue {
+  box-shadow: var(--shadow-neon-blue);
+}
+
+/* Premium Button */
+.button-premium {
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+.button-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+}
+
+/* Node Type Specific Colors */
+.node-trigger {
+  --node-color: var(--neon-purple);
+  --node-shadow: var(--shadow-neon-purple);
+}
+
+.node-action {
+  --node-color: var(--neon-cyan);
+  --node-shadow: var(--shadow-neon-cyan);
+}
+
+.node-condition {
+  --node-color: var(--neon-green);
+  --node-shadow: var(--shadow-neon-green);
+}
+
+.node-ai {
+  --node-color: var(--neon-blue);
+  --node-shadow: var(--shadow-neon-blue);
+}
+
+/* Premium Node Base */
+.premium-node {
+  min-width: 200px;
+  padding: 16px;
+  border-width: 2px;
+  border-style: solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
+
+/* Handle Styles */
+.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+  background: var(--bg-dark);
+  transition: all 0.2s ease;
+}
+
+.react-flow__handle:hover {
+  width: 16px;
+  height: 16px;
+}
+
+.react-flow__handle-top {
+  top: -6px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -6px;
+}
