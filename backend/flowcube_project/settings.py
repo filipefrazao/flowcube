@@ -182,3 +182,12 @@ CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
 CSP_IMG_SRC = ("'self'", "data:", "https:")
 CSP_FONT_SRC = ("'self'", "data:")
 CSP_CONNECT_SRC = ("'self'",)
+
+# Proxy Configuration (for Rate Limiting behind Nginx)
+# Django needs to trust the X-Forwarded-For header from Nginx proxy
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Number of proxies in front of Django (Nginx = 1)
+# This helps DRF throttling get the real client IP
+NUM_PROXIES = 1
