@@ -58,7 +58,7 @@ export default function ConversationsPage() {
       if (searchQuery) {
         params.search = searchQuery;
       }
-      const data = await chatApi.listSessions(params);
+      const data = await chatApi.getSessions(params);
       setSessions(data);
     } catch (err) {
       console.error("Error loading sessions:", err);
