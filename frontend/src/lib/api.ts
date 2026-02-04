@@ -68,12 +68,7 @@ export interface ChatSessionDetail extends ChatSession {
   messages: ChatMessage[];
 }
 
-export interface ChatStats {
-  total_sessions: number;
-  total_messages: number;
-  avg_messages_per_session: number;
-  active_sessions_today: number;
-}
+export interface ChatStats {  total_sessions: number;  total_messages: number;  avg_messages_per_session: number;  active_sessions_today: number;  total?: number;  by_status?: {    handoff: number;    [key: string]: number;  };}
 
 // Execution Types
 export interface ExecutionStats {  total_executions: number;  successful_executions: number;  failed_executions: number;  avg_execution_time_ms: number;  executions_last_24h: number;  daily_counts?: Array<{ date: string; count: number }>;}
