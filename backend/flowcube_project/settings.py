@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third party
     "rest_framework",
-    "django_filters",
+    "rest_framework.authtoken",
     "corsheaders",
     "channels",
     "django_ratelimit",
@@ -31,12 +31,15 @@ INSTALLED_APPS = [
     "workflows",
     "telegram_integration",
     "billing",  # SaaS billing & subscriptions
+    "ai",  # AI features (Node Builder, Debug Assistant)
     "achievements",  # Gamification system
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "csp.middleware.CSPMiddleware",
+    "flowcube_project.middleware.RealIPMiddleware",  # Capture real client IP
+    "flowcube_project.middleware.RatelimitExceptionMiddleware",  # Handle rate limit exceptions
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -86,6 +89,17 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Cache Configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{os.environ.get('REDIS_HOST', 'localhost')}:6379/2",
+    }
+}
+
+# Django Ratelimit
+RATELIMIT_USE_CACHE = "default"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
