@@ -36,8 +36,17 @@ export default function NodeConfigEditor({ className }: NodeConfigEditorProps) {
   if (!selectedNode) return null;
 
   const nodeData = selectedNode.data as ConfigurableNodeData;
-  const nodeType = nodeData.type || "default";
+  const rawNodeType = nodeData.type || "default";
   const config = nodeData.config || {};
+
+  // Normalize premium types to their base type for config editor
+  const premiumTypeMap: Record<string, string> = {
+    premium_trigger: "webhook_trigger",
+    premium_action: "http_request",
+    premium_condition: "condition",
+    premium_ai: "openai",
+  };
+  const nodeType = premiumTypeMap[rawNodeType] || rawNodeType;
 
   // Render config based on node type
   switch (nodeType) {

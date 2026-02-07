@@ -40,7 +40,8 @@ const sourceColors: Record<string, { bg: string; text: string; border: string }>
 const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
   const config = data.config || {};
   const source = config.source || "custom";
-  const colors = sourceColors[source] || sourceColors.custom;
+  const defaultColors = { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', iconBg: 'bg-gray-100' };
+  const colors = sourceColors[source] || sourceColors.custom || defaultColors;
 
   const webhookUrl = useMemo(() => {
     if (config.webhook_url) return config.webhook_url;

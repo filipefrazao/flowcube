@@ -106,7 +106,7 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
           }}
         >
           <motion.div
-            className={\`mb-6 inline-flex p-8 rounded-full bg-gradient-to-br \${rarityColors[achievement.rarity]} shadow-2xl relative\`}
+            className={`mb-6 inline-flex p-8 rounded-full bg-gradient-to-br ${rarityColors[achievement.rarity]} shadow-2xl relative`}
             animate={{
               scale: [1, 1.1, 1]
             }}
@@ -123,7 +123,7 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <p className={\`text-sm uppercase tracking-wider mb-2 \${rarityTextColor[achievement.rarity]}\`}>
+            <p className={`text-sm uppercase tracking-wider mb-2 ${rarityTextColor[achievement.rarity]}`}>
               Achievement Unlocked!
             </p>
             <h2 className="text-4xl font-bold text-white mb-3">
@@ -133,7 +133,7 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
               {achievement.description}
             </p>
             
-            <div className={\`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r \${rarityColors[achievement.rarity]} backdrop-blur\`}>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${rarityColors[achievement.rarity]} backdrop-blur`}>
               <Star className="w-4 h-4 text-white" />
               <span className="capitalize font-semibold text-white">{achievement.rarity}</span>
             </div>

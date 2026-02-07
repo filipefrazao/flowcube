@@ -41,6 +41,19 @@ const CREDENTIAL_TYPES = [
   { value: "mongodb", label: "MongoDB", icon: Database, color: "text-accent-green" },
   { value: "redis", label: "Redis", icon: Database, color: "text-error" },
   { value: "custom", label: "Custom", icon: Settings, color: "text-text-secondary" },
+  { value: "groq", label: "Groq", icon: Bot, color: "text-accent-orange" },
+  { value: "deepseek", label: "DeepSeek", icon: Bot, color: "text-accent-blue" },
+  { value: "grok", label: "Grok (X.AI)", icon: Bot, color: "text-text-primary" },
+  { value: "google_ai", label: "Google AI (Gemini)", icon: Bot, color: "text-accent-blue" },
+  { value: "n8n", label: "N8N", icon: Webhook, color: "text-accent-orange" },
+  { value: "whatsapp_cloud", label: "WhatsApp Cloud API", icon: MessageSquare, color: "text-accent-green" },
+  { value: "meta_lead_ads", label: "Meta Lead Ads", icon: Database, color: "text-accent-blue" },
+  { value: "supabase", label: "Supabase", icon: Database, color: "text-accent-green" },
+  { value: "make", label: "Make (Integromat)", icon: Webhook, color: "text-accent-purple" },
+  { value: "google_ads", label: "Google Ads", icon: Database, color: "text-accent-green" },
+  { value: "openrouter", label: "OpenRouter", icon: Bot, color: "text-accent-purple" },
+  { value: "elevenlabs", label: "ElevenLabs", icon: Bot, color: "text-accent-pink" },
+  { value: "mistral", label: "Mistral", icon: Bot, color: "text-accent-orange" },
 ];
 
 const CREDENTIAL_FIELDS: Record<string, Array<{ key: string; label: string; type: string; placeholder: string }>> = {
@@ -87,6 +100,81 @@ const CREDENTIAL_FIELDS: Record<string, Array<{ key: string; label: string; type
     { key: "key1", label: "Key 1", type: "text", placeholder: "Value 1" },
     { key: "key2", label: "Key 2", type: "text", placeholder: "Value 2" },
   ],
+  groq: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "gsk_..." },
+  ],
+  deepseek: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "sk-..." },
+  ],
+  grok: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "xai-..." },
+  ],
+  google_ai: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "AIza..." },
+  ],
+  n8n: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "eyJ..." },
+  ],
+  whatsapp_cloud: [
+    { key: "access_token", label: "Access Token", type: "password", placeholder: "EAA..." },
+    { key: "phone_number_id", label: "Phone Number ID", type: "text", placeholder: "933152683214452" },
+    { key: "waba_id", label: "WABA ID", type: "text", placeholder: "1420212763006169" },
+  ],
+  meta_lead_ads: [
+    { key: "access_token", label: "System User Token", type: "password", placeholder: "EAA..." },
+    { key: "app_id", label: "App ID", type: "text", placeholder: "1527291528327529" },
+  ],
+  supabase: [
+    { key: "access_token", label: "Access Token (PAT)", type: "password", placeholder: "sbp_..." },
+  ],
+  make: [
+    { key: "api_token", label: "API Token", type: "password", placeholder: "44efa5a9-..." },
+    { key: "organization_id", label: "Organization ID", type: "text", placeholder: "493266" },
+  ],
+  google_ads: [
+    { key: "developer_token", label: "Developer Token", type: "password", placeholder: "LIhDx-..." },
+    { key: "mcc_account_id", label: "MCC Account ID", type: "text", placeholder: "323-286-6419" },
+    { key: "client_id", label: "OAuth Client ID", type: "text", placeholder: "716084310222-..." },
+    { key: "client_secret", label: "OAuth Client Secret", type: "password", placeholder: "GOCSPX-..." },
+  ],
+  openrouter: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "sk-or-..." },
+  ],
+  elevenlabs: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "sk_..." },
+  ],
+  mistral: [
+    { key: "api_key", label: "API Key", type: "password", placeholder: "0wmQ..." },
+  ],
+  google_drive: [
+    { key: "credentials_json", label: "Service Account JSON", type: "textarea", placeholder: '{"type": "service_account", ...}' },
+  ],
+  notion: [
+    { key: "api_key", label: "API Key (Internal Integration)", type: "password", placeholder: "ntn_..." },
+  ],
+  slack: [
+    { key: "bot_token", label: "Bot Token", type: "password", placeholder: "xoxb-..." },
+    { key: "signing_secret", label: "Signing Secret", type: "password", placeholder: "..." },
+  ],
+  discord: [
+    { key: "bot_token", label: "Bot Token", type: "password", placeholder: "..." },
+  ],
+  mongodb: [
+    { key: "connection_string", label: "Connection String", type: "password", placeholder: "mongodb://user:pass@host:27017/db" },
+  ],
+  redis: [
+    { key: "host", label: "Host", type: "text", placeholder: "localhost" },
+    { key: "port", label: "Port", type: "text", placeholder: "6379" },
+    { key: "password", label: "Password", type: "password", placeholder: "..." },
+    { key: "database", label: "Database Number", type: "text", placeholder: "0" },
+  ],
+  mysql: [
+    { key: "host", label: "Host", type: "text", placeholder: "localhost" },
+    { key: "port", label: "Port", type: "text", placeholder: "3306" },
+    { key: "database", label: "Database", type: "text", placeholder: "mydb" },
+    { key: "username", label: "Username", type: "text", placeholder: "root" },
+    { key: "password", label: "Password", type: "password", placeholder: "..." },
+  ],
 };
 
 export default function CredentialsPage() {
@@ -117,7 +205,7 @@ export default function CredentialsPage() {
     try {
       setLoading(true);
       const data = await credentialApi.list();
-      setCredentials(data);
+      setCredentials(data.results || []);
     } catch (err) {
       console.error("Failed to load credentials:", err);
     } finally {
@@ -347,11 +435,11 @@ export default function CredentialsPage() {
                     )}
 
                     {/* Masked preview */}
-                    <div className="bg-background rounded-lg p-2 mb-3">
+                    <div className="bg-background rounded-lg p-2 mb-3 overflow-hidden">
                       {Object.entries(credential.masked_preview).slice(0, 2).map(([key, value]) => (
-                        <div key={key} className="flex items-center justify-between text-xs py-0.5">
-                          <span className="text-text-muted">{key}:</span>
-                          <span className="text-text-secondary font-mono">{value}</span>
+                        <div key={key} className="flex items-center gap-2 text-xs py-0.5 min-w-0">
+                          <span className="text-text-muted shrink-0">{key}:</span>
+                          <span className="text-text-secondary font-mono truncate">{value}</span>
                         </div>
                       ))}
                     </div>

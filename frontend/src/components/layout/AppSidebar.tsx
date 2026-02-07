@@ -1,24 +1,66 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Home,
   GitBranch,
   Key,
   History,
-  Database,
   Settings,
-  HelpCircle,
   Plus,
   Search,
   MessageSquare,
-  Bell,
   User,
   Inbox,
   BarChart3,
+  LogOut,
+  Smartphone,
+  Trophy,
+  CreditCard,
+  Brain,
+  Send,
+  Puzzle,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { clearAuthToken } from '@/lib/auth';
+import { usePlugins } from '@/hooks/usePlugins';
+import type { Plugin } from '@/lib/plugins';
+
+// ============================================================================
+// Icon Map: backend icon string -> Lucide component
+// ============================================================================
+
+const iconMap: Record<string, LucideIcon> = {
+  'home': Home,
+  'git-branch': GitBranch,
+  'key': Key,
+  'history': History,
+  'settings': Settings,
+  'plus': Plus,
+  'search': Search,
+  'message-square': MessageSquare,
+  'message-circle': Smartphone,
+  'user': User,
+  'inbox': Inbox,
+  'bar-chart-3': BarChart3,
+  'log-out': LogOut,
+  'smartphone': Smartphone,
+  'trophy': Trophy,
+  'credit-card': CreditCard,
+  'brain': Brain,
+  'send': Send,
+  'puzzle': Puzzle,
+};
+
+function getIcon(name: string): LucideIcon {
+  return iconMap[name] || Puzzle;
+}
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface SidebarItem {
   icon: React.ReactNode;
@@ -27,28 +69,65 @@ interface SidebarItem {
   badge?: number;
 }
 
-const mainItems: SidebarItem[] = [
+// ============================================================================
+// Core items (always visible, not from plugins API)
+// ============================================================================
+
+const coreItems: SidebarItem[] = [
   { icon: <Home className="w-5 h-5" />, label: 'Home', href: '/dashboard' },
   { icon: <GitBranch className="w-5 h-5" />, label: 'Workflows', href: '/workflows' },
-  { icon: <Inbox className="w-5 h-5" />, label: 'Conversations', href: '/conversations', badge: 3 },
+  { icon: <Inbox className="w-5 h-5" />, label: 'Conversations', href: '/conversations' },
+];
+
+const coreItemsAfterPlugins: SidebarItem[] = [
   { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', href: '/analytics' },
   { icon: <Key className="w-5 h-5" />, label: 'Credentials', href: '/credentials' },
   { icon: <History className="w-5 h-5" />, label: 'Executions', href: '/executions' },
 ];
 
 const bottomItems: SidebarItem[] = [
-  { icon: <Bell className="w-5 h-5" />, label: 'Notifications', href: '/notifications' },
-  { icon: <HelpCircle className="w-5 h-5" />, label: 'Help', href: '/help' },
   { icon: <Settings className="w-5 h-5" />, label: 'Settings', href: '/settings' },
 ];
 
+// ============================================================================
+// Helper: convert Plugin -> SidebarItem
+// ============================================================================
+
+function pluginToSidebarItem(plugin: Plugin): SidebarItem {
+  const IconComponent = getIcon(plugin.icon);
+  return {
+    icon: <IconComponent className="w-5 h-5" />,
+    label: plugin.label,
+    href: plugin.frontend_route || '/' + plugin.slug,
+  };
+}
+
+// ============================================================================
+// AppSidebar Component
+// ============================================================================
+
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { plugins } = usePlugins();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/' || pathname === '/dashboard';
     return pathname.startsWith(href);
   };
+
+  const handleLogout = () => {
+    clearAuthToken();
+    router.push('/login');
+  };
+
+  // Convert plugins to sidebar items, sorted by menu_position
+  const pluginItems = plugins
+    .sort((a, b) => a.menu_position - b.menu_position)
+    .map(pluginToSidebarItem);
+
+  // Build full nav: core top -> plugins -> core bottom
+  const allMainItems = [...coreItems, ...pluginItems, ...coreItemsAfterPlugins];
 
   return (
     <aside className="w-14 bg-background-secondary border-r border-border flex flex-col h-screen">
@@ -62,7 +141,7 @@ export function AppSidebar() {
       {/* Quick Actions */}
       <div className="p-2 border-b border-border">
         <Link
-          href="/workflows/new"
+          href="/workflows/create"
           className="sidebar-icon w-full h-10 bg-surface hover:bg-surface-hover"
           title="Create new workflow"
         >
@@ -70,20 +149,15 @@ export function AppSidebar() {
         </Link>
         <button
           className="sidebar-icon w-full h-10 mt-1"
-          title="Search (Ctrl+K)"
-          onClick={() => {
-            // Trigger kbar
-            const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true });
-            document.dispatchEvent(event);
-          }}
+          title="Search"
         >
           <Search className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Main Navigation */}
+      {/* Main Navigation (Core + Plugins) */}
       <nav className="flex-1 py-2 px-2 space-y-1">
-        {mainItems.map((item) => (
+        {allMainItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -126,13 +200,18 @@ export function AppSidebar() {
             title={item.label}
           >
             {item.icon}
-            {item.badge && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 text-white text-[10px] font-medium rounded-full flex items-center justify-center">
-                {item.badge}
-              </span>
-            )}
           </Link>
         ))}
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="sidebar-icon w-full text-red-500 hover:text-red-600 hover:bg-red-50"
+          title="Logout"
+          aria-label="Logout"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
 
       {/* User Profile */}

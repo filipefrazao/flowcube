@@ -1,5 +1,5 @@
 /**
- * FlowCube 3.0 - Workflow Store (Simplified)
+ * FlowCube 4.0 - Workflow Store (Simplified)
  *
  * Zustand store with temporal middleware for undo/redo
  */
@@ -214,7 +214,9 @@ export const useWorkflowStore = create<WorkflowState>()(
 
       removeNode: (id) => set((state) => ({
         nodes: state.nodes.filter((node) => node.id !== id),
-        edges: state.edges.filter((edge) => edge.source !== id && edge.target !== id),
+        edges: state.edges.filter(
+          (edge) => edge.source !== id && edge.target !== id
+        ),
         selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
         isDirty: true,
       })),
@@ -231,18 +233,15 @@ export const useWorkflowStore = create<WorkflowState>()(
             x: node.position.x + 50,
             y: node.position.y + 50,
           },
+          data: { ...node.data },
           selected: false,
-          data: {
-            ...node.data,
-            stats: undefined,
-          },
         };
 
-        set((state) => ({
+        set({
           nodes: [...state.nodes, newNode],
           selectedNodeId: newNode.id,
           isDirty: true,
-        }));
+        });
       },
 
       // Edge actions
@@ -259,12 +258,19 @@ export const useWorkflowStore = create<WorkflowState>()(
 
       // Bulk actions
       loadWorkflow: (data) => {
+        // No need to normalize node types here
+        // The Proxy in nodeTypes (index.ts) handles ALL unknown types gracefully
+        // by returning AnalyticsNode as a fallback
+        const nodes = data.graph.nodes || [];
+        const edges = data.graph.edges || [];
+        const viewport = data.graph.viewport || { x: 0, y: 0, zoom: 1 };
+
         set({
           workflowId: data.id,
           workflowName: data.name,
-          nodes: data.graph.nodes || [],
-          edges: data.graph.edges || [],
-          viewport: data.graph.viewport || { x: 0, y: 0, zoom: 1 },
+          nodes: nodes,
+          edges: edges,
+          viewport: viewport,
           isPublished: data.isPublished,
           isDirty: false,
           isLoading: false,
@@ -294,18 +300,15 @@ export const useWorkflowStore = create<WorkflowState>()(
   )
 );
 
-// Export hook for undo/redo controls
+// Hook to access temporal store for undo/redo
 export const useTemporalStore = () => {
   return useWorkflowStore.temporal.getState();
 };
 
-// Selector hooks for performance
-export const useNodes = () => useWorkflowStore((state) => state.nodes);
-export const useEdges = () => useWorkflowStore((state) => state.edges);
+// Hook to get selected node with reactive updates
 export const useSelectedNode = () => {
-  const selectedNodeId = useWorkflowStore((state) => state.selectedNodeId);
-  const nodes = useWorkflowStore((state) => state.nodes);
-  return nodes.find((node) => node.id === selectedNodeId);
+  return useWorkflowStore((state) => {
+    if (!state.selectedNodeId) return null;
+    return state.nodes.find((n) => n.id === state.selectedNodeId) || null;
+  });
 };
-
-export default useWorkflowStore;

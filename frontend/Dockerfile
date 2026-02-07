@@ -2,8 +2,8 @@ FROM node:20-alpine AS base
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
@@ -12,7 +12,7 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_API_URL=https://flowcube.frzgroup.com.br
+ENV NEXT_PUBLIC_API_URL=https://flowcube.frzgroup.com.br/api/v1
 
 RUN npm run build
 

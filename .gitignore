@@ -1,63 +1,33 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-venv/
-.venv/
-ENV/
-
-# Django
-*.log
-local_settings.py
-db.sqlite3
-media/
-staticfiles/
-
-# Node
+# Dependencies
 node_modules/
-.npm
-.yarn
+__pycache__/
+*.pyc
+.venv/
+venv/
 
-# Next.js
-.next/
-out/
-.nuxt
-.output
+# Environment
+.env
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-*~
+
+# Build
+.next/
+dist/
+build/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Environment
-.env
-.env.local
-.env*.local
+# Docker
+*.log
 
-# Build
-*.tsbuildinfo
-next-env.d.ts
-.env
+# Backups
+*.bak
+*.backup
+*.bak-*
+*.backup-*

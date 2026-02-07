@@ -78,7 +78,7 @@ export default function ExecutionsPage() {
         params.append("status", statusFilter);
       }
       const data = await executionApi.list(params.toString());
-      setExecutions(data);
+      setExecutions(data.results || []);
       setError(null);
     } catch (err) {
       setError("Failed to load executions");

@@ -1,9 +1,13 @@
 /**
- * FlowCube 3.0 - Node Types Registry
+ * FlowCube 4.0 - Node Types Registry (DEFINITIVE FIX)
  *
  * Registers all custom node types for React Flow
+ * Uses comprehensive Proxy with multiple traps to prevent React Error #130
  */
-import { NodeTypes } from "@xyflow/react";
+"use client";
+
+import React, { memo } from "react";
+import { NodeTypes, NodeProps } from "@xyflow/react";
 import AnalyticsNode from "./AnalyticsNode";
 import HttpRequestNode from "./HttpRequestNode";
 import AINode from "./AINode";
@@ -24,63 +28,178 @@ import {
   getTelegramNodeDefaultConfig,
 } from "./telegram";
 
-// Node type registry for React Flow
-export const nodeTypes: NodeTypes = {
-  // Default node
-  analyticsNode: AnalyticsNode as any,
-  default: AnalyticsNode as any,
+// Type for node component
+type NodeComponent = React.ComponentType<NodeProps<any>>;
 
-  // Premium nodes
-  premium_trigger: PremiumNode as any,
-  premium_action: PremiumNode as any,
-  premium_condition: PremiumNode as any,
-  premium_ai: PremiumNode as any,
+// ================================
+// ALL NODE TYPE MAPPINGS
+// ================================
+// This object maps ALL possible node types to their React components
+// ANY type not explicitly listed will use AnalyticsNode as fallback
 
-  // Specialized nodes
-  http_request: HttpRequestNode as any,
-  webhook: HttpRequestNode as any,
+const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
+  // Default/Fallback
+  analyticsNode: AnalyticsNode,
+  default: AnalyticsNode,
 
-  // AI nodes
-  openai: AINode as any,
-  claude: AINode as any,
-  deepseek: AINode as any,
+  // Premium nodes (glassmorphism)
+  premium_trigger: PremiumNode,
+  premium_action: PremiumNode,
+  premium_condition: PremiumNode,
+  premium_ai: PremiumNode,
 
-  // Triggers
-  webhook_trigger: WebhookTriggerNode as any,
-  whatsapp_trigger: WebhookTriggerNode as any,
-  evolution_trigger: WebhookTriggerNode as any,
+  // HTTP nodes
+  http_request: HttpRequestNode,
+  webhook: HttpRequestNode,
+  n8n_webhook: HttpRequestNode,
 
-  // Responses
-  text_response: TextResponseNode as any,
-  whatsapp_template: TextResponseNode as any,
+  // AI/LLM nodes
+  openai: AINode,
+  claude: AINode,
+  deepseek: AINode,
+  ai: AINode,
+  llm: AINode,
 
-  // Logic
-  condition: ConditionNode as any,
-  decision_tree: ConditionNode as any,
+  // Trigger nodes
+  webhook_trigger: WebhookTriggerNode,
+  whatsapp_trigger: WebhookTriggerNode,
+  evolution_trigger: WebhookTriggerNode,
+  schedule: WebhookTriggerNode,
 
-  // Integrations
-  salescube_create_lead: SalesCubeNode as any,
-  salescube_update_lead: SalesCubeNode as any,
-  n8n_webhook: HttpRequestNode as any,
+  // Response/Output nodes
+  text_response: TextResponseNode,
+  whatsapp_template: TextResponseNode,
+  image_response: TextResponseNode,
+
+  // Logic/Flow nodes
+  condition: ConditionNode,
+  decision_tree: ConditionNode,
+  set_variable: ConditionNode,
+  wait: ConditionNode,
+
+  // Integration nodes
+  salescube_create_lead: SalesCubeNode,
+  salescube_update_lead: SalesCubeNode,
+
+  // Traffic source nodes (use AnalyticsNode for tracking)
+  google_organic: AnalyticsNode,
+  google_ads: AnalyticsNode,
+  facebook_ads: AnalyticsNode,
+  meta_ads: AnalyticsNode,
+  direct: AnalyticsNode,
+  referral: AnalyticsNode,
+  social: AnalyticsNode,
+
+  // Page nodes (use AnalyticsNode for funnel tracking)
+  landing_page: AnalyticsNode,
+  sales_page: AnalyticsNode,
+  checkout: AnalyticsNode,
+  thank_you: AnalyticsNode,
+  upsell: AnalyticsNode,
+  downsell: AnalyticsNode,
+
+  // Action/Event nodes
+  button_click: AnalyticsNode,
+  form_submit: AnalyticsNode,
+  purchase: AnalyticsNode,
+  custom_event: AnalyticsNode,
+  scroll: AnalyticsNode,
+  video_play: AnalyticsNode,
 
   // Telegram nodes
-  telegram_trigger: TelegramTriggerNode as any,
-  telegram_message_trigger: TelegramTriggerNode as any,
-  telegram_command_trigger: TelegramTriggerNode as any,
-  telegram_callback_trigger: TelegramTriggerNode as any,
-  telegram_send: TelegramSendNode as any,
-  telegram_send_message: TelegramSendNode as any,
-  telegram_buttons: TelegramButtonsNode as any,
-  telegram_keyboard: TelegramButtonsNode as any,
-  telegram_media: TelegramMediaNode as any,
-  telegram_photo: TelegramMediaNode as any,
-  telegram_video: TelegramMediaNode as any,
-  telegram_document: TelegramMediaNode as any,
-  telegram_callback: TelegramCallbackNode as any,
-  telegram_callback_handler: TelegramCallbackNode as any,
+  telegram_trigger: TelegramTriggerNode,
+  telegram_message_trigger: TelegramTriggerNode,
+  telegram_command_trigger: TelegramTriggerNode,
+  telegram_callback_trigger: TelegramTriggerNode,
+  telegram_send: TelegramSendNode,
+  telegram_send_message: TelegramSendNode,
+  telegram_buttons: TelegramButtonsNode,
+  telegram_keyboard: TelegramButtonsNode,
+  telegram_media: TelegramMediaNode,
+  telegram_photo: TelegramMediaNode,
+  telegram_video: TelegramMediaNode,
+  telegram_document: TelegramMediaNode,
+  telegram_callback: TelegramCallbackNode,
+  telegram_callback_handler: TelegramCallbackNode,
 };
 
-// Node categories for the palette
+// ================================
+// SAFE NODE TYPE RESOLVER
+// ================================
+// This function ALWAYS returns a valid component
+function getNodeComponent(type: string | symbol): NodeComponent {
+  if (typeof type !== "string") {
+    return AnalyticsNode;
+  }
+  
+  const component = NODE_COMPONENT_MAP[type];
+  if (component) {
+    return component;
+  }
+  
+  // Log unknown type for debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[FlowCube] Unknown node type: "${type}", using AnalyticsNode`);
+  }
+  
+  return AnalyticsNode;
+}
+
+// ================================
+// PROXY-BASED NODE TYPES
+// ================================
+// Comprehensive Proxy that handles all access patterns used by React Flow
+
+export const nodeTypes: NodeTypes = new Proxy(NODE_COMPONENT_MAP as NodeTypes, {
+  // GET trap - handles property access
+  get(target, prop: string | symbol, receiver): any {
+    // Handle special properties that React/ReactFlow might access
+    if (typeof prop === "symbol") {
+      // Handle Symbol.iterator, Symbol.toStringTag, etc.
+      return Reflect.get(target, prop, receiver);
+    }
+    
+    // Handle Object prototype methods
+    if (prop === "hasOwnProperty" || prop === "toString" || prop === "valueOf") {
+      return Reflect.get(target, prop, receiver);
+    }
+    
+    // Return valid component for any string key
+    return getNodeComponent(prop);
+  },
+  
+  // HAS trap - handles "in" operator
+  has(target, prop: string | symbol): boolean {
+    // All node types are "available" - we return AnalyticsNode for unknowns
+    if (typeof prop === "string") {
+      return true;
+    }
+    return Reflect.has(target, prop);
+  },
+  
+  // OWN_KEYS trap - handles Object.keys()
+  ownKeys(target): (string | symbol)[] {
+    return Reflect.ownKeys(target);
+  },
+  
+  // GET_OWN_PROPERTY_DESCRIPTOR trap
+  getOwnPropertyDescriptor(target, prop: string | symbol) {
+    if (typeof prop === "string" && !(prop in target)) {
+      // Create descriptor for unknown types that we'll handle
+      return {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: AnalyticsNode,
+      };
+    }
+    return Reflect.getOwnPropertyDescriptor(target, prop);
+  },
+});
+
+// ================================
+// NODE CATEGORIES FOR PALETTE
+// ================================
 export const nodeCategories = [
   {
     id: "premium",
@@ -105,7 +224,6 @@ export const nodeCategories = [
       { type: "schedule", label: "Schedule", description: "Time-based trigger" },
     ],
   },
-  // Telegram category
   telegramNodeCategory,
   {
     id: "ai",
@@ -191,18 +309,20 @@ export const nodeCategories = [
   },
 ];
 
-// Helper to create a new node
+// ================================
+// HELPER FUNCTIONS
+// ================================
+
+// Helper to create a new node with safe type
 export function createNode(
   type: string,
   label: string,
   position: { x: number; y: number }
 ) {
-  // Determine the correct node type for React Flow
-  const reactFlowType = nodeTypes[type] ? type : "analyticsNode";
-
+  // Use the actual type - the Proxy will handle fallback
   return {
     id: `${type}-${Date.now()}`,
-    type: reactFlowType,
+    type: type, // Keep original type, Proxy handles rendering
     position,
     data: {
       label,
@@ -216,14 +336,14 @@ export function createNode(
 // Get default config for each node type
 function getDefaultConfig(type: string): Record<string, unknown> {
   // Check Telegram nodes first
-  if (type.startsWith('telegram_')) {
+  if (type.startsWith("telegram_")) {
     return getTelegramNodeDefaultConfig(type);
   }
 
   // Check Premium nodes
-  if (type.startsWith('premium_')) {
-    const nodeType = type.replace('premium_', '') as 'trigger' | 'action' | 'condition' | 'ai';
-    return { type: nodeType, label: '', description: '' };
+  if (type.startsWith("premium_")) {
+    const nodeType = type.replace("premium_", "") as "trigger" | "action" | "condition" | "ai";
+    return { type: nodeType, label: "", description: "" };
   }
 
   switch (type) {

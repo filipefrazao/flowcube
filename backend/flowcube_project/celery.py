@@ -15,6 +15,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Auto-discover tasks in all installed apps
 app.autodiscover_tasks()
+# Explicitly include plugin apps that may not be found by autodiscovery
+app.autodiscover_tasks(['funnelcube'])
 
 # Celery configuration
 app.conf.update(
@@ -50,6 +52,7 @@ app.conf.update(
         'flowcube.tasks.execute_ai_completion': {'queue': 'ai'},
         'flowcube.tasks.send_whatsapp_message': {'queue': 'whatsapp'},
         'flowcube.tasks.execute_workflow_node': {'queue': 'workflows'},
+        'workflows.tasks.execute_workflow_task': {'queue': 'workflows'},
         # Telegram integration tasks
         'telegram_integration.tasks.verify_telegram_bot': {'queue': 'telegram'},
         'telegram_integration.tasks.setup_telegram_webhook': {'queue': 'telegram'},
@@ -59,6 +62,10 @@ app.conf.update(
         'telegram_integration.tasks.process_telegram_update': {'queue': 'telegram'},
         'telegram_integration.tasks.send_bulk_telegram_messages': {'queue': 'telegram'},
         'telegram_integration.tasks.cleanup_old_webhook_logs': {'queue': 'telegram'},
+        # FunnelCube analytics tasks
+        'funnelcube.tasks.flush_event_buffer': {'queue': 'analytics'},
+        'funnelcube.tasks.rotate_daily_salt': {'queue': 'analytics'},
+        'funnelcube.tasks.generate_insights': {'queue': 'analytics'},
     },
 
     # Queues
@@ -70,6 +77,7 @@ app.conf.update(
         'whatsapp': {'routing_key': 'whatsapp'},
         'workflows': {'routing_key': 'workflows'},
         'telegram': {'routing_key': 'telegram'},
+        'analytics': {'routing_key': 'analytics'},
     },
 
     # Beat scheduler (for periodic tasks)

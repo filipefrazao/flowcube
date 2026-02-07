@@ -10,6 +10,7 @@ from .views import (
     VariableViewSet, ExecutionViewSet,
     AIAssistantViewSet, BrazilianContextViewSet
 )
+from .webhook_handler import webhook_receiver
 
 # Main router
 router = DefaultRouter()
@@ -28,4 +29,6 @@ workflow_router.register(r"variables", VariableViewSet, basename="workflow-varia
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(workflow_router.urls)),
+    # Webhook trigger endpoint
+    path("webhooks/<str:token>/", webhook_receiver, name="webhook-receiver"),
 ]

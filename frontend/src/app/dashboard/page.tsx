@@ -47,7 +47,7 @@ export default function DashboardPage() {
     try {
       const [workflows, execStats] = await Promise.all([
         workflowApi.list(),
-        executionApi.stats().catch(() => null),
+        executionApi.getStats().catch(() => null),
       ]);
       setData({ workflows, execStats, loading: false, error: null });
     } catch (err) {
@@ -109,7 +109,7 @@ export default function DashboardPage() {
             size="md"
             icon={<Plus className="w-4 h-4" />}
             glow
-            onClick={() => window.location.href = '/workflows/new'}
+            onClick={() => window.location.href = '/workflows/create'}
           >
             New Workflow
           </PremiumButton>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                       <GitBranch className="w-10 h-10 text-gray-500 mx-auto mb-3" />
                       <p className="text-gray-400 text-sm">No workflows yet</p>
                       <Link
-                        href="/workflows/new"
+                        href="/workflows/create"
                         className="text-purple-400 text-sm hover:underline mt-2 inline-block"
                       >
                         Create your first workflow
@@ -276,9 +276,9 @@ export default function DashboardPage() {
                 ) : (
                   <div className="p-4 space-y-4">
                     <div className="grid grid-cols-3 gap-2">
-                      <StatusBadge label="Done" value={data.execStats.by_status.completed} variant="success" />
-                      <StatusBadge label="Failed" value={data.execStats.by_status.failed} variant="error" />
-                      <StatusBadge label="Running" value={data.execStats.by_status.running} variant="info" />
+                      <StatusBadge label="Done" value={data.execStats.by_status?.completed ?? 0} variant="success" />
+                      <StatusBadge label="Failed" value={data.execStats.by_status?.failed ?? 0} variant="error" />
+                      <StatusBadge label="Running" value={data.execStats.by_status?.running ?? 0} variant="info" />
                     </div>
                     <div className="pt-4 border-t border-gray-700/50 space-y-3">
                       <div className="flex items-center justify-between text-sm">
@@ -315,7 +315,7 @@ export default function DashboardPage() {
               <QuickActionCard
                 title="Create Workflow"
                 description="Build new automation"
-                href="/workflows/new"
+                href="/workflows/create"
                 icon={<Plus className="w-5 h-5" />}
                 color="purple"
               />

@@ -74,6 +74,19 @@ class Credential(models.Model):
         ('mongodb', 'MongoDB'),
         ('redis', 'Redis'),
         ('custom', 'Custom'),
+        ('groq', 'Groq'),
+        ('deepseek', 'DeepSeek'),
+        ('grok', 'Grok (X.AI)'),
+        ('google_ai', 'Google AI (Gemini)'),
+        ('n8n', 'N8N'),
+        ('whatsapp_cloud', 'WhatsApp Cloud API'),
+        ('meta_lead_ads', 'Meta Lead Ads'),
+        ('supabase', 'Supabase'),
+        ('make', 'Make (Integromat)'),
+        ('google_ads', 'Google Ads'),
+        ('openrouter', 'OpenRouter'),
+        ('elevenlabs', 'ElevenLabs'),
+        ('mistral', 'Mistral'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -106,7 +119,10 @@ class Credential(models.Model):
             return {}
         try:
             fernet = Fernet(CREDENTIAL_ENCRYPTION_KEY.encode() if isinstance(CREDENTIAL_ENCRYPTION_KEY, str) else CREDENTIAL_ENCRYPTION_KEY)
-            decrypted = fernet.decrypt(self.encrypted_data)
+            token = self.encrypted_data
+            if isinstance(token, memoryview):
+                token = token.tobytes()
+            decrypted = fernet.decrypt(token)
             return json.loads(decrypted.decode())
         except Exception as e:
             logger.error(f"Failed to decrypt credential {self.id}: {e}")

@@ -8,11 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Max
 from django.utils import timezone
 from datetime import timedelta
 
-from .pagination import WorkflowPagination
 from .models import Workflow, Group, Block, Edge, Variable, Execution
 from .serializers import (
     WorkflowListSerializer, WorkflowDetailSerializer, WorkflowCreateSerializer,
@@ -32,12 +31,6 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     destroy: Delete workflow
     """
     permission_classes = [IsAuthenticated]
-    pagination_class = WorkflowPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ["is_active", "is_published"]
-    search_fields = ["name", "description"]
-    ordering_fields = ["created_at", "updated_at", "name"]
-    ordering = ["-created_at"]
     
     def get_queryset(self):
         return Workflow.objects.filter(owner=self.request.user)
@@ -66,11 +59,135 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=["post"])
     def publish(self, request, pk=None):
-        """Publish workflow"""
+        """Publish workflow - creates immutable version snapshot"""
+        from .models import WorkflowVersion
+        
         workflow = self.get_object()
+        
+        # Get next version number
+        last_version = workflow.versions.order_by('-version_number').first()
+        next_version = (last_version.version_number + 1) if last_version else 1
+        
+        # Create immutable version snapshot
+        version = WorkflowVersion.objects.create(
+            workflow=workflow,
+            graph=workflow.graph,
+            version_number=next_version,
+            tag="published",
+            notes=request.data.get('notes', ''),
+            created_by=request.user
+        )
+        
+        # Update workflow status
         workflow.is_published = True
-        workflow.save()
-        return Response({"status": "published"})
+        workflow.published_at = timezone.now()
+        workflow.save(update_fields=['is_published', 'published_at'])
+        
+        # Setup webhook trigger if applicable
+        from .webhook_handler import setup_webhook_trigger
+        webhook_url = setup_webhook_trigger(workflow)
+        
+        return Response({
+            "status": "published",
+            "version": next_version,
+            "version_id": str(version.id),
+            "published_at": workflow.published_at.isoformat(),
+            "webhook_url": webhook_url
+        })
+
+
+    @action(detail=True, methods=["get"], url_path="webhook-url")
+    def webhook_url(self, request, pk=None):
+        """Get webhook URL for this workflow"""
+        from .webhook_handler import get_webhook_url
+        
+        workflow = self.get_object()
+        
+        # Only published workflows can have webhook URLs
+        if not workflow.is_published:
+            return Response({
+                "error": "Workflow must be published to get webhook URL",
+                "is_published": False
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get or create webhook URL
+        webhook_url = get_webhook_url(workflow)
+        base_url = request.build_absolute_uri("/").rstrip("/")
+        full_url = f"{base_url}{webhook_url}"
+        
+        return Response({
+            "webhook_url": full_url,
+            "token": workflow.graph.get("webhook_token"),
+            "workflow_id": str(workflow.id),
+            "workflow_name": workflow.name
+        })
+
+    @action(detail=True, methods=["post"], url_path="execute")
+    def execute(self, request, pk=None):
+        """Execute workflow asynchronously"""
+        workflow = self.get_object()
+        
+        # Import task and execution model
+        from .tasks import execute_workflow_task
+        from .models import Execution
+        
+        # Create execution record
+        execution = Execution.objects.create(
+            workflow=workflow,
+            status=Execution.Status.PENDING,
+            trigger_data=request.data.get("input_data", {}),
+            triggered_by="api"
+        )
+        
+        # Dispatch Celery task
+        task = execute_workflow_task.delay(str(execution.id))
+        
+        return Response({
+            "execution_id": str(execution.id),
+            "status": "pending",
+            "task_id": task.id
+        }, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=["get"], url_path="stats")
+    def workflow_stats(self, request):
+        """
+        GET /api/v1/workflows/stats/
+        
+        Returns workflow statistics:
+        - Most executed workflows
+        - Average execution time
+        - Workflows by status
+        """
+        user = request.user
+        
+        # Top workflows by execution count
+        workflows = Workflow.objects.filter(owner=user).annotate(
+            execution_count=Count("executions"),
+            last_executed=Max("executions__started_at")
+        ).order_by("-execution_count")[:10]
+        
+        # Workflows by status
+        by_status = {
+            "draft": Workflow.objects.filter(owner=user, is_published=False).count(),
+            "published": Workflow.objects.filter(owner=user, is_published=True, is_active=True).count(),
+            "inactive": Workflow.objects.filter(owner=user, is_active=False).count(),
+        }
+        
+        return Response({
+            "top_workflows": [
+                {
+                    "id": str(w.id),
+                    "name": w.name,
+                    "execution_count": w.execution_count or 0,
+                    "avg_duration_ms": round(w.avg_duration or 0, 2),
+                    "last_executed": w.last_executed.isoformat() if w.last_executed else None
+                }
+                for w in workflows
+            ],
+            "by_status": by_status,
+            "total": Workflow.objects.filter(owner=user).count()
+        })
+
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -110,7 +227,7 @@ class EdgeViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         workflow_id = self.kwargs.get("workflow_pk")
-        return Edge.objects.filter(workflow_id=workflow_id, workflow__owner=self.request.user)
+        return Edge.objects.filter(workflow_id=workflow_id, workflow__owner=self.request.user).order_by("created_at")
     
     def perform_create(self, serializer):
         workflow_id = self.kwargs.get("workflow_pk")
@@ -184,11 +301,20 @@ class ExecutionViewSet(viewsets.ReadOnlyModelViewSet):
         # Status breakdown
         status_counts = dict(recent.values('status').annotate(count=Count('id')).values_list('status', 'count'))
 
-        # Average duration for completed executions
-        avg_duration = recent.filter(
+        # Average duration for completed executions (calculated from started_at/finished_at)
+        completed_execs = recent.filter(
             status='completed',
-            finished_at__isnull=False
-        ).aggregate(avg=Avg('duration_ms'))['avg'] or 0
+            finished_at__isnull=False,
+            started_at__isnull=False
+        )
+        
+        durations = []
+        for exec in completed_execs:
+            if exec.started_at and exec.finished_at:
+                duration = (exec.finished_at - exec.started_at).total_seconds() * 1000
+                durations.append(duration)
+        
+        avg_duration = sum(durations) / len(durations) if durations else 0
 
         # Daily execution counts for chart
         daily_counts = []

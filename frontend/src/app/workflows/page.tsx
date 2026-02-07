@@ -44,7 +44,7 @@ export default function WorkflowsPage() {
     try {
       setLoading(true);
       const data = await workflowApi.list();
-      setWorkflows(data);
+      setWorkflows(data || []);
     } catch (err) {
       setError("Failed to load workflows");
       console.error(err);
@@ -192,7 +192,7 @@ export default function WorkflowsPage() {
 
             {/* New Workflow */}
             <Link
-              href="/workflows/new"
+              href="/workflows/create"
               className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -224,7 +224,7 @@ export default function WorkflowsPage() {
               </p>
               {!searchQuery && (
                 <Link
-                  href="/workflows/new"
+                  href="/workflows/create"
                   className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
                 >
                   <Plus className="w-5 h-5" />

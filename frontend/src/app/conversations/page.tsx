@@ -82,7 +82,7 @@ export default function ConversationsPage() {
   const loadSessionDetails = useCallback(async (sessionId: string) => {
     try {
       setIsLoadingMessages(true);
-      const data = await chatApi.getSession(Number(sessionId));
+      const data = await chatApi.getSession(sessionId);
       setSelectedSession(data);
     } catch (err) {
       console.error("Error loading session details:", err);
@@ -121,7 +121,7 @@ export default function ConversationsPage() {
 
     setIsSending(true);
     try {
-      await chatApi.sendMessage(selectedSession.id, newMessage.trim());
+      await chatApi.sendMessage(String(selectedSession.id), newMessage.trim());
       setNewMessage("");
       // Reload messages
       await loadSessionDetails(String(selectedSession.id));

@@ -185,7 +185,6 @@ interface AnalyticsNodeProps {
   data: AnalyticsNodeData;
   selected?: boolean;
 }
-
 type OldAnalyticsNodeProps = {
   data: AnalyticsNodeData;
 }
@@ -193,7 +192,16 @@ type OldAnalyticsNodeProps = {
 const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
   const nodeType = data.type || 'custom_event';
   const category = getCategory(nodeType);
-  const colors = categoryColors[category] || categoryColors.tool;
+  
+  // Defensive: Ensure colors is always defined with safe defaults
+  const defaultColors = {
+    bg: 'bg-gray-50',
+    border: 'border-gray-300',
+    text: 'text-gray-700',
+    iconBg: 'bg-gray-100',
+  };
+  
+  const colors = categoryColors[category] || categoryColors.tool || defaultColors;
   const Icon = nodeIcons[nodeType] || Zap;
 
   // Memoize stats display for performance

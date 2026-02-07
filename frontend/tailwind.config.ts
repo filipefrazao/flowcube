@@ -10,17 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // SalesCube-inspired dark theme
         background: {
-          DEFAULT: "#192838",
-          secondary: "#0f1a24",
+          DEFAULT: "var(--background)",
+          secondary: "var(--background-secondary)",
         },
         surface: {
-          DEFAULT: "#152332",
-          hover: "#1e3044",
+          DEFAULT: "var(--surface)",
+          hover: "var(--surface-hover)",
           active: "#2a4058",
         },
-        // Amber/Orange accent (SalesCube style)
+        // Amber/Orange accent (hex - same for both themes, needs opacity modifiers)
         primary: {
           DEFAULT: "#F59E0B",
           hover: "#D97706",
@@ -44,16 +43,16 @@ const config: Config = {
         warning: "#f59e0b",
         error: "#ef4444",
         text: {
-          primary: "#ffffff",
-          secondary: "#94a3b8",
-          muted: "#64748b",
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          muted: "var(--text-muted)",
         },
         border: {
-          DEFAULT: "#2a4058",
+          DEFAULT: "var(--border)",
           light: "#3d5a7a",
           dark: "#152332",
         },
-        // Node-specific colors
+        // Node-specific colors (always the same regardless of theme)
         node: {
           trigger: "#f59e0b",
           action: "#3b82f6",

@@ -25,7 +25,7 @@ const blockColors: Record<string, string> = {
 };
 
 function BaseNodeComponent({ data, selected }: NodeProps<FlowNode>) {
-  const borderColor = blockColors[data.blockType] || "border-border";
+  const borderColor = blockColors[data.blockType] || "border-border" || "border-gray-300";
   
   return (
     <div

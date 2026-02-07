@@ -104,6 +104,143 @@ class CredentialViewSet(viewsets.ModelViewSet):
                 success = response.status_code < 500
                 message = f"Webhook reachable (status: {response.status_code})"
 
+            elif credential_type == 'meta_ads':
+                url = f"https://graph.facebook.com/v24.0/me/adaccounts?access_token={credential_data.get('access_token')}"
+                response = requests.get(url, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else f"Failed: {response.text[:200]}"
+
+            elif credential_type == 'whatsapp_cloud':
+                url = f"https://graph.facebook.com/v24.0/me?access_token={credential_data.get('access_token')}"
+                response = requests.get(url, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else f"Failed: {response.text[:200]}"
+
+            elif credential_type == 'meta_lead_ads':
+                url = f"https://graph.facebook.com/v24.0/me/accounts?access_token={credential_data.get('access_token')}"
+                response = requests.get(url, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else f"Failed: {response.text[:200]}"
+
+            elif credential_type == 'google_sheets' or credential_type == 'google_drive':
+                import json as json_mod
+                try:
+                    creds = json_mod.loads(credential_data.get('credentials_json', '{}'))
+                    success = creds.get('type') == 'service_account' and bool(creds.get('client_email'))
+                    message = f"Service account: {creds.get('client_email', 'N/A')}" if success else "Invalid service account JSON"
+                except:
+                    success = False
+                    message = "Invalid JSON format"
+
+            elif credential_type == 'notion':
+                url = "https://api.notion.com/v1/users/me"
+                headers = {
+                    'Authorization': f"Bearer {credential_data.get('api_key')}",
+                    'Notion-Version': '2022-06-28'
+                }
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else f"Failed: {response.status_code}"
+
+            elif credential_type == 'smtp':
+                import smtplib
+                try:
+                    server = smtplib.SMTP(credential_data.get('host', 'smtp.gmail.com'), int(credential_data.get('port', 587)), timeout=10)
+                    server.starttls()
+                    server.login(credential_data.get('username', ''), credential_data.get('password', ''))
+                    server.quit()
+                    success = True
+                    message = "SMTP connection successful"
+                except Exception as smtp_err:
+                    success = False
+                    message = f"SMTP error: {str(smtp_err)}"
+
+            elif credential_type == 'n8n':
+                url = f"{credential.base_url}/api/v1/workflows?limit=1"
+                headers = {'X-N8N-API-KEY': credential_data.get('api_key')}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else f"Failed: {response.status_code}"
+
+            elif credential_type == 'groq':
+                url = "https://api.groq.com/openai/v1/models"
+                headers = {'Authorization': f"Bearer {credential_data.get('api_key')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type == 'deepseek':
+                url = "https://api.deepseek.com/v1/models"
+                headers = {'Authorization': f"Bearer {credential_data.get('api_key')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type == 'grok':
+                url = "https://api.x.ai/v1/models"
+                headers = {'Authorization': f"Bearer {credential_data.get('api_key')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type == 'google_ai':
+                api_key = credential_data.get('api_key', '')
+                url = f"https://generativelanguage.googleapis.com/v1/models?key={api_key}"
+                response = requests.get(url, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type == 'supabase':
+                url = "https://api.supabase.com/v1/projects"
+                headers = {'Authorization': f"Bearer {credential_data.get('access_token')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid access token"
+
+            elif credential_type == 'make':
+                url = "https://us1.make.com/api/v2/users/me"
+                headers = {'Authorization': f"Token {credential_data.get('api_token')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid token"
+
+            elif credential_type == 'google_ads':
+                success = bool(credential_data.get('developer_token'))
+                message = "Developer token saved" if success else "No developer token"
+
+            elif credential_type == 'openrouter':
+                url = "https://openrouter.ai/api/v1/models"
+                headers = {'Authorization': f"Bearer {credential_data.get('api_key')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type == 'elevenlabs':
+                url = "https://api.elevenlabs.io/v1/user"
+                headers = {'xi-api-key': credential_data.get('api_key')}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type == 'mistral':
+                url = "https://api.mistral.ai/v1/models"
+                headers = {'Authorization': f"Bearer {credential_data.get('api_key')}"}
+                response = requests.get(url, headers=headers, timeout=10)
+                success = response.status_code == 200
+                message = "Connected successfully" if success else "Invalid API key"
+
+            elif credential_type in ('postgresql', 'mysql'):
+                success = bool(credential_data.get('host') and credential_data.get('database'))
+                message = "Credential data saved" if success else "Missing host or database"
+
+            elif credential_type == 'mongodb':
+                success = bool(credential_data.get('connection_string'))
+                message = "Connection string saved" if success else "No connection string"
+
+            elif credential_type == 'redis':
+                success = bool(credential_data.get('host'))
+                message = "Redis config saved" if success else "No host configured"
+
             else:
                 # Generic test - just verify data exists
                 success = bool(credential_data)

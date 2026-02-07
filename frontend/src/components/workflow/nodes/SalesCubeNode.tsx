@@ -6,7 +6,7 @@
 import { memo, useMemo } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { cn } from "../../../lib/utils";
-import { Users, UserPlus, RefreshCw, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Users, UserPlus, RefreshCw, CheckCircle, XCircle, Loader2, Database } from "lucide-react";
 
 const actionConfig: Record<string, { 
   icon: typeof UserPlus; 
@@ -45,7 +45,8 @@ interface SalesCubeNodeProps {
 const SalesCubeNode = ({ data, selected }: SalesCubeNodeProps) => {
   const config = data.config || {};
   const action = config.action || "create_lead";
-  const actionInfo = actionConfig[action] || actionConfig.create_lead;
+  const defaultActionInfo = { label: 'Action', icon: Database, color: 'blue' };
+  const actionInfo = actionConfig[action] || actionConfig.create_lead || defaultActionInfo;
   const ActionIcon = actionInfo.icon;
 
   const StatusIcon = useMemo(() => {

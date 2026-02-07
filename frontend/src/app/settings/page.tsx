@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   Palette,
   Bell,
@@ -28,6 +29,7 @@ import {
 import { settingsApi, type UserPreferences } from "@/lib/api";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { cn } from "@/lib/utils";
+import { clearAuthToken } from "@/lib/auth";
 
 type Tab = "appearance" | "notifications" | "editor" | "account";
 
@@ -39,10 +41,18 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     loadPreferences();
   }, []);
+
+  // Sync theme from backend preferences to next-themes on load
+  useEffect(() => {
+    if (preferences?.theme) {
+      setTheme(preferences.theme);
+    }
+  }, [preferences?.theme, setTheme]);
 
   async function loadPreferences() {
     try {
@@ -167,7 +177,7 @@ export default function SettingsPage() {
             {preferences && (
               <div className="bg-surface border border-border rounded-lg">
                 {activeTab === "appearance" && (
-                  <AppearanceTab preferences={preferences} updatePreference={updatePreference} />
+                  <AppearanceTab preferences={preferences} updatePreference={updatePreference} onThemeChange={setTheme} />
                 )}
                 {activeTab === "notifications" && (
                   <NotificationsTab preferences={preferences} updatePreference={updatePreference} />
@@ -190,9 +200,10 @@ export default function SettingsPage() {
 interface TabProps {
   preferences: UserPreferences;
   updatePreference: <K extends keyof UserPreferences>(key: K, value: UserPreferences[K]) => void;
+  onThemeChange?: (theme: string) => void;
 }
 
-function AppearanceTab({ preferences, updatePreference }: TabProps) {
+function AppearanceTab({ preferences, updatePreference, onThemeChange }: TabProps) {
   const themes: { id: "dark" | "light" | "system"; label: string; icon: React.ReactNode }[] = [
     { id: "dark", label: "Dark", icon: <Moon className="w-5 h-5" /> },
     { id: "light", label: "Light", icon: <Sun className="w-5 h-5" /> },
@@ -208,7 +219,10 @@ function AppearanceTab({ preferences, updatePreference }: TabProps) {
           {themes.map((theme) => (
             <button
               key={theme.id}
-              onClick={() => updatePreference("theme", theme.id)}
+              onClick={() => {
+                updatePreference("theme", theme.id);
+                onThemeChange?.(theme.id);
+              }}
               className={cn(
                 "flex flex-col items-center gap-2 p-4 rounded-lg border transition-colors",
                 preferences.theme === theme.id
@@ -391,6 +405,13 @@ function EditorTab({ preferences, updatePreference }: TabProps) {
 }
 
 function AccountTab() {
+  const handleLogout = () => {
+    // Clear token
+    clearAuthToken();
+    // Redirect to login
+    window.location.href = '/login';
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -452,10 +473,26 @@ function AccountTab() {
             />
           </div>
 
-          <button className="px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors">
+          <button className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors">
             Update Password
           </button>
         </div>
+      </div>
+
+      {/* Sign Out Section */}
+      <div className="pt-6 border-t border-border">
+        <h3 className="text-sm font-medium text-text-primary mb-1">Sign Out</h3>
+        <p className="text-xs text-text-muted mb-4">Log out of your account</p>
+
+        <button 
+          onClick={handleLogout}
+          className="px-4 py-2 bg-surface hover:bg-surface-hover border border-border rounded-lg text-text-primary font-medium transition-colors flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Sign Out
+        </button>
       </div>
 
       <div className="pt-6 border-t border-border">

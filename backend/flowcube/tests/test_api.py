@@ -1,70 +1,58 @@
-
-# flowcube/tests/test_api.py
-from django.urls import reverse
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
-from uuid import UUID
-from ..models import Workflow, Node, Step
 
-class WorkflowAPITests(APITestCase):
+
+User = get_user_model()
+
+
+class FlowcubeAPITestCase(APITestCase):
     def setUp(self):
-        self.workflow = Workflow.objects.create(
-            name="Test Workflow",
-            description="This is a test workflow"
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
         )
-        self.node = Node.objects.create(
-            workflow=self.workflow,
-            name="Start Node",
-            type="START",
-            position_x=0,
-            position_y=0
-        )
+        self.client.force_authenticate(user=self.user)
 
-    def test_get_workflows(self):
-        url = reverse('workflow-list')
+    def test_preferences_me_get_creates_default(self):
+        url = '/api/flowcube/preferences/me/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['name'], "Test Workflow")
+        self.assertIn('theme', response.data)
 
-    def test_create_workflow(self):
-        url = reverse('workflow-list')
-        data = {
-            'name': 'New Workflow',
-            'description': 'Another test workflow'
+    def test_preferences_me_patch_updates(self):
+        url = '/api/flowcube/preferences/me/'
+        response = self.client.patch(url, {'theme': 'light'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('theme'), 'light')
+
+    def test_credentials_crud_and_test_action(self):
+        list_url = '/api/flowcube/credentials/'
+
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('results', response.data)
+
+        create_payload = {
+            'name': 'My Custom',
+            'credential_type': 'custom',
+            'description': 'Test credential',
+            'base_url': '',
+            'is_active': True,
+            'data': {'foo': 'bar'},
         }
-        response = self.client.post(url, data)
+        response = self.client.post(list_url, create_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['name'], data['name'])
-        self.assertEqual(response.data['description'], data['description'])
+        cred_id = response.data.get('id')
+        self.assertTrue(cred_id)
 
-    def test_get_workflow_detail(self):
-        url = reverse('workflow-detail', args=[str(self.workflow.id)])
-        response = self.client.get(url)
+        detail_url = f'/api/flowcube/credentials/{cred_id}/'
+        response = self.client.get(detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(UUID(str(response.data['id'])), self.workflow.id)
+        self.assertEqual(response.data.get('credential_type'), 'custom')
 
-    def test_update_workflow(self):
-        url = reverse('workflow-detail', args=[str(self.workflow.id)])
-        data = {
-            'name': 'Updated Workflow',
-            'description': 'Updated description'
-        }
-        response = self.client.put(url, data)
+        test_url = f'/api/flowcube/credentials/{cred_id}/test/'
+        response = self.client.post(test_url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['name'], data['name'])
-
-    def test_partial_update_workflow(self):
-        url = reverse('workflow-detail', args=[str(self.workflow.id)])
-        data = {
-            'description': 'Partial update'
-        }
-        response = self.client.patch(url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['description'], data['description'])
-
-    def test_delete_workflow(self):
-        url = reverse('workflow-detail', args=[str(self.workflow.id)])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Workflow.objects.filter(id=self.workflow.id).exists())
+        self.assertTrue(response.data.get('success'))

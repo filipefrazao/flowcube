@@ -202,7 +202,20 @@ function TelegramMediaNodeComponent({ data, selected }: TelegramMediaNodeProps) 
     },
   };
 
-  const colors = colorClasses[mediaConfig.color as keyof typeof colorClasses] || colorClasses.blue;
+  const defaultColors = {
+    gradient: 'from-gray-50 to-gray-100',
+    border: 'border-gray-300',
+    borderSelected: 'border-gray-400',
+    ring: 'ring-gray-500',
+    header: 'border-gray-300',
+    icon: 'bg-gray-100',
+    iconText: 'text-gray-600',
+    title: 'text-gray-700',
+    subtitle: 'text-gray-500',
+    badge: 'bg-gray-100 text-gray-700',
+    handle: 'bg-gray-500',
+  };
+  const colors = colorClasses[mediaConfig.color as keyof typeof colorClasses] || colorClasses.blue || defaultColors;
 
   return (
     <div

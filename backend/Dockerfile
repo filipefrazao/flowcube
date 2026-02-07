@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Collect static files
-RUN python manage.py collectstatic --noinput 2>/dev/null || true
+RUN DEBUG=True python manage.py collectstatic --noinput
 
 EXPOSE 8000
 

@@ -41,7 +41,8 @@ const channelColors: Record<string, { bg: string; text: string; icon: string }> 
 const TextResponseNode = ({ data, selected }: TextResponseNodeProps) => {
   const config = data.config || {};
   const channel = config.channel || "whatsapp";
-  const colors = channelColors[channel] || channelColors.whatsapp;
+  const defaultColors = { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', iconBg: 'bg-gray-100' };
+  const colors = channelColors[channel] || channelColors.whatsapp || defaultColors;
 
   const textPreview = useMemo(() => {
     const text = config.text || "";

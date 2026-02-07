@@ -1,8 +1,8 @@
-'"'"'use client'"'"';
-import { useState } from '"'"'react'"'"';
-import { motion } from '"'"'framer-motion'"'"';
-import { Brain, Sparkles, Check, X } from '"'"'lucide-react'"'"';
-import { useAIStream } from '"'"'@/hooks/useAIStream'"'"';
+"use client";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Brain, Sparkles, Check, X } from 'lucide-react';
+import { useAIStream } from '@/hooks/useAIStream';
 
 interface AINodeBuilderProps {
   onNodeGenerated?: (node: any) => void;
@@ -10,12 +10,12 @@ interface AINodeBuilderProps {
 }
 
 export function AINodeBuilder({ onNodeGenerated, workflowContext }: AINodeBuilderProps) {
-  const [description, setDescription] = useState('"'"''"'"');
+  const [description, setDescription] = useState('');
   const [preview, setPreview] = useState<any>(null);
   const { stream, isStreaming, error } = useAIStream();
 
   const handleGenerate = async () => {
-    const result = await stream('"'"'/api/v1/ai/generate-node-stream/'"'"', {
+    const result = await stream('/api/v1/ai/generate-node-stream/', {
       description,
       context: workflowContext
     });
@@ -25,7 +25,7 @@ export function AINodeBuilder({ onNodeGenerated, workflowContext }: AINodeBuilde
         const node = JSON.parse(result);
         setPreview(node);
       } catch (e) {
-        console.error('"'"'Failed to parse AI response:'"'"', e);
+        console.error('Failed to parse AI response:', e);
       }
     }
   };
@@ -34,7 +34,7 @@ export function AINodeBuilder({ onNodeGenerated, workflowContext }: AINodeBuilde
     if (preview) {
       onNodeGenerated?.(preview);
       setPreview(null);
-      setDescription('"'"''"'"');
+      setDescription('');
     }
   };
 
@@ -120,4 +120,3 @@ export function AINodeBuilder({ onNodeGenerated, workflowContext }: AINodeBuilde
     </div>
   );
 }
-ENDOFFILE'

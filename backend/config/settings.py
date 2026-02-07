@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'instagram_automation',
     'ai_agents',
     'achievements',
+    'chatcube',
 ]
 
 MIDDLEWARE = [

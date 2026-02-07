@@ -6,6 +6,7 @@
 'use client';
 
 import { useCallback, useRef, useEffect, useState } from 'react';
+import { workflowApi } from '../../lib/api';
 import {
   ReactFlow,
   Background,
@@ -77,16 +78,36 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
   // Undo/redo from temporal store
   const { undo, redo, pastStates, futureStates } = useTemporalStore();
 
-  // Load workflow on mount
+  // Load workflow on mount - FETCH FROM API FIRST!
   useEffect(() => {
-    if (workflowId) {
-      loadWorkflow({
-        id: workflowId,
-        name: 'Demo Workflow',
-        graph: { nodes: [], edges: [], viewport: { x: 0, y: 0, zoom: 1 } },
-        isPublished: false,
-      });
+    async function fetchAndLoadWorkflow() {
+      if (!workflowId) return;
+      
+      try {
+        useWorkflowStore.getState().setLoading(true);
+        console.log('Fetching workflow from API:', workflowId);
+        
+        // Fetch workflow data from API
+        const workflow = await workflowApi.get(workflowId);
+        console.log('Workflow fetched:', workflow);
+        
+        // Load into store with actual data
+        loadWorkflow({
+          id: workflow.id,
+          name: workflow.name || 'Untitled Workflow',
+          graph: workflow.graph || { nodes: [], edges: [], viewport: { x: 0, y: 0, zoom: 1 } },
+          isPublished: workflow.is_published || false,
+        });
+        
+        console.log('Workflow loaded into store');
+      } catch (error) {
+        console.error('Failed to load workflow:', error);
+      } finally {
+        useWorkflowStore.getState().setLoading(false);
+      }
     }
+    
+    fetchAndLoadWorkflow();
   }, [workflowId, loadWorkflow]);
 
   // Handle viewport change
@@ -124,9 +145,10 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
 
       const { type, label } = JSON.parse(data);
 
+      // React Flow v12: screenToFlowPosition expects absolute screen coordinates
       const position = screenToFlowPosition({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
+        x: event.clientX,
+        y: event.clientY,
       });
 
       const newNode = createNode(type, label, position);
@@ -213,7 +235,37 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
     [selectedNodeId, nodes, addNode, setSelectedNodeId, getGraph]
   );
 
+  // Manual save handler (for Ctrl+S and save button)
+  const handleManualSave = useCallback(async () => {
+    if (!workflowId) {
+      console.error('No workflow ID - cannot save');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      console.log('Manual save triggered (Ctrl+S)...');
+
+      const graph = getGraph();
+      const name = useWorkflowStore.getState().workflowName;
+
+      await workflowApi.updateWorkflow(workflowId, {
+        name: name,
+        graph: graph,
+      });
+
+      setIsDirty(false);
+      console.log('✅ Manual save successful');
+    } catch (error) {
+      console.error('❌ Manual save failed:', error);
+      alert('Failed to save workflow. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }, [workflowId, getGraph, setSaving, setIsDirty]);
+
   // Keyboard shortcuts
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
@@ -234,30 +286,43 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
         }
       } else if (isMod && event.key === 's') {
         event.preventDefault();
-        console.log('Save workflow', getGraph());
+        handleManualSave();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, selectedNodeId, getGraph]);
+  }, [undo, redo, selectedNodeId, getGraph, handleManualSave]);
 
-  // Auto-save
+  // Auto-save (skip if manual save is in progress)
   useEffect(() => {
-    if (isDirty && workflowId) {
-      const timeoutId = setTimeout(() => {
-        setSaving(true);
-        console.log('Auto-saving...', getGraph());
-        setTimeout(() => {
-          setSaving(false);
+    if (isDirty && workflowId && !isSaving) {
+      const timeoutId = setTimeout(async () => {
+        try {
+          setSaving(true);
+          console.log('Auto-saving workflow...');
+
+          const graph = getGraph();
+          const name = useWorkflowStore.getState().workflowName;
+
+          await workflowApi.updateWorkflow(workflowId, {
+            name: name,
+            graph: graph,
+          });
+
           setIsDirty(false);
-        }, 500);
+          console.log('✅ Auto-save successful');
+        } catch (error) {
+          console.error('❌ Auto-save failed:', error);
+          // Keep isDirty as true so user can retry
+        } finally {
+          setSaving(false);
+        }
       }, 2000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [isDirty, workflowId, getGraph, setSaving, setIsDirty]);
-
+  }, [isDirty, workflowId, isSaving, getGraph, setSaving, setIsDirty]);
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}

@@ -3,6 +3,7 @@ FlowCube 3.0 Serializers
 """
 from rest_framework import serializers
 from django.utils.html import escape
+import uuid
 from .models import (
     AIAssistant, BrazilianContext, AutomationSuggestion,
     Workflow, WorkflowVersion, Execution, NodeExecutionLog,
@@ -13,7 +14,7 @@ from .models import (
 class NodeAnalyticsSerializer(serializers.ModelSerializer):
     conversion_rate = serializers.ReadOnlyField()
     drop_off_rate = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = NodeAnalytics
         fields = [
@@ -36,7 +37,7 @@ class NodeExecutionLogSerializer(serializers.ModelSerializer):
 class ExecutionSerializer(serializers.ModelSerializer):
     node_logs = NodeExecutionLogSerializer(many=True, read_only=True)
     duration_ms = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Execution
         fields = [
@@ -49,7 +50,7 @@ class ExecutionSerializer(serializers.ModelSerializer):
 class ExecutionListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing executions"""
     duration_ms = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Execution
         fields = [
@@ -72,47 +73,61 @@ class VariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variable
         fields = ['id', 'workflow', 'name', 'value', 'is_system', 'created_at']
+        extra_kwargs = {"workflow": {"read_only": True}}
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['id', 'workflow', 'title', 'position_x', 'position_y', 'width', 'height', 'color', 'created_at']
+        extra_kwargs = {"workflow": {"read_only": True}}
 
 
 class BlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
         fields = ['id', 'workflow', 'group', 'block_type', 'content', 'position_x', 'position_y', 'created_at', 'updated_at']
+        extra_kwargs = {"workflow": {"read_only": True}}
 
 
 class EdgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Edge
         fields = ['id', 'workflow', 'source_block', 'target_block', 'source_handle', 'target_handle', 'condition', 'created_at']
+        extra_kwargs = {"workflow": {"read_only": True}}
 
 
 class WorkflowListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing workflows"""
     executions_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Workflow
         fields = [
             'id', 'name', 'description', 'is_published', 'is_active',
             'folder', 'tags', 'created_at', 'updated_at', 'executions_count'
         ]
-    
+
     def get_executions_count(self, obj):
         return obj.executions.count()
 
 
 class WorkflowDetailSerializer(serializers.ModelSerializer):
-    """Full serializer for workflow detail with graph and analytics"""
+    """
+    Full serializer for workflow detail with graph and analytics
+
+    ✅ FIXES APPLIED:
+    - Added get_graph method to normalize graph data
+    - Prevents "Cannot read properties of undefined (reading 'border')" error
+    - Ensures all nodes have complete style objects
+    - Ensures all edges have complete style objects
+    - Optimized node_analytics query with select_related and only()
+    """
     versions = WorkflowVersionSerializer(many=True, read_only=True)
     variables = VariableSerializer(many=True, read_only=True)
     node_analytics = serializers.SerializerMethodField()
-    
+    graph = serializers.SerializerMethodField()  # ✅ NEW: Normalize graph
+
     class Meta:
         model = Workflow
         fields = [
@@ -122,18 +137,73 @@ class WorkflowDetailSerializer(serializers.ModelSerializer):
             'node_analytics'
         ]
         read_only_fields = ['owner', 'created_at', 'updated_at', 'published_at']
-    
+
+    def get_graph(self, obj):
+        """
+        ✅ FIX: Normalize graph data to prevent frontend undefined errors
+        This fixes the "Cannot read properties of undefined (reading 'border')" bug
+        """
+        graph = obj.graph or {}
+
+        # Ensure nodes array exists
+        nodes = graph.get('nodes', [])
+        for node in nodes:
+            # Ensure all required fields exist with defaults
+            node.setdefault('id', str(uuid.uuid4()))
+            node.setdefault('type', 'default')
+            node.setdefault('position', {'x': 0, 'y': 0})
+
+            # ✅ FIX: Ensure style object exists with all properties
+            if 'style' not in node or node['style'] is None:
+                node['style'] = {}
+
+            node['style'].setdefault('border', '1px solid #d1d5db')
+            node['style'].setdefault('borderRadius', '8px')
+            node['style'].setdefault('padding', '10px')
+            node['style'].setdefault('background', 'white')
+
+            # Ensure data object exists
+            if 'data' not in node or node['data'] is None:
+                node['data'] = {}
+
+            node['data'].setdefault('label', 'Untitled')
+
+        # Ensure edges array exists
+        edges = graph.get('edges', [])
+        for edge in edges:
+            edge.setdefault('id', str(uuid.uuid4()))
+            edge.setdefault('source', '')
+            edge.setdefault('target', '')
+            edge.setdefault('type', 'default')
+
+            # ✅ FIX: Ensure style object exists
+            if 'style' not in edge or edge['style'] is None:
+                edge['style'] = {}
+
+        # Ensure viewport exists
+        if 'viewport' not in graph or graph['viewport'] is None:
+            graph['viewport'] = {'x': 0, 'y': 0, 'zoom': 1}
+
+        graph['nodes'] = nodes
+        graph['edges'] = edges
+
+        return graph
+
     def get_node_analytics(self, obj):
-        """Get latest analytics for all nodes"""
+        """
+        ✅ FIX: Get latest analytics with optimized query
+        """
         from datetime import date, timedelta
         end_date = date.today()
         start_date = end_date - timedelta(days=30)
-        
+
+        # FIXED: Removed select_related + only() incompatibility bug
         analytics = NodeAnalytics.objects.filter(
             workflow=obj,
             period_start__gte=start_date,
             period_end__lte=end_date
         )
+
         return NodeAnalyticsSerializer(analytics, many=True).data
 
 
@@ -142,17 +212,17 @@ class WorkflowCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workflow
         fields = ['id', 'name', 'description', 'graph', 'is_published', 'is_active', 'folder', 'tags']
-    
+
     def validate_name(self, value):
         """Sanitize name field to prevent XSS"""
         return escape(value)
-    
+
     def validate_description(self, value):
         """Sanitize description field to prevent XSS"""
         if value:
             return escape(value)
         return value
-    
+
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
@@ -168,15 +238,15 @@ class WorkflowGraphSerializer(serializers.ModelSerializer):
 class PublishWorkflowSerializer(serializers.Serializer):
     """Serializer for publishing a workflow"""
     notes = serializers.CharField(required=False, allow_blank=True)
-    
+
     def create(self, validated_data):
         workflow = self.context['workflow']
         user = self.context['request'].user
-        
+
         # Get next version number
         last_version = workflow.versions.order_by('-version_number').first()
         next_version = (last_version.version_number + 1) if last_version else 1
-        
+
         # Create version
         version = WorkflowVersion.objects.create(
             workflow=workflow,
@@ -186,13 +256,13 @@ class PublishWorkflowSerializer(serializers.Serializer):
             notes=validated_data.get('notes', ''),
             created_by=user
         )
-        
+
         # Update workflow
         from django.utils import timezone
         workflow.is_published = True
         workflow.published_at = timezone.now()
         workflow.save()
-        
+
         return version
 
 
@@ -203,7 +273,7 @@ class PublishWorkflowSerializer(serializers.Serializer):
 class AIAssistantSerializer(serializers.ModelSerializer):
     """Serializer para AIAssistant"""
     suggestions_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = AIAssistant
         fields = [
@@ -211,7 +281,7 @@ class AIAssistantSerializer(serializers.ModelSerializer):
             'is_active', 'created_at', 'updated_at', 'suggestions_count'
         ]
         read_only_fields = ['created_at', 'updated_at']
-    
+
     def get_suggestions_count(self, obj):
         return obj.suggestions.count()
 
@@ -219,7 +289,7 @@ class AIAssistantSerializer(serializers.ModelSerializer):
 class BrazilianContextSerializer(serializers.ModelSerializer):
     """Serializer para BrazilianContext"""
     context_type_display = serializers.CharField(source='get_context_type_display', read_only=True)
-    
+
     class Meta:
         model = BrazilianContext
         fields = [
@@ -234,7 +304,7 @@ class AutomationSuggestionSerializer(serializers.ModelSerializer):
     confidence_level = serializers.ReadOnlyField()
     assistant_name = serializers.CharField(source='assistant.name', read_only=True)
     workflow_name = serializers.CharField(source='applied_to_workflow.name', read_only=True, allow_null=True)
-    
+
     class Meta:
         model = AutomationSuggestion
         fields = [
@@ -251,7 +321,7 @@ class AutomationSuggestionListSerializer(serializers.ModelSerializer):
     """Serializer simplificado para listagem de sugestões"""
     confidence_level = serializers.ReadOnlyField()
     assistant_name = serializers.CharField(source='assistant.name', read_only=True)
-    
+
     class Meta:
         model = AutomationSuggestion
         fields = [

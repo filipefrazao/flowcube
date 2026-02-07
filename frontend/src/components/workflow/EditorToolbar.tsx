@@ -22,7 +22,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { workflowApi } from '../../lib/api';
 
 interface EditorToolbarProps {
   onTogglePalette?: () => void;
@@ -53,6 +54,36 @@ export function EditorToolbar({
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsExecuting(false);
   };
+  const handleSave = useCallback(async () => {
+    const workflowId = useWorkflowStore.getState().workflowId;
+
+    if (!workflowId) {
+      console.error('No workflow ID - cannot save');
+      return;
+    }
+
+    try {
+      useWorkflowStore.getState().setSaving(true);
+
+      const graph = useWorkflowStore.getState().getGraph();
+      const name = useWorkflowStore.getState().workflowName;
+
+      await workflowApi.updateWorkflow(workflowId, {
+        name: name,
+        graph: graph,
+      });
+
+      useWorkflowStore.getState().setIsDirty(false);
+      console.log('✅ Workflow saved successfully');
+    } catch (error) {
+      console.error('❌ Failed to save workflow:', error);
+      alert('Failed to save workflow. Please try again.');
+    } finally {
+      useWorkflowStore.getState().setSaving(false);
+    }
+  }, []);
+
+
 
   return (
     <header className="h-14 bg-background border-b border-border flex items-center justify-between px-4 shrink-0">
@@ -131,7 +162,9 @@ export function EditorToolbar({
       <div className="flex items-center gap-2">
         {/* Save Button */}
         <button
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleSave}
+          disabled={isSaving || !isDirty}
           title="Save (Ctrl+S)"
         >
           <Save className="w-4 h-4" />

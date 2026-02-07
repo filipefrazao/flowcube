@@ -1,4 +1,5 @@
 'use client';
+
 import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
@@ -7,56 +8,87 @@ import { nodeVariants } from '@/utils/animations/node-animations';
 
 interface PremiumNodeData {
   label: string;
-  type: 'trigger' | 'action' | 'condition' | 'ai';
+  // Accept wide string types; editor/store uses values like "draft".
+  type?: string;
   icon?: string;
   description?: string;
-  status?: 'idle' | 'running' | 'success' | 'error';
+  status?: string;
 }
 
+type NormalizedType = 'trigger' | 'action' | 'condition' | 'ai';
+
+type NormalizedStatus = 'idle' | 'running' | 'success' | 'error';
+
 export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>) => {
-  // Icon mapping
-  const IconComponent = {
-    trigger: Zap,
-    action: MessageSquare,
-    condition: GitBranch,
-    ai: Brain
-  }[data.type];
+  // Normalize type: "premium_trigger" -> "trigger", etc.
+  const rawType = typeof data.type === 'string' ? data.type : 'trigger';
+  const normalizedType = (rawType.replace('premium_', '') || 'trigger') as NormalizedType;
+
+  // Normalize status to avoid undefined className and to keep animations predictable.
+  const rawStatus = data.status ?? 'idle';
+  const normalizedStatus: NormalizedStatus =
+    rawStatus === 'running' || rawStatus === 'success' || rawStatus === 'error' || rawStatus === 'idle'
+      ? rawStatus
+      : 'idle';
+
+  const shouldAnimate = selected || normalizedStatus === 'running';
+
+  // Icon mapping (uses normalizedType)
+  const IconComponent =
+    {
+      trigger: Zap,
+      action: MessageSquare,
+      condition: GitBranch,
+      ai: Brain,
+    }[normalizedType] || Zap;
 
   // Color mapping
-  const colorConfig = {
+  const colorConfigMap = {
     trigger: {
       border: 'border-[#A855F7]',
       bg: 'from-purple-500/20',
       text: 'text-purple-400',
-      glow: 'neon-glow-purple'
+      glow: 'neon-glow-purple',
     },
     action: {
       border: 'border-[#00ffff]',
       bg: 'from-cyan-500/20',
       text: 'text-cyan-400',
-      glow: 'neon-glow-cyan'
+      glow: 'neon-glow-cyan',
     },
     condition: {
       border: 'border-[#c8eb2d]',
       bg: 'from-green-500/20',
       text: 'text-green-400',
-      glow: 'neon-glow-green'
+      glow: 'neon-glow-green',
     },
     ai: {
       border: 'border-[#3B82F6]',
       bg: 'from-blue-500/20',
       text: 'text-blue-400',
-      glow: 'neon-glow-blue'
-    }
-  }[data.type];
+      glow: 'neon-glow-blue',
+    },
+  };
+
+  const defaultColorConfig = {
+    border: 'border-gray-500',
+    bg: 'from-gray-500/20',
+    text: 'text-gray-400',
+    glow: 'neon-glow-gray',
+  };
+
+  const colorConfig = colorConfigMap[normalizedType] || defaultColorConfig;
 
   // Status indicator colors
-  const statusColor = {
-    idle: 'bg-gray-500',
-    running: 'bg-yellow-500',
-    success: 'bg-green-500',
-    error: 'bg-red-500'
-  }[data.status || 'idle'];
+  const statusColor =
+    {
+      idle: 'bg-gray-500',
+      running: 'bg-yellow-500',
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+    }[normalizedStatus] || 'bg-gray-500';
+
+  const progressGradient = colorConfig.bg.replace('/20', '');
 
   return (
     <>
@@ -92,12 +124,12 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
           <motion.div
             className={`w-2 h-2 rounded-full ${statusColor}`}
             animate={{
-              scale: data.status === 'running' ? [1, 1.3, 1] : 1,
-              opacity: data.status === 'running' ? [1, 0.5, 1] : 1
+              scale: normalizedStatus === 'running' ? [1, 1.3, 1] : 1,
+              opacity: normalizedStatus === 'running' ? [1, 0.5, 1] : 1,
             }}
             transition={{
               duration: 1,
-              repeat: data.status === 'running' ? Infinity : 0
+              repeat: normalizedStatus === 'running' ? Infinity : 0,
             }}
           />
         </div>
@@ -116,22 +148,27 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
 
         {/* Progress bar */}
         <motion.div
-          className={`mt-3 h-1 bg-gradient-to-r ${colorConfig.bg.replace('/20', '')} to-transparent rounded-full overflow-hidden`}
+          className={`mt-3 h-1 bg-gradient-to-r ${progressGradient} to-transparent rounded-full overflow-hidden`}
           initial={{ width: 0 }}
           animate={{ width: '100%' }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <motion.div
-            className={`h-full bg-gradient-to-r ${colorConfig.bg.replace('/20', '')} ${colorConfig.text.replace('text-', 'from-')}`}
-            animate={{
-              x: ['-100%', '100%']
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'linear'
-            }}
-          />
+          {shouldAnimate ? (
+            // Infinite animation only when selected/running to avoid editor slowdowns.
+            <motion.div
+              className={`h-full bg-gradient-to-r ${progressGradient} ${colorConfig.text.replace('text-', 'from-')}`}
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'linear',
+              }}
+            />
+          ) : (
+            <div
+              className={`h-full bg-gradient-to-r ${progressGradient} ${colorConfig.text.replace('text-', 'from-')}`}
+            />
+          )}
         </motion.div>
 
         {/* Sparkle effect on hover */}

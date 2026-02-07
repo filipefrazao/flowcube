@@ -105,6 +105,7 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
             <button
               onClick={() => toggleCategory(category.id)}
               className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              aria-label={`Toggle ${category.label} category`}
             >
               {expandedCategories.has(category.id) ? (
                 <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -114,18 +115,26 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
               <span
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: category.color }}
+                aria-hidden="true"
               />
-              <span className="flex-1 text-left text-sm font-medium text-gray-700">
+              <span 
+                className="flex-1 text-left text-sm font-medium text-gray-700"
+                id={`category-${category.id}`}
+              >
                 {category.label}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400" aria-label={`${category.nodes.length} items`}>
                 {category.nodes.length}
               </span>
             </button>
 
             {/* Category Nodes */}
             {expandedCategories.has(category.id) && (
-              <div className="ml-4 mt-1 space-y-1">
+              <div 
+                className="ml-4 mt-1 space-y-1"
+                role="list"
+                aria-labelledby={`category-${category.id}`}
+              >
                 {category.nodes.map((node) => (
                   <div
                     key={node.type}
@@ -133,16 +142,19 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
                     onDragStart={(e) => onDragStart(e, node.type, node.label)}
                     onClick={() => handleAddNode(node.type, node.label)}
                     className="group flex items-center gap-2 px-3 py-2 rounded-lg cursor-grab hover:bg-gray-100 transition-colors active:cursor-grabbing"
+                    role="listitem"
+                    aria-label={`${node.label} - ${category.label} element`}
                   >
-                    <Grip className="w-3 h-3 text-gray-300 group-hover:text-gray-400" />
+                    <Grip className="w-3 h-3 text-gray-300 group-hover:text-gray-400" aria-hidden="true" />
                     <span
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: category.color }}
+                      aria-hidden="true"
                     />
                     <span className="flex-1 text-sm text-gray-600 group-hover:text-gray-900">
                       {node.label}
                     </span>
-                    <Plus className="w-4 h-4 text-gray-300 group-hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Plus className="w-4 h-4 text-gray-300 group-hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </div>
                 ))}
               </div>
@@ -152,7 +164,7 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
 
         {/* No results */}
         {filteredCategories.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm">
+          <div className="text-center py-8 text-gray-500 text-sm" role="status">
             No elements found for "{searchQuery}"
           </div>
         )}
@@ -161,7 +173,7 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4" aria-hidden="true" />
           Create Custom Element
         </button>
       </div>

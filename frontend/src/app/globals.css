@@ -5,8 +5,10 @@
 @import "../styles/design-system.css";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+/* Default (dark) fallback */
 :root {
   --background: #192838;
+  --background-secondary: #0f1a24;
   --surface: #152332;
   --surface-hover: #1e3044;
   --primary: #F59E0B;
@@ -15,6 +17,37 @@
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
+  color-scheme: dark;
+}
+
+/* Dark theme (explicit class from next-themes) */
+html.dark {
+  --background: #192838;
+  --background-secondary: #0f1a24;
+  --surface: #152332;
+  --surface-hover: #1e3044;
+  --primary: #F59E0B;
+  --primary-hover: #D97706;
+  --border: #2a4058;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  color-scheme: dark;
+}
+
+/* Light theme */
+html.light {
+  --background: #f8fafc;
+  --background-secondary: #f1f5f9;
+  --surface: #ffffff;
+  --surface-hover: #f8fafc;
+  --primary: #F59E0B;
+  --primary-hover: #D97706;
+  --border: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  color-scheme: light;
 }
 
 * {

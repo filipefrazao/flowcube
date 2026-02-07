@@ -31,7 +31,7 @@ export function useAchievements() {
     try {
       setLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      const response = await axios.get(`${API_URL}/api/v1/gamification/achievements/`, {
+      const response = await axios.get(`${API_URL}/api/v1/achievements/`, {
         headers: { Authorization: token ? `Token ${token}` : '' },
       });
       setAchievements(response.data);

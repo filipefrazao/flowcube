@@ -65,7 +65,8 @@ interface AINodeProps {
 const AINode = ({ data, selected }: AINodeProps) => {
   const config = data.config || {};
   const provider = config.provider || data.type as keyof typeof providerConfig || "openai";
-  const providerInfo = providerConfig[provider] || providerConfig.openai;
+  const defaultProviderInfo = { icon: Bot, name: 'AI', borderColor: 'border-blue-500', bgColor: 'bg-blue-50', textColor: 'text-blue-600', models: ['gpt-4'] };
+  const providerInfo = providerConfig[provider] || providerConfig.openai || defaultProviderInfo;
   const Icon = providerInfo.icon;
   const model = config.model || providerInfo.models[0];
   const temperature = config.temperature ?? 0.7;
