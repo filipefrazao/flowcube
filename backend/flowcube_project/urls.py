@@ -44,10 +44,14 @@ urlpatterns = [
     # Plugin app URLs (backward compatible)
     path("api/v1/achievements/", include("achievements.urls")),
     path("api/v1/funnelcube/", include("funnelcube.urls")),
+    path("api/v1/socialcube/", include("socialcube.urls")),
+    path("api/v1/pagecube/", include("pagecube.urls")),
     path("api/v1/", include("workflows.urls")),
     path("api/v1/billing/", include("billing.urls")),
     path("api/v1/ai/", include("ai.urls")),
     path("api/flowcube/", include("flowcube.urls")),
     path("api/telegram/", include("telegram_integration.urls")),
     path("api/v1/chatcube/", include("chatcube.urls")),
+    # PageCube public page serving
+    path("p/<slug:slug>/", include(("pagecube.public_urls", "pagecube"), namespace="pagecube-public")),
 ]

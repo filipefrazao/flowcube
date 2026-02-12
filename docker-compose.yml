@@ -36,6 +36,9 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-backend
     restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
     environment:
       - DEBUG=${DJANGO_DEBUG}
       - SECRET_KEY=${DJANGO_SECRET_KEY}
@@ -83,7 +86,9 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-celery
     restart: unless-stopped
-    command: celery -A flowcube_project worker -l info --concurrency=2 -Q default,webhooks,http,ai,whatsapp,workflows,telegram,analytics
+    command: celery -A flowcube_project worker -l info --concurrency=2 -Q default,webhooks,http,ai,whatsapp,workflows,telegram,analytics,social,pages
+    volumes:
+      - ./backend:/app
     environment:
       - DEBUG=${DJANGO_DEBUG}
       - SECRET_KEY=${DJANGO_SECRET_KEY}
@@ -129,6 +134,8 @@ services:
     container_name: flowcube-celery-beat
     restart: unless-stopped
     command: celery -A flowcube_project beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./backend:/app
     environment:
       - DEBUG=${DJANGO_DEBUG}
       - SECRET_KEY=${DJANGO_SECRET_KEY}
@@ -168,8 +175,13 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-frontend
     restart: unless-stopped
+    command: sh -c "rm -rf /app/.next && npx next dev -p 3000 -H 0.0.0.0"
+    user: root
+    volumes:
+      - ./frontend:/app
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NODE_ENV=development
     depends_on:
       - flowcube-backend
     networks:
@@ -190,8 +202,12 @@ services:
       dockerfile: Dockerfile
     container_name: chatcube-engine
     restart: unless-stopped
+    command: npx tsx watch src/index.ts
+    volumes:
+      - ./chatcube-engine:/app
+      - chatcube-sessions:/app/sessions
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3100
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@flowcube-postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@flowcube-redis:6379/3
@@ -204,8 +220,6 @@ services:
         condition: service_healthy
     networks:
       - flowcube-network
-    volumes:
-      - chatcube-sessions:/app/sessions
     deploy:
       resources:
         limits:

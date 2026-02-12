@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     # Plugin framework (must load before plugins)
     'flowcube_core',
     'funnelcube',
+    'socialcube',
+    'pagecube',
     # Core apps (not yet extracted as plugins)
     'flowcube',
     'workflows',
@@ -263,3 +265,11 @@ CSP_CONNECT_SRC = ("'self'",)
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 NUM_PROXIES = int(_env('NUM_PROXIES', '1'))
+
+# SocialCube settings
+SOCIALCUBE_META_APP_ID = _env("SOCIALCUBE_META_APP_ID", "656846287422494")
+SOCIALCUBE_META_APP_SECRET = _env("SOCIALCUBE_META_APP_SECRET", "")
+SOCIALCUBE_META_REDIRECT_URI = _env(
+    "SOCIALCUBE_META_REDIRECT_URI",
+    "https://flowcube.frzgroup.com.br/socialcube/callback"
+)

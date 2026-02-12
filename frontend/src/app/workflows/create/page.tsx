@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -41,6 +41,12 @@ export default function NewWorkflowPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const {
     register,
@@ -233,7 +239,7 @@ export default function NewWorkflowPage() {
                     variant="gradient"
                     size="md"
                     icon={loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    disabled={loading}
+                    disabled={loading || !hydrated}
                     glow
                   >
                     {loading ? "Creating..." : "Create Workflow"}

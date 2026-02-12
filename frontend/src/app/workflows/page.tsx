@@ -25,7 +25,6 @@ import { cn } from "@/lib/utils";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 
 type ViewMode = "grid" | "list";
-type Tab = "workflows" | "credentials" | "executions" | "data";
 
 export default function WorkflowsPage() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -34,7 +33,6 @@ export default function WorkflowsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"updated" | "name" | "created">("updated");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [activeTab, setActiveTab] = useState<Tab>("workflows");
 
   useEffect(() => {
     loadWorkflows();
@@ -89,13 +87,6 @@ export default function WorkflowsPage() {
       }
     });
 
-  const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: "workflows", label: "Workflows", count: workflows.length },
-    { id: "credentials", label: "Credentials" },
-    { id: "executions", label: "Executions" },
-    { id: "data", label: "Data tables" },
-  ];
-
   if (loading) {
     return (
       <div className="flex h-screen bg-background">
@@ -117,29 +108,11 @@ export default function WorkflowsPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="h-14 border-b border-border bg-background flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            {/* Tabs */}
-            <nav className="flex items-center gap-1">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                    activeTab === tab.id
-                      ? "text-primary bg-primary-muted"
-                      : "text-text-secondary hover:text-text-primary hover:bg-surface"
-                  )}
-                >
-                  {tab.label}
-                  {tab.count !== undefined && (
-                    <span className="ml-2 px-1.5 py-0.5 text-xs bg-surface rounded-full">
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </nav>
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-text-primary">Workflows</h1>
+            <span className="px-2 py-0.5 text-xs bg-surface rounded-full text-text-secondary">
+              {workflows.length}
+            </span>
           </div>
 
           <div className="flex items-center gap-3">

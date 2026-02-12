@@ -1,22 +1,33 @@
+const CANONICAL_TOKEN_KEY = "authToken";
+const LEGACY_TOKEN_KEYS = ["auth_token", "token"] as const;
+
 export function getAuthToken(): string | null {
-  if (typeof window === undefined) return null;
+  if (typeof window === "undefined") return null;
 
-  const token =
-    localStorage.getItem(authToken) ||
-    localStorage.getItem(auth_token) ||
-    localStorage.getItem(token);
+  const canonical = localStorage.getItem(CANONICAL_TOKEN_KEY);
+  if (canonical) return canonical;
 
-  // Migrate legacy keys to the canonical one.
-  if (token && !localStorage.getItem(authToken)) {
-    localStorage.setItem(authToken, token);
+  // Backward-compat: accept legacy keys and migrate to canonical.
+  for (const key of LEGACY_TOKEN_KEYS) {
+    const v = localStorage.getItem(key);
+    if (v) {
+      localStorage.setItem(CANONICAL_TOKEN_KEY, v);
+      return v;
+    }
   }
 
-  return token;
+  return null;
+}
+
+export function setAuthToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(CANONICAL_TOKEN_KEY, token);
 }
 
 export function clearAuthToken(): void {
-  if (typeof window === undefined) return;
-  localStorage.removeItem(authToken);
-  localStorage.removeItem(auth_token);
-  localStorage.removeItem(token);
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(CANONICAL_TOKEN_KEY);
+  for (const key of LEGACY_TOKEN_KEYS) {
+    localStorage.removeItem(key);
+  }
 }

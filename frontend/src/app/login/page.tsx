@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { authApi } from "@/lib/api";
@@ -14,6 +14,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
   const [focused, setFocused] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +32,23 @@ export default function LoginPage() {
       localStorage.setItem("authToken", response.token);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.non_field_errors?.[0] || "Invalid credentials. Please try again.");
+      const statusCode = err?.response?.status;
+      const data = err?.response?.data;
+
+      if (!err?.response) {
+        setError("Network error. Please try again.");
+      } else if (statusCode === 429 || data?.error_code === "rate_limit_exceeded") {
+        const retryAfter = data?.retry_after;
+        const retryMsg =
+          typeof retryAfter === "number" ? ` Please wait ${retryAfter}s and try again.` : "";
+        setError(data?.detail || `Too many login attempts.${retryMsg}`);
+      } else {
+        setError(
+          data?.non_field_errors?.[0] ||
+            data?.detail ||
+            "Invalid credentials. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -168,7 +190,7 @@ export default function LoginPage() {
                 icon={<ArrowRight className="w-5 h-5" />}
                 iconPosition="right"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || !hydrated}
               >
                 {loading ? "Signing in..." : "Sign in to FlowCube"}
               </PremiumButton>

@@ -21,7 +21,7 @@ export function useAchievementUnlock() {
 
   const checkForUnlocks = useCallback(async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
       const response = await axios.get(`${API_URL}/api/v1/achievements/recent-unlocks/`, {
         headers: { Authorization: token ? `Token ${token}` : '' },
       });

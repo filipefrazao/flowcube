@@ -49,7 +49,7 @@ export function AIChat({ context, placeholder = "Ask about this error..." }: AIC
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Token ${localStorage.getItem('token')}`
+          'Authorization': `Token ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({
           message: input,

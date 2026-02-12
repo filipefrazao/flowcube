@@ -40,7 +40,7 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Token ${localStorage.getItem('token')}`
+          'Authorization': `Token ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({ execution_id: execution.id })
       });
@@ -70,7 +70,7 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Token ${localStorage.getItem('token')}`
+          'Authorization': `Token ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({
           node_id: execution.failed_node_id,

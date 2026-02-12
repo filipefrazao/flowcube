@@ -30,7 +30,7 @@ export function useAchievements() {
   const fetchAchievements = useCallback(async () => {
     try {
       setLoading(true);
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
       const response = await axios.get(`${API_URL}/api/v1/achievements/`, {
         headers: { Authorization: token ? `Token ${token}` : '' },
       });
