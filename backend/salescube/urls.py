@@ -9,6 +9,7 @@ from .views import (
     PipelineStageViewSet,
     PipelineViewSet,
     ProductViewSet,
+    SaleLineItemViewSet,
     SaleViewSet,
     TaskViewSet,
 )
@@ -21,6 +22,7 @@ router.register("tasks", TaskViewSet)
 router.register("categories", CategoryViewSet)
 router.register("products", ProductViewSet)
 router.register("sales", SaleViewSet)
+router.register("sale-line-items", SaleLineItemViewSet)
 router.register("financial-records", FinancialRecordViewSet)
 
 urlpatterns = [

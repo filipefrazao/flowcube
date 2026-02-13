@@ -73,6 +73,7 @@ const sections: SidebarSection[] = [
     label: "SalesCube",
     icon: Kanban,
     children: [
+      { label: "Dashboard", href: "/salescube/dashboard" },
       { label: "Quadro", href: "/salescube" },
       { label: "Leads", href: "/salescube/leads" },
       { label: "Tarefas", href: "/salescube/tasks" },

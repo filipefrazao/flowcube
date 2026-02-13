@@ -86,6 +86,53 @@ class Lead(models.Model):
         return f"{self.name} ({self.stage})"
 
 
+class LeadNote(models.Model):
+    NOTE_TYPE_CHOICES = [
+        ("note", "Nota"),
+        ("call", "Ligacao"),
+        ("email", "Email"),
+        ("meeting", "Reuniao"),
+        ("task", "Tarefa"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name="lead_notes")
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="salescube_notes"
+    )
+    content = models.TextField()
+    note_type = models.CharField(
+        max_length=20, choices=NOTE_TYPE_CHOICES, default="note"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.note_type}: {self.content[:50]}"
+
+
+class LeadActivity(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lead = models.ForeignKey(
+        Lead, on_delete=models.CASCADE, related_name="activities"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="salescube_activities"
+    )
+    action = models.CharField(max_length=100)
+    old_value = models.CharField(max_length=500, blank=True, default="")
+    new_value = models.CharField(max_length=500, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name_plural = "lead activities"
+
+    def __str__(self):
+        return f"{self.action} - {self.lead.name}"
+
+
 class Task(models.Model):
     PRIORITY_CHOICES = [
         ("low", "Low"),
@@ -212,6 +259,29 @@ class Sale(models.Model):
 
     def __str__(self):
         return f"Sale {self.id} - R${self.total_value}"
+
+
+class SaleLineItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="line_items")
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, related_name="sale_line_items"
+    )
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        self.subtotal = self.unit_price * self.quantity
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        product_name = self.product.name if self.product else "N/A"
+        return f"{product_name} x{self.quantity} = R${self.subtotal}"
 
 
 class FinancialRecord(models.Model):

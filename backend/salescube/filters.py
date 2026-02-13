@@ -6,10 +6,11 @@ from .models import FinancialRecord, Lead, Product, Sale, Task
 class LeadFilter(django_filters.FilterSet):
     score_min = django_filters.NumberFilter(field_name="score", lookup_expr="gte")
     score_max = django_filters.NumberFilter(field_name="score", lookup_expr="lte")
+    pipeline = django_filters.UUIDFilter(field_name="stage__pipeline")
 
     class Meta:
         model = Lead
-        fields = ["stage", "assigned_to", "source", "score_min", "score_max"]
+        fields = ["stage", "assigned_to", "source", "score_min", "score_max", "pipeline"]
 
 
 class TaskFilter(django_filters.FilterSet):

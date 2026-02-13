@@ -49,6 +49,7 @@ export interface PipelineStage {
   color: string;
   probability: number;
   leads_count?: number;
+  total_value?: number;
 }
 
 export interface Lead {
@@ -59,6 +60,7 @@ export interface Lead {
   company: string;
   stage: string;
   stage_name?: string;
+  stage_color?: string;
   pipeline?: string;
   assigned_to: string | null;
   assigned_to_name?: string;
@@ -66,8 +68,37 @@ export interface Lead {
   source: string;
   notes: string;
   value: string;
+  lost_reason?: string;
   created_at: string;
   updated_at?: string;
+}
+
+export interface LeadDetail extends Lead {
+  lead_notes: LeadNote[];
+  activities: LeadActivityItem[];
+  tasks: SalesTask[];
+  sales: Sale[];
+}
+
+export interface LeadNote {
+  id: string;
+  lead: string;
+  user: string | null;
+  user_name: string | null;
+  content: string;
+  note_type: "note" | "call" | "email" | "meeting" | "task";
+  created_at: string;
+}
+
+export interface LeadActivityItem {
+  id: string;
+  lead: string;
+  user: string | null;
+  user_name: string | null;
+  action: string;
+  old_value: string;
+  new_value: string;
+  created_at: string;
 }
 
 export interface SalesTask {
@@ -82,6 +113,7 @@ export interface SalesTask {
   status: string;
   priority: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Product {
@@ -106,11 +138,22 @@ export interface Category {
   children?: Category[];
 }
 
+export interface SaleLineItem {
+  id: string;
+  sale: string;
+  product: string | null;
+  product_name?: string;
+  quantity: number;
+  unit_price: string;
+  subtotal: string;
+}
+
 export interface Sale {
   id: string;
   lead: string | null;
   lead_name?: string;
-  products?: Array<{ product: string; product_name: string; quantity: number; unit_price: string }>;
+  products?: string[];
+  line_items?: SaleLineItem[];
   total_value: string;
   stage: string;
   notes: string;
@@ -118,11 +161,22 @@ export interface Sale {
   created_at: string;
 }
 
+export interface LeadStats {
+  total_leads: number;
+  total_sales: number;
+  total_revenue: number;
+  leads_per_stage: Array<{ name: string; color: string; count: number; total_value: number }>;
+  leads_per_day: Array<{ date: string; count: number }>;
+  top_assignees: Array<{ name: string; count: number; total_value: number }>;
+}
+
 export interface FinancialOverview {
+  year: number;
   total_revenue: number;
   total_expenses: number;
+  total_refunds: number;
   net: number;
-  monthly_breakdown: Array<{ month: string; revenue: number; expenses: number }>;
+  monthly_breakdown: Record<string, { revenue: number; expense: number; refund: number }>;
 }
 
 // ============================================================================
@@ -158,11 +212,16 @@ export const stageApi = {
 
 export const leadApi = {
   list: (params?: Record<string, string>) => apiClient.get("/salescube/leads/", { params }),
-  get: (id: string) => apiClient.get(`/salescube/leads/${id}/`),
+  get: (id: string) => apiClient.get<LeadDetail>(`/salescube/leads/${id}/`),
   create: (data: Partial<Lead>) => apiClient.post("/salescube/leads/", data),
   update: (id: string, data: Partial<Lead>) => apiClient.patch(`/salescube/leads/${id}/`, data),
   delete: (id: string) => apiClient.delete(`/salescube/leads/${id}/`),
   move: (id: string, stageId: string) => apiClient.post(`/salescube/leads/${id}/move/`, { stage_id: stageId }),
+  bulkMove: (leadIds: string[], stageId: string) => apiClient.post("/salescube/leads/bulk-move/", { lead_ids: leadIds, stage_id: stageId }),
+  getNotes: (id: string) => apiClient.get<LeadNote[]>(`/salescube/leads/${id}/notes/`),
+  addNote: (id: string, data: { content: string; note_type: string }) => apiClient.post(`/salescube/leads/${id}/notes/`, data),
+  getActivities: (id: string) => apiClient.get<LeadActivityItem[]>(`/salescube/leads/${id}/activities/`),
+  getStats: (params?: Record<string, string>) => apiClient.get<LeadStats>("/salescube/leads/stats/", { params }),
 };
 
 // ============================================================================
@@ -211,6 +270,8 @@ export const saleApi = {
   create: (data: Partial<Sale>) => apiClient.post("/salescube/sales/", data),
   update: (id: string, data: Partial<Sale>) => apiClient.patch(`/salescube/sales/${id}/`, data),
   delete: (id: string) => apiClient.delete(`/salescube/sales/${id}/`),
+  addLineItem: (saleId: string, data: Partial<SaleLineItem>) => apiClient.post(`/salescube/sales/${saleId}/line-items/`, data),
+  getLineItems: (saleId: string) => apiClient.get<SaleLineItem[]>(`/salescube/sales/${saleId}/line-items-list/`),
 };
 
 // ============================================================================
@@ -218,5 +279,5 @@ export const saleApi = {
 // ============================================================================
 
 export const financialApi = {
-  overview: (params?: Record<string, string>) => apiClient.get("/salescube/financial-overview/", { params }),
+  overview: (params?: Record<string, string>) => apiClient.get<FinancialOverview>("/salescube/financial-overview/", { params }),
 };
