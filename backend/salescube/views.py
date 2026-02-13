@@ -1,7 +1,8 @@
 from datetime import timedelta
+from decimal import Decimal
 
-from django.db.models import Count, Sum, Q
-from django.db.models.functions import TruncMonth, TruncDate
+from django.db.models import Count, Sum, Q, Avg, F
+from django.db.models.functions import TruncMonth, TruncDate, Coalesce
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
@@ -23,11 +24,16 @@ from .models import (
     FinancialRecord,
     Lead,
     LeadActivity,
+    LeadComment,
     LeadNote,
+    LeadTag,
+    LeadTagAssignment,
+    Payment,
     Pipeline,
     PipelineStage,
     Product,
     Sale,
+    SaleAttachment,
     SaleLineItem,
     Task,
 )
@@ -35,12 +41,17 @@ from .serializers import (
     CategorySerializer,
     FinancialRecordSerializer,
     LeadActivitySerializer,
+    LeadCommentSerializer,
     LeadDetailSerializer,
     LeadNoteSerializer,
     LeadSerializer,
+    LeadTagAssignmentSerializer,
+    LeadTagSerializer,
+    PaymentSerializer,
     PipelineSerializer,
     PipelineStageSerializer,
     ProductSerializer,
+    SaleAttachmentSerializer,
     SaleLineItemSerializer,
     SaleSerializer,
     TaskSerializer,
@@ -66,7 +77,6 @@ class PipelineViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
-        # Add leads_count and total_value to each stage
         for stage_data in data.get("stages", []):
             stage_id = stage_data["id"]
             agg = Lead.objects.filter(stage_id=stage_id).aggregate(
@@ -75,6 +85,89 @@ class PipelineViewSet(viewsets.ModelViewSet):
             stage_data["leads_count"] = agg["count"] or 0
             stage_data["total_value"] = float(agg["total"] or 0)
         return Response(data)
+
+    @action(detail=True, methods=["get"], url_path="kanban")
+    def kanban(self, request, pk=None):
+        """
+        Kanban board view: returns stages with paginated leads for a pipeline.
+        Query params:
+          - page_size: leads per column (default 50)
+          - search: text search on lead name/email/phone
+          - stage: filter specific stage UUID
+        """
+        pipeline = self.get_object()
+        page_size = int(request.query_params.get("page_size", 50))
+        search = request.query_params.get("search", "")
+
+        stages = pipeline.stages.order_by("order")
+        columns = []
+
+        for stage in stages:
+            leads_qs = Lead.objects.filter(stage=stage).select_related(
+                "assigned_to"
+            ).order_by("-created_at")
+
+            if search:
+                leads_qs = leads_qs.filter(
+                    Q(name__icontains=search)
+                    | Q(email__icontains=search)
+                    | Q(phone__icontains=search)
+                )
+
+            # Per-stage pagination
+            page_param = request.query_params.get(f"stage_{stage.id}_page", "1")
+            try:
+                page_num = int(page_param)
+            except (ValueError, TypeError):
+                page_num = 1
+            offset = (page_num - 1) * page_size
+            total_leads = leads_qs.count()
+            total_pages = max(1, (total_leads + page_size - 1) // page_size)
+            page_leads = leads_qs[offset:offset + page_size]
+
+            agg = Lead.objects.filter(stage=stage).aggregate(
+                total_value=Sum("value")
+            )
+
+            lead_cards = []
+            for lead in page_leads:
+                assigned_name = None
+                if lead.assigned_to:
+                    full = lead.assigned_to.get_full_name()
+                    assigned_name = full if full else lead.assigned_to.username
+
+                lead_cards.append({
+                    "id": str(lead.id),
+                    "name": lead.name,
+                    "email": lead.email,
+                    "phone": lead.phone,
+                    "company": lead.company,
+                    "score": lead.score,
+                    "source": lead.source,
+                    "value": str(lead.value),
+                    "assigned_to": lead.assigned_to_id,
+                    "assigned_to_name": assigned_name,
+                    "created_at": lead.created_at.isoformat(),
+                })
+
+            columns.append({
+                "stage_id": str(stage.id),
+                "stage_name": stage.name,
+                "color": stage.color,
+                "order": stage.order,
+                "probability": stage.probability,
+                "count": total_leads,
+                "total_value": str(agg["total_value"] or 0),
+                "total_pages": total_pages,
+                "current_page": page_num,
+                "leads": lead_cards,
+            })
+
+        return Response({
+            "pipeline_id": str(pipeline.id),
+            "pipeline_name": pipeline.name,
+            "columns": columns,
+        })
 
 
 class PipelineStageViewSet(viewsets.ModelViewSet):
@@ -110,7 +203,6 @@ class LeadViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset()
         if self.action == "retrieve":
             qs = qs.prefetch_related("lead_notes", "activities", "tasks", "sales")
-        # Support filtering by pipeline
         pipeline = self.request.query_params.get("pipeline")
         if pipeline:
             qs = qs.filter(stage__pipeline_id=pipeline)
@@ -135,7 +227,6 @@ class LeadViewSet(viewsets.ModelViewSet):
         old_stage = lead.stage
         lead.stage = stage
         lead.save(update_fields=["stage", "updated_at"])
-        # Log activity
         LeadActivity.objects.create(
             lead=lead,
             user=request.user,
@@ -165,6 +256,43 @@ class LeadViewSet(viewsets.ModelViewSet):
         count = leads.update(stage=stage)
         return Response({"moved": count})
 
+    @action(detail=False, methods=["post"], url_path="bulk-assign")
+    def bulk_assign(self, request):
+        lead_ids = request.data.get("lead_ids", [])
+        user_id = request.data.get("user_id")
+        if not lead_ids:
+            return Response(
+                {"error": "lead_ids is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = None
+        if user_id:
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+        leads = Lead.objects.filter(pk__in=lead_ids)
+        count = leads.update(assigned_to=user)
+        return Response({"assigned": count})
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request):
+        lead_ids = request.data.get("lead_ids", [])
+        if not lead_ids:
+            return Response(
+                {"error": "lead_ids is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        leads = Lead.objects.filter(pk__in=lead_ids)
+        count = leads.count()
+        leads.delete()
+        return Response({"deleted": count})
+
     @action(detail=True, methods=["get", "post"], url_path="notes")
     def notes(self, request, pk=None):
         lead = self.get_object()
@@ -176,7 +304,6 @@ class LeadViewSet(viewsets.ModelViewSet):
             serializer = LeadNoteSerializer(data={**request.data, "lead": lead.id})
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user, lead=lead)
-            # Log activity
             LeadActivity.objects.create(
                 lead=lead,
                 user=request.user,
@@ -192,12 +319,49 @@ class LeadViewSet(viewsets.ModelViewSet):
         serializer = LeadActivitySerializer(activities, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["get", "post"], url_path="comments")
+    def comments(self, request, pk=None):
+        lead = self.get_object()
+        if request.method == "GET":
+            comments = LeadComment.objects.filter(lead=lead).select_related("author")
+            serializer = LeadCommentSerializer(comments, many=True)
+            return Response(serializer.data)
+        else:
+            serializer = LeadCommentSerializer(data={**request.data, "lead": lead.id})
+            serializer.is_valid(raise_exception=True)
+            serializer.save(author=request.user, lead=lead)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["get", "post", "delete"], url_path="tags")
+    def tags(self, request, pk=None):
+        lead = self.get_object()
+        if request.method == "GET":
+            assignments = LeadTagAssignment.objects.filter(lead=lead).select_related("tag")
+            serializer = LeadTagAssignmentSerializer(assignments, many=True)
+            return Response(serializer.data)
+        elif request.method == "POST":
+            tag_id = request.data.get("tag_id")
+            if not tag_id:
+                return Response({"error": "tag_id required"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                tag = LeadTag.objects.get(pk=tag_id)
+            except LeadTag.DoesNotExist:
+                return Response({"error": "Tag not found"}, status=status.HTTP_404_NOT_FOUND)
+            assignment, created = LeadTagAssignment.objects.get_or_create(lead=lead, tag=tag)
+            return Response(LeadTagAssignmentSerializer(assignment).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        else:
+            tag_id = request.data.get("tag_id")
+            if tag_id:
+                LeadTagAssignment.objects.filter(lead=lead, tag_id=tag_id).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=False, methods=["get"], url_path="stats")
     def stats(self, request):
         now = timezone.now()
         days = int(request.query_params.get("days", 30))
         start_date = request.query_params.get("start_date")
         end_date = request.query_params.get("end_date")
+        pipeline_id = request.query_params.get("pipeline")
 
         if start_date:
             from datetime import datetime
@@ -216,18 +380,28 @@ class LeadViewSet(viewsets.ModelViewSet):
         leads_qs = Lead.objects.filter(created_at__gte=start, created_at__lte=end)
         sales_qs = Sale.objects.filter(created_at__gte=start, created_at__lte=end)
 
+        if pipeline_id:
+            leads_qs = leads_qs.filter(stage__pipeline_id=pipeline_id)
+            sales_qs = sales_qs.filter(lead__stage__pipeline_id=pipeline_id)
+
         total_leads = leads_qs.count()
         total_sales = sales_qs.count()
         total_revenue = sales_qs.filter(stage="won").aggregate(
             total=Sum("total_value")
         )["total"] or 0
 
-        # Leads per stage
+        # Leads per stage grouped by pipeline
+        stage_qs = Lead.objects.filter(stage__isnull=False)
+        if pipeline_id:
+            stage_qs = stage_qs.filter(stage__pipeline_id=pipeline_id)
         leads_per_stage = list(
-            Lead.objects.filter(stage__isnull=False)
-            .values("stage__name", "stage__color", "stage__order")
+            stage_qs
+            .values(
+                "stage__name", "stage__color", "stage__order",
+                "stage__pipeline__name", "stage__pipeline_id"
+            )
             .annotate(count=Count("id"), total_value=Sum("value"))
-            .order_by("stage__order")
+            .order_by("stage__pipeline__name", "stage__order")
         )
 
         # Leads per day
@@ -239,23 +413,72 @@ class LeadViewSet(viewsets.ModelViewSet):
         )
 
         # Top assignees
+        assignees_qs = Lead.objects.filter(assigned_to__isnull=False)
+        if pipeline_id:
+            assignees_qs = assignees_qs.filter(stage__pipeline_id=pipeline_id)
         top_assignees = list(
-            Lead.objects.filter(assigned_to__isnull=False)
-            .values("assigned_to__username")
+            assignees_qs
+            .values("assigned_to__username", "assigned_to__first_name", "assigned_to__last_name")
             .annotate(count=Count("id"), total_value=Sum("value"))
             .order_by("-count")[:10]
         )
+
+        # Leads per source
+        source_qs = leads_qs if pipeline_id else Lead.objects.all()
+        if pipeline_id:
+            source_qs = source_qs.filter(stage__pipeline_id=pipeline_id)
+        leads_per_source = list(
+            source_qs
+            .values("source")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+
+        # Pipeline summary
+        pipeline_summary = list(
+            Lead.objects.filter(stage__isnull=False)
+            .values("stage__pipeline__name", "stage__pipeline_id")
+            .annotate(
+                count=Count("id"),
+                total_value=Sum("value"),
+            )
+            .order_by("-count")
+        )
+
+        # Sales pipeline stages
+        sales_by_stage = list(
+            Sale.objects.values("stage")
+            .annotate(count=Count("id"), total=Sum("total_value"))
+            .order_by("stage")
+        )
+
+        # Conversion rate
+        base_qs = leads_qs if pipeline_id else Lead.objects.all()
+        converted_count = base_qs.filter(
+            stage__name__in=["Convertido", "Finalizado"]
+        ).count()
+        all_leads_count = base_qs.count()
+        conversion_rate = (converted_count / all_leads_count * 100) if all_leads_count > 0 else 0
+
+        # Average deal size
+        avg_deal = sales_qs.filter(stage="won").aggregate(
+            avg=Avg("total_value")
+        )["avg"] or 0
 
         return Response({
             "total_leads": total_leads,
             "total_sales": total_sales,
             "total_revenue": float(total_revenue),
+            "conversion_rate": round(conversion_rate, 1),
+            "avg_deal_size": float(avg_deal),
             "leads_per_stage": [
                 {
                     "name": s["stage__name"],
                     "color": s["stage__color"],
                     "count": s["count"],
                     "total_value": float(s["total_value"] or 0),
+                    "pipeline": s["stage__pipeline__name"],
+                    "pipeline_id": str(s["stage__pipeline_id"]),
                 }
                 for s in leads_per_stage
             ],
@@ -268,11 +491,35 @@ class LeadViewSet(viewsets.ModelViewSet):
             ],
             "top_assignees": [
                 {
-                    "name": a["assigned_to__username"],
+                    "name": a.get("assigned_to__first_name", "") + " " + a.get("assigned_to__last_name", "") if a.get("assigned_to__first_name") else a["assigned_to__username"],
                     "count": a["count"],
                     "total_value": float(a["total_value"] or 0),
                 }
                 for a in top_assignees
+            ],
+            "leads_per_source": [
+                {
+                    "source": s["source"] or "unknown",
+                    "count": s["count"],
+                }
+                for s in leads_per_source
+            ],
+            "pipeline_summary": [
+                {
+                    "name": p["stage__pipeline__name"],
+                    "pipeline_id": str(p["stage__pipeline_id"]),
+                    "count": p["count"],
+                    "total_value": float(p["total_value"] or 0),
+                }
+                for p in pipeline_summary
+            ],
+            "sales_pipeline": [
+                {
+                    "stage": s["stage"],
+                    "count": s["count"],
+                    "total": float(s["total"] or 0),
+                }
+                for s in sales_by_stage
             ],
         })
 
@@ -325,7 +572,6 @@ class SaleViewSet(viewsets.ModelViewSet):
         serializer = SaleLineItemSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # Recalculate total
         total = sale.line_items.aggregate(total=Sum("subtotal"))["total"] or 0
         sale.total_value = total
         sale.save(update_fields=["total_value", "updated_at"])
@@ -338,6 +584,97 @@ class SaleViewSet(viewsets.ModelViewSet):
         serializer = SaleLineItemSerializer(items, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=["get"], url_path="kpis")
+    def kpis(self, request):
+        """
+        Sales KPIs: totals by stage, conversion rate, average ticket, top products, top sellers.
+        """
+        qs = self.filter_queryset(self.get_queryset())
+
+        total_sales = qs.count()
+        total_amount = float(qs.aggregate(
+            total=Coalesce(Sum("total_value"), Decimal("0"))
+        )["total"])
+        avg_ticket = float(qs.aggregate(
+            avg=Coalesce(Avg("total_value"), Decimal("0"))
+        )["avg"])
+
+        # By stage
+        by_stage = {}
+        for stage_code, stage_label in Sale.STAGE_CHOICES:
+            stage_qs = qs.filter(stage=stage_code)
+            count = stage_qs.count()
+            amount = float(stage_qs.aggregate(
+                total=Coalesce(Sum("total_value"), Decimal("0"))
+            )["total"])
+            stage_avg = float(stage_qs.aggregate(
+                avg=Coalesce(Avg("total_value"), Decimal("0"))
+            )["avg"])
+            by_stage[stage_code] = {
+                "label": stage_label,
+                "count": count,
+                "total_amount": amount,
+                "average_ticket": stage_avg,
+                "percentage": round((count / total_sales * 100), 2) if total_sales > 0 else 0,
+                "amount_percentage": round((amount / total_amount * 100), 2) if total_amount > 0 else 0,
+            }
+
+        # Conversion rates
+        won_count = by_stage.get("won", {}).get("count", 0)
+        lost_count = by_stage.get("lost", {}).get("count", 0)
+        concluded = won_count + lost_count
+        conversion_rate = round((won_count / concluded * 100), 2) if concluded > 0 else 0
+        loss_rate = round((lost_count / concluded * 100), 2) if concluded > 0 else 0
+
+        # Top products
+        top_products = list(
+            SaleLineItem.objects.filter(sale__in=qs, product__isnull=False)
+            .values("product__name")
+            .annotate(
+                total_quantity=Sum("quantity"),
+                total_revenue=Sum("subtotal"),
+            )
+            .order_by("-total_revenue")[:10]
+        )
+
+        # Top sellers
+        top_sellers = list(
+            qs.filter(created_by__isnull=False)
+            .values("created_by__username")
+            .annotate(
+                count=Count("id"),
+                total_amount=Sum("total_value"),
+            )
+            .order_by("-total_amount")[:10]
+        )
+
+        return Response({
+            "summary": {
+                "total_sales": total_sales,
+                "total_amount": total_amount,
+                "average_ticket": avg_ticket,
+                "conversion_rate": conversion_rate,
+                "loss_rate": loss_rate,
+            },
+            "by_stage": by_stage,
+            "top_products": [
+                {
+                    "name": p["product__name"],
+                    "quantity": p["total_quantity"],
+                    "revenue": float(p["total_revenue"] or 0),
+                }
+                for p in top_products
+            ],
+            "top_sellers": [
+                {
+                    "name": s["created_by__username"],
+                    "count": s["count"],
+                    "total_amount": float(s["total_amount"] or 0),
+                }
+                for s in top_sellers
+            ],
+        })
+
 
 class SaleLineItemViewSet(viewsets.ModelViewSet):
     queryset = SaleLineItem.objects.select_related("product", "sale")
@@ -349,7 +686,6 @@ class SaleLineItemViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         sale = instance.sale
         instance.delete()
-        # Recalculate total
         total = sale.line_items.aggregate(total=Sum("subtotal"))["total"] or 0
         sale.total_value = total
         sale.save(update_fields=["total_value", "updated_at"])
@@ -364,47 +700,212 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     ordering_fields = ["date", "value", "created_at"]
 
 
+
+class LeadCommentViewSet(viewsets.ModelViewSet):
+    queryset = LeadComment.objects.select_related("lead", "author")
+    serializer_class = LeadCommentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["lead"]
+    search_fields = ["text"]
+    ordering_fields = ["created_at"]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class LeadTagViewSet(viewsets.ModelViewSet):
+    queryset = LeadTag.objects.all()
+    serializer_class = LeadTagSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
+
+
+class LeadTagAssignmentViewSet(viewsets.ModelViewSet):
+    queryset = LeadTagAssignment.objects.select_related("lead", "tag")
+    serializer_class = LeadTagAssignmentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["lead", "tag"]
+
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.select_related("sale", "taker")
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ["sale", "method", "status"]
+    ordering_fields = ["amount", "due_date", "created_at"]
+
+    @action(detail=False, methods=["get"], url_path="summary")
+    def summary(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        total = float(qs.aggregate(total=Coalesce(Sum("amount"), Decimal("0")))["total"])
+        by_method = list(
+            qs.values("method").annotate(
+                count=Count("id"), total=Sum("amount")
+            ).order_by("-total")
+        )
+        by_status = list(
+            qs.values("status").annotate(
+                count=Count("id"), total=Sum("amount")
+            ).order_by("-total")
+        )
+        return Response({
+            "total_payments": qs.count(),
+            "total_amount": total,
+            "by_method": [
+                {"method": m["method"], "count": m["count"], "total": float(m["total"] or 0)}
+                for m in by_method
+            ],
+            "by_status": [
+                {"status": s["status"], "count": s["count"], "total": float(s["total"] or 0)}
+                for s in by_status
+            ],
+        })
+
+
+class SaleAttachmentViewSet(viewsets.ModelViewSet):
+    queryset = SaleAttachment.objects.select_related("sale", "uploaded_by")
+    serializer_class = SaleAttachmentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["sale"]
+
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
+
+
 class FinancialOverviewView(APIView):
+    """
+    Financial overview based on actual Sale data (won sales as revenue).
+    Falls back to FinancialRecord if records exist.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         now = timezone.now()
         year = int(request.query_params.get("year", now.year))
 
-        records = FinancialRecord.objects.filter(date__year=year)
+        # Check if FinancialRecord has data
+        fr_count = FinancialRecord.objects.filter(date__year=year).count()
 
-        total_revenue = (
-            records.filter(type="revenue").aggregate(total=Sum("value"))["total"] or 0
-        )
-        total_expenses = (
-            records.filter(type="expense").aggregate(total=Sum("value"))["total"] or 0
-        )
-        total_refunds = (
-            records.filter(type="refund").aggregate(total=Sum("value"))["total"] or 0
-        )
+        if fr_count > 0:
+            # Use FinancialRecord data
+            records = FinancialRecord.objects.filter(date__year=year)
+            total_revenue = float(
+                records.filter(type="revenue").aggregate(total=Sum("value"))["total"] or 0
+            )
+            total_expenses = float(
+                records.filter(type="expense").aggregate(total=Sum("value"))["total"] or 0
+            )
+            total_refunds = float(
+                records.filter(type="refund").aggregate(total=Sum("value"))["total"] or 0
+            )
+
+            monthly = (
+                records.annotate(month=TruncMonth("date"))
+                .values("month", "type")
+                .annotate(total=Sum("value"))
+                .order_by("month")
+            )
+            monthly_breakdown = {}
+            for row in monthly:
+                key = row["month"].strftime("%Y-%m")
+                if key not in monthly_breakdown:
+                    monthly_breakdown[key] = {"revenue": 0.0, "expense": 0.0, "refund": 0.0}
+                monthly_breakdown[key][row["type"]] = float(row["total"])
+        else:
+            # Derive from Sales data
+            sales_qs = Sale.objects.filter(created_at__year=year)
+
+            # Revenue = won sales
+            total_revenue = float(
+                sales_qs.filter(stage="won").aggregate(
+                    total=Coalesce(Sum("total_value"), Decimal("0"))
+                )["total"]
+            )
+            # Lost as "refund" equivalent
+            total_refunds = float(
+                sales_qs.filter(stage="lost").aggregate(
+                    total=Coalesce(Sum("total_value"), Decimal("0"))
+                )["total"]
+            )
+            total_expenses = 0.0
+
+            # Monthly breakdown from sales
+            monthly_won = (
+                sales_qs.filter(stage="won")
+                .annotate(month=TruncMonth("created_at"))
+                .values("month")
+                .annotate(total=Sum("total_value"))
+                .order_by("month")
+            )
+            monthly_lost = (
+                sales_qs.filter(stage="lost")
+                .annotate(month=TruncMonth("created_at"))
+                .values("month")
+                .annotate(total=Sum("total_value"))
+                .order_by("month")
+            )
+
+            monthly_breakdown = {}
+            for row in monthly_won:
+                key = row["month"].strftime("%Y-%m")
+                monthly_breakdown[key] = {
+                    "revenue": float(row["total"] or 0),
+                    "expense": 0.0,
+                    "refund": 0.0,
+                }
+            for row in monthly_lost:
+                key = row["month"].strftime("%Y-%m")
+                if key not in monthly_breakdown:
+                    monthly_breakdown[key] = {"revenue": 0.0, "expense": 0.0, "refund": 0.0}
+                monthly_breakdown[key]["refund"] = float(row["total"] or 0)
+
+            # Also add negotiation and proposal as "pipeline"
+            pipeline_value = float(
+                sales_qs.filter(stage__in=["negotiation", "proposal"]).aggregate(
+                    total=Coalesce(Sum("total_value"), Decimal("0"))
+                )["total"]
+            )
+
         net = total_revenue - total_expenses - total_refunds
 
-        monthly = (
-            records.annotate(month=TruncMonth("date"))
-            .values("month", "type")
-            .annotate(total=Sum("value"))
-            .order_by("month")
-        )
+        response_data = {
+            "year": year,
+            "total_revenue": total_revenue,
+            "total_expenses": total_expenses,
+            "total_refunds": total_refunds,
+            "net": net,
+            "monthly_breakdown": monthly_breakdown,
+        }
 
-        monthly_breakdown = {}
-        for row in monthly:
-            key = row["month"].strftime("%Y-%m")
-            if key not in monthly_breakdown:
-                monthly_breakdown[key] = {"revenue": 0, "expense": 0, "refund": 0}
-            monthly_breakdown[key][row["type"]] = float(row["total"])
-
-        return Response(
-            {
-                "year": year,
-                "total_revenue": float(total_revenue),
-                "total_expenses": float(total_expenses),
-                "total_refunds": float(total_refunds),
-                "net": float(net),
-                "monthly_breakdown": monthly_breakdown,
+        # Add sales pipeline summary
+        if fr_count == 0:
+            sales_qs = Sale.objects.filter(created_at__year=year)
+            response_data["sales_pipeline"] = {
+                "negotiation": {
+                    "count": sales_qs.filter(stage="negotiation").count(),
+                    "total": float(sales_qs.filter(stage="negotiation").aggregate(
+                        total=Coalesce(Sum("total_value"), Decimal("0"))
+                    )["total"]),
+                },
+                "proposal": {
+                    "count": sales_qs.filter(stage="proposal").count(),
+                    "total": float(sales_qs.filter(stage="proposal").aggregate(
+                        total=Coalesce(Sum("total_value"), Decimal("0"))
+                    )["total"]),
+                },
+                "won": {
+                    "count": sales_qs.filter(stage="won").count(),
+                    "total": total_revenue,
+                },
+                "lost": {
+                    "count": sales_qs.filter(stage="lost").count(),
+                    "total": total_refunds,
+                },
             }
-        )
+
+        return Response(response_data)

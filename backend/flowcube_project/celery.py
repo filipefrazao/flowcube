@@ -16,7 +16,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Auto-discover tasks in all installed apps
 app.autodiscover_tasks()
 # Explicitly include plugin apps that may not be found by autodiscovery
-app.autodiscover_tasks(['funnelcube'])
+app.autodiscover_tasks(['funnelcube', 'socialcube', 'pagecube'])
 
 # Celery configuration
 app.conf.update(
@@ -66,6 +66,20 @@ app.conf.update(
         'funnelcube.tasks.flush_event_buffer': {'queue': 'analytics'},
         'funnelcube.tasks.rotate_daily_salt': {'queue': 'analytics'},
         'funnelcube.tasks.generate_insights': {'queue': 'analytics'},
+        # SocialCube tasks
+        'socialcube.publish_post': {'queue': 'social'},
+        'socialcube.publish_scheduled': {'queue': 'social'},
+        'socialcube.pull_account_analytics': {'queue': 'social'},
+        'socialcube.pull_all_analytics': {'queue': 'social'},
+        'socialcube.process_leadgen_event': {'queue': 'social'},
+        'socialcube.distribute_lead': {'queue': 'social'},
+        'socialcube.poll_leads_fallback': {'queue': 'social'},
+        'socialcube.refresh_tokens': {'queue': 'social'},
+        'socialcube.track_single_competitor': {'queue': 'social'},
+        # PageCube tasks
+        'pagecube.tasks.render_page': {'queue': 'pages'},
+        'pagecube.tasks.distribute_submission': {'queue': 'pages'},
+        'pagecube.tasks.verify_domain': {'queue': 'pages'},
     },
 
     # Queues
@@ -78,6 +92,8 @@ app.conf.update(
         'workflows': {'routing_key': 'workflows'},
         'telegram': {'routing_key': 'telegram'},
         'analytics': {'routing_key': 'analytics'},
+        'social': {'routing_key': 'social'},
+        'pages': {'routing_key': 'pages'},
     },
 
     # Beat scheduler (for periodic tasks)

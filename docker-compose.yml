@@ -125,7 +125,7 @@ services:
           memory: 4G
         reservations:
           cpus: 0.5
-          memory: 2G
+          memory: 4G
 
   flowcube-celery-beat:
     build:
@@ -191,7 +191,7 @@ services:
       resources:
         limits:
           cpus: 1
-          memory: 2G
+          memory: 4G
         reservations:
           cpus: 0.25
           memory: 256M
@@ -220,7 +220,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: 2G
+          memory: 4G
         reservations:
           cpus: "0.25"
           memory: 256M

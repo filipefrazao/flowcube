@@ -165,9 +165,14 @@ export interface LeadStats {
   total_leads: number;
   total_sales: number;
   total_revenue: number;
-  leads_per_stage: Array<{ name: string; color: string; count: number; total_value: number }>;
+  conversion_rate: number;
+  avg_deal_size: number;
+  leads_per_stage: Array<{ name: string; color: string; count: number; total_value: number; pipeline: string; pipeline_id: string }>;
   leads_per_day: Array<{ date: string; count: number }>;
   top_assignees: Array<{ name: string; count: number; total_value: number }>;
+  leads_per_source: Array<{ source: string; count: number }>;
+  pipeline_summary: Array<{ name: string; pipeline_id: string; count: number; total_value: number }>;
+  sales_pipeline: Array<{ stage: string; count: number; total: number }>;
 }
 
 export interface FinancialOverview {
@@ -218,6 +223,8 @@ export const leadApi = {
   delete: (id: string) => apiClient.delete(`/salescube/leads/${id}/`),
   move: (id: string, stageId: string) => apiClient.post(`/salescube/leads/${id}/move/`, { stage_id: stageId }),
   bulkMove: (leadIds: string[], stageId: string) => apiClient.post("/salescube/leads/bulk-move/", { lead_ids: leadIds, stage_id: stageId }),
+  bulkAssign: (leadIds: string[], userId: string | null) => apiClient.post("/salescube/leads/bulk-assign/", { lead_ids: leadIds, user_id: userId }),
+  bulkDelete: (leadIds: string[]) => apiClient.post("/salescube/leads/bulk-delete/", { lead_ids: leadIds }),
   getNotes: (id: string) => apiClient.get<LeadNote[]>(`/salescube/leads/${id}/notes/`),
   addNote: (id: string, data: { content: string; note_type: string }) => apiClient.post(`/salescube/leads/${id}/notes/`, data),
   getActivities: (id: string) => apiClient.get<LeadActivityItem[]>(`/salescube/leads/${id}/activities/`),
@@ -280,4 +287,79 @@ export const saleApi = {
 
 export const financialApi = {
   overview: (params?: Record<string, string>) => apiClient.get<FinancialOverview>("/salescube/financial-overview/", { params }),
+};
+
+// ============================================================================
+// Kanban Types
+// ============================================================================
+
+export interface KanbanLeadCard {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  score: number;
+  source: string;
+  value: string;
+  assigned_to: string | null;
+  assigned_to_name: string | null;
+  created_at: string;
+}
+
+export interface KanbanColumn {
+  stage_id: string;
+  stage_name: string;
+  color: string;
+  order: number;
+  probability: number;
+  count: number;
+  total_value: string;
+  total_pages: number;
+  current_page: number;
+  leads: KanbanLeadCard[];
+}
+
+export interface KanbanBoard {
+  pipeline_id: string;
+  pipeline_name: string;
+  columns: KanbanColumn[];
+}
+
+export interface SaleKPIs {
+  summary: {
+    total_sales: number;
+    total_amount: number;
+    average_ticket: number;
+    conversion_rate: number;
+    loss_rate: number;
+  };
+  by_stage: Record<string, {
+    label: string;
+    count: number;
+    total_amount: number;
+    average_ticket: number;
+    percentage: number;
+    amount_percentage: number;
+  }>;
+  top_products: Array<{ name: string; quantity: number; revenue: number }>;
+  top_sellers: Array<{ name: string; count: number; total_amount: number }>;
+}
+
+// ============================================================================
+// Kanban API
+// ============================================================================
+
+export const kanbanApi = {
+  getBoard: (pipelineId: string, params?: Record<string, string>) =>
+    apiClient.get<KanbanBoard>(`/salescube/pipelines/${pipelineId}/kanban/`, { params }),
+};
+
+// ============================================================================
+// Sales KPI API
+// ============================================================================
+
+export const saleKpiApi = {
+  getKpis: (params?: Record<string, string>) =>
+    apiClient.get<SaleKPIs>("/salescube/sales/kpis/", { params }),
 };

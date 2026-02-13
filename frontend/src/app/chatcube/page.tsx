@@ -45,9 +45,11 @@ export default function ChatCubeDashboard() {
   }
 
   // Compute stats from instances if API stats not available
-  const totalInstances = stats?.total_instances ?? instances.length;
-  const connectedInstances = stats?.connected_instances ?? instances.filter((i) => i.status === "connected").length;
-  const messagesToday = stats?.messages_today ?? instances.reduce((sum, i) => sum + i.messages_sent_today + i.messages_received_today, 0);
+  const totalInstances = (stats as any)?.instances_total ?? stats?.total_instances ?? instances.length;
+  const connectedInstances = (stats as any)?.instances_connected ?? stats?.connected_instances ?? instances.filter((i) => i.status === "connected").length;
+  const msgSent = (stats as any)?.messages_sent_today ?? 0;
+  const msgReceived = (stats as any)?.messages_received_today ?? 0;
+  const messagesToday = stats?.messages_today ?? ((msgSent + msgReceived) || instances.reduce((sum, i) => sum + i.messages_sent_today + ((i as any).stats?.messages_received_today ?? 0), 0));
   const healthScore = stats?.health_score ?? (totalInstances > 0 ? Math.round((connectedInstances / totalInstances) * 100) : 0);
 
   if (loading) {

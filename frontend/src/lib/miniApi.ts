@@ -36,6 +36,8 @@ export interface Location {
   city: string;
   state: string;
   manager: string;
+  zip_code?: string;
+  phone?: string;
   active: boolean;
   created_at: string;
 }
@@ -77,6 +79,8 @@ export interface Flow {
   education_class?: string;
   class_name?: string;
   blocks?: any[];
+  zip_code?: string;
+  phone?: string;
   active: boolean;
   created_at: string;
 }

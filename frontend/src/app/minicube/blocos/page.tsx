@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { LayoutList, Plus, Loader2, X, Video, FileText, HelpCircle, CheckSquare, GripVertical } from "lucide-react";
-import { miniApi, type Block } from "@/lib/miniApi";
+import { miniApi, type Block, type Flow } from "@/lib/miniApi";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 
 const typeConfig: Record<string, { color: string; icon: any; label: string }> = {
@@ -14,38 +14,65 @@ const typeConfig: Record<string, { color: string; icon: any; label: string }> = 
 
 export default function BlocosPage() {
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [flows, setFlows] = useState<Flow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Block>>({
-    title: "", type: "text", content: "", order: 0,
+    title: "", type: "text", content: "", order: 0, flow: "", duration_minutes: undefined,
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadBlocks(); }, []);
+  useEffect(() => { loadData(); }, []);
 
-  async function loadBlocks() {
+  async function loadData() {
     try {
       setLoading(true);
-      const data = await miniApi.listBlocks({ ordering: "order" });
-      setBlocks(data.results || []);
+      const [blockData, flowData] = await Promise.all([
+        miniApi.listBlocks({ ordering: "order" }),
+        miniApi.listFlows(),
+      ]);
+      setBlocks(blockData.results || []);
+      setFlows(flowData.results || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }
 
-  async function handleCreate() {
+  function openCreate() {
+    setEditingId(null);
+    setFormData({ title: "", type: "text", content: "", order: 0, flow: "", duration_minutes: undefined });
+    setShowForm(true);
+  }
+
+  function openEdit(b: Block) {
+    setEditingId(b.id);
+    setFormData({
+      title: b.title, type: b.type, content: b.content, order: b.order,
+      flow: b.flow, duration_minutes: b.duration_minutes,
+    });
+    setShowForm(true);
+  }
+
+  async function handleSave() {
     try {
       setSaving(true);
-      await miniApi.createBlock(formData);
+      const payload = { ...formData };
+      if (!payload.duration_minutes) delete payload.duration_minutes;
+      if (editingId) {
+        await miniApi.updateBlock(editingId, payload);
+      } else {
+        await miniApi.createBlock(payload);
+      }
       setShowForm(false);
-      setFormData({ title: "", type: "text", content: "", order: 0 });
-      loadBlocks();
+      setEditingId(null);
+      loadData();
     } catch (err) { console.error(err); }
     finally { setSaving(false); }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este bloco?")) return;
-    try { await miniApi.deleteBlock(id); loadBlocks(); } catch (err) { console.error(err); }
+    try { await miniApi.deleteBlock(id); loadData(); } catch (err) { console.error(err); }
   }
 
   return (
@@ -57,7 +84,7 @@ export default function BlocosPage() {
             <LayoutList className="w-5 h-5 text-indigo-400" />
             <h1 className="text-lg font-semibold text-gray-100">Blocos de Conteudo</h1>
           </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
             <Plus className="w-4 h-4" /> Novo Bloco
           </button>
         </header>
@@ -69,6 +96,7 @@ export default function BlocosPage() {
             <div className="text-center py-20 text-gray-400">
               <LayoutList className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Nenhum bloco encontrado</p>
+              {flows.length === 0 && <p className="text-xs mt-2">Crie um Flow primeiro para poder criar blocos.</p>}
             </div>
           ) : (
             <div className="space-y-2">
@@ -87,7 +115,10 @@ export default function BlocosPage() {
                       <h3 className="text-sm font-medium text-gray-100 truncate">{b.title}</h3>
                       <p className="text-xs text-gray-400 truncate">{b.flow_name || "Sem flow"}{b.duration_minutes ? ` - ${b.duration_minutes}min` : ""}</p>
                     </div>
-                    <button onClick={() => handleDelete(b.id)} className="text-red-400 hover:text-red-300 text-xs">Excluir</button>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => openEdit(b)} className="text-indigo-400 hover:text-indigo-300 text-xs">Editar</button>
+                      <button onClick={() => handleDelete(b.id)} className="text-red-400 hover:text-red-300 text-xs">Excluir</button>
+                    </div>
                   </div>
                 );
               })}
@@ -99,19 +130,28 @@ export default function BlocosPage() {
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-100">Novo Bloco</h2>
+                <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Bloco" : "Novo Bloco"}</h2>
                 <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-300 mb-1">Titulo</label>
-                  <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  <label className="block text-sm text-gray-300 mb-1">Titulo *</label>
+                  <input type="text" value={formData.title || ""} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Flow *</label>
+                  <select value={formData.flow || ""} onChange={(e) => setFormData({ ...formData, flow: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
+                    <option value="">Selecione um flow...</option>
+                    {flows.map((f) => <option key={f.id} value={f.id}>{f.name}{f.class_name ? ` (${f.class_name})` : ""}</option>)}
+                  </select>
+                  {flows.length === 0 && <p className="text-xs text-yellow-400 mt-1">Nenhum flow cadastrado. Crie um flow primeiro.</p>}
+                </div>
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm text-gray-300 mb-1">Tipo</label>
-                    <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as Block["type"] })}
+                    <select value={formData.type || "text"} onChange={(e) => setFormData({ ...formData, type: e.target.value as Block["type"] })}
                       className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
                       <option value="text">Texto</option>
                       <option value="video">Video</option>
@@ -121,19 +161,25 @@ export default function BlocosPage() {
                   </div>
                   <div>
                     <label className="block text-sm text-gray-300 mb-1">Ordem</label>
-                    <input type="number" value={formData.order} onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    <input type="number" value={formData.order || 0} onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
                       className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Duracao (min)</label>
+                    <input type="number" value={formData.duration_minutes || ""} onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || undefined })}
+                      placeholder="Opcional"
+                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm text-gray-300 mb-1">Conteudo</label>
-                  <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  <textarea value={formData.content || ""} onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" rows={4} />
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
                   <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-300 hover:text-gray-100">Cancelar</button>
-                  <button onClick={handleCreate} disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
-                    {saving && <Loader2 className="w-4 h-4 animate-spin" />} Criar Bloco
+                  <button onClick={handleSave} disabled={saving || !formData.flow} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Bloco"}
                   </button>
                 </div>
               </div>

@@ -5,10 +5,15 @@ from .views import (
     CategoryViewSet,
     FinancialOverviewView,
     FinancialRecordViewSet,
+    LeadCommentViewSet,
+    LeadTagAssignmentViewSet,
+    LeadTagViewSet,
     LeadViewSet,
+    PaymentViewSet,
     PipelineStageViewSet,
     PipelineViewSet,
     ProductViewSet,
+    SaleAttachmentViewSet,
     SaleLineItemViewSet,
     SaleViewSet,
     TaskViewSet,
@@ -24,6 +29,11 @@ router.register("products", ProductViewSet)
 router.register("sales", SaleViewSet)
 router.register("sale-line-items", SaleLineItemViewSet)
 router.register("financial-records", FinancialRecordViewSet)
+router.register("comments", LeadCommentViewSet)
+router.register("tags", LeadTagViewSet)
+router.register("tag-assignments", LeadTagAssignmentViewSet)
+router.register("payments", PaymentViewSet)
+router.register("attachments", SaleAttachmentViewSet)
 
 urlpatterns = [
     path("financial-overview/", FinancialOverviewView.as_view(), name="financial-overview"),

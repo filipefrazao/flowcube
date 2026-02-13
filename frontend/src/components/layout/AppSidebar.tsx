@@ -23,6 +23,7 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clearAuthToken } from "@/lib/auth";
@@ -142,6 +143,12 @@ const sections: SidebarSection[] = [
       { label: "Curva ABC", href: "/reports/curva-abc" },
       { label: "Lead Vitta", href: "/reports/lead-vitta" },
     ],
+  },
+  {
+    id: "achievements",
+    label: "Conquistas",
+    icon: Trophy,
+    href: "/achievements",
   },
   {
     id: "settings",

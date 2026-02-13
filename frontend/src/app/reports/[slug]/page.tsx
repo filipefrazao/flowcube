@@ -30,7 +30,7 @@ export default function ReportExecutionPage() {
       const data = await reportsApi.get(slug);
       setReport(data);
       const defaults: Record<string, string> = {};
-      data.parameters.forEach((p) => { defaults[p.name] = p.default_value || ""; });
+      data.parameters.forEach((p) => { defaults[p.name] = p.default || ""; });
       setParamValues(defaults);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -46,10 +46,11 @@ export default function ReportExecutionPage() {
   }
 
   async function handleExport(format: "csv" | "xlsx") {
+    if (!result?.execution_id) return;
     try {
       const blob = format === "csv"
-        ? await reportsApi.exportCsv(slug, paramValues)
-        : await reportsApi.exportXlsx(slug, paramValues);
+        ? await reportsApi.exportCsv(result.execution_id)
+        : await reportsApi.exportXlsx(result.execution_id);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -147,7 +148,7 @@ export default function ReportExecutionPage() {
             <BarChart3 className="w-5 h-5 text-indigo-400" />
             <h1 className="text-lg font-semibold text-gray-100">{report.name}</h1>
           </div>
-          {result && (
+          {result && result.execution_id && (
             <div className="flex items-center gap-2">
               <button onClick={() => handleExport("csv")} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-xs">
                 <Download className="w-3 h-3" /> CSV
@@ -168,18 +169,10 @@ export default function ReportExecutionPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {report.parameters.map((p) => (
                   <div key={p.name}>
-                    <label className="block text-xs text-gray-400 mb-1">{p.label}{p.required && " *"}</label>
-                    {p.param_type === "select" ? (
-                      <select value={paramValues[p.name] || ""} onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
-                        className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-indigo-500">
-                        <option value="">Selecione...</option>
-                        {p.choices?.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                    ) : (
-                      <input type={p.param_type === "date" ? "date" : p.param_type === "number" ? "number" : "text"}
-                        value={paramValues[p.name] || ""} onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
-                        className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-indigo-500" />
-                    )}
+                    <label className="block text-xs text-gray-400 mb-1">{p.label}</label>
+                    <input type={p.type === "date" ? "date" : p.type === "number" ? "number" : "text"}
+                      value={paramValues[p.name] || ""} onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-indigo-500" />
                   </div>
                 ))}
               </div>

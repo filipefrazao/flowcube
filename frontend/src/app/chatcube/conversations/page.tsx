@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { chatApi, type ChatSession, type ChatSessionDetail, type ChatMessage } from "@/lib/api";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { cn } from "@/lib/utils";
 
 export default function ChatCubeConversationsPage() {
@@ -72,13 +73,24 @@ export default function ChatCubeConversationsPage() {
   });
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)]">
+    <div className="flex h-screen bg-background">
+      <AppSidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="h-14 border-b border-border bg-background flex items-center px-6">
+          <div className="flex items-center gap-3">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-text-primary">Conversas</h1>
+            <span className="text-sm text-text-muted">{sessions.length} conversa{sessions.length !== 1 ? "s" : ""}</span>
+          </div>
+        </header>
+    <div className="flex flex-1 overflow-hidden">
       {/* Sidebar - Conversations List */}
       <div className={cn(
-        "w-80 border-r border-gray-800 flex flex-col bg-gray-900 flex-shrink-0",
+        "w-80 border-r border-border flex flex-col bg-surface flex-shrink-0",
         selectedSession ? "hidden md:flex" : "flex"
       )}>
-        <div className="p-3 border-b border-gray-800">
+        <div className="p-3 border-b border-border">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
@@ -86,34 +98,34 @@ export default function ChatCubeConversationsPage() {
               placeholder="Buscar conversas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+              className="w-full bg-background border border-border rounded-lg pl-10 pr-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary"
             />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-10">
-              <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-10 text-gray-500 text-sm">Nenhuma conversa</div>
+            <div className="text-center py-10 text-text-muted text-sm">Nenhuma conversa</div>
           ) : (
             filtered.map((session) => (
               <button
                 key={session.id}
                 onClick={() => setSelectedSession(session.id)}
                 className={cn(
-                  "w-full text-left px-4 py-3 border-b border-gray-800/50 hover:bg-gray-800 transition-colors",
-                  selectedSession === session.id && "bg-gray-800"
+                  "w-full text-left px-4 py-3 border-b border-border/50 hover:bg-surface-hover transition-colors",
+                  selectedSession === session.id && "bg-surface-hover"
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
-                    <MessageSquare className="w-4 h-4 text-indigo-400" />
+                  <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-4 h-4 text-primary" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-medium text-gray-100 truncate">{session.contact_name || session.contact_phone}</h4>
-                    <p className="text-xs text-gray-500">
+                    <h4 className="text-sm font-medium text-text-primary truncate">{session.contact_name || session.contact_phone}</h4>
+                    <p className="text-xs text-text-muted">
                       {session.message_count} msgs
                       {session.last_message_at && ` | ${new Date(session.last_message_at).toLocaleDateString("pt-BR")}`}
                     </p>
@@ -126,20 +138,20 @@ export default function ChatCubeConversationsPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-gray-900">
+      <div className="flex-1 flex flex-col bg-background">
         {selectedSession && sessionDetail ? (
           <>
             {/* Chat Header */}
-            <div className="h-14 flex items-center gap-3 px-4 border-b border-gray-800">
-              <button onClick={() => setSelectedSession(null)} className="md:hidden text-gray-400 hover:text-gray-100">
+            <div className="h-14 flex items-center gap-3 px-4 border-b border-border">
+              <button onClick={() => setSelectedSession(null)} className="md:hidden text-text-muted hover:text-text-primary">
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
-                <MessageSquare className="w-4 h-4 text-indigo-400" />
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <MessageSquare className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-100">{sessionDetail.contact_name || sessionDetail.contact_phone}</h3>
-                <p className="text-xs text-gray-500">{sessionDetail.contact_phone}</p>
+                <h3 className="text-sm font-medium text-text-primary">{sessionDetail.contact_name || sessionDetail.contact_phone}</h3>
+                <p className="text-xs text-text-muted">{sessionDetail.contact_phone}</p>
               </div>
             </div>
 
@@ -155,13 +167,13 @@ export default function ChatCubeConversationsPage() {
                     <div className={cn(
                       "max-w-[70%] rounded-xl px-3 py-2",
                       msg.direction === "outbound"
-                        ? "bg-indigo-600 text-white rounded-br-sm"
-                        : "bg-gray-800 text-gray-100 rounded-bl-sm"
+                        ? "bg-primary text-white rounded-br-sm"
+                        : "bg-surface text-text-primary rounded-bl-sm"
                     )}>
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                       <p className={cn(
                         "text-[10px] mt-1",
-                        msg.direction === "outbound" ? "text-indigo-200" : "text-gray-500"
+                        msg.direction === "outbound" ? "text-primary/70" : "text-gray-500"
                       )}>
                         {new Date(msg.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                         {msg.is_ai_generated && " (IA)"}
@@ -174,7 +186,7 @@ export default function ChatCubeConversationsPage() {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-gray-800">
+            <div className="p-3 border-t border-border">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
@@ -182,12 +194,12 @@ export default function ChatCubeConversationsPage() {
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                  className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+                  className="flex-1 bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary"
                 />
                 <button
                   onClick={handleSend}
                   disabled={!messageText.trim() || sending}
-                  className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="p-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -197,11 +209,13 @@ export default function ChatCubeConversationsPage() {
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-700" />
-              <p className="text-gray-500">Selecione uma conversa</p>
+              <MessageSquare className="w-12 h-12 mx-auto mb-3 text-text-muted" />
+              <p className="text-text-muted">Selecione uma conversa</p>
             </div>
           </div>
         )}
+      </div>
+    </div>
       </div>
     </div>
   );

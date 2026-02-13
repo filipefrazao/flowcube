@@ -6,11 +6,16 @@ from .models import (
     FinancialRecord,
     Lead,
     LeadActivity,
+    LeadComment,
     LeadNote,
+    LeadTag,
+    LeadTagAssignment,
+    Payment,
     Pipeline,
     PipelineStage,
     Product,
     Sale,
+    SaleAttachment,
     SaleLineItem,
     Task,
 )
@@ -217,3 +222,75 @@ class FinancialRecordSerializer(serializers.ModelSerializer):
             "id", "sale", "type", "value", "date",
             "description", "created_at",
         ]
+
+
+
+class LeadCommentSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LeadComment
+        fields = ["id", "lead", "author", "author_name", "text", "created_at", "updated_at"]
+        read_only_fields = ["author"]
+
+    def get_author_name(self, obj):
+        if obj.author:
+            full = obj.author.get_full_name()
+            return full if full else obj.author.username
+        return None
+
+
+class LeadTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeadTag
+        fields = ["id", "name", "color", "created_at"]
+
+
+class LeadTagAssignmentSerializer(serializers.ModelSerializer):
+    tag_name = serializers.SerializerMethodField()
+    tag_color = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LeadTagAssignment
+        fields = ["id", "lead", "tag", "tag_name", "tag_color", "created_at"]
+
+    def get_tag_name(self, obj):
+        return obj.tag.name if obj.tag else None
+
+    def get_tag_color(self, obj):
+        return obj.tag.color if obj.tag else None
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    taker_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = [
+            "id", "sale", "taker", "taker_name", "method", "amount",
+            "status", "protocol", "due_date", "paid_at",
+            "created_at", "updated_at",
+        ]
+
+    def get_taker_name(self, obj):
+        if obj.taker:
+            full = obj.taker.get_full_name()
+            return full if full else obj.taker.username
+        return None
+
+
+class SaleAttachmentSerializer(serializers.ModelSerializer):
+    uploaded_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SaleAttachment
+        fields = [
+            "id", "sale", "file", "file_name", "file_url",
+            "uploaded_by", "uploaded_by_name", "created_at",
+        ]
+
+    def get_uploaded_by_name(self, obj):
+        if obj.uploaded_by:
+            full = obj.uploaded_by.get_full_name()
+            return full if full else obj.uploaded_by.username
+        return None

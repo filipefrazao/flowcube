@@ -32,23 +32,20 @@ rp.interceptors.response.use(
 export interface ReportParameter {
   name: string;
   label: string;
-  param_type: "text" | "date" | "number" | "select";
-  required: boolean;
-  default_value?: string;
-  choices?: string[];
+  type: "text" | "date" | "number" | "select";
+  default?: string;
 }
 
 export interface ReportDefinition {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   description: string;
   chart_type: "bar" | "line" | "pie" | "table" | "area";
-  category: string;
-  sql_query?: string;
+  query_template: string;
   parameters: ReportParameter[];
-  is_active: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface ReportResult {
@@ -56,28 +53,29 @@ export interface ReportResult {
   rows: Record<string, any>[];
   total_rows: number;
   executed_at: string;
+  execution_id?: string;
 }
 
 // API
 export const reportsApi = {
   list: async (): Promise<{ results: ReportDefinition[] }> => {
-    const r = await rp.get("/");
+    const r = await rp.get("/definitions/");
     return r.data;
   },
   get: async (slug: string): Promise<ReportDefinition> => {
-    const r = await rp.get(`/${slug}/`);
+    const r = await rp.get(`/definitions/${slug}/`);
     return r.data;
   },
   execute: async (slug: string, params?: Record<string, any>): Promise<ReportResult> => {
-    const r = await rp.post(`/${slug}/execute/`, params || {});
+    const r = await rp.post(`/execute/${slug}/`, params || {});
     return r.data;
   },
-  exportCsv: async (slug: string, params?: Record<string, any>): Promise<Blob> => {
-    const r = await rp.post(`/${slug}/export/`, { ...params, format: "csv" }, { responseType: "blob" });
+  exportCsv: async (executionId: string): Promise<Blob> => {
+    const r = await rp.get(`/export/${executionId}/`, { params: { format: "csv" }, responseType: "blob" });
     return r.data;
   },
-  exportXlsx: async (slug: string, params?: Record<string, any>): Promise<Blob> => {
-    const r = await rp.post(`/${slug}/export/`, { ...params, format: "xlsx" }, { responseType: "blob" });
+  exportXlsx: async (executionId: string): Promise<Blob> => {
+    const r = await rp.get(`/export/${executionId}/`, { params: { format: "xlsx" }, responseType: "blob" });
     return r.data;
   },
 };

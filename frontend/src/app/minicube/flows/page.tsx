@@ -2,41 +2,63 @@
 
 import { useEffect, useState } from "react";
 import { Workflow, Plus, Loader2, X, BookOpen } from "lucide-react";
-import { miniApi, type Flow } from "@/lib/miniApi";
+import { miniApi, type Flow, type MiniClass } from "@/lib/miniApi";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 
 export default function FlowsPage() {
   const [flows, setFlows] = useState<Flow[]>([]);
+  const [classes, setClasses] = useState<MiniClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<Partial<Flow>>({ name: "", description: "", active: true });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<Partial<Flow>>({ name: "", description: "", education_class: "", active: true });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadFlows(); }, []);
+  useEffect(() => { loadData(); }, []);
 
-  async function loadFlows() {
+  async function loadData() {
     try {
       setLoading(true);
-      const data = await miniApi.listFlows();
-      setFlows(data.results || []);
+      const [flowData, classData] = await Promise.all([
+        miniApi.listFlows(),
+        miniApi.listClasses(),
+      ]);
+      setFlows(flowData.results || []);
+      setClasses(classData.results || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }
 
-  async function handleCreate() {
+  function openCreate() {
+    setEditingId(null);
+    setFormData({ name: "", description: "", education_class: "", active: true });
+    setShowForm(true);
+  }
+
+  function openEdit(f: Flow) {
+    setEditingId(f.id);
+    setFormData({ name: f.name, description: f.description, education_class: f.education_class || "", active: f.active });
+    setShowForm(true);
+  }
+
+  async function handleSave() {
     try {
       setSaving(true);
-      await miniApi.createFlow(formData);
+      if (editingId) {
+        await miniApi.updateFlow(editingId, formData);
+      } else {
+        await miniApi.createFlow(formData);
+      }
       setShowForm(false);
-      setFormData({ name: "", description: "", active: true });
-      loadFlows();
+      setEditingId(null);
+      loadData();
     } catch (err) { console.error(err); }
     finally { setSaving(false); }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este flow?")) return;
-    try { await miniApi.deleteFlow(id); loadFlows(); } catch (err) { console.error(err); }
+    try { await miniApi.deleteFlow(id); loadData(); } catch (err) { console.error(err); }
   }
 
   return (
@@ -48,7 +70,7 @@ export default function FlowsPage() {
             <Workflow className="w-5 h-5 text-indigo-400" />
             <h1 className="text-lg font-semibold text-gray-100">Flows Educacionais</h1>
           </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
             <Plus className="w-4 h-4" /> Novo Flow
           </button>
         </header>
@@ -60,6 +82,7 @@ export default function FlowsPage() {
             <div className="text-center py-20 text-gray-400">
               <Workflow className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Nenhum flow encontrado</p>
+              {classes.length === 0 && <p className="text-xs mt-2">Crie uma Turma primeiro para poder criar flows.</p>}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -79,7 +102,8 @@ export default function FlowsPage() {
                     <span>{f.class_name || "Sem turma"}</span>
                     <span>{f.blocks?.length || 0} blocos</span>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-gray-700 flex justify-end">
+                  <div className="mt-3 pt-3 border-t border-gray-700 flex justify-end gap-3">
+                    <button onClick={() => openEdit(f)} className="text-indigo-400 hover:text-indigo-300 text-xs">Editar</button>
                     <button onClick={() => handleDelete(f.id)} className="text-red-400 hover:text-red-300 text-xs">Excluir</button>
                   </div>
                 </div>
@@ -92,24 +116,39 @@ export default function FlowsPage() {
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-100">Novo Flow</h2>
+                <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Flow" : "Novo Flow"}</h2>
                 <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-300 mb-1">Nome</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  <label className="block text-sm text-gray-300 mb-1">Nome *</label>
+                  <input type="text" value={formData.name || ""} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
                 </div>
                 <div>
+                  <label className="block text-sm text-gray-300 mb-1">Turma *</label>
+                  <select value={formData.education_class || ""} onChange={(e) => setFormData({ ...formData, education_class: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
+                    <option value="">Selecione uma turma...</option>
+                    {classes.map((c) => <option key={c.id} value={c.id}>{c.name}{c.location_name ? ` (${c.location_name})` : ""}</option>)}
+                  </select>
+                  {classes.length === 0 && <p className="text-xs text-yellow-400 mt-1">Nenhuma turma cadastrada. Crie uma turma primeiro.</p>}
+                </div>
+                <div>
                   <label className="block text-sm text-gray-300 mb-1">Descricao</label>
-                  <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  <textarea value={formData.description || ""} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" rows={3} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="flow-active" checked={formData.active !== false}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                    className="accent-indigo-500" />
+                  <label htmlFor="flow-active" className="text-sm text-gray-300">Ativo</label>
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
                   <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-300 hover:text-gray-100">Cancelar</button>
-                  <button onClick={handleCreate} disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
-                    {saving && <Loader2 className="w-4 h-4 animate-spin" />} Criar Flow
+                  <button onClick={handleSave} disabled={saving || !formData.education_class} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Flow"}
                   </button>
                 </div>
               </div>

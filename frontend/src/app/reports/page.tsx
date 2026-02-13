@@ -60,7 +60,7 @@ export default function ReportsPage() {
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-gray-100">{r.name}</h3>
-                        <span className="text-xs text-gray-500">{r.category}</span>
+                        <span className="text-xs text-gray-500">{r.chart_type}</span>
                       </div>
                     </div>
                     <p className="text-sm text-gray-400 mb-4 flex-1 line-clamp-2">{r.description}</p>

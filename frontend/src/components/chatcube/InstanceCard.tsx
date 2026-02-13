@@ -11,7 +11,7 @@ interface InstanceCardProps {
 }
 
 export function InstanceCard({ instance }: InstanceCardProps) {
-  const totalMessagesToday = instance.messages_sent_today + instance.messages_received_today;
+  const totalMessagesToday = instance.messages_sent_today + ((instance as any).stats?.messages_received_today ?? (instance as any).messages_received_today ?? 0);
   const warmupProgress = instance.daily_limit > 0
     ? Math.min(100, Math.round((instance.warmup_day / 30) * 100))
     : 0;

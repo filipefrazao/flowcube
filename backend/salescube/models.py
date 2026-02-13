@@ -309,3 +309,109 @@ class FinancialRecord(models.Model):
 
     def __str__(self):
         return f"{self.type}: R${self.value} ({self.date})"
+
+
+class LeadComment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="salescube_comments"
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Comment on {self.lead.name}: {self.text[:50]}"
+
+
+class LeadTag(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    color = models.CharField(max_length=20, blank=True, default="#6366f1")
+    created_at = models.DateTimeField(auto_now_add=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class LeadTagAssignment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name="tag_assignments")
+    tag = models.ForeignKey(LeadTag, on_delete=models.CASCADE, related_name="assignments")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ["lead", "tag"]
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.lead.name} -> {self.tag.name}"
+
+
+class Payment(models.Model):
+    METHOD_CHOICES = [
+        ("credit_card", "Credit Card"),
+        ("debit_card", "Debit Card"),
+        ("pix", "PIX"),
+        ("cash", "Cash"),
+        ("transfer", "Transfer"),
+        ("cheque", "Cheque"),
+        ("other", "Other"),
+    ]
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("reproved", "Reproved"),
+        ("cancelled", "Cancelled"),
+        ("refunded", "Refunded"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="payments")
+    taker = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="salescube_payments_taken"
+    )
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, default="pix")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    protocol = models.CharField(max_length=100, blank=True, default="")
+    due_date = models.DateField(null=True, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Payment R${self.amount} ({self.method}) - {self.status}"
+
+
+class SaleAttachment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="attachments")
+    file = models.FileField(upload_to="salescube/attachments/%Y/%m/", blank=True)
+    file_name = models.CharField(max_length=255, blank=True, default="")
+    file_url = models.URLField(blank=True, default="")
+    uploaded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="salescube_attachments"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Attachment: {self.file_name or self.file}"
