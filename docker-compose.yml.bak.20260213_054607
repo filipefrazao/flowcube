@@ -202,8 +202,12 @@ services:
       dockerfile: Dockerfile
     container_name: chatcube-engine
     restart: unless-stopped
+    command: npx tsx watch src/index.ts
+    volumes:
+      - ./chatcube-engine:/app
+      - chatcube-sessions:/app/sessions
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3100
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@flowcube-postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@flowcube-redis:6379/3
@@ -219,10 +223,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
+          cpus: 1
           memory: 1G
         reservations:
-          cpus: "0.25"
+          cpus: 0.25
           memory: 256M
 
 networks:
@@ -233,3 +237,4 @@ networks:
 
 volumes:
   flowcube-postgres-data:
+  chatcube-sessions:

@@ -9,6 +9,7 @@ import makeWASocket, {
   BaileysEventMap,
   proto,
 } from "@whiskeysockets/baileys";
+import { Pool } from "pg";
 import * as QRCode from "qrcode";
 import pino from "pino";
 import path from "path";
@@ -23,12 +24,25 @@ import {
   MessageType,
 } from "../types";
 import { config } from "../config";
+import {
+  usePostgresAuthState,
+  deletePostgresAuthState,
+} from "../services/usePostgresAuthState";
 
 const baileysLogger = pino({ level: "warn", name: "baileys" });
+
+// Maximum backoff delay: 5 minutes
+const MAX_RECONNECT_DELAY_MS = 300000;
 
 /**
  * BaileysEngine - Wraps @whiskeysockets/baileys for WhatsApp Web connections.
  * Each instance manages a single WhatsApp connection.
+ *
+ * Stability features:
+ * - PostgreSQL auth state (survives container restarts)
+ * - Infinite reconnection with exponential backoff (cap 5min)
+ * - Separate disconnect (pause) vs logout (clear session)
+ * - @lid JID support
  */
 export class BaileysEngine extends EventEmitter implements IEngine {
   public instanceId: string;
@@ -36,27 +50,27 @@ export class BaileysEngine extends EventEmitter implements IEngine {
 
   private socket: WASocket | null = null;
   private instanceConfig: InstanceConfig;
+  private pgPool: Pool | null = null;
   private qrCode: string | null = null;
   private phoneNumber: string | null = null;
   private pushName: string | null = null;
   private connectedAt: string | null = null;
   private reconnectAttempts: number = 0;
-  private maxReconnectRetries: number;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private intentionalDisconnect: boolean = false;
   private logger: pino.Logger;
 
-  constructor(instanceId: string, instanceConfig: InstanceConfig) {
+  constructor(instanceId: string, instanceConfig: InstanceConfig, pgPool?: Pool) {
     super();
     this.instanceId = instanceId;
     this.instanceConfig = instanceConfig;
-    this.maxReconnectRetries =
-      instanceConfig.maxReconnectRetries || config.maxReconnectRetries;
+    this.pgPool = pgPool || null;
     this.logger = pino({ name: `baileys-engine:${instanceId}` });
   }
 
   /**
-   * Connect to WhatsApp using Baileys
+   * Connect to WhatsApp using Baileys.
+   * Uses PostgreSQL auth state if pgPool is available, falls back to file-based.
    */
   async connect(): Promise<void> {
     if (this.status === "connected" || this.status === "connecting") {
@@ -69,14 +83,27 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     this.emitStatusChange("connecting");
 
     try {
-      const sessionDir = path.join(config.sessionsDir, this.instanceId);
-      if (!fs.existsSync(sessionDir)) {
-        fs.mkdirSync(sessionDir, { recursive: true });
+      // Load auth state from PostgreSQL or filesystem
+      let state: any;
+      let saveCreds: () => Promise<void>;
+
+      if (this.pgPool) {
+        const authResult = await usePostgresAuthState(this.pgPool, this.instanceId);
+        state = authResult.state;
+        saveCreds = authResult.saveCreds;
+        this.logger.info("Using PostgreSQL auth state");
+      } else {
+        const sessionDir = path.join(config.sessionsDir, this.instanceId);
+        if (!fs.existsSync(sessionDir)) {
+          fs.mkdirSync(sessionDir, { recursive: true });
+        }
+        const authResult = await useMultiFileAuthState(sessionDir);
+        state = authResult.state;
+        saveCreds = authResult.saveCreds;
+        this.logger.info("Using file-based auth state (fallback)");
       }
 
-      const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
       const { version } = await fetchLatestBaileysVersion();
-
       this.logger.info({ version }, "Creating WASocket");
 
       this.socket = makeWASocket({
@@ -111,14 +138,13 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             this.emitStatusChange("qr_ready");
           }
 
-          // Connection opened
+          // Connection opened successfully
           if (connection === "open") {
             this.status = "connected";
             this.qrCode = null;
-            this.reconnectAttempts = 0;
+            this.reconnectAttempts = 0; // Reset on successful connection
             this.connectedAt = new Date().toISOString();
 
-            // Extract phone number and push name from socket
             const me = this.socket?.user;
             if (me) {
               this.phoneNumber = me.id.split(":")[0] || me.id.split("@")[0];
@@ -141,25 +167,20 @@ export class BaileysEngine extends EventEmitter implements IEngine {
               !this.intentionalDisconnect;
 
             this.logger.warn(
-              { statusCode, shouldReconnect },
+              { statusCode, shouldReconnect, intentional: this.intentionalDisconnect },
               "Connection closed"
             );
 
             this.status = "disconnected";
             this.socket = null;
 
-            if (statusCode === DisconnectReason.loggedOut) {
-              // Clear session on logout
-              this.logger.info("Logged out, clearing session");
-              const sessionDir = path.join(
-                config.sessionsDir,
-                this.instanceId
-              );
-              if (fs.existsSync(sessionDir)) {
-                fs.rmSync(sessionDir, { recursive: true, force: true });
-              }
+            if (statusCode === DisconnectReason.loggedOut && !this.intentionalDisconnect) {
+              // Server-side logout (not user-initiated) - clear auth state
+              this.logger.info("Logged out by WhatsApp server, clearing auth state");
+              await this.clearAuthState();
               this.emitStatusChange("disconnected", "logged_out");
             } else if (shouldReconnect) {
+              // Auto-reconnect with infinite backoff
               this.scheduleReconnect();
             } else {
               this.emitStatusChange("disconnected", "intentional");
@@ -178,14 +199,14 @@ export class BaileysEngine extends EventEmitter implements IEngine {
 
         for (const msg of messages) {
           if (!msg.message) continue;
-          if (msg.key.fromMe) continue; // Skip own messages
+          if (msg.key.fromMe) continue;
 
           const from = msg.key.remoteJid || "";
           const isGroup = from.endsWith("@g.us");
+          const isLid = from.endsWith("@lid");
           const participant = msg.key.participant || "";
           const senderJid = isGroup ? participant : from;
 
-          // Extract text content
           let content = "";
           let msgType: MessageType = "text";
 
@@ -214,6 +235,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             type: msgType,
             content,
             isGroup,
+            isLid,
             groupId: isGroup ? from : undefined,
             timestamp: msg.messageTimestamp
               ? typeof msg.messageTimestamp === "number"
@@ -223,11 +245,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
           };
 
           this.logger.info(
-            {
-              from: eventData.from,
-              type: msgType,
-              isGroup,
-            },
+            { from: eventData.from, type: msgType, isGroup, isLid },
             "Message received"
           );
 
@@ -259,8 +277,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
         }
       });
     } catch (error: unknown) {
-      const errMsg =
-        error instanceof Error ? error.message : "Unknown error";
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
       this.logger.error({ error: errMsg }, "Failed to connect");
       this.status = "disconnected";
       this.emitStatusChange("disconnected", errMsg);
@@ -269,7 +286,8 @@ export class BaileysEngine extends EventEmitter implements IEngine {
   }
 
   /**
-   * Disconnect from WhatsApp
+   * Disconnect from WhatsApp WITHOUT clearing session.
+   * The session is preserved so reconnect works without new QR code.
    */
   async disconnect(): Promise<void> {
     this.intentionalDisconnect = true;
@@ -277,9 +295,32 @@ export class BaileysEngine extends EventEmitter implements IEngine {
 
     if (this.socket) {
       try {
+        this.socket.end(undefined);
+      } catch {
+        // Ignore end errors
+      }
+      this.socket = null;
+    }
+
+    this.status = "disconnected";
+    this.qrCode = null;
+    this.emitStatusChange("disconnected", "intentional");
+    this.logger.info("Disconnected (session preserved)");
+  }
+
+  /**
+   * Logout from WhatsApp AND clear session.
+   * After logout, a new QR code scan is required.
+   */
+  async logout(): Promise<void> {
+    this.intentionalDisconnect = true;
+    this.clearReconnectTimer();
+
+    if (this.socket) {
+      try {
         await this.socket.logout();
       } catch {
-        // Ignore logout errors, just end the connection
+        // Ignore logout errors
       }
       try {
         this.socket.end(undefined);
@@ -289,10 +330,13 @@ export class BaileysEngine extends EventEmitter implements IEngine {
       this.socket = null;
     }
 
+    // Clear auth state from storage
+    await this.clearAuthState();
+
     this.status = "disconnected";
     this.qrCode = null;
-    this.emitStatusChange("disconnected", "intentional");
-    this.logger.info("Disconnected");
+    this.emitStatusChange("disconnected", "logged_out");
+    this.logger.info("Logged out (session cleared)");
   }
 
   /**
@@ -319,14 +363,12 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     }
 
     try {
-      // Remove non-numeric characters
       const cleanPhone = phone.replace(/\D/g, "");
       const code = await this.socket.requestPairingCode(cleanPhone);
       this.logger.info({ phone: cleanPhone }, "Pairing code generated");
       return code;
     } catch (error: unknown) {
-      const errMsg =
-        error instanceof Error ? error.message : "Unknown error";
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
       this.logger.error({ error: errMsg }, "Failed to get pairing code");
       return null;
     }
@@ -340,109 +382,67 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     content: SendMessagePayload
   ): Promise<MessageResult> {
     if (!this.socket || this.status !== "connected") {
-      return {
-        success: false,
-        error: "Not connected to WhatsApp",
-      };
+      return { success: false, error: "Not connected to WhatsApp" };
     }
 
     try {
-      let messageContent: proto.IMessage;
       const normalizedJid = this.normalizeJid(jid);
+      let sentMsg: proto.WebMessageInfo;
 
       switch (content.type) {
         case "text":
-          messageContent = { conversation: content.content };
+          sentMsg = await this.socket.sendMessage(normalizedJid, {
+            text: content.content,
+          });
           break;
 
         case "image":
-          messageContent = {
-            imageMessage: {
-              url: content.mediaUrl || "",
-              caption: content.caption || content.content || "",
-              mimetype: content.mimetype || "image/jpeg",
-            } as any,
-          };
+          if (!content.mediaUrl) {
+            return { success: false, error: "Media URL required for image" };
+          }
+          sentMsg = await this.socket.sendMessage(normalizedJid, {
+            image: { url: content.mediaUrl },
+            caption: content.caption || content.content || "",
+          });
           break;
 
         case "video":
-          messageContent = {
-            videoMessage: {
-              url: content.mediaUrl || "",
-              caption: content.caption || content.content || "",
-              mimetype: content.mimetype || "video/mp4",
-            } as any,
-          };
+          if (!content.mediaUrl) {
+            return { success: false, error: "Media URL required for video" };
+          }
+          sentMsg = await this.socket.sendMessage(normalizedJid, {
+            video: { url: content.mediaUrl },
+            caption: content.caption || content.content || "",
+          });
           break;
 
         case "audio":
-          messageContent = {
-            audioMessage: {
-              url: content.mediaUrl || "",
-              mimetype: content.mimetype || "audio/mpeg",
-              ptt: true,
-            } as any,
-          };
+          if (!content.mediaUrl) {
+            return { success: false, error: "Media URL required for audio" };
+          }
+          sentMsg = await this.socket.sendMessage(normalizedJid, {
+            audio: { url: content.mediaUrl },
+            ptt: true,
+          });
           break;
 
         case "document":
-          messageContent = {
-            documentMessage: {
-              url: content.mediaUrl || "",
-              fileName: content.fileName || "document",
-              mimetype:
-                content.mimetype || "application/octet-stream",
-            } as any,
-          };
+          if (!content.mediaUrl) {
+            return { success: false, error: "Media URL required for document" };
+          }
+          sentMsg = await this.socket.sendMessage(normalizedJid, {
+            document: { url: content.mediaUrl },
+            fileName: content.fileName || "document",
+            mimetype: content.mimetype || "application/octet-stream",
+          });
           break;
 
         default:
-          return {
-            success: false,
-            error: `Unsupported message type: ${content.type}`,
-          };
-      }
-
-      let sentMsg: proto.WebMessageInfo;
-
-      if (content.type === "text") {
-        sentMsg = await this.socket.sendMessage(normalizedJid, {
-          text: content.content,
-        });
-      } else if (content.type === "image" && content.mediaUrl) {
-        sentMsg = await this.socket.sendMessage(normalizedJid, {
-          image: { url: content.mediaUrl },
-          caption: content.caption || content.content || "",
-        });
-      } else if (content.type === "video" && content.mediaUrl) {
-        sentMsg = await this.socket.sendMessage(normalizedJid, {
-          video: { url: content.mediaUrl },
-          caption: content.caption || content.content || "",
-        });
-      } else if (content.type === "audio" && content.mediaUrl) {
-        sentMsg = await this.socket.sendMessage(normalizedJid, {
-          audio: { url: content.mediaUrl },
-          ptt: true,
-        });
-      } else if (content.type === "document" && content.mediaUrl) {
-        sentMsg = await this.socket.sendMessage(normalizedJid, {
-          document: { url: content.mediaUrl },
-          fileName: content.fileName || "document",
-          mimetype: content.mimetype || "application/octet-stream",
-        });
-      } else {
-        return {
-          success: false,
-          error: "Media URL required for non-text messages",
-        };
+          return { success: false, error: `Unsupported message type: ${content.type}` };
       }
 
       this.logger.info(
-        {
-          jid: normalizedJid,
-          type: content.type,
-          messageId: sentMsg?.key?.id,
-        },
+        { jid: normalizedJid, type: content.type, messageId: sentMsg?.key?.id },
         "Message sent"
       );
 
@@ -452,28 +452,17 @@ export class BaileysEngine extends EventEmitter implements IEngine {
         timestamp: Date.now(),
       };
     } catch (error: unknown) {
-      const errMsg =
-        error instanceof Error ? error.message : "Unknown error";
-      this.logger.error(
-        { error: errMsg, jid, type: content.type },
-        "Failed to send message"
-      );
-      return {
-        success: false,
-        error: errMsg,
-      };
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
+      this.logger.error({ error: errMsg, jid, type: content.type }, "Failed to send message");
+      return { success: false, error: errMsg };
     }
   }
 
   /**
    * Get contacts list
    */
-  async getContacts(): Promise<
-    Array<{ id: string; name?: string; notify?: string }>
-  > {
-    if (!this.socket || this.status !== "connected") {
-      return [];
-    }
+  async getContacts(): Promise<Array<{ id: string; name?: string; notify?: string }>> {
+    if (!this.socket || this.status !== "connected") return [];
 
     try {
       const store = (this.socket as any).store;
@@ -487,7 +476,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
         );
       }
       return [];
-    } catch (error: unknown) {
+    } catch {
       this.logger.error("Failed to get contacts");
       return [];
     }
@@ -496,12 +485,8 @@ export class BaileysEngine extends EventEmitter implements IEngine {
   /**
    * Get groups list
    */
-  async getGroups(): Promise<
-    Array<{ id: string; subject: string; participants: number }>
-  > {
-    if (!this.socket || this.status !== "connected") {
-      return [];
-    }
+  async getGroups(): Promise<Array<{ id: string; subject: string; participants: number }>> {
+    if (!this.socket || this.status !== "connected") return [];
 
     try {
       const groups = await this.socket.groupFetchAllParticipating();
@@ -510,7 +495,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
         subject: group.subject || "",
         participants: group.participants?.length || 0,
       }));
-    } catch (error: unknown) {
+    } catch {
       this.logger.error("Failed to get groups");
       return [];
     }
@@ -537,16 +522,21 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     };
   }
 
+  /**
+   * Check if the socket is alive and responsive
+   */
+  isAlive(): boolean {
+    return this.socket !== null && this.status === "connected";
+  }
+
   // ---------- Private Methods ----------
 
   /**
-   * Normalize JID to proper format
+   * Normalize JID to proper format.
+   * Handles @s.whatsapp.net, @g.us, and @lid formats.
    */
   private normalizeJid(jid: string): string {
-    // Already a valid JID
     if (jid.includes("@")) return jid;
-
-    // Clean phone number
     const clean = jid.replace(/\D/g, "");
     return `${clean}@s.whatsapp.net`;
   }
@@ -559,40 +549,30 @@ export class BaileysEngine extends EventEmitter implements IEngine {
   }
 
   /**
-   * Schedule auto-reconnect with exponential backoff
+   * Schedule auto-reconnect with exponential backoff.
+   * NO maximum retry limit - reconnects indefinitely with cap at 5 minutes.
    */
   private scheduleReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectRetries) {
-      this.logger.error(
-        {
-          attempts: this.reconnectAttempts,
-          max: this.maxReconnectRetries,
-        },
-        "Max reconnect attempts reached"
-      );
-      this.emitStatusChange("disconnected", "max_retries_reached");
-      return;
-    }
-
     const delay = Math.min(
       1000 * Math.pow(2, this.reconnectAttempts),
-      60000
+      MAX_RECONNECT_DELAY_MS
     );
     this.reconnectAttempts++;
 
     this.logger.info(
-      {
-        attempt: this.reconnectAttempts,
-        delayMs: delay,
-      },
-      "Scheduling reconnect"
+      { attempt: this.reconnectAttempts, delayMs: delay },
+      "Scheduling reconnect (infinite retry)"
     );
+
+    this.emitStatusChange("disconnected", `reconnecting_attempt_${this.reconnectAttempts}`);
 
     this.reconnectTimer = setTimeout(async () => {
       try {
         await this.connect();
       } catch (error: unknown) {
-        this.logger.error("Reconnect attempt failed");
+        const errMsg = error instanceof Error ? error.message : "Unknown error";
+        this.logger.error({ error: errMsg, attempt: this.reconnectAttempts }, "Reconnect attempt failed");
+        // connect() failure triggers connection.close, which calls scheduleReconnect again
       }
     }, delay);
   }
@@ -604,6 +584,24 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
+    }
+  }
+
+  /**
+   * Clear auth state from PostgreSQL or filesystem
+   */
+  private async clearAuthState(): Promise<void> {
+    try {
+      if (this.pgPool) {
+        await deletePostgresAuthState(this.pgPool, this.instanceId);
+      } else {
+        const sessionDir = path.join(config.sessionsDir, this.instanceId);
+        if (fs.existsSync(sessionDir)) {
+          fs.rmSync(sessionDir, { recursive: true, force: true });
+        }
+      }
+    } catch (error) {
+      this.logger.error({ error }, "Failed to clear auth state");
     }
   }
 }

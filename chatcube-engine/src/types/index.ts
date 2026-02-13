@@ -1,9 +1,3 @@
-// ==========================================
-// ChatCube Engine - TypeScript Types
-// ==========================================
-
-// ---------- Instance Types ----------
-
 export type EngineType = "baileys" | "cloud_api";
 
 export type InstanceStatus =
@@ -18,12 +12,12 @@ export interface InstanceConfig {
   id: string;
   name: string;
   engine: EngineType;
-  phoneNumberId?: string;       // For Cloud API
-  accessToken?: string;          // For Cloud API
-  webhookUrl?: string;           // Override per-instance webhook
-  messageDelay?: number;         // Override per-instance message delay (ms)
-  autoReconnect?: boolean;       // Default true
-  maxReconnectRetries?: number;  // Default 5
+  phoneNumberId?: string;
+  accessToken?: string;
+  webhookUrl?: string;
+  messageDelay?: number;
+  autoReconnect?: boolean;
+  maxReconnectRetries?: number;
 }
 
 export interface InstanceInfo {
@@ -36,8 +30,6 @@ export interface InstanceInfo {
   connectedAt?: string;
   qrCode?: string;
 }
-
-// ---------- Message Types ----------
 
 export type MessageType = "text" | "image" | "video" | "audio" | "document";
 
@@ -57,8 +49,6 @@ export interface MessageResult {
   error?: string;
   timestamp?: number;
 }
-
-// ---------- Webhook Event Types ----------
 
 export type WebhookEventType =
   | "message_received"
@@ -83,6 +73,7 @@ export interface MessageReceivedData {
   content: string;
   mediaUrl?: string;
   isGroup: boolean;
+  isLid?: boolean;
   groupId?: string;
   groupName?: string;
   timestamp: number;
@@ -108,16 +99,12 @@ export interface QRCodeData {
   expiresAt?: number;
 }
 
-// ---------- Auth Store Types ----------
-
 export interface AuthState {
   instanceId: string;
-  creds: string;       // JSON-serialized creds
-  keys: string;        // JSON-serialized keys
+  creds: string;
+  keys: string;
   updatedAt: Date;
 }
-
-// ---------- Queue Types ----------
 
 export interface QueuedMessage {
   id: string;
@@ -128,26 +115,22 @@ export interface QueuedMessage {
   retries: number;
 }
 
-// ---------- Engine Interface ----------
-
 export interface IEngine {
   instanceId: string;
   status: InstanceStatus;
-
   connect(): Promise<void>;
   disconnect(): Promise<void>;
+  logout(): Promise<void>;
   getStatus(): InstanceStatus;
   getQRCode(): Promise<string | null>;
   getPairingCode(phone: string): Promise<string | null>;
   sendMessage(jid: string, content: SendMessagePayload): Promise<MessageResult>;
   getContacts(): Promise<Array<{ id: string; name?: string; notify?: string }>>;
   getGroups(): Promise<Array<{ id: string; subject: string; participants: number }>>;
-
+  isAlive(): boolean;
   on(event: string, listener: (...args: unknown[]) => void): void;
   removeAllListeners(): void;
 }
-
-// ---------- API Types ----------
 
 export interface ApiResponse<T = unknown> {
   success: boolean;

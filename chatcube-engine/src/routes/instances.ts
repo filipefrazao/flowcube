@@ -12,8 +12,7 @@ const router = Router();
 const logger = pino({ name: "routes:instances" });
 
 /**
- * POST /api/instances
- * Create a new WhatsApp instance
+ * POST /api/instances - Create a new WhatsApp instance
  */
 router.post(
   "/",
@@ -25,316 +24,192 @@ router.post(
       const { id, name, engine, config: extraConfig } = req.body;
 
       if (!id || !name) {
-        res.status(400).json({
-          success: false,
-          error: "Fields id and name are required",
-        });
+        res.status(400).json({ success: false, error: "Fields id and name are required" });
         return;
       }
 
       const engineType = engine || "baileys";
       const manager = InstanceManager.getInstance();
-      const instance = await manager.createInstance(
-        id,
-        name,
-        engineType,
-        extraConfig
-      );
+      const instance = await manager.createInstance(id, name, engineType, extraConfig);
 
       logger.info({ id, name, engine: engineType }, "Instance created via API");
-
-      res.status(201).json({
-        success: true,
-        data: instance,
-        message: "Instance created successfully",
-      });
+      res.status(201).json({ success: true, data: instance, message: "Instance created successfully" });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Unknown error";
       logger.error({ error: errMsg }, "Failed to create instance");
-      res.status(400).json({
-        success: false,
-        error: errMsg,
-      });
+      res.status(400).json({ success: false, error: errMsg });
     }
   }
 );
 
 /**
- * GET /api/instances
- * List all instances
+ * GET /api/instances - List all instances
  */
-router.get(
-  "/",
-  (_req: Request, res: Response<ApiResponse<InstanceInfo[]>>) => {
-    const manager = InstanceManager.getInstance();
-    const instances = manager.getAllInstances();
-
-    res.json({
-      success: true,
-      data: instances,
-    });
-  }
-);
+router.get("/", (_req: Request, res: Response<ApiResponse<InstanceInfo[]>>) => {
+  const manager = InstanceManager.getInstance();
+  const instances = manager.getAllInstances();
+  res.json({ success: true, data: instances });
+});
 
 /**
- * GET /api/instances/:id
- * Get instance status
+ * GET /api/instances/:id - Get instance status
  */
-router.get(
-  "/:id",
-  (
-    req: Request<{ id: string }>,
-    res: Response<ApiResponse<InstanceInfo>>
-  ) => {
+router.get("/:id", (req: Request<{ id: string }>, res: Response<ApiResponse<InstanceInfo>>) => {
+  const { id } = req.params;
+  const manager = InstanceManager.getInstance();
+  const info = manager.getInstanceInfo(id);
+
+  if (!info) {
+    res.status(404).json({ success: false, error: `Instance ${id} not found` });
+    return;
+  }
+  res.json({ success: true, data: info });
+});
+
+/**
+ * DELETE /api/instances/:id - Delete an instance
+ */
+router.delete("/:id", async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
+  try {
     const { id } = req.params;
     const manager = InstanceManager.getInstance();
-    const info = manager.getInstanceInfo(id);
-
-    if (!info) {
-      res.status(404).json({
-        success: false,
-        error: `Instance ${id} not found`,
-      });
-      return;
-    }
-
-    res.json({
-      success: true,
-      data: info,
-    });
+    await manager.deleteInstance(id);
+    logger.info({ id }, "Instance deleted via API");
+    res.json({ success: true, message: `Instance ${id} deleted` });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
+    res.status(404).json({ success: false, error: errMsg });
   }
-);
+});
 
 /**
- * DELETE /api/instances/:id
- * Delete an instance
- */
-router.delete(
-  "/:id",
-  async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
-    try {
-      const { id } = req.params;
-      const manager = InstanceManager.getInstance();
-      await manager.deleteInstance(id);
-
-      logger.info({ id }, "Instance deleted via API");
-
-      res.json({
-        success: true,
-        message: `Instance ${id} deleted`,
-      });
-    } catch (error: unknown) {
-      const errMsg = error instanceof Error ? error.message : "Unknown error";
-      res.status(404).json({
-        success: false,
-        error: errMsg,
-      });
-    }
-  }
-);
-
-/**
- * GET /api/instances/:id/qr-code
- * Get QR code for instance
+ * GET /api/instances/:id/qr-code - Get QR code for instance
  */
 router.get(
   "/:id/qr-code",
-  async (
-    req: Request<{ id: string }>,
-    res: Response<ApiResponse<{ qrCode: string | null }>>
-  ) => {
+  async (req: Request<{ id: string }>, res: Response<ApiResponse<{ qrCode: string | null }>>) => {
     const { id } = req.params;
     const manager = InstanceManager.getInstance();
     const info = manager.getInstanceInfo(id);
 
     if (!info) {
-      res.status(404).json({
-        success: false,
-        error: `Instance ${id} not found`,
-      });
+      res.status(404).json({ success: false, error: `Instance ${id} not found` });
       return;
     }
-
     const qrCode = await manager.getQRCode(id);
-
-    res.json({
-      success: true,
-      data: { qrCode },
-    });
+    res.json({ success: true, data: { qrCode } });
   }
 );
 
 /**
- * POST /api/instances/:id/pairing-code
- * Get pairing code for phone number linking
+ * POST /api/instances/:id/pairing-code - Get pairing code
  */
 router.post(
   "/:id/pairing-code",
-  async (
-    req: Request<{ id: string }, {}, PairingCodeBody>,
-    res: Response<ApiResponse<{ pairingCode: string | null }>>
-  ) => {
+  async (req: Request<{ id: string }, {}, PairingCodeBody>, res: Response<ApiResponse<{ pairingCode: string | null }>>) => {
     try {
       const { id } = req.params;
       const { phone } = req.body;
 
       if (!phone) {
-        res.status(400).json({
-          success: false,
-          error: "Field phone is required",
-        });
+        res.status(400).json({ success: false, error: "Field phone is required" });
         return;
       }
 
       const manager = InstanceManager.getInstance();
-      const info = manager.getInstanceInfo(id);
-
-      if (!info) {
-        res.status(404).json({
-          success: false,
-          error: `Instance ${id} not found`,
-        });
-        return;
-      }
-
       const pairingCode = await manager.getPairingCode(id, phone);
-
-      res.json({
-        success: true,
-        data: { pairingCode },
-      });
+      res.json({ success: true, data: { pairingCode } });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Unknown error";
-      res.status(500).json({
-        success: false,
-        error: errMsg,
-      });
+      res.status(500).json({ success: false, error: errMsg });
     }
   }
 );
 
 /**
- * POST /api/instances/:id/disconnect
- * Disconnect an instance (without deleting)
+ * POST /api/instances/:id/disconnect - Disconnect (preserves session)
  */
-router.post(
-  "/:id/disconnect",
-  async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
-    try {
-      const { id } = req.params;
-      const manager = InstanceManager.getInstance();
-      await manager.disconnectInstance(id);
-
-      logger.info({ id }, "Instance disconnected via API");
-
-      res.json({
-        success: true,
-        message: `Instance ${id} disconnected`,
-      });
-    } catch (error: unknown) {
-      const errMsg = error instanceof Error ? error.message : "Unknown error";
-      res.status(404).json({
-        success: false,
-        error: errMsg,
-      });
-    }
+router.post("/:id/disconnect", async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
+  try {
+    const { id } = req.params;
+    const manager = InstanceManager.getInstance();
+    await manager.disconnectInstance(id);
+    logger.info({ id }, "Instance disconnected via API");
+    res.json({ success: true, message: `Instance ${id} disconnected (session preserved)` });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
+    res.status(404).json({ success: false, error: errMsg });
   }
-);
+});
 
 /**
- * POST /api/instances/:id/reconnect
- * Reconnect an instance
+ * POST /api/instances/:id/reconnect - Reconnect an instance
  */
-router.post(
-  "/:id/reconnect",
-  async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
-    try {
-      const { id } = req.params;
-      const manager = InstanceManager.getInstance();
-      await manager.reconnectInstance(id);
-
-      logger.info({ id }, "Instance reconnected via API");
-
-      res.json({
-        success: true,
-        message: `Instance ${id} reconnecting`,
-      });
-    } catch (error: unknown) {
-      const errMsg = error instanceof Error ? error.message : "Unknown error";
-      res.status(404).json({
-        success: false,
-        error: errMsg,
-      });
-    }
+router.post("/:id/reconnect", async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
+  try {
+    const { id } = req.params;
+    const manager = InstanceManager.getInstance();
+    await manager.reconnectInstance(id);
+    logger.info({ id }, "Instance reconnected via API");
+    res.json({ success: true, message: `Instance ${id} reconnecting` });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
+    res.status(404).json({ success: false, error: errMsg });
   }
-);
+});
 
 /**
- * GET /api/instances/:id/contacts
- * List contacts for an instance
+ * GET /api/instances/:id/contacts - List contacts
  */
 router.get(
   "/:id/contacts",
-  async (
-    req: Request<{ id: string }>,
-    res: Response<
-      ApiResponse<Array<{ id: string; name?: string; notify?: string }>>
-    >
-  ) => {
+  async (req: Request<{ id: string }>, res: Response<ApiResponse<Array<{ id: string; name?: string; notify?: string }>>>) => {
     const { id } = req.params;
     const manager = InstanceManager.getInstance();
     const info = manager.getInstanceInfo(id);
 
     if (!info) {
-      res.status(404).json({
-        success: false,
-        error: `Instance ${id} not found`,
-      });
+      res.status(404).json({ success: false, error: `Instance ${id} not found` });
       return;
     }
-
     const contacts = await manager.getContacts(id);
-
-    res.json({
-      success: true,
-      data: contacts,
-    });
+    res.json({ success: true, data: contacts });
   }
 );
 
 /**
- * GET /api/instances/:id/groups
- * List groups for an instance
+ * GET /api/instances/:id/groups - List groups
  */
 router.get(
   "/:id/groups",
-  async (
-    req: Request<{ id: string }>,
-    res: Response<
-      ApiResponse<
-        Array<{ id: string; subject: string; participants: number }>
-      >
-    >
-  ) => {
+  async (req: Request<{ id: string }>, res: Response<ApiResponse<Array<{ id: string; subject: string; participants: number }>>>) => {
     const { id } = req.params;
     const manager = InstanceManager.getInstance();
     const info = manager.getInstanceInfo(id);
 
     if (!info) {
-      res.status(404).json({
-        success: false,
-        error: `Instance ${id} not found`,
-      });
+      res.status(404).json({ success: false, error: `Instance ${id} not found` });
       return;
     }
-
     const groups = await manager.getGroups(id);
-
-    res.json({
-      success: true,
-      data: groups,
-    });
+    res.json({ success: true, data: groups });
   }
 );
+
+/**
+ * POST /api/instances/:id/logout - Logout (clears session, requires new QR)
+ */
+router.post("/:id/logout", async (req: Request<{ id: string }>, res: Response<ApiResponse>) => {
+  try {
+    const { id } = req.params;
+    const manager = InstanceManager.getInstance();
+    await manager.logoutInstance(id);
+    logger.info({ id }, "Instance logged out via API");
+    res.json({ success: true, message: `Instance ${id} logged out (session cleared, new QR required)` });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
+    res.status(404).json({ success: false, error: errMsg });
+  }
+});
 
 export default router;

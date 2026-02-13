@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import pino from "pino";
+import { Pool } from "pg";
 import { config } from "./config";
 import { authMiddleware } from "./middleware/auth";
 import { errorHandler } from "./middleware/errorHandler";
@@ -10,32 +11,58 @@ import healthRouter from "./routes/health";
 import instancesRouter from "./routes/instances";
 import messagesRouter from "./routes/messages";
 import { InstanceManager } from "./services/InstanceManager";
-import { AuthStore } from "./services/AuthStore";
 
 const logger = pino({ name: "chatcube-engine" });
 
 async function main(): Promise<void> {
   logger.info(
-    {
-      nodeEnv: config.nodeEnv,
-      port: config.port,
-    },
+    { nodeEnv: config.nodeEnv, port: config.port },
     "Starting ChatCube Engine..."
   );
 
-  // Initialize auth store (create table if needed)
-  const authStore = new AuthStore();
+  // Initialize shared PostgreSQL pool for auth state
+  const pgPool = new Pool({
+    connectionString: config.databaseUrl,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  });
+
+  // Test database connection
   try {
-    await authStore.initialize();
-    logger.info("Auth store initialized");
-  } catch (error: unknown) {
-    logger.warn(
-      "Auth store initialization failed - will retry on first use"
-    );
+    await pgPool.query("SELECT 1");
+    logger.info("PostgreSQL connection established");
+  } catch (error) {
+    logger.error({ error }, "Failed to connect to PostgreSQL - auth will use file fallback");
   }
 
-  // Initialize instance manager
+  // Ensure auth tables exist
+  try {
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS chatcube_auth_creds (
+        instance_id VARCHAR(255) PRIMARY KEY,
+        creds TEXT NOT NULL,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS chatcube_auth_keys (
+        instance_id VARCHAR(255) NOT NULL,
+        key_type VARCHAR(127) NOT NULL,
+        key_id VARCHAR(255) NOT NULL,
+        key_data TEXT NOT NULL,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (instance_id, key_type, key_id)
+      );
+    `);
+    logger.info("Auth tables initialized");
+  } catch (error) {
+    logger.warn({ error }, "Auth table initialization failed - tables may already exist");
+  }
+
+  // Initialize instance manager with PostgreSQL pool
   const instanceManager = InstanceManager.getInstance();
+  instanceManager.setPgPool(pgPool);
 
   // Create Express app
   const app = express();
@@ -57,10 +84,7 @@ async function main(): Promise<void> {
 
   // 404 handler
   app.use((_req, res) => {
-    res.status(404).json({
-      success: false,
-      error: "Route not found",
-    });
+    res.status(404).json({ success: false, error: "Route not found" });
   });
 
   // Global error handler
@@ -69,15 +93,27 @@ async function main(): Promise<void> {
   // Start server
   const server = app.listen(config.port, () => {
     logger.info(
-      {
-        port: config.port,
-        nodeEnv: config.nodeEnv,
-      },
+      { port: config.port, nodeEnv: config.nodeEnv },
       `ChatCube Engine running on port ${config.port}`
     );
   });
 
-  // Graceful shutdown
+  // Auto-restore instances after server is ready
+  setTimeout(async () => {
+    try {
+      logger.info("Starting instance auto-restore...");
+      await instanceManager.restoreInstances();
+      logger.info("Instance auto-restore completed");
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
+      logger.error({ error: errMsg }, "Instance auto-restore failed");
+    }
+
+    // Start health monitoring after restore
+    instanceManager.startHealthMonitor();
+  }, 3000); // Wait 3s for Django to be ready
+
+  // Graceful shutdown (preserves sessions)
   const gracefulShutdown = async (signal: string): Promise<void> => {
     logger.info({ signal }, "Received shutdown signal");
 
@@ -86,31 +122,36 @@ async function main(): Promise<void> {
       logger.info("HTTP server closed");
     });
 
-    // Disconnect all WhatsApp instances
+    // Disconnect all instances (sessions preserved in PostgreSQL)
     try {
       await instanceManager.shutdownAll();
-    } catch (error: unknown) {
+    } catch {
       logger.error("Error during instance shutdown");
     }
 
-    // Close auth store pool
+    // Close PostgreSQL pool
     try {
-      await authStore.close();
-    } catch (error: unknown) {
-      logger.error("Error closing auth store");
+      await pgPool.end();
+    } catch {
+      logger.error("Error closing PostgreSQL pool");
     }
 
-    logger.info("Graceful shutdown complete");
+    logger.info("Graceful shutdown complete - sessions preserved in PostgreSQL");
     process.exit(0);
   };
 
   process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
   process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
-  // Handle uncaught errors
+  // Handle uncaught errors WITHOUT killing the process
   process.on("uncaughtException", (error: Error) => {
-    logger.fatal({ error: error.message, stack: error.stack }, "Uncaught exception");
-    process.exit(1);
+    logger.fatal(
+      { error: error.message, stack: error.stack },
+      "Uncaught exception - attempting to continue"
+    );
+    // Don't exit - let the process continue. Only critical failures
+    // like OOM will naturally kill the process.
+    // Docker's restart policy handles truly fatal crashes.
   });
 
   process.on("unhandledRejection", (reason: unknown) => {
