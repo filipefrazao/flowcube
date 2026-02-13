@@ -57,11 +57,15 @@ INSTALLED_APPS = [
     'channels',
     'django_ratelimit',
     'django_celery_beat',
+    'django_filters',
     # Plugin framework (must load before plugins)
     'flowcube_core',
     'funnelcube',
     'socialcube',
     'pagecube',
+    'salescube',
+    'minicube',
+    'reports',
     # Core apps (not yet extracted as plugins)
     'flowcube',
     'workflows',

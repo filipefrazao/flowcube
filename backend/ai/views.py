@@ -1,15 +1,26 @@
 from django.http import StreamingHttpResponse
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .debug_assistant import AIDebugAssistant
 from .node_builder import AINodeBuilder
+from .models import AIAgent, KnowledgeBase, KnowledgeDocument, KnowledgeChunk
+from .serializers import (
+    AIAgentSerializer, AIAgentListSerializer,
+    KnowledgeBaseSerializer, KnowledgeDocumentSerializer,
+    KnowledgeChunkSerializer, TestChatSerializer,
+)
 
 import os
 import json
+from datetime import datetime
 
+
+# ============================================================================
+# EXISTING FUNCTION-BASED VIEWS (kept intact)
+# ============================================================================
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -26,10 +37,10 @@ def generate_node_stream(request):
     def event_stream():
         try:
             for chunk in builder.stream_generate_node(description, context):
-                yield f"data: {json.dumps({'chunk': chunk})}\n\n"
-            yield f"data: {json.dumps({'done': True})}\n\n"
+                yield f"data: {json.dumps({chunk: chunk})}\n\n"
+            yield f"data: {json.dumps({done: True})}\n\n"
         except Exception as e:
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield f"data: {json.dumps({error: str(e)})}\n\n"
 
     response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"
@@ -50,10 +61,7 @@ def generate_node(request):
     try:
         builder = AINodeBuilder()
         result = builder.generate_node(description, context)
-
-        # Try to parse as JSON to validate
         node_config = json.loads(result)
-
         return Response({"success": True, "node": node_config})
     except json.JSONDecodeError as e:
         return Response(
@@ -67,18 +75,13 @@ def generate_node(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def debug_workflow(request):
-    """Analyze a workflow execution error and suggest fixes.
-
-    NOTE: The workflows app uses the Execution/NodeExecutionLog models.
-    Older references to WorkflowExecution were removed.
-    """
+    """Analyze a workflow execution error and suggest fixes."""
     execution_id = request.data.get("execution_id")
 
     if not execution_id:
         return Response({"error": "execution_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Import here to avoid circular imports
         from workflows.models import Execution, NodeExecutionLog
 
         execution = (
@@ -88,11 +91,9 @@ def debug_workflow(request):
         )
 
         workflow = execution.workflow
-
-        # Find the first error node log (if any)
         ordered_logs = list(execution.node_logs.all().order_by("started_at"))
         failed_log = None
-        previous_nodes: list[str] = []
+        previous_nodes = []
 
         for log in ordered_logs:
             if log.status == NodeExecutionLog.Status.ERROR:
@@ -144,12 +145,10 @@ def apply_quick_fix(request):
         )
 
     try:
-        # Import here to avoid circular imports
         from workflows.models import Workflow
 
         workflow = Workflow.objects.get(id=workflow_id)
         graph = workflow.graph
-
         nodes = graph.get("nodes", [])
         node_found = False
 
@@ -159,7 +158,6 @@ def apply_quick_fix(request):
                     node["data"] = {}
                 if "config" not in node["data"]:
                     node["data"]["config"] = {}
-
                 node["data"]["config"].update(fix_config)
                 node_found = True
                 break
@@ -186,7 +184,6 @@ def analyze_workflow_health(request):
     limit = request.data.get("limit", 50)
 
     if not workflow_id:
-        # Also acts as a lightweight AI service health endpoint.
         return Response(
             {
                 "success": True,
@@ -198,7 +195,6 @@ def analyze_workflow_health(request):
         )
 
     try:
-        # Import here to avoid circular imports
         from workflows.models import Workflow, Execution
 
         workflow = Workflow.objects.get(id=workflow_id)
@@ -212,7 +208,6 @@ def analyze_workflow_health(request):
 
         execution_history = []
         for execution in executions:
-            # Normalize status to what the AI helper expects.
             normalized_status = "error" if execution.status == Execution.Status.FAILED else execution.status
             execution_history.append(
                 {
@@ -233,3 +228,78 @@ def analyze_workflow_health(request):
         return Response({"error": "Workflow not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ============================================================================
+# NEW VIEWSETS FOR AI MODELS
+# ============================================================================
+
+class AIAgentViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return AIAgentListSerializer
+        return AIAgentSerializer
+
+    def get_queryset(self):
+        return AIAgent.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="test")
+    def test_chat(self, request, pk=None):
+        agent = self.get_object()
+        serializer = TestChatSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        message = serializer.validated_data["message"]
+
+        # Mock response using agent config
+        response_text = (
+            f"[Mock response from {agent.name} using {agent.model}] "
+            f"You said: \"{message}\". "
+            f"This is a test response. In production, this will call the actual LLM API."
+        )
+
+        return Response({
+            "agent_id": str(agent.id),
+            "agent_name": agent.name,
+            "model": agent.model,
+            "message": message,
+            "response": response_text,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+
+class KnowledgeBaseViewSet(viewsets.ModelViewSet):
+    serializer_class = KnowledgeBaseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return KnowledgeBase.objects.filter(agent__owner=self.request.user)
+
+    @action(detail=True, methods=["get"], url_path="documents")
+    def list_documents(self, request, pk=None):
+        kb = self.get_object()
+        documents = kb.documents.all()
+        serializer = KnowledgeDocumentSerializer(documents, many=True)
+        return Response(serializer.data)
+
+
+class KnowledgeDocumentViewSet(viewsets.ModelViewSet):
+    serializer_class = KnowledgeDocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return KnowledgeDocument.objects.filter(
+            knowledge_base__agent__owner=self.request.user
+        )
+
+    @action(detail=True, methods=["get"], url_path="chunks")
+    def list_chunks(self, request, pk=None):
+        doc = self.get_object()
+        chunks = doc.chunks.all()
+        serializer = KnowledgeChunkSerializer(chunks, many=True)
+        return Response(serializer.data)

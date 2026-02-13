@@ -477,3 +477,79 @@ class HandoffRequest(models.Model):
     
     def __str__(self):
         return f"Handoff {self.session.contact_phone} - {self.reason}"
+
+
+# ============================================================================
+# SETTINGS MODELS - UserGroup, BusinessUnit, Squad, Tag
+# ============================================================================
+
+class UserGroup(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, default="")
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="custom_groups")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class BusinessUnit(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=150)
+    address = models.CharField(max_length=300, blank=True, default="")
+    city = models.CharField(max_length=100, blank=True, default="")
+    state = models.CharField(max_length=2, blank=True, default="")
+    manager = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="managed_units"
+    )
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Squad(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, default="")
+    unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, related_name="squads")
+    leader = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="led_squads"
+    )
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="squads")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.unit.name})"
+
+
+class Tag(models.Model):
+    ENTITY_TYPE_CHOICES = [
+        ("lead", "Lead"), ("contact", "Contact"),
+        ("product", "Product"), ("general", "General"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
+    color = models.CharField(max_length=7, default="#6366f1")
+    entity_type = models.CharField(max_length=20, choices=ENTITY_TYPE_CHOICES, default="general")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
