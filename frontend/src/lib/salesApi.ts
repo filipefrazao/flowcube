@@ -8,7 +8,7 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  if (typeof window \!== "undefined") {
+  if (typeof window !== "undefined") {
     const token = localStorage.getItem("authToken");
     if (token) config.headers.Authorization = `Token ${token}`;
   }
@@ -19,7 +19,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window \!== "undefined") {
+      if (typeof window !== "undefined") {
         localStorage.removeItem("authToken");
         window.location.href = "/login";
       }
