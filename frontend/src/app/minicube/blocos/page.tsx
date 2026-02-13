@@ -17,7 +17,7 @@ export default function BlocosPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Block>>({
-    title: "", block_type: "text", content: "", order: 0,
+    title: "", type: "text", content: "", order: 0,
   });
   const [saving, setSaving] = useState(false);
 
@@ -37,13 +37,13 @@ export default function BlocosPage() {
       setSaving(true);
       await miniApi.createBlock(formData);
       setShowForm(false);
-      setFormData({ title: "", block_type: "text", content: "", order: 0 });
+      setFormData({ title: "", type: "text", content: "", order: 0 });
       loadBlocks();
     } catch (err) { console.error(err); }
     finally { setSaving(false); }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este bloco?")) return;
     try { await miniApi.deleteBlock(id); loadBlocks(); } catch (err) { console.error(err); }
   }
@@ -73,7 +73,7 @@ export default function BlocosPage() {
           ) : (
             <div className="space-y-2">
               {blocks.map((b) => {
-                const tc = typeConfig[b.block_type] || typeConfig.text;
+                const tc = typeConfig[b.type] || typeConfig.text;
                 const Icon = tc.icon;
                 return (
                   <div key={b.id} className="bg-gray-800 rounded-lg border border-gray-700 p-4 flex items-center gap-4 hover:border-indigo-500/50 transition-colors">
@@ -85,7 +85,7 @@ export default function BlocosPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium text-gray-100 truncate">{b.title}</h3>
-                      <p className="text-xs text-gray-400 truncate">{b.flow_name || "Sem flow"}{b.duration_minutes ? ` - ${b.duration_minutes}min" : ""}</p>
+                      <p className="text-xs text-gray-400 truncate">{b.flow_name || "Sem flow"}{b.duration_minutes ? ` - ${b.duration_minutes}min` : ""}</p>
                     </div>
                     <button onClick={() => handleDelete(b.id)} className="text-red-400 hover:text-red-300 text-xs">Excluir</button>
                   </div>
@@ -111,7 +111,7 @@ export default function BlocosPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-300 mb-1">Tipo</label>
-                    <select value={formData.block_type} onChange={(e) => setFormData({ ...formData, block_type: e.target.value as Block["block_type"] })}
+                    <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as Block["type"] })}
                       className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
                       <option value="text">Texto</option>
                       <option value="video">Video</option>

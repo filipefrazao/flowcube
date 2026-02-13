@@ -37,7 +37,7 @@ export default function ClientesPage() {
     finally { setSaving(false); }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este aluno?")) return;
     try { await miniApi.deleteStudent(id); loadStudents(); } catch (err) { console.error(err); }
   }
@@ -105,7 +105,7 @@ export default function ClientesPage() {
                       <td className="px-4 py-3 text-sm text-gray-300">{s.email}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{s.phone}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{s.cpf}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{s.mini_class_name || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-gray-300">{s.class_name || "-"}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{s.location_name || "-"}</td>
                       <td className="px-4 py-3">{statusBadge(s.status)}</td>
                       <td className="px-4 py-3 text-right">

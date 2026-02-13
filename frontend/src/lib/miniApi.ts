@@ -30,63 +30,63 @@ mc.interceptors.response.use(
 
 // Types
 export interface Location {
-  id: number;
+  id: string;
   name: string;
   address: string;
   city: string;
   state: string;
   manager: string;
-  is_active: boolean;
+  active: boolean;
   created_at: string;
 }
 
 export interface MiniClass {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  location: number;
+  location: string;
   location_name?: string;
   instructor: string;
   start_date: string;
   end_date: string;
   capacity: number;
-  enrolled_count?: number;
+  students_count?: number;
   status: "active" | "completed" | "cancelled";
   created_at: string;
 }
 
 export interface Student {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;
   cpf: string;
-  mini_class: number;
-  mini_class_name?: string;
-  location: number;
+  student_class: string;
+  class_name?: string;
+  location: string;
   location_name?: string;
   status: "active" | "inactive" | "graduated";
-  enrolled_at: string;
+  enrollment_date: string;
   created_at: string;
 }
 
 export interface Flow {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  mini_class?: number;
-  mini_class_name?: string;
-  blocks_count?: number;
-  is_active: boolean;
+  education_class?: string;
+  class_name?: string;
+  blocks?: any[];
+  active: boolean;
   created_at: string;
 }
 
 export interface Block {
-  id: number;
-  flow: number;
+  id: string;
+  flow: string;
   flow_name?: string;
   title: string;
-  block_type: "video" | "text" | "quiz" | "task";
+  type: "video" | "text" | "quiz" | "task";
   content: string;
   order: number;
   duration_minutes?: number;
@@ -100,7 +100,7 @@ export const miniApi = {
     const r = await mc.get("/locations/", { params });
     return r.data;
   },
-  getLocation: async (id: number): Promise<Location> => {
+  getLocation: async (id: string): Promise<Location> => {
     const r = await mc.get(`/locations/${id}/`);
     return r.data;
   },
@@ -108,11 +108,11 @@ export const miniApi = {
     const r = await mc.post("/locations/", data);
     return r.data;
   },
-  updateLocation: async (id: number, data: Partial<Location>): Promise<Location> => {
+  updateLocation: async (id: string, data: Partial<Location>): Promise<Location> => {
     const r = await mc.patch(`/locations/${id}/`, data);
     return r.data;
   },
-  deleteLocation: async (id: number): Promise<void> => {
+  deleteLocation: async (id: string): Promise<void> => {
     await mc.delete(`/locations/${id}/`);
   },
 
@@ -121,7 +121,7 @@ export const miniApi = {
     const r = await mc.get("/classes/", { params });
     return r.data;
   },
-  getClass: async (id: number): Promise<MiniClass> => {
+  getClass: async (id: string): Promise<MiniClass> => {
     const r = await mc.get(`/classes/${id}/`);
     return r.data;
   },
@@ -129,11 +129,11 @@ export const miniApi = {
     const r = await mc.post("/classes/", data);
     return r.data;
   },
-  updateClass: async (id: number, data: Partial<MiniClass>): Promise<MiniClass> => {
+  updateClass: async (id: string, data: Partial<MiniClass>): Promise<MiniClass> => {
     const r = await mc.patch(`/classes/${id}/`, data);
     return r.data;
   },
-  deleteClass: async (id: number): Promise<void> => {
+  deleteClass: async (id: string): Promise<void> => {
     await mc.delete(`/classes/${id}/`);
   },
 
@@ -142,7 +142,7 @@ export const miniApi = {
     const r = await mc.get("/students/", { params });
     return r.data;
   },
-  getStudent: async (id: number): Promise<Student> => {
+  getStudent: async (id: string): Promise<Student> => {
     const r = await mc.get(`/students/${id}/`);
     return r.data;
   },
@@ -150,11 +150,11 @@ export const miniApi = {
     const r = await mc.post("/students/", data);
     return r.data;
   },
-  updateStudent: async (id: number, data: Partial<Student>): Promise<Student> => {
+  updateStudent: async (id: string, data: Partial<Student>): Promise<Student> => {
     const r = await mc.patch(`/students/${id}/`, data);
     return r.data;
   },
-  deleteStudent: async (id: number): Promise<void> => {
+  deleteStudent: async (id: string): Promise<void> => {
     await mc.delete(`/students/${id}/`);
   },
 
@@ -163,7 +163,7 @@ export const miniApi = {
     const r = await mc.get("/flows/", { params });
     return r.data;
   },
-  getFlow: async (id: number): Promise<Flow> => {
+  getFlow: async (id: string): Promise<Flow> => {
     const r = await mc.get(`/flows/${id}/`);
     return r.data;
   },
@@ -171,11 +171,11 @@ export const miniApi = {
     const r = await mc.post("/flows/", data);
     return r.data;
   },
-  updateFlow: async (id: number, data: Partial<Flow>): Promise<Flow> => {
+  updateFlow: async (id: string, data: Partial<Flow>): Promise<Flow> => {
     const r = await mc.patch(`/flows/${id}/`, data);
     return r.data;
   },
-  deleteFlow: async (id: number): Promise<void> => {
+  deleteFlow: async (id: string): Promise<void> => {
     await mc.delete(`/flows/${id}/`);
   },
 
@@ -184,7 +184,7 @@ export const miniApi = {
     const r = await mc.get("/blocks/", { params });
     return r.data;
   },
-  getBlock: async (id: number): Promise<Block> => {
+  getBlock: async (id: string): Promise<Block> => {
     const r = await mc.get(`/blocks/${id}/`);
     return r.data;
   },
@@ -192,11 +192,11 @@ export const miniApi = {
     const r = await mc.post("/blocks/", data);
     return r.data;
   },
-  updateBlock: async (id: number, data: Partial<Block>): Promise<Block> => {
+  updateBlock: async (id: string, data: Partial<Block>): Promise<Block> => {
     const r = await mc.patch(`/blocks/${id}/`, data);
     return r.data;
   },
-  deleteBlock: async (id: number): Promise<void> => {
+  deleteBlock: async (id: string): Promise<void> => {
     await mc.delete(`/blocks/${id}/`);
   },
 };

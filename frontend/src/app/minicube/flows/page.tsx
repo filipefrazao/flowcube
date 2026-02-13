@@ -9,7 +9,7 @@ export default function FlowsPage() {
   const [flows, setFlows] = useState<Flow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<Partial<Flow>>({ name: "", description: "", is_active: true });
+  const [formData, setFormData] = useState<Partial<Flow>>({ name: "", description: "", active: true });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadFlows(); }, []);
@@ -28,13 +28,13 @@ export default function FlowsPage() {
       setSaving(true);
       await miniApi.createFlow(formData);
       setShowForm(false);
-      setFormData({ name: "", description: "", is_active: true });
+      setFormData({ name: "", description: "", active: true });
       loadFlows();
     } catch (err) { console.error(err); }
     finally { setSaving(false); }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este flow?")) return;
     try { await miniApi.deleteFlow(id); loadFlows(); } catch (err) { console.error(err); }
   }
@@ -70,14 +70,14 @@ export default function FlowsPage() {
                       <BookOpen className="w-5 h-5 text-indigo-400" />
                       <h3 className="text-sm font-semibold text-gray-100">{f.name}</h3>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${f.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}>
-                      {f.is_active ? "Ativo" : "Inativo"}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${f.active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}>
+                      {f.active ? "Ativo" : "Inativo"}
                     </span>
                   </div>
                   <p className="text-sm text-gray-400 mb-3 line-clamp-2">{f.description || "Sem descricao"}</p>
                   <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>{f.mini_class_name || "Sem turma"}</span>
-                    <span>{f.blocks_count || 0} blocos</span>
+                    <span>{f.class_name || "Sem turma"}</span>
+                    <span>{f.blocks?.length || 0} blocos</span>
                   </div>
                   <div className="mt-3 pt-3 border-t border-gray-700 flex justify-end">
                     <button onClick={() => handleDelete(f.id)} className="text-red-400 hover:text-red-300 text-xs">Excluir</button>

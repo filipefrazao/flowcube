@@ -10,7 +10,7 @@ export default function PolosPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Location>>({
-    name: "", address: "", city: "", state: "", manager: "", is_active: true,
+    name: "", address: "", city: "", state: "", manager: "", active: true,
   });
   const [saving, setSaving] = useState(false);
 
@@ -30,13 +30,13 @@ export default function PolosPage() {
       setSaving(true);
       await miniApi.createLocation(formData);
       setShowForm(false);
-      setFormData({ name: "", address: "", city: "", state: "", manager: "", is_active: true });
+      setFormData({ name: "", address: "", city: "", state: "", manager: "", active: true });
       loadLocations();
     } catch (err) { console.error(err); }
     finally { setSaving(false); }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir este polo?")) return;
     try { await miniApi.deleteLocation(id); loadLocations(); } catch (err) { console.error(err); }
   }
@@ -86,8 +86,8 @@ export default function PolosPage() {
                       <td className="px-4 py-3 text-sm text-gray-300">{l.state}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{l.manager}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${l.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}>
-                          {l.is_active ? "Sim" : "Nao"}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${l.active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}>
+                          {l.active ? "Sim" : "Nao"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">

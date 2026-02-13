@@ -162,7 +162,7 @@ export const leadApi = {
   create: (data: Partial<Lead>) => apiClient.post("/salescube/leads/", data),
   update: (id: string, data: Partial<Lead>) => apiClient.patch(`/salescube/leads/${id}/`, data),
   delete: (id: string) => apiClient.delete(`/salescube/leads/${id}/`),
-  move: (id: string, stageId: string) => apiClient.post(`/salescube/leads/${id}/move/`, { stage: stageId }),
+  move: (id: string, stageId: string) => apiClient.post(`/salescube/leads/${id}/move/`, { stage_id: stageId }),
 };
 
 // ============================================================================

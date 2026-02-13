@@ -59,7 +59,7 @@ export default function LeadsPage() {
     return matchSearch && matchStage && matchSource;
   });
 
-  const sources = [...new Set(leads.map((l) => l.source).filter(Boolean))];
+  const sources = Array.from(new Set(leads.map((l) => l.source).filter(Boolean)));
 
   return (
     <div className="p-6 space-y-6">

@@ -44,7 +44,7 @@ export default function TurmasPage() {
     }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir esta turma?")) return;
     try {
       await miniApi.deleteClass(id);
@@ -127,7 +127,7 @@ export default function TurmasPage() {
                       <td className="px-4 py-3 text-sm text-gray-300">{c.instructor}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{c.start_date ? new Date(c.start_date).toLocaleDateString("pt-BR") : "-"}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{c.end_date ? new Date(c.end_date).toLocaleDateString("pt-BR") : "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{c.enrolled_count || 0}/{c.capacity}</td>
+                      <td className="px-4 py-3 text-sm text-gray-300">{c.students_count || 0}/{c.capacity}</td>
                       <td className="px-4 py-3">{statusBadge(c.status)}</td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-300 text-sm">Excluir</button>
