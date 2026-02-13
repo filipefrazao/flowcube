@@ -2,7 +2,7 @@
 const buildStamp = process.env.NEXT_PUBLIC_APP_VERSION || new Date().toISOString();
 
 const nextConfig = {
-  output: 'standalone',
+  // output: 'standalone', // disabled for next start compatibility
   reactStrictMode: true,
   transpilePackages: ['@xyflow/react'],
   env: {

@@ -125,7 +125,7 @@ services:
           memory: 4G
         reservations:
           cpus: 0.5
-          memory: 1G
+          memory: 2G
 
   flowcube-celery-beat:
     build:
@@ -175,13 +175,13 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-frontend
     restart: unless-stopped
-    command: sh -c "rm -rf /app/.next && npx next dev -p 3000 -H 0.0.0.0"
+    command: sh -c "npx next build && npx next start -p 3000 -H 0.0.0.0"
     user: root
     volumes:
       - ./frontend:/app
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-      - NODE_ENV=development
+      - NODE_ENV=production
     depends_on:
       - flowcube-backend
     networks:
@@ -191,7 +191,7 @@ services:
       resources:
         limits:
           cpus: 1
-          memory: 1G
+          memory: 2G
         reservations:
           cpus: 0.25
           memory: 256M
@@ -220,7 +220,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: 1G
+          memory: 2G
         reservations:
           cpus: "0.25"
           memory: 256M
