@@ -1,0 +1,424 @@
+/* ============================================================
+   FlowCube Workflow Editor - Node Design Tokens & Animations
+   v1.0.0 - 2026-02-14
+   ============================================================
+
+   15 node categories, 7 animations, handle styles, node base.
+   Import via globals.css: @import "../styles/workflow-nodes.css";
+   ============================================================ */
+
+/* ========================
+   1. CATEGORY COLORS
+   ======================== */
+:root {
+  /* --- Node Categories (15) --- */
+  --node-cat-triggers:      #EAB308;
+  --node-cat-ai:            #EC4899;
+  --node-cat-logic:         #EF4444;
+  --node-cat-integrations:  #3B82F6;
+  --node-cat-outputs:       #14B8A6;
+  --node-cat-analytics:     #6366F1;
+  --node-cat-pages:         #F97316;
+  --node-cat-actions:       #10B981;
+  --node-cat-telegram:      #0EA5E9;
+  --node-cat-premium:       #A855F7;
+  --node-cat-salescube:     #FF6D5A;
+  --node-cat-whatsapp:      #25D366;
+  --node-cat-email:         #EA580C;
+  --node-cat-data:          #8B5CF6;
+  --node-cat-default:       #6B7280;
+
+  /* --- Category Tints (15% opacity for backgrounds) --- */
+  --node-cat-triggers-tint:      rgba(234, 179, 8, 0.15);
+  --node-cat-ai-tint:            rgba(236, 72, 153, 0.15);
+  --node-cat-logic-tint:         rgba(239, 68, 68, 0.15);
+  --node-cat-integrations-tint:  rgba(59, 130, 246, 0.15);
+  --node-cat-outputs-tint:       rgba(20, 184, 166, 0.15);
+  --node-cat-analytics-tint:     rgba(99, 102, 241, 0.15);
+  --node-cat-pages-tint:         rgba(249, 115, 22, 0.15);
+  --node-cat-actions-tint:       rgba(16, 185, 129, 0.15);
+  --node-cat-telegram-tint:      rgba(14, 165, 233, 0.15);
+  --node-cat-premium-tint:       rgba(168, 85, 247, 0.15);
+  --node-cat-salescube-tint:     rgba(255, 109, 90, 0.15);
+  --node-cat-whatsapp-tint:      rgba(37, 211, 102, 0.15);
+  --node-cat-email-tint:         rgba(234, 88, 12, 0.15);
+  --node-cat-data-tint:          rgba(139, 92, 246, 0.15);
+  --node-cat-default-tint:       rgba(107, 114, 128, 0.15);
+
+  /* --- Status Colors --- */
+  --node-status-running:  #3B82F6;
+  --node-status-success:  #22C55E;
+  --node-status-error:    #EF4444;
+  --node-status-waiting:  #F59E0B;
+  --node-status-draft:    #6B7280;
+
+  /* --- Node Card (dark theme) --- */
+  --node-bg:              #1A1A1E;
+  --node-bg-hover:        #212126;
+  --node-border:          #2E2E34;
+  --node-border-hover:    #3E3E46;
+  --node-header-bg:       #151518;
+  --node-radius:          12px;
+  --node-width-min:       220px;
+  --node-width-max:       280px;
+  --node-shadow:          0 2px 8px rgba(0, 0, 0, 0.35);
+  --node-shadow-hover:    0 6px 20px rgba(0, 0, 0, 0.45);
+  --node-shadow-selected: 0 0 0 2px var(--primary), 0 6px 24px rgba(245, 158, 11, 0.18);
+
+  /* --- Handle --- */
+  --handle-size:          12px;
+  --handle-bg:            var(--primary);
+  --handle-border:        var(--node-bg);
+  --handle-border-width:  2px;
+  --handle-hover-scale:   1.35;
+
+  /* --- Edge --- */
+  --edge-color:           #3D5A7A;
+  --edge-color-hover:     var(--primary);
+  --edge-width:           2px;
+  --edge-width-hover:     3px;
+
+  /* --- Node Text --- */
+  --node-text-primary:    #F5F5F7;
+  --node-text-secondary:  #A1A1AA;
+  --node-text-muted:      #71717A;
+}
+
+
+/* ========================
+   2. ANIMATIONS (7)
+   ======================== */
+
+/* 2.1 - pulse-running: Gentle blue pulse for running status badge */
+@keyframes pulse-running {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+}
+.animate-pulse-running {
+  animation: pulse-running 1.5s ease-in-out infinite;
+}
+
+/* 2.2 - spin-running: Rotation for running loader icons */
+@keyframes spin-running {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-running {
+  animation: spin-running 1s linear infinite;
+}
+
+/* 2.3 - pulse-error: Red pulse for error status */
+@keyframes pulse-error {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+  }
+}
+.animate-pulse-error {
+  animation: pulse-error 2s ease-in-out infinite;
+}
+
+/* 2.4 - check-success: Pop-in for success checkmark */
+@keyframes check-success {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-check-success {
+  animation: check-success 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 2.5 - flow-dash: Animated dashes along edge path (running state) */
+@keyframes flow-dash {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+.animate-flow-dash {
+  animation: flow-dash 0.6s linear infinite;
+}
+
+/* 2.6 - slide-in-right: Panel entrance from right */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2.7 - fade-in: General fade in */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out forwards;
+}
+
+
+/* ========================
+   3. HANDLE STYLES
+   ======================== */
+
+/* Base handle override for workflow editor */
+.workflow-editor .react-flow__handle {
+  width: var(--handle-size);
+  height: var(--handle-size);
+  background: var(--handle-bg);
+  border: var(--handle-border-width) solid var(--handle-border);
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.15s ease,
+              box-shadow 0.2s ease;
+}
+
+.workflow-editor .react-flow__handle:hover {
+  transform: scale(var(--handle-hover-scale));
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+/* Handle connecting state */
+.workflow-editor .react-flow__handle.connecting {
+  background: var(--node-status-running);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Handle valid connection target */
+.workflow-editor .react-flow__handle.valid {
+  background: var(--node-status-success);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+}
+
+/* Category-specific handle colors */
+.fc-handle-triggers     { background: var(--node-cat-triggers) !important; }
+.fc-handle-ai           { background: var(--node-cat-ai) !important; }
+.fc-handle-logic        { background: var(--node-cat-logic) !important; }
+.fc-handle-integrations { background: var(--node-cat-integrations) !important; }
+.fc-handle-outputs      { background: var(--node-cat-outputs) !important; }
+.fc-handle-analytics    { background: var(--node-cat-analytics) !important; }
+.fc-handle-pages        { background: var(--node-cat-pages) !important; }
+.fc-handle-actions      { background: var(--node-cat-actions) !important; }
+.fc-handle-telegram     { background: var(--node-cat-telegram) !important; }
+.fc-handle-premium      { background: var(--node-cat-premium) !important; }
+.fc-handle-salescube    { background: var(--node-cat-salescube) !important; }
+.fc-handle-whatsapp     { background: var(--node-cat-whatsapp) !important; }
+.fc-handle-email        { background: var(--node-cat-email) !important; }
+.fc-handle-data         { background: var(--node-cat-data) !important; }
+
+
+/* ========================
+   4. NODE BASE STYLES
+   ======================== */
+
+/* Base node card (dark theme) */
+.fc-node {
+  background: var(--node-bg);
+  border: 2px solid var(--node-border);
+  border-radius: var(--node-radius);
+  min-width: var(--node-width-min);
+  max-width: var(--node-width-max);
+  box-shadow: var(--node-shadow);
+  transition: box-shadow 0.2s ease,
+              border-color 0.2s ease,
+              transform 0.15s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.fc-node:hover {
+  border-color: var(--node-border-hover);
+  box-shadow: var(--node-shadow-hover);
+}
+
+.fc-node.selected {
+  box-shadow: var(--node-shadow-selected);
+  transform: scale(1.015);
+}
+
+/* Node header bar (colored strip per category) */
+.fc-node-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--node-header-bg);
+  border-bottom: 1px solid var(--node-border);
+  position: relative;
+}
+
+/* Category accent strip (left border on entire node) */
+.fc-node::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--_cat-color, var(--node-cat-default));
+  border-radius: var(--node-radius) 0 0 var(--node-radius);
+  z-index: 1;
+}
+
+/* Icon container */
+.fc-node-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--_cat-tint, var(--node-cat-default-tint));
+  color: var(--_cat-color, var(--node-cat-default));
+}
+
+.fc-node-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Node title */
+.fc-node-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--node-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* Node subtitle */
+.fc-node-subtitle {
+  font-size: 11px;
+  color: var(--node-text-muted);
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Node body (config preview area) */
+.fc-node-body {
+  padding: 8px 14px 10px;
+}
+
+/* Status badge */
+.fc-status-badge {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fc-status-badge.running {
+  background: var(--node-status-running);
+  animation: pulse-running 1.5s ease-in-out infinite;
+}
+
+.fc-status-badge.success {
+  background: var(--node-status-success);
+  animation: check-success 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.fc-status-badge.error {
+  background: var(--node-status-error);
+  animation: pulse-error 2s ease-in-out infinite;
+}
+
+.fc-status-badge.waiting {
+  background: var(--node-status-waiting);
+  animation: pulse-running 2s ease-in-out infinite;
+}
+
+/* Execution count badge */
+.fc-exec-count {
+  font-size: 10px;
+  color: var(--node-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trigger badge (floats above trigger nodes) */
+.fc-trigger-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  color: #000;
+  background: var(--node-cat-triggers);
+  z-index: 1;
+}
+
+
+/* ========================
+   5. CATEGORY CLASS HELPERS
+   ======================== */
+
+.fc-cat-triggers     { --_cat-color: var(--node-cat-triggers);     --_cat-tint: var(--node-cat-triggers-tint); }
+.fc-cat-ai           { --_cat-color: var(--node-cat-ai);           --_cat-tint: var(--node-cat-ai-tint); }
+.fc-cat-logic        { --_cat-color: var(--node-cat-logic);        --_cat-tint: var(--node-cat-logic-tint); }
+.fc-cat-integrations { --_cat-color: var(--node-cat-integrations); --_cat-tint: var(--node-cat-integrations-tint); }
+.fc-cat-outputs      { --_cat-color: var(--node-cat-outputs);      --_cat-tint: var(--node-cat-outputs-tint); }
+.fc-cat-analytics    { --_cat-color: var(--node-cat-analytics);    --_cat-tint: var(--node-cat-analytics-tint); }
+.fc-cat-pages        { --_cat-color: var(--node-cat-pages);        --_cat-tint: var(--node-cat-pages-tint); }
+.fc-cat-actions      { --_cat-color: var(--node-cat-actions);      --_cat-tint: var(--node-cat-actions-tint); }
+.fc-cat-telegram     { --_cat-color: var(--node-cat-telegram);     --_cat-tint: var(--node-cat-telegram-tint); }
+.fc-cat-premium      { --_cat-color: var(--node-cat-premium);      --_cat-tint: var(--node-cat-premium-tint); }
+.fc-cat-salescube    { --_cat-color: var(--node-cat-salescube);     --_cat-tint: var(--node-cat-salescube-tint); }
+.fc-cat-whatsapp     { --_cat-color: var(--node-cat-whatsapp);     --_cat-tint: var(--node-cat-whatsapp-tint); }
+.fc-cat-email        { --_cat-color: var(--node-cat-email);        --_cat-tint: var(--node-cat-email-tint); }
+.fc-cat-data         { --_cat-color: var(--node-cat-data);         --_cat-tint: var(--node-cat-data-tint); }
+.fc-cat-default      { --_cat-color: var(--node-cat-default);      --_cat-tint: var(--node-cat-default-tint); }
+
+
+/* ========================
+   6. EDGE ANIMATION CLASSES
+   ======================== */
+
+/* Animated edge for running workflows */
+.fc-edge-running path {
+  stroke: var(--node-status-running) !important;
+  stroke-dasharray: 8 4;
+  animation: flow-dash 0.6s linear infinite;
+}
+
+.fc-edge-success path {
+  stroke: var(--node-status-success) !important;
+  transition: stroke 0.3s ease;
+}
+
+.fc-edge-error path {
+  stroke: var(--node-status-error) !important;
+  transition: stroke 0.3s ease;
+}

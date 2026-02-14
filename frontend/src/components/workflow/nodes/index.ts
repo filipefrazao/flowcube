@@ -216,7 +216,7 @@ export const nodeCategories = [
   {
     id: "triggers",
     label: "Triggers",
-    color: "#EAB308",
+    color: "#10B981",
     description: "Entry points that start your workflow",
     nodes: [
       { type: "webhook_trigger", label: "Webhook", description: "HTTP webhook trigger" },
@@ -239,7 +239,7 @@ export const nodeCategories = [
   {
     id: "logic",
     label: "Logic & Flow",
-    color: "#EF4444",
+    color: "#F59E0B",
     description: "Conditional branching and routing",
     nodes: [
       { type: "condition", label: "Condition", description: "If/else branching" },
