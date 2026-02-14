@@ -20,6 +20,12 @@ from .filters import (
     TaskFilter,
 )
 from .models import (
+    Contact,
+    EmailTemplate,
+    Invoice,
+    InvoiceItem,
+    Ticket,
+    TicketMessage,
     Category,
     FinancialRecord,
     Lead,
@@ -38,6 +44,13 @@ from .models import (
     Task,
 )
 from .serializers import (
+    ContactSerializer,
+    EmailTemplateSerializer,
+    InvoiceItemSerializer,
+    InvoiceSerializer,
+    TicketListSerializer,
+    TicketMessageSerializer,
+    TicketSerializer,
     CategorySerializer,
     FinancialRecordSerializer,
     LeadActivitySerializer,
@@ -48,10 +61,12 @@ from .serializers import (
     LeadTagAssignmentSerializer,
     LeadTagSerializer,
     PaymentSerializer,
+    PipelineDetailSerializer,
     PipelineSerializer,
     PipelineStageSerializer,
     ProductSerializer,
     SaleAttachmentSerializer,
+    SaleDetailSerializer,
     SaleLineItemSerializer,
     SaleSerializer,
     TaskSerializer,
@@ -69,22 +84,14 @@ class PipelineViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return PipelineDetailSerializer
+        return PipelineSerializer
+
     def get_queryset(self):
         qs = super().get_queryset()
         return qs.prefetch_related("stages")
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        data = serializer.data
-        for stage_data in data.get("stages", []):
-            stage_id = stage_data["id"]
-            agg = Lead.objects.filter(stage_id=stage_id).aggregate(
-                count=Count("id"), total=Sum("value")
-            )
-            stage_data["leads_count"] = agg["count"] or 0
-            stage_data["total_value"] = float(agg["total"] or 0)
-        return Response(data)
 
     @action(detail=True, methods=["get"], url_path="kanban")
     def kanban(self, request, pk=None):
@@ -202,7 +209,10 @@ class LeadViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         if self.action == "retrieve":
-            qs = qs.prefetch_related("lead_notes", "activities", "tasks", "sales")
+            qs = qs.prefetch_related(
+                "lead_notes", "activities", "comments", "tag_assignments__tag",
+                "tasks", "sales",
+            )
         pipeline = self.request.query_params.get("pipeline")
         if pipeline:
             qs = qs.filter(stage__pipeline_id=pipeline)
@@ -297,7 +307,7 @@ class LeadViewSet(viewsets.ModelViewSet):
     def notes(self, request, pk=None):
         lead = self.get_object()
         if request.method == "GET":
-            notes = LeadNote.objects.filter(lead=lead)
+            notes = LeadNote.objects.filter(lead=lead).select_related("user")
             serializer = LeadNoteSerializer(notes, many=True)
             return Response(serializer.data)
         else:
@@ -315,7 +325,7 @@ class LeadViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="activities")
     def activities(self, request, pk=None):
         lead = self.get_object()
-        activities = LeadActivity.objects.filter(lead=lead)
+        activities = LeadActivity.objects.filter(lead=lead).select_related("user")
         serializer = LeadActivitySerializer(activities, many=True)
         return Response(serializer.data)
 
@@ -330,6 +340,12 @@ class LeadViewSet(viewsets.ModelViewSet):
             serializer = LeadCommentSerializer(data={**request.data, "lead": lead.id})
             serializer.is_valid(raise_exception=True)
             serializer.save(author=request.user, lead=lead)
+            LeadActivity.objects.create(
+                lead=lead,
+                user=request.user,
+                action="comment_added",
+                new_value=request.data.get("text", "")[:100],
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["get", "post", "delete"], url_path="tags")
@@ -348,11 +364,32 @@ class LeadViewSet(viewsets.ModelViewSet):
             except LeadTag.DoesNotExist:
                 return Response({"error": "Tag not found"}, status=status.HTTP_404_NOT_FOUND)
             assignment, created = LeadTagAssignment.objects.get_or_create(lead=lead, tag=tag)
-            return Response(LeadTagAssignmentSerializer(assignment).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            if created:
+                LeadActivity.objects.create(
+                    lead=lead,
+                    user=request.user,
+                    action="tag_added",
+                    new_value=tag.name,
+                )
+            return Response(
+                LeadTagAssignmentSerializer(assignment).data,
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
         else:
             tag_id = request.data.get("tag_id")
             if tag_id:
-                LeadTagAssignment.objects.filter(lead=lead, tag_id=tag_id).delete()
+                deleted, _ = LeadTagAssignment.objects.filter(lead=lead, tag_id=tag_id).delete()
+                if deleted:
+                    try:
+                        tag = LeadTag.objects.get(pk=tag_id)
+                        LeadActivity.objects.create(
+                            lead=lead,
+                            user=request.user,
+                            action="tag_removed",
+                            old_value=tag.name,
+                        )
+                    except LeadTag.DoesNotExist:
+                        pass
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["get"], url_path="stats")
@@ -562,6 +599,17 @@ class SaleViewSet(viewsets.ModelViewSet):
     search_fields = ["notes"]
     ordering_fields = ["total_value", "created_at"]
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return SaleDetailSerializer
+        return SaleSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == "retrieve":
+            qs = qs.prefetch_related("payments", "attachments", "line_items__product")
+        return qs
+
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
@@ -586,9 +634,7 @@ class SaleViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="kpis")
     def kpis(self, request):
-        """
-        Sales KPIs: totals by stage, conversion rate, average ticket, top products, top sellers.
-        """
+        """Sales KPIs: totals by stage, conversion rate, average ticket, top products, top sellers."""
         qs = self.filter_queryset(self.get_queryset())
 
         total_sales = qs.count()
@@ -700,7 +746,6 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     ordering_fields = ["date", "value", "created_at"]
 
 
-
 class LeadCommentViewSet(viewsets.ModelViewSet):
     queryset = LeadComment.objects.select_related("lead", "author")
     serializer_class = LeadCommentSerializer
@@ -778,10 +823,7 @@ class SaleAttachmentViewSet(viewsets.ModelViewSet):
 
 
 class FinancialOverviewView(APIView):
-    """
-    Financial overview based on actual Sale data (won sales as revenue).
-    Falls back to FinancialRecord if records exist.
-    """
+    """Financial overview based on actual Sale data (won sales as revenue)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -792,7 +834,6 @@ class FinancialOverviewView(APIView):
         fr_count = FinancialRecord.objects.filter(date__year=year).count()
 
         if fr_count > 0:
-            # Use FinancialRecord data
             records = FinancialRecord.objects.filter(date__year=year)
             total_revenue = float(
                 records.filter(type="revenue").aggregate(total=Sum("value"))["total"] or 0
@@ -817,16 +858,13 @@ class FinancialOverviewView(APIView):
                     monthly_breakdown[key] = {"revenue": 0.0, "expense": 0.0, "refund": 0.0}
                 monthly_breakdown[key][row["type"]] = float(row["total"])
         else:
-            # Derive from Sales data
             sales_qs = Sale.objects.filter(created_at__year=year)
 
-            # Revenue = won sales
             total_revenue = float(
                 sales_qs.filter(stage="won").aggregate(
                     total=Coalesce(Sum("total_value"), Decimal("0"))
                 )["total"]
             )
-            # Lost as "refund" equivalent
             total_refunds = float(
                 sales_qs.filter(stage="lost").aggregate(
                     total=Coalesce(Sum("total_value"), Decimal("0"))
@@ -834,7 +872,6 @@ class FinancialOverviewView(APIView):
             )
             total_expenses = 0.0
 
-            # Monthly breakdown from sales
             monthly_won = (
                 sales_qs.filter(stage="won")
                 .annotate(month=TruncMonth("created_at"))
@@ -864,13 +901,6 @@ class FinancialOverviewView(APIView):
                     monthly_breakdown[key] = {"revenue": 0.0, "expense": 0.0, "refund": 0.0}
                 monthly_breakdown[key]["refund"] = float(row["total"] or 0)
 
-            # Also add negotiation and proposal as "pipeline"
-            pipeline_value = float(
-                sales_qs.filter(stage__in=["negotiation", "proposal"]).aggregate(
-                    total=Coalesce(Sum("total_value"), Decimal("0"))
-                )["total"]
-            )
-
         net = total_revenue - total_expenses - total_refunds
 
         response_data = {
@@ -882,7 +912,6 @@ class FinancialOverviewView(APIView):
             "monthly_breakdown": monthly_breakdown,
         }
 
-        # Add sales pipeline summary
         if fr_count == 0:
             sales_qs = Sale.objects.filter(created_at__year=year)
             response_data["sales_pipeline"] = {
@@ -909,3 +938,329 @@ class FinancialOverviewView(APIView):
             }
 
         return Response(response_data)
+
+
+# ============================================================================
+# Sprint 2 Views - Contacts, Invoices, Tickets, Email, Calendar, Notes
+# ============================================================================
+
+
+class ContactViewSet(viewsets.ModelViewSet):
+    queryset = Contact.objects.select_related("lead", "owner").prefetch_related("tags")
+    serializer_class = ContactSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["source", "is_active", "city", "state", "owner"]
+    search_fields = ["name", "email", "phone", "company", "cpf"]
+    ordering_fields = ["name", "created_at", "updated_at"]
+
+    @action(detail=False, methods=["post"], url_path="import-csv")
+    def import_csv(self, request):
+        import csv, io
+        file = request.FILES.get("file")
+        if not file:
+            return Response({"error": "CSV file required"}, status=status.HTTP_400_BAD_REQUEST)
+        decoded = file.read().decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(decoded))
+        created = 0
+        skipped = 0
+        for row in reader:
+            name = row.get("name", row.get("nome", "")).strip()
+            if not name:
+                skipped += 1
+                continue
+            Contact.objects.create(
+                name=name,
+                email=row.get("email", "").strip(),
+                phone=row.get("phone", row.get("telefone", "")).strip(),
+                company=row.get("company", row.get("empresa", "")).strip(),
+                position=row.get("position", row.get("cargo", "")).strip(),
+                cpf=row.get("cpf", "").strip(),
+                city=row.get("city", row.get("cidade", "")).strip(),
+                state=row.get("state", row.get("estado", "")).strip(),
+                source="import",
+                owner=request.user,
+            )
+            created += 1
+        return Response({"created": created, "skipped": skipped})
+
+    @action(detail=False, methods=["post"], url_path="merge")
+    def merge(self, request):
+        primary_id = request.data.get("primary_id")
+        merge_ids = request.data.get("merge_ids", [])
+        if not primary_id or not merge_ids:
+            return Response({"error": "primary_id and merge_ids required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            primary = Contact.objects.get(pk=primary_id)
+        except Contact.DoesNotExist:
+            return Response({"error": "Primary contact not found"}, status=status.HTTP_404_NOT_FOUND)
+        duplicates = Contact.objects.filter(pk__in=merge_ids).exclude(pk=primary_id)
+        for dup in duplicates:
+            if not primary.email and dup.email:
+                primary.email = dup.email
+            if not primary.phone and dup.phone:
+                primary.phone = dup.phone
+            if not primary.company and dup.company:
+                primary.company = dup.company
+            if not primary.cpf and dup.cpf:
+                primary.cpf = dup.cpf
+            for tag in dup.tags.all():
+                primary.tags.add(tag)
+        primary.save()
+        merged = duplicates.count()
+        duplicates.delete()
+        return Response({"merged": merged, "primary": ContactSerializer(primary).data})
+
+    @action(detail=False, methods=["get"], url_path="export")
+    def export(self, request):
+        import csv
+        from django.http import HttpResponse
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="contacts.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["Nome", "Email", "Telefone", "Empresa", "Cargo", "CPF", "Cidade", "Estado", "Fonte"])
+        for c in self.filter_queryset(self.get_queryset()):
+            writer.writerow([c.name, c.email, c.phone, c.company, c.position, c.cpf, c.city, c.state, c.source])
+        return response
+
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.select_related("lead", "contact", "sale", "created_by").prefetch_related("items")
+    serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["status", "lead", "contact"]
+    search_fields = ["number", "notes"]
+    ordering_fields = ["issue_date", "due_date", "total", "created_at"]
+
+    def perform_create(self, serializer):
+        last = Invoice.objects.order_by("-number").first()
+        if last and last.number.isdigit():
+            next_num = str(int(last.number) + 1).zfill(6)
+        else:
+            next_num = "000001"
+        serializer.save(created_by=self.request.user, number=next_num)
+
+    @action(detail=True, methods=["post"], url_path="add-item")
+    def add_item(self, request, pk=None):
+        invoice = self.get_object()
+        data = {**request.data, "invoice": invoice.id}
+        serializer = InvoiceItemSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        invoice.recalculate()
+        return Response(InvoiceSerializer(invoice).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"], url_path="remove-item/(?P<item_id>[^/.]+)")
+    def remove_item(self, request, pk=None, item_id=None):
+        invoice = self.get_object()
+        InvoiceItem.objects.filter(pk=item_id, invoice=invoice).delete()
+        invoice.recalculate()
+        return Response(InvoiceSerializer(invoice).data)
+
+    @action(detail=True, methods=["post"], url_path="mark-paid")
+    def mark_paid(self, request, pk=None):
+        invoice = self.get_object()
+        invoice.status = "paid"
+        invoice.paid_at = timezone.now()
+        invoice.save(update_fields=["status", "paid_at", "updated_at"])
+        return Response(InvoiceSerializer(invoice).data)
+
+    @action(detail=False, methods=["get"], url_path="summary")
+    def summary(self, request):
+        from django.db.models.functions import Coalesce
+        qs = self.filter_queryset(self.get_queryset())
+        by_status = list(
+            qs.values("status").annotate(count=Count("id"), total=Sum("total")).order_by("status")
+        )
+        overdue_count = qs.filter(status__in=["sent", "draft"], due_date__lt=timezone.now().date()).count()
+        return Response({
+            "total_invoices": qs.count(),
+            "total_value": float(qs.aggregate(t=Sum("total"))["t"] or 0),
+            "by_status": [{"status": s["status"], "count": s["count"], "total": float(s["total"] or 0)} for s in by_status],
+            "overdue_count": overdue_count,
+        })
+
+
+class InvoiceItemViewSet(viewsets.ModelViewSet):
+    queryset = InvoiceItem.objects.select_related("product", "invoice")
+    serializer_class = InvoiceItemSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["invoice"]
+
+
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = Ticket.objects.select_related("lead", "contact", "assigned_to", "created_by")
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["status", "priority", "category", "assigned_to", "lead", "contact"]
+    search_fields = ["title", "description"]
+    ordering_fields = ["priority", "status", "created_at", "updated_at"]
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return TicketListSerializer
+        return TicketSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["get", "post"], url_path="messages")
+    def messages(self, request, pk=None):
+        ticket = self.get_object()
+        if request.method == "GET":
+            msgs = ticket.messages.select_related("author").all()
+            return Response(TicketMessageSerializer(msgs, many=True).data)
+        serializer = TicketMessageSerializer(data={**request.data, "ticket": ticket.id})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="resolve")
+    def resolve(self, request, pk=None):
+        ticket = self.get_object()
+        ticket.status = "resolved"
+        ticket.resolved_at = timezone.now()
+        ticket.save(update_fields=["status", "resolved_at", "updated_at"])
+        return Response(TicketSerializer(ticket).data)
+
+    @action(detail=True, methods=["post"], url_path="close")
+    def close(self, request, pk=None):
+        ticket = self.get_object()
+        ticket.status = "closed"
+        ticket.closed_at = timezone.now()
+        ticket.save(update_fields=["status", "closed_at", "updated_at"])
+        return Response(TicketSerializer(ticket).data)
+
+    @action(detail=False, methods=["get"], url_path="summary")
+    def summary(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        by_status = list(qs.values("status").annotate(count=Count("id")).order_by("status"))
+        by_priority = list(qs.values("priority").annotate(count=Count("id")).order_by("priority"))
+        by_category = list(qs.values("category").annotate(count=Count("id")).order_by("category"))
+        return Response({
+            "total": qs.count(),
+            "by_status": [{"status": s["status"], "count": s["count"]} for s in by_status],
+            "by_priority": [{"priority": p["priority"], "count": p["count"]} for p in by_priority],
+            "by_category": [{"category": c["category"], "count": c["count"]} for c in by_category],
+        })
+
+
+class TicketMessageViewSet(viewsets.ModelViewSet):
+    queryset = TicketMessage.objects.select_related("ticket", "author")
+    serializer_class = TicketMessageSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["ticket", "is_internal"]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class EmailTemplateViewSet(viewsets.ModelViewSet):
+    queryset = EmailTemplate.objects.all()
+    serializer_class = EmailTemplateSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filterset_fields = ["category", "is_active"]
+    search_fields = ["name", "subject"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="send")
+    def send_email(self, request, pk=None):
+        template = self.get_object()
+        to_email = request.data.get("to")
+        variables = request.data.get("variables", {})
+        if not to_email:
+            return Response({"error": "to email required"}, status=status.HTTP_400_BAD_REQUEST)
+        subject = template.subject
+        body = template.body_html
+        for key, val in variables.items():
+            subject = subject.replace("{{" + key + "}}", str(val))
+            body = body.replace("{{" + key + "}}", str(val))
+        from django.core.mail import send_mail
+        try:
+            send_mail(subject, template.body_text or "", None, [to_email], html_message=body)
+            return Response({"sent": True, "to": to_email})
+        except Exception as e:
+            return Response({"sent": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CalendarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        start = request.query_params.get("start")
+        end = request.query_params.get("end")
+        events = []
+        task_qs = Task.objects.filter(due_date__isnull=False).select_related("lead", "assigned_to")
+        if start:
+            task_qs = task_qs.filter(due_date__gte=start)
+        if end:
+            task_qs = task_qs.filter(due_date__lte=end)
+        for t in task_qs:
+            events.append({
+                "id": str(t.id),
+                "title": t.title,
+                "start": t.due_date.isoformat() if t.due_date else None,
+                "type": "task",
+                "status": t.status,
+                "priority": t.priority,
+                "lead_id": str(t.lead_id) if t.lead_id else None,
+                "lead_name": t.lead.name if t.lead else None,
+                "assigned_to_name": t.assigned_to.get_full_name() or t.assigned_to.username if t.assigned_to else None,
+            })
+        ticket_qs = Ticket.objects.filter(created_at__isnull=False).select_related("lead", "assigned_to")
+        if start:
+            ticket_qs = ticket_qs.filter(created_at__gte=start)
+        if end:
+            ticket_qs = ticket_qs.filter(created_at__lte=end)
+        for tk in ticket_qs[:50]:
+            events.append({
+                "id": str(tk.id),
+                "title": tk.title,
+                "start": tk.created_at.isoformat(),
+                "type": "ticket",
+                "status": tk.status,
+                "priority": tk.priority,
+                "lead_id": str(tk.lead_id) if tk.lead_id else None,
+                "lead_name": tk.lead.name if tk.lead else None,
+            })
+        return Response(events)
+
+
+class AllNotesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        note_type = request.query_params.get("note_type")
+        lead_id = request.query_params.get("lead")
+        search = request.query_params.get("search", "")
+        page = int(request.query_params.get("page", 1))
+        page_size = int(request.query_params.get("page_size", 50))
+        qs = LeadNote.objects.select_related("lead", "user").all()
+        if note_type:
+            qs = qs.filter(note_type=note_type)
+        if lead_id:
+            qs = qs.filter(lead_id=lead_id)
+        if search:
+            qs = qs.filter(content__icontains=search)
+        total = qs.count()
+        offset = (page - 1) * page_size
+        notes = qs[offset:offset + page_size]
+        data = []
+        for n in notes:
+            data.append({
+                "id": str(n.id),
+                "lead_id": str(n.lead_id),
+                "lead_name": n.lead.name if n.lead else None,
+                "user_name": (n.user.get_full_name() or n.user.username) if n.user else None,
+                "content": n.content,
+                "note_type": n.note_type,
+                "created_at": n.created_at.isoformat(),
+            })
+        return Response({"count": total, "page": page, "page_size": page_size, "results": data})

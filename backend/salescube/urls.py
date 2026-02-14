@@ -2,9 +2,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    AllNotesView,
+    CalendarView,
     CategoryViewSet,
+    ContactViewSet,
+    EmailTemplateViewSet,
     FinancialOverviewView,
     FinancialRecordViewSet,
+    InvoiceItemViewSet,
+    InvoiceViewSet,
     LeadCommentViewSet,
     LeadTagAssignmentViewSet,
     LeadTagViewSet,
@@ -17,6 +23,8 @@ from .views import (
     SaleLineItemViewSet,
     SaleViewSet,
     TaskViewSet,
+    TicketMessageViewSet,
+    TicketViewSet,
 )
 
 router = DefaultRouter()
@@ -34,8 +42,17 @@ router.register("tags", LeadTagViewSet)
 router.register("tag-assignments", LeadTagAssignmentViewSet)
 router.register("payments", PaymentViewSet)
 router.register("attachments", SaleAttachmentViewSet)
+# Sprint 2
+router.register("contacts", ContactViewSet)
+router.register("invoices", InvoiceViewSet)
+router.register("invoice-items", InvoiceItemViewSet)
+router.register("tickets", TicketViewSet)
+router.register("ticket-messages", TicketMessageViewSet)
+router.register("email-templates", EmailTemplateViewSet)
 
 urlpatterns = [
     path("financial-overview/", FinancialOverviewView.as_view(), name="financial-overview"),
+    path("calendar/", CalendarView.as_view(), name="calendar"),
+    path("all-notes/", AllNotesView.as_view(), name="all-notes"),
     path("", include(router.urls)),
 ]

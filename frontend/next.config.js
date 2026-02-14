@@ -2,7 +2,7 @@
 const buildStamp = process.env.NEXT_PUBLIC_APP_VERSION || new Date().toISOString();
 
 const nextConfig = {
-  // output: 'standalone', // disabled for next start compatibility
+  // output: 'standalone', // disabled - docker-compose uses 'next start'
   reactStrictMode: true,
   transpilePackages: ['@xyflow/react'],
   env: {

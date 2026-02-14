@@ -82,6 +82,12 @@ const sections: SidebarSection[] = [
       { label: "Categorias", href: "/salescube/categories" },
       { label: "Vendas", href: "/salescube/sales" },
       { label: "Financeiro", href: "/salescube/financial" },
+      { label: "Contatos", href: "/salescube/contacts" },
+      { label: "Faturas", href: "/salescube/invoices" },
+      { label: "Tickets", href: "/salescube/tickets" },
+      { label: "Notas", href: "/salescube/notes" },
+      { label: "Calendario", href: "/salescube/calendar" },
+      { label: "Email", href: "/salescube/email" },
     ],
   },
   {

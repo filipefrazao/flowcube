@@ -415,3 +415,212 @@ class SaleAttachment(models.Model):
 
     def __str__(self):
         return f"Attachment: {self.file_name or self.file}"
+
+
+# ============================================================================
+# Sprint 2 Models - Contacts, Invoices, Tickets, Email
+# ============================================================================
+
+
+class Contact(models.Model):
+    SOURCE_CHOICES = [
+        ("manual", "Manual"),
+        ("import", "Import CSV"),
+        ("lead", "Convertido de Lead"),
+        ("whatsapp", "WhatsApp"),
+        ("website", "Website"),
+        ("referral", "Indicacao"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    email = models.EmailField(blank=True, default="")
+    phone = models.CharField(max_length=30, blank=True, default="")
+    company = models.CharField(max_length=200, blank=True, default="")
+    position = models.CharField(max_length=100, blank=True, default="")
+    cpf = models.CharField(max_length=14, blank=True, default="")
+    address = models.TextField(blank=True, default="")
+    city = models.CharField(max_length=100, blank=True, default="")
+    state = models.CharField(max_length=2, blank=True, default="")
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default="manual")
+    notes = models.TextField(blank=True, default="")
+    lead = models.ForeignKey(
+        Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="contacts"
+    )
+    tags = models.ManyToManyField(LeadTag, blank=True, related_name="contacts")
+    owner = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="owned_contacts"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["email"]),
+            models.Index(fields=["phone"]),
+            models.Index(fields=["cpf"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.email or self.phone})"
+
+
+class Invoice(models.Model):
+    STATUS_CHOICES = [
+        ("draft", "Rascunho"),
+        ("sent", "Enviada"),
+        ("paid", "Paga"),
+        ("overdue", "Vencida"),
+        ("cancelled", "Cancelada"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    number = models.CharField(max_length=20, unique=True)
+    lead = models.ForeignKey(
+        Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="invoices"
+    )
+    contact = models.ForeignKey(
+        "Contact", on_delete=models.SET_NULL, null=True, blank=True, related_name="invoices"
+    )
+    sale = models.ForeignKey(
+        Sale, on_delete=models.SET_NULL, null=True, blank=True, related_name="invoices"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    issue_date = models.DateField()
+    due_date = models.DateField()
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    discount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    notes = models.TextField(blank=True, default="")
+    payment_method = models.CharField(max_length=50, blank=True, default="")
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="created_invoices"
+    )
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-issue_date"]
+
+    def __str__(self):
+        return f"Fatura #{self.number} - R${self.total}"
+
+    def recalculate(self):
+        self.subtotal = sum(item.subtotal for item in self.items.all())
+        self.total = self.subtotal - self.discount + self.tax
+        self.save(update_fields=["subtotal", "total", "updated_at"])
+
+
+class InvoiceItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, blank=True, related_name="invoice_items"
+    )
+    description = models.CharField(max_length=300)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    class Meta:
+        ordering = ["id"]
+
+    def save(self, *args, **kwargs):
+        self.subtotal = self.unit_price * self.quantity
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.description} x{self.quantity} = R${self.subtotal}"
+
+
+class Ticket(models.Model):
+    STATUS_CHOICES = [
+        ("open", "Aberto"),
+        ("in_progress", "Em Andamento"),
+        ("waiting", "Aguardando"),
+        ("resolved", "Resolvido"),
+        ("closed", "Fechado"),
+    ]
+    PRIORITY_CHOICES = [
+        ("low", "Baixa"),
+        ("medium", "Media"),
+        ("high", "Alta"),
+        ("urgent", "Urgente"),
+    ]
+    CATEGORY_CHOICES = [
+        ("support", "Suporte"),
+        ("billing", "Financeiro"),
+        ("technical", "Tecnico"),
+        ("feature", "Solicitacao"),
+        ("complaint", "Reclamacao"),
+        ("other", "Outro"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    lead = models.ForeignKey(
+        Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="tickets"
+    )
+    contact = models.ForeignKey(
+        "Contact", on_delete=models.SET_NULL, null=True, blank=True, related_name="tickets"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="open")
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default="medium")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="support")
+    assigned_to = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_tickets"
+    )
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="created_tickets"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.status}] {self.title}"
+
+
+class TicketMessage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="messages")
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="ticket_messages"
+    )
+    content = models.TextField()
+    is_internal = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Msg #{self.ticket.title[:30]} by {self.author}"
+
+
+class EmailTemplate(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    subject = models.CharField(max_length=200)
+    body_html = models.TextField()
+    body_text = models.TextField(blank=True, default="")
+    category = models.CharField(max_length=50, blank=True, default="general")
+    variables = models.JSONField(default=list, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="email_templates"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name

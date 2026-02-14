@@ -363,3 +363,193 @@ export const saleKpiApi = {
   getKpis: (params?: Record<string, string>) =>
     apiClient.get<SaleKPIs>("/salescube/sales/kpis/", { params }),
 };
+
+// ============================================================================
+// Sprint 2 Types
+// ============================================================================
+
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  position: string;
+  cpf: string;
+  address: string;
+  city: string;
+  state: string;
+  source: string;
+  notes: string;
+  lead: string | null;
+  lead_name?: string;
+  tags: string[];
+  tag_names?: Array<{ id: string; name: string; color: string }>;
+  owner: string | null;
+  owner_name?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface Invoice {
+  id: string;
+  number: string;
+  lead: string | null;
+  lead_name?: string;
+  contact: string | null;
+  contact_name?: string;
+  sale: string | null;
+  status: string;
+  issue_date: string;
+  due_date: string;
+  subtotal: string;
+  discount: string;
+  tax: string;
+  total: string;
+  notes: string;
+  payment_method: string;
+  created_by: string | null;
+  created_by_name?: string;
+  paid_at: string | null;
+  items?: InvoiceItemType[];
+  created_at: string;
+}
+
+export interface InvoiceItemType {
+  id: string;
+  invoice: string;
+  product: string | null;
+  product_name?: string;
+  description: string;
+  quantity: string;
+  unit_price: string;
+  subtotal: string;
+}
+
+export interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  lead: string | null;
+  lead_name?: string;
+  contact: string | null;
+  contact_name?: string;
+  status: string;
+  priority: string;
+  category: string;
+  assigned_to: string | null;
+  assigned_to_name?: string;
+  messages?: TicketMessage[];
+  messages_count?: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface TicketMessage {
+  id: string;
+  ticket: string;
+  author: string | null;
+  author_name?: string;
+  content: string;
+  is_internal: boolean;
+  created_at: string;
+}
+
+export interface EmailTemplateType {
+  id: string;
+  name: string;
+  subject: string;
+  body_html: string;
+  body_text: string;
+  category: string;
+  variables: string[];
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  type: "task" | "ticket";
+  status: string;
+  priority: string;
+  lead_id?: string;
+  lead_name?: string;
+  assigned_to_name?: string;
+}
+
+// ============================================================================
+// Sprint 2 API Clients
+// ============================================================================
+
+export const contactApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/contacts/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/contacts/${id}/`),
+  create: (data: Partial<Contact>) => apiClient.post("/salescube/contacts/", data),
+  update: (id: string, data: Partial<Contact>) => apiClient.patch(`/salescube/contacts/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/contacts/${id}/`),
+  importCsv: (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiClient.post("/salescube/contacts/import-csv/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+  },
+  merge: (primaryId: string, mergeIds: string[]) => apiClient.post("/salescube/contacts/merge/", { primary_id: primaryId, merge_ids: mergeIds }),
+  export: () => apiClient.get("/salescube/contacts/export/", { responseType: "blob" }),
+};
+
+export const invoiceApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/invoices/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/invoices/${id}/`),
+  create: (data: Partial<Invoice>) => apiClient.post("/salescube/invoices/", data),
+  update: (id: string, data: Partial<Invoice>) => apiClient.patch(`/salescube/invoices/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/invoices/${id}/`),
+  addItem: (id: string, data: Partial<InvoiceItemType>) => apiClient.post(`/salescube/invoices/${id}/add-item/`, data),
+  removeItem: (id: string, itemId: string) => apiClient.delete(`/salescube/invoices/${id}/remove-item/${itemId}/`),
+  markPaid: (id: string) => apiClient.post(`/salescube/invoices/${id}/mark-paid/`),
+  summary: (params?: Record<string, string>) => apiClient.get("/salescube/invoices/summary/", { params }),
+};
+
+export const ticketApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/tickets/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/tickets/${id}/`),
+  create: (data: Partial<Ticket>) => apiClient.post("/salescube/tickets/", data),
+  update: (id: string, data: Partial<Ticket>) => apiClient.patch(`/salescube/tickets/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/tickets/${id}/`),
+  addMessage: (id: string, data: { content: string; is_internal?: boolean }) => apiClient.post(`/salescube/tickets/${id}/messages/`, data),
+  getMessages: (id: string) => apiClient.get(`/salescube/tickets/${id}/messages/`),
+  resolve: (id: string) => apiClient.post(`/salescube/tickets/${id}/resolve/`),
+  close: (id: string) => apiClient.post(`/salescube/tickets/${id}/close/`),
+  summary: (params?: Record<string, string>) => apiClient.get("/salescube/tickets/summary/", { params }),
+};
+
+export const emailTemplateApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/email-templates/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/email-templates/${id}/`),
+  create: (data: Partial<EmailTemplateType>) => apiClient.post("/salescube/email-templates/", data),
+  update: (id: string, data: Partial<EmailTemplateType>) => apiClient.patch(`/salescube/email-templates/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/email-templates/${id}/`),
+  send: (id: string, to: string, variables?: Record<string, string>) => apiClient.post(`/salescube/email-templates/${id}/send/`, { to, variables }),
+};
+
+export const calendarApi = {
+  getEvents: (params?: Record<string, string>) => apiClient.get<CalendarEvent[]>("/salescube/calendar/", { params }),
+};
+
+export const allNotesApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/all-notes/", { params }),
+};
+
+// ============================================================================
+// Ticket Summary Type
+// ============================================================================
+
+export interface TicketSummary {
+  total: number;
+  open: number;
+  in_progress: number;
+  waiting: number;
+  resolved: number;
+  closed: number;
+}
