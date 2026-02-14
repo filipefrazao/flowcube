@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { GitBranch, ArrowRight, Zap, Workflow, BarChart3, Sparkles } from "lucide-react";
+import { LayoutDashboard, ArrowRight, Zap, Workflow, BarChart3, Sparkles } from "lucide-react";
 import { GlassCard, PremiumButton } from "@/components/ui/premium";
 import { GradientBlobs, AuroraBackground } from "@/components/effects";
 
@@ -35,20 +35,20 @@ export default function HomePage() {
   const features = [
     {
       icon: Workflow,
-      title: "Visual Builder",
-      description: "Drag & drop workflow editor with real-time preview",
+      title: "Workflow Builder",
+      description: "Editor visual de workflows com drag & drop e preview em tempo real",
       color: "text-purple-400",
     },
     {
       icon: Zap,
-      title: "AI Powered",
-      description: "OpenAI, Claude, and DeepSeek integrations built-in",
+      title: "IA Integrada",
+      description: "Integracoes com OpenAI, Claude e DeepSeek nativas",
       color: "text-cyan-400",
     },
     {
       icon: BarChart3,
       title: "Analytics",
-      description: "Track conversions, drop-offs, and revenue in real-time",
+      description: "Acompanhe conversoes, funil e receita em tempo real",
       color: "text-pink-400",
     },
   ];
@@ -83,7 +83,7 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <GitBranch className="w-12 h-12 text-white" />
+                <LayoutDashboard className="w-12 h-12 text-white" />
               </motion.div>
               <motion.div
                 className="absolute -top-2 -right-2"
@@ -103,7 +103,7 @@ export default function HomePage() {
             transition={{ delay: 0.3 }}
           >
             <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
-              FlowCube
+              FRZ Platform
             </span>
           </motion.h1>
 
@@ -114,8 +114,8 @@ export default function HomePage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Build powerful conversational workflows with an intuitive visual editor.
-            Automate sales, support, and marketing with AI.
+            Plataforma unificada de CRM, Workflows, WhatsApp, Analytics e muito mais.
+            Automatize vendas, suporte e marketing com inteligencia artificial.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -133,7 +133,7 @@ export default function HomePage() {
                 icon={<ArrowRight className="w-5 h-5" />}
                 iconPosition="right"
               >
-                Get Started
+                Comecar
               </PremiumButton>
             </Link>
             <Link href="/login">
@@ -141,7 +141,7 @@ export default function HomePage() {
                 variant="outline"
                 size="lg"
               >
-                View Demo
+                Ver Demo
               </PremiumButton>
             </Link>
           </motion.div>
@@ -181,7 +181,7 @@ export default function HomePage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          FlowCube &copy; 2026 FRZ Group. All rights reserved.
+          FRZ Platform &copy; 2026 FRZ Group. Todos os direitos reservados.
         </motion.p>
       </div>
     </main>

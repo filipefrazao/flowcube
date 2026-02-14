@@ -46,7 +46,7 @@ const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
   const webhookUrl = useMemo(() => {
     if (config.webhook_url) return config.webhook_url;
     const path = config.webhook_path || "webhook";
-    return `https://flowcube.frzgroup.com.br/api/v1/webhooks/${path}`;
+    return `https://platform.frzgroup.com.br/api/v1/webhooks/${path}`;
   }, [config.webhook_url, config.webhook_path]);
 
   const displayUrl = useMemo(() => {

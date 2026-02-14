@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { authApi } from "@/lib/api";
-import { GitBranch, Loader2, AlertCircle, ArrowRight, Sparkles, Lock, User } from "lucide-react";
+import { LayoutDashboard, Loader2, AlertCircle, ArrowRight, Sparkles, Lock, User } from "lucide-react";
 import { GlassCard, PremiumButton } from "@/components/ui/premium";
 import { GradientBlobs, AuroraBackground } from "@/components/effects";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setSenha] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -36,17 +36,17 @@ export default function LoginPage() {
       const data = err?.response?.data;
 
       if (!err?.response) {
-        setError("Network error. Please try again.");
+        setError("Erro de rede. Tente novamente.");
       } else if (statusCode === 429 || data?.error_code === "rate_limit_exceeded") {
         const retryAfter = data?.retry_after;
         const retryMsg =
-          typeof retryAfter === "number" ? ` Please wait ${retryAfter}s and try again.` : "";
-        setError(data?.detail || `Too many login attempts.${retryMsg}`);
+          typeof retryAfter === "number" ? ` Aguarde ${retryAfter}s e tente novamente.` : "";
+        setError(data?.detail || `Muitas tentativas de login.${retryMsg}`);
       } else {
         setError(
           data?.non_field_errors?.[0] ||
             data?.detail ||
-            "Invalid credentials. Please try again."
+            "Credenciais invalidas. Tente novamente."
         );
       }
     } finally {
@@ -93,13 +93,13 @@ export default function LoginPage() {
               whileHover={{ scale: 1.05, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
             >
-              <GitBranch className="w-10 h-10 text-white" />
+              <LayoutDashboard className="w-10 h-10 text-white" />
             </motion.div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
-              FlowCube
+              FRZ Platform
             </h1>
             <p className="mt-2 text-gray-400">
-              Welcome back! Sign in to continue.
+              Bem-vindo! Faca login para continuar.
             </p>
           </motion.div>
 
@@ -127,7 +127,7 @@ export default function LoginPage() {
               transition={{ delay: 0.2 }}
             >
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                Username or Email
+                Usuario ou Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -147,14 +147,14 @@ export default function LoginPage() {
               </div>
             </motion.div>
 
-            {/* Password Field */}
+            {/* Senha Field */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Password
+                Senha
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -164,7 +164,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setSenha(e.target.value)}
                   onFocus={() => setFocused('password')}
                   onBlur={() => setFocused(null)}
                   required
@@ -192,7 +192,7 @@ export default function LoginPage() {
                 className="w-full"
                 disabled={loading || !hydrated}
               >
-                {loading ? "Signing in..." : "Sign in to FlowCube"}
+                {loading ? "Entrando..." : "Entrar na Plataforma"}
               </PremiumButton>
             </motion.div>
           </form>
@@ -205,9 +205,9 @@ export default function LoginPage() {
             transition={{ delay: 0.5 }}
           >
             <p className="text-sm text-gray-500">
-              Don't have an account?{" "}
+              Nao tem uma conta?{" "}
               <span className="text-purple-400 hover:text-purple-300 cursor-pointer transition-colors">
-                Contact your administrator
+                Contate o administrador
               </span>
             </p>
           </motion.div>
@@ -220,7 +220,7 @@ export default function LoginPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          FlowCube 4.0 &copy; 2026 FRZ Group
+          FRZ Platform &copy; 2026 FRZ Group
         </motion.p>
       </motion.div>
     </main>

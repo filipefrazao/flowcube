@@ -71,14 +71,14 @@ export default function ProjectDashboardPage() {
       identify:function(){w.__fc.q.push(['identify'].concat([].slice.call(arguments)))}
     };
     var e=d.createElement(s);e.async=1;
-    e.src='https://flowcube.frzgroup.com.br/fc.js';
+    e.src='https://platform.frzgroup.com.br/fc.js';
     d.head.appendChild(e);
   })(window,document,'script');
 
   FunnelCube.init({
     clientId: '${project?.client_id || 'YOUR_CLIENT_ID'}',
     clientSecret: '${project?.client_secret || 'YOUR_CLIENT_SECRET'}',
-    apiUrl: 'https://flowcube.frzgroup.com.br/api/v1/funnelcube'
+    apiUrl: 'https://platform.frzgroup.com.br/api/v1/funnelcube'
   });
 
   // Custom events:

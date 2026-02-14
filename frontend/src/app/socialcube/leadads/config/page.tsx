@@ -55,7 +55,7 @@ export default function LeadAdsConfigPage() {
   };
 
   const generatedWebhookUrl =
-    (typeof window !== "undefined" ? window.location.origin : "https://flowcube.frzgroup.com.br") +
+    (typeof window !== "undefined" ? window.location.origin : "https://platform.frzgroup.com.br") +
     "/api/v1/socialcube/leadads/webhook/";
 
   if (loading) {
