@@ -21,6 +21,8 @@ import '@xyflow/react/dist/style.css';
 
 import { useWorkflowStore, useTemporalStore } from '../../stores/workflowStore';
 import { nodeTypes, createNode } from './nodes';
+import { edgeTypes } from './edges/AnimatedEdge';
+import './nodes/workflow-nodes.css';
 import ElementsPalette from './panels/ElementsPalette';
 import PropertiesPanel from './panels/PropertiesPanel';
 import { EditorToolbar } from './EditorToolbar';
@@ -352,6 +354,7 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
@@ -371,7 +374,7 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
               variant={BackgroundVariant.Dots}
               gap={20}
               size={1}
-              color="#333333"
+              color="rgba(255,255,255,0.05)"
             />
             <Controls
               showZoom={false}

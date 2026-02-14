@@ -1,0 +1,166 @@
+/* Workflow Node Design System - FRZ Platform */
+
+:root {
+  --node-triggers-primary: #10B981;
+  --node-triggers-secondary: #065F46;
+  --node-actions-primary: #3B82F6;
+  --node-actions-secondary: #1E3A5F;
+  --node-conditions-primary: #F59E0B;
+  --node-conditions-secondary: #78350F;
+  --node-loops-primary: #8B5CF6;
+  --node-loops-secondary: #4C1D95;
+  --node-ai-primary: #EC4899;
+  --node-ai-secondary: #831843;
+  --node-messaging-primary: #06B6D4;
+  --node-messaging-secondary: #164E63;
+  --node-data-primary: #14B8A6;
+  --node-data-secondary: #134E4A;
+  --node-webhook-primary: #F97316;
+  --node-webhook-secondary: #7C2D12;
+  --node-integration-primary: #6366F1;
+  --node-integration-secondary: #312E81;
+  --node-telegram-primary: #2196F3;
+  --node-telegram-secondary: #0D47A1;
+  --node-premium-primary: #A855F7;
+  --node-premium-secondary: #581C87;
+  --node-analytics-primary: #EF4444;
+  --node-analytics-secondary: #7F1D1D;
+  --node-salescube-primary: #0EA5E9;
+  --node-salescube-secondary: #0C4A6E;
+  --status-idle: #6B7280;
+  --status-running: #3B82F6;
+  --status-success: #10B981;
+  --status-error: #EF4444;
+  --status-warning: #F59E0B;
+  --node-min-width: 224px;
+  --node-max-width: 320px;
+  --node-header-height: 36px;
+  --node-border-radius: 12px;
+  --node-handle-size: 10px;
+}
+
+.workflow-node {
+  min-width: var(--node-min-width);
+  max-width: var(--node-max-width);
+  border-radius: var(--node-border-radius);
+  background: rgb(17 24 39);
+  border: 1px solid rgb(55 65 81);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 150ms ease, border-color 150ms ease, transform 150ms ease;
+  overflow: hidden;
+}
+
+.workflow-node:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-color: rgb(75 85 99);
+  transform: translateY(-1px);
+}
+
+.workflow-node.selected {
+  border-color: rgb(99 102 241);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3), 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.workflow-node.dragging {
+  opacity: 0.8;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  transform: scale(1.02);
+}
+
+.workflow-node-header {
+  height: var(--node-header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.01em;
+}
+
+.workflow-node-body {
+  padding: 8px 12px 10px;
+}
+
+@keyframes pulse-running {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin-running {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-error {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+@keyframes check-success {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flow-dash {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+.node-status-running {
+  animation: pulse-running 1.5s ease-in-out infinite;
+}
+
+.node-status-error {
+  animation: pulse-error 1.5s ease-in-out infinite;
+}
+
+.node-status-success .status-icon {
+  animation: check-success 0.4s ease-out;
+}
+
+.node-spinner {
+  animation: spin-running 1s linear infinite;
+}
+
+.react-flow__handle {
+  width: var(--node-handle-size) !important;
+  height: var(--node-handle-size) !important;
+  border-radius: 50% !important;
+  background: rgb(75 85 99) !important;
+  border: 2px solid rgb(17 24 39) !important;
+  transition: all 150ms ease !important;
+}
+
+.react-flow__handle:hover,
+.react-flow__handle.connecting {
+  background: rgb(99 102 241) !important;
+  border-color: rgb(17 24 39) !important;
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+.animated-edge {
+  stroke-dasharray: 8 4;
+  animation: flow-dash 1s linear infinite;
+}
+
+.config-panel-enter {
+  animation: slide-in-right 200ms ease-out;
+}
+
+.config-tab-content {
+  animation: fade-in 150ms ease-out;
+}
