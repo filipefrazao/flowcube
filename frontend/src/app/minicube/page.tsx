@@ -19,9 +19,9 @@ export default function MiniCubePage() {
 
   useEffect(() => {
     Promise.all([
-      miniApi.classes.list().then(r => r.length || r.count || 0).catch(() => 0),
-      miniApi.locations.list().then(r => r.length || r.count || 0).catch(() => 0),
-      miniApi.students.list().then(r => r.length || r.count || 0).catch(() => 0),
+      miniApi.listClasses().then(r => r.count || 0).catch(() => 0),
+      miniApi.listPoles().then(r => r.count || 0).catch(() => 0),
+      miniApi.listCustomers().then(r => r.count || 0).catch(() => 0),
     ]).then(([turmas, polos, clientes]) => setStats({ turmas, polos, clientes }))
   }, [])
 

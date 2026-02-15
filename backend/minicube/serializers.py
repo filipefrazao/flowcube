@@ -162,20 +162,29 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
 
 class ContentBlockSerializer(serializers.ModelSerializer):
+    flow_name = serializers.SerializerMethodField()
+
     class Meta:
         model = ContentBlock
         fields = [
-            "id", "flow", "title", "type", "content", "order",
+            "id", "flow", "flow_name", "title", "type", "content", "order",
             "duration_minutes", "created_at", "updated_at",
         ]
+
+    def get_flow_name(self, obj):
+        return obj.flow.name if obj.flow else None
 
 
 class EducationFlowSerializer(serializers.ModelSerializer):
     blocks = ContentBlockSerializer(many=True, read_only=True)
+    class_name = serializers.SerializerMethodField()
 
     class Meta:
         model = EducationFlow
         fields = [
-            "id", "name", "description", "education_class", "active",
-            "blocks", "created_at", "updated_at",
+            "id", "name", "description", "education_class", "class_name",
+            "active", "blocks", "created_at", "updated_at",
         ]
+
+    def get_class_name(self, obj):
+        return obj.education_class.name if obj.education_class else None

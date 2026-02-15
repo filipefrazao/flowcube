@@ -119,6 +119,38 @@ class CustomerViewSet(viewsets.ModelViewSet):
             "pessoa_juridica": qs.filter(tipo_pessoa="juridica").count(),
         })
 
+    @action(detail=True, methods=["get"])
+    def enrollments(self, request, pk=None):
+        """Get all enrollments for this customer."""
+        customer = self.get_object()
+        enrollments = Enrollment.objects.filter(customer=customer).select_related(
+            "student", "course_class"
+        )
+        return Response(EnrollmentSerializer(enrollments, many=True).data)
+
+    @action(detail=True, methods=["get"], url_path="notes_list")
+    def notes_list(self, request, pk=None):
+        """Get customer notes."""
+        customer = self.get_object()
+        return Response({"notes": customer.notes or ""})
+
+    @action(detail=True, methods=["post"], url_path="add_note")
+    def add_note(self, request, pk=None):
+        """Add a note to customer (appended to notes field)."""
+        customer = self.get_object()
+        text = request.data.get("text", "").strip()
+        if not text:
+            return Response({"error": "text is required"}, status=status.HTTP_400_BAD_REQUEST)
+        from django.utils import timezone
+        timestamp = timezone.now().strftime("%d/%m/%Y %H:%M")
+        new_note = f"[{timestamp}] {text}"
+        if customer.notes:
+            customer.notes = f"{customer.notes}\n{new_note}"
+        else:
+            customer.notes = new_note
+        customer.save(update_fields=["notes"])
+        return Response({"notes": customer.notes})
+
 
 class ClassViewSet(viewsets.ModelViewSet):
     queryset = Class.objects.all()
@@ -228,15 +260,8 @@ class AttendanceViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def bulk_record(self, request):
-        """Bulk record attendance for a class session.
-        Expects: {
-            "course_class_id": "<uuid>",
-            "date": "2026-02-15",
-            "records": [
-                {"enrollment_id": "<uuid>", "present": true, "notes": ""},
-                ...
-            ]
-        }
+        """Bulk record attendance for a class session (legacy format).
+        Expects: { "course_class_id", "date", "records": [{"enrollment_id", "present", "notes"}] }
         """
         class_id = request.data.get("course_class_id")
         date = request.data.get("date")
@@ -254,6 +279,36 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             present = record.get("present", False)
             notes = record.get("notes", "")
             att, was_created = Attendance.objects.update_or_create(
+                enrollment_id=enrollment_id,
+                date=date,
+                defaults={
+                    "present": present,
+                    "notes": notes,
+                    "recorded_by": request.user,
+                },
+            )
+            created.append(AttendanceSerializer(att).data)
+
+        return Response({"count": len(created), "records": created}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["post"], url_path="bulk_create")
+    def bulk_create(self, request):
+        """Bulk create/update attendance records (frontend format).
+        Expects: { "records": [{"enrollment": "<uuid>", "date": "2026-02-15", "present": true, "notes": ""}] }
+        """
+        records = request.data.get("records", [])
+        if not records:
+            return Response({"error": "records is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        created = []
+        for record in records:
+            enrollment_id = record.get("enrollment")
+            date = record.get("date")
+            present = record.get("present", False)
+            notes = record.get("notes", "")
+            if not enrollment_id or not date:
+                continue
+            att, _ = Attendance.objects.update_or_create(
                 enrollment_id=enrollment_id,
                 date=date,
                 defaults={

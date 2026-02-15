@@ -38,6 +38,7 @@ def api_root(request):
             "achievements": "/api/v1/achievements/",
             "chatcube": "/api/v1/chatcube/",
             "salescube": "/api/v1/salescube/",
+            "minicube": "/api/v1/minicube/",
             "admin": "/admin/",
         }
     })
@@ -82,6 +83,7 @@ urlpatterns = [
     path('api/v1/', include('achievements.urls')),
     path('api/v1/chatcube/', include('chatcube.urls')),
     path('api/v1/salescube/', include('salescube.urls')),
+    path('api/v1/minicube/', include('minicube.urls')),
     path('api/', api_root, name='api-root'),
     path('', api_root, name='root'),
 ]
