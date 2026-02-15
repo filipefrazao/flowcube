@@ -138,18 +138,20 @@ class Command(BaseCommand):
             self.stdout.write(f"  {k}: {v}")
 
     def fetch_all(self, endpoint, params=None):
-        """Paginate through all results from a PROD API endpoint."""
+        """Paginate through all results from a PROD API endpoint.
+        PROD uses 'limit' (not 'page_size') and 'page' for pagination.
+        """
         url = f"{PROD_BASE}/{endpoint}/"
         all_results = []
         page = 1
-        base_params = {"format": "json", "page_size": PAGE_SIZE}
+        base_params = {"format": "json", "limit": PAGE_SIZE}
         if params:
             base_params.update(params)
 
-        while url:
+        while True:
             base_params["page"] = page
             try:
-                resp = self.session.get(url, params=base_params, timeout=30)
+                resp = self.session.get(url, params=base_params, timeout=60)
                 resp.raise_for_status()
                 data = resp.json()
             except Exception as e:
@@ -159,15 +161,12 @@ class Command(BaseCommand):
             results = data.get("results", [])
             all_results.extend(results)
 
-            if data.get("next"):
-                page += 1
-                # Reset URL to base - use page param
-                base_params["page"] = page
-            else:
+            if not data.get("next"):
                 break
+            page += 1
 
-            if page % 10 == 0:
-                self.stdout.write(f"  ... fetched {len(all_results)} records (page {page})")
+            if len(all_results) % 1000 == 0:
+                self.stdout.write(f"  ... fetched {len(all_results)} records")
 
         return all_results
 
