@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-backend
     restart: unless-stopped
-    command: python manage.py runserver 0.0.0.0:8000
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
       - ./backend:/app
     environment:

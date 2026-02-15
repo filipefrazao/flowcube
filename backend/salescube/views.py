@@ -1137,14 +1137,15 @@ class TicketViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="summary")
     def summary(self, request):
         qs = self.filter_queryset(self.get_queryset())
-        by_status = list(qs.values("status").annotate(count=Count("id")).order_by("status"))
-        by_priority = list(qs.values("priority").annotate(count=Count("id")).order_by("priority"))
-        by_category = list(qs.values("category").annotate(count=Count("id")).order_by("category"))
+        total = qs.count()
+        status_counts = dict(qs.values_list("status").annotate(count=Count("id")).values_list("status", "count"))
         return Response({
-            "total": qs.count(),
-            "by_status": [{"status": s["status"], "count": s["count"]} for s in by_status],
-            "by_priority": [{"priority": p["priority"], "count": p["count"]} for p in by_priority],
-            "by_category": [{"category": c["category"], "count": c["count"]} for c in by_category],
+            "total": total,
+            "open": status_counts.get("open", 0),
+            "in_progress": status_counts.get("in_progress", 0),
+            "waiting": status_counts.get("waiting", 0),
+            "resolved": status_counts.get("resolved", 0),
+            "closed": status_counts.get("closed", 0),
         })
 
 

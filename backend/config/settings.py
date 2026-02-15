@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 import dj_database_url
 
@@ -9,6 +10,8 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -19,6 +22,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     # Local apps
     'workflows',
     'django_celery_beat',
@@ -29,11 +33,13 @@ INSTALLED_APPS = [
     'ai_agents',
     'achievements',
     'chatcube',
+    'salescube',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -50,6 +56,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://46.224.59.249:3010",
     "https://flowcube.frzgroup.com.br",
+    "https://platform.frzgroup.com.br",
+    "https://sc.frzgroup.com.br",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://flowcube.frzgroup.com.br",
+    "https://platform.frzgroup.com.br",
+    "https://sc.frzgroup.com.br",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -95,13 +108,38 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'COERCE_DECIMAL_TO_STRING': False,
 }
+
+# JWT - Aligned with SalesCube PROD
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer', 'Token'),
+}
+
+# SalesCube PROD integration
+SALESCUBE_API_URL = os.environ.get('SALESCUBE_API_URL', 'https://api.frzglobal.com.br')
+SALESCUBE_API_TOKEN = os.environ.get('SALESCUBE_API_TOKEN', '')
 
 CHANNEL_LAYERS = {
     "default": {
@@ -123,5 +161,20 @@ LOGGING = {
     'root': {
         'handlers': ['console'],
         'level': 'INFO',
+    },
+}
+
+# Celery
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# WhiteNoise
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }

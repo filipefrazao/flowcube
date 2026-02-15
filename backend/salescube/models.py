@@ -144,6 +144,7 @@ class Task(models.Model):
         ("pending", "Pending"),
         ("in_progress", "In Progress"),
         ("completed", "Completed"),
+        ("blocked", "Blocked"),
         ("cancelled", "Cancelled"),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
