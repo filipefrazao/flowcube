@@ -31,3 +31,7 @@ Thumbs.db
 *.backup
 *.bak-*
 *.backup-*
+
+# GeoIP databases
+backend/geoip/
+backend/staticfiles/
