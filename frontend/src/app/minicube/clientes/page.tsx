@@ -1,51 +1,137 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Users, Plus, Search, Loader2, X } from "lucide-react";
-import { miniApi, type Student, type MiniClass, type Location } from "@/lib/miniApi";
+import { useEffect, useState, useCallback } from "react";
+import {
+  Users, Plus, Search, Loader2, X, Filter, ChevronLeft, ChevronRight,
+  Pencil, Trash2, Eye, User, FileText, MessageSquare, ShoppingCart,
+  GraduationCap, ClipboardList, StickyNote, Camera, Building2,
+  Phone, Mail, MapPin,
+} from "lucide-react";
+import { miniApi, type Customer, type Pole, type Enrollment } from "@/lib/miniApi";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 25;
+const STATES_BR = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
+  "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+];
+const STATUS_OPTIONS = [
+  { value: "ativo", label: "Ativo", color: "bg-green-500/20 text-green-400 border-green-500/30" },
+  { value: "inativo", label: "Inativo", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
+  { value: "prospect", label: "Prospect", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+];
+const TIPO_PESSOA_OPTIONS = [
+  { value: "fisica", label: "Pessoa Fisica" },
+  { value: "juridica", label: "Pessoa Juridica" },
+];
+
+const TABS = [
+  { key: "info", label: "Info", icon: User },
+  { key: "cadastro", label: "Cadastro", icon: FileText },
+  { key: "chat", label: "Chat", icon: MessageSquare },
+  { key: "leads", label: "Leads", icon: Eye },
+  { key: "vendas", label: "Vendas", icon: ShoppingCart },
+  { key: "turmas", label: "Turmas", icon: GraduationCap },
+  { key: "tarefas", label: "Tarefas", icon: ClipboardList },
+  { key: "notas", label: "Notas", icon: StickyNote },
+  { key: "foto", label: "Foto", icon: Camera },
+];
+
+const emptyForm = (): Partial<Customer> => ({
+  name: "", email: "", phone: "", cpf: "", cnpj: "",
+  tipo_pessoa: "fisica", company: "", position: "",
+  address: "", city: "", state: "", zip_code: "",
+  photo_url: "", birth_date: null, notes: "",
+  status: "ativo", pole: null,
+});
 
 export default function ClientesPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [classes, setClasses] = useState<MiniClass[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [poles, setPoles] = useState<Pole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Search & filters
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterTipoPessoa, setFilterTipoPessoa] = useState("");
+  const [filterState, setFilterState] = useState("");
+  const [filterCity, setFilterCity] = useState("");
+  const [filterPole, setFilterPole] = useState("");
+  const [filterCreatedAfter, setFilterCreatedAfter] = useState("");
+  const [filterCreatedBefore, setFilterCreatedBefore] = useState("");
+  const [sortField, setSortField] = useState("name");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Create/Edit modal
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Student>>({
-    name: "", email: "", phone: "", cpf: "", status: "active", student_class: "", location: "",
-  });
+  const [form, setForm] = useState<Partial<Customer>>(emptyForm());
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  // Detail drawer
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [activeTab, setActiveTab] = useState("info");
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [customerEnrollments, setCustomerEnrollments] = useState<Enrollment[]>([]);
+  const [noteText, setNoteText] = useState("");
+  const [customerNotes, setCustomerNotes] = useState("");
 
-  async function loadData() {
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [studData, classData, locData] = await Promise.all([
-        miniApi.listStudents({ search }),
-        miniApi.listClasses(),
-        miniApi.listLocations(),
+      const params: Record<string, any> = {
+        limit: PAGE_SIZE,
+        offset: (page - 1) * PAGE_SIZE,
+        ordering: sortField,
+      };
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (filterStatus) params.status = filterStatus;
+      if (filterTipoPessoa) params.tipo_pessoa = filterTipoPessoa;
+      if (filterState) params.state = filterState;
+      if (filterCity) params.city = filterCity;
+      if (filterPole) params.pole = filterPole;
+      if (filterCreatedAfter) params.created_after = filterCreatedAfter;
+      if (filterCreatedBefore) params.created_before = filterCreatedBefore;
+
+      const [custData, poleData] = await Promise.all([
+        miniApi.listCustomers(params),
+        miniApi.listPoles({ limit: 200 }),
       ]);
-      setStudents(studData.results || []);
-      setClasses(classData.results || []);
-      setLocations(locData.results || []);
+      setCustomers(custData.results || []);
+      setTotalCount(custData.count || 0);
+      setPoles(poleData.results || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
-  }
+  }, [page, debouncedSearch, filterStatus, filterTipoPessoa, filterState, filterCity, filterPole, filterCreatedAfter, filterCreatedBefore, sortField]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   function openCreate() {
     setEditingId(null);
-    setFormData({ name: "", email: "", phone: "", cpf: "", status: "active", student_class: "", location: "" });
+    setForm(emptyForm());
     setShowForm(true);
   }
 
-  function openEdit(s: Student) {
-    setEditingId(s.id);
-    setFormData({
-      name: s.name, email: s.email, phone: s.phone, cpf: s.cpf,
-      status: s.status, student_class: s.student_class || "", location: s.location || "",
+  function openEdit(c: Customer) {
+    setEditingId(c.id);
+    setForm({
+      name: c.name, email: c.email, phone: c.phone, cpf: c.cpf, cnpj: c.cnpj,
+      tipo_pessoa: c.tipo_pessoa, company: c.company, position: c.position,
+      address: c.address, city: c.city, state: c.state, zip_code: c.zip_code,
+      photo_url: c.photo_url, birth_date: c.birth_date,
+      notes: c.notes, status: c.status, pole: c.pole,
     });
     setShowForm(true);
   }
@@ -53,164 +139,563 @@ export default function ClientesPage() {
   async function handleSave() {
     try {
       setSaving(true);
-      const payload = { ...formData };
-      // Send null for empty FK fields
-      if (!payload.student_class) payload.student_class = null as any;
-      if (!payload.location) payload.location = null as any;
+      const payload: Record<string, any> = { ...form };
+      if (!payload.pole) payload.pole = null;
+      if (!payload.birth_date) payload.birth_date = null;
       if (editingId) {
-        await miniApi.updateStudent(editingId, payload);
+        await miniApi.updateCustomer(editingId, payload);
       } else {
-        await miniApi.createStudent(payload);
+        await miniApi.createCustomer(payload);
       }
       setShowForm(false);
       setEditingId(null);
-      loadData();
-    } catch (err) { console.error(err); }
-    finally { setSaving(false); }
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.response?.data ? JSON.stringify(err.response.data) : "Erro ao salvar");
+    } finally { setSaving(false); }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Tem certeza que deseja excluir este aluno?")) return;
-    try { await miniApi.deleteStudent(id); loadData(); } catch (err) { console.error(err); }
+    if (!confirm("Excluir este cliente?")) return;
+    try { await miniApi.deleteCustomer(id); fetchData(); if (selectedCustomer?.id === id) setSelectedCustomer(null); } catch (err) { console.error(err); }
   }
 
-  const statusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      active: "bg-green-500/20 text-green-400",
-      inactive: "bg-gray-500/20 text-gray-400",
-      graduated: "bg-blue-500/20 text-blue-400",
-    };
-    const labels: Record<string, string> = { active: "Ativo", inactive: "Inativo", graduated: "Formado" };
-    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || colors.active}`}>{labels[status] || status}</span>;
-  };
+  async function openDetail(c: Customer) {
+    setSelectedCustomer(c);
+    setActiveTab("info");
+    setDetailLoading(true);
+    try {
+      const [enroll, notesData] = await Promise.all([
+        miniApi.getCustomerEnrollments(c.id),
+        miniApi.getCustomerNotes(c.id),
+      ]);
+      setCustomerEnrollments(enroll || []);
+      setCustomerNotes(notesData.notes || "");
+    } catch (err) { console.error(err); }
+    finally { setDetailLoading(false); }
+  }
+
+  async function handleAddNote() {
+    if (!noteText.trim() || !selectedCustomer) return;
+    try {
+      const result = await miniApi.addCustomerNote(selectedCustomer.id, noteText.trim());
+      setCustomerNotes(result.notes || "");
+      setNoteText("");
+    } catch (err) { console.error(err); }
+  }
+
+  async function handleDetailSave() {
+    if (!selectedCustomer) return;
+    try {
+      setSaving(true);
+      await miniApi.updateCustomer(selectedCustomer.id, form);
+      fetchData();
+      const updated = await miniApi.getCustomer(selectedCustomer.id);
+      setSelectedCustomer(updated);
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.response?.data ? JSON.stringify(err.response.data) : "Erro ao salvar");
+    } finally { setSaving(false); }
+  }
+
+  // When selectedCustomer changes, update form for inline editing
+  useEffect(() => {
+    if (selectedCustomer) {
+      setForm({
+        name: selectedCustomer.name, email: selectedCustomer.email, phone: selectedCustomer.phone,
+        cpf: selectedCustomer.cpf, cnpj: selectedCustomer.cnpj, tipo_pessoa: selectedCustomer.tipo_pessoa,
+        company: selectedCustomer.company, position: selectedCustomer.position,
+        address: selectedCustomer.address, city: selectedCustomer.city, state: selectedCustomer.state,
+        zip_code: selectedCustomer.zip_code, photo_url: selectedCustomer.photo_url,
+        birth_date: selectedCustomer.birth_date, notes: selectedCustomer.notes,
+        status: selectedCustomer.status, pole: selectedCustomer.pole,
+      });
+    }
+  }, [selectedCustomer]);
+
+  function getStatusBadge(status: string) {
+    const opt = STATUS_OPTIONS.find((s) => s.value === status);
+    return <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", opt?.color || "bg-gray-500/20 text-gray-400 border-gray-500/30")}>{opt?.label || status}</span>;
+  }
+
+  function clearFilters() {
+    setFilterStatus(""); setFilterTipoPessoa(""); setFilterState(""); setFilterCity("");
+    setFilterPole(""); setFilterCreatedAfter(""); setFilterCreatedBefore(""); setSearch(""); setSortField("name");
+  }
+
+  const hasActiveFilters = filterStatus || filterTipoPessoa || filterState || filterCity || filterPole || filterCreatedAfter || filterCreatedBefore || search;
+
+  const inputClass = "w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500 transition-colors";
+  const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
+  const selectClass = "px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500";
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-gray-950">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-gray-700 bg-gray-900 flex items-center justify-between px-6">
+        {/* Header */}
+        <header className="h-14 border-b border-gray-800 bg-gray-950 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-indigo-400" />
-            <h1 className="text-lg font-semibold text-gray-100">Alunos</h1>
+            <h1 className="text-lg font-semibold text-gray-100">Clientes</h1>
+            <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">{totalCount}</span>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
-            <Plus className="w-4 h-4" /> Novo Aluno
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
+            <Plus className="w-4 h-4" /> Novo Cliente
           </button>
         </header>
 
-        <div className="p-6 flex-1 overflow-auto">
-          <div className="mb-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder="Buscar por nome ou email..." value={search}
-                onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && loadData()}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-indigo-500" />
+        {/* Filters */}
+        <div className="border-b border-gray-800 bg-gray-950/50 px-6 py-3 shrink-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="text" placeholder="Buscar nome, email, CPF, telefone..." value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-indigo-500 transition-colors" />
             </div>
+            <button onClick={() => setShowFilters(!showFilters)}
+              className={cn("flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors",
+                showFilters ? "border-indigo-500 text-indigo-400 bg-indigo-500/10" : "border-gray-800 text-gray-400 hover:border-gray-600")}>
+              <Filter className="w-4 h-4" /> Filtros
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-indigo-400" />}
+            </button>
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Limpar filtros</button>
+            )}
           </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
-          ) : students.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhum aluno encontrado</p>
-            </div>
-          ) : (
-            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Nome</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Email</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Telefone</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">CPF</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Turma</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Polo</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Status</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">Acoes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((s) => (
-                    <tr key={s.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                      <td className="px-4 py-3 text-sm text-gray-100 font-medium">{s.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{s.email || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{s.phone || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{s.cpf || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{s.class_name || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{s.location_name || "-"}</td>
-                      <td className="px-4 py-3">{statusBadge(s.status)}</td>
-                      <td className="px-4 py-3 text-right space-x-2">
-                        <button onClick={() => openEdit(s)} className="text-indigo-400 hover:text-indigo-300 text-sm">Editar</button>
-                        <button onClick={() => handleDelete(s.id)} className="text-red-400 hover:text-red-300 text-sm">Excluir</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {showFilters && (
+            <div className="mt-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }} className={selectClass}>
+                <option value="">Todos Status</option>
+                {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+              <select value={filterTipoPessoa} onChange={(e) => { setFilterTipoPessoa(e.target.value); setPage(1); }} className={selectClass}>
+                <option value="">Tipo Pessoa</option>
+                {TIPO_PESSOA_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+              <select value={filterState} onChange={(e) => { setFilterState(e.target.value); setPage(1); }} className={selectClass}>
+                <option value="">Estado/UF</option>
+                {STATES_BR.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <input type="text" placeholder="Cidade" value={filterCity} onChange={(e) => { setFilterCity(e.target.value); setPage(1); }} className={selectClass} />
+              <select value={filterPole} onChange={(e) => { setFilterPole(e.target.value); setPage(1); }} className={selectClass}>
+                <option value="">Todos Polos</option>
+                {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <select value={sortField} onChange={(e) => { setSortField(e.target.value); setPage(1); }} className={selectClass}>
+                <option value="name">Ordenar: Nome A-Z</option>
+                <option value="-name">Ordenar: Nome Z-A</option>
+                <option value="-created_at">Ordenar: Mais Recente</option>
+                <option value="created_at">Ordenar: Mais Antigo</option>
+                <option value="city">Ordenar: Cidade</option>
+                <option value="state">Ordenar: Estado</option>
+              </select>
+              <div className="flex items-center gap-2">
+                <input type="date" placeholder="De" value={filterCreatedAfter} onChange={(e) => { setFilterCreatedAfter(e.target.value); setPage(1); }}
+                  className={cn(selectClass, "flex-1")} title="Data inicio" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="date" placeholder="Ate" value={filterCreatedBefore} onChange={(e) => { setFilterCreatedBefore(e.target.value); setPage(1); }}
+                  className={cn(selectClass, "flex-1")} title="Data fim" />
+              </div>
             </div>
           )}
         </div>
 
+        {/* Content: Table + Detail Drawer */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Table */}
+          <div className={cn("flex-1 overflow-auto p-6 transition-all", selectedCustomer ? "w-1/2" : "w-full")}>
+            {loading ? (
+              <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+            ) : customers.length === 0 ? (
+              <div className="text-center py-20 text-gray-500">
+                <Users className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium text-gray-400">Nenhum cliente encontrado</p>
+                <p className="text-sm mt-1">Cadastre um novo cliente para comecar.</p>
+              </div>
+            ) : (
+              <>
+                <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-800">
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">CPF/CNPJ</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">UF</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cadastro</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800/50">
+                      {customers.map((c) => (
+                        <tr key={c.id} onClick={() => openDetail(c)}
+                          className={cn("hover:bg-gray-800/40 transition-colors cursor-pointer",
+                            selectedCustomer?.id === c.id && "bg-indigo-500/10 border-l-2 border-l-indigo-500")}>
+                          <td className="px-4 py-3">
+                            <span className="text-sm font-medium text-gray-100">{c.name}</span>
+                            {c.company && <p className="text-xs text-gray-500">{c.company}</p>}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-300">{c.cpf || c.cnpj || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-gray-300 max-w-[150px] truncate">{c.email || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-gray-300">{c.phone || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-gray-300">{c.city || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-gray-300">{c.state || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-gray-400">{c.tipo_pessoa === "juridica" ? "PJ" : "PF"}</td>
+                          <td className="px-4 py-3">{getStatusBadge(c.status)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-400">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+                    <span>{totalCount} cliente{totalCount !== 1 ? "s" : ""}</span>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}
+                        className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="px-3 py-1 text-gray-300">Pagina {page} de {totalPages}</span>
+                      <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages}
+                        className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Detail Drawer */}
+          {selectedCustomer && (
+            <div className="w-1/2 border-l border-gray-800 bg-gray-950 flex flex-col overflow-hidden">
+              {/* Drawer header */}
+              <div className="border-b border-gray-800 px-6 py-4 shrink-0">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold text-gray-100">{selectedCustomer.name}</h2>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEdit(selectedCustomer)} className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-indigo-400 transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDelete(selectedCustomer.id)} className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-red-400 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setSelectedCustomer(null)} className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-gray-200 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  {selectedCustomer.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {selectedCustomer.email}</span>}
+                  {selectedCustomer.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {selectedCustomer.phone}</span>}
+                  {selectedCustomer.city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {selectedCustomer.city}/{selectedCustomer.state}</span>}
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="border-b border-gray-800 px-6 shrink-0 overflow-x-auto">
+                <div className="flex gap-0 min-w-max">
+                  {TABS.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                        className={cn("flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap",
+                          activeTab === tab.key
+                            ? "border-indigo-500 text-indigo-400"
+                            : "border-transparent text-gray-500 hover:text-gray-300")}>
+                        <Icon className="w-3.5 h-3.5" /> {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 overflow-auto p-6">
+                {detailLoading ? (
+                  <div className="flex items-center justify-center py-10"><Loader2 className="w-6 h-6 text-indigo-400 animate-spin" /></div>
+                ) : (
+                  <>
+                    {/* TAB: Info */}
+                    {activeTab === "info" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className={labelClass}>Nome</label>
+                            <input type="text" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Email</label>
+                            <input type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Telefone</label>
+                            <input type="text" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>CPF</label>
+                            <input type="text" value={form.cpf || ""} onChange={(e) => setForm({ ...form, cpf: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>CNPJ</label>
+                            <input type="text" value={form.cnpj || ""} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Status</label>
+                            <select value={form.status || "ativo"} onChange={(e) => setForm({ ...form, status: e.target.value as any })} className={inputClass}>
+                              {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className={labelClass}>Cidade</label>
+                            <input type="text" value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Estado</label>
+                            <select value={form.state || ""} onChange={(e) => setForm({ ...form, state: e.target.value })} className={inputClass}>
+                              <option value="">Selecione...</option>
+                              {STATES_BR.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex justify-end pt-2">
+                          <button onClick={handleDetailSave} disabled={saving}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                            {saving && <Loader2 className="w-4 h-4 animate-spin" />} Salvar Alteracoes
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB: Cadastro */}
+                    {activeTab === "cadastro" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className={labelClass}>Tipo Pessoa</label>
+                            <select value={form.tipo_pessoa || "fisica"} onChange={(e) => setForm({ ...form, tipo_pessoa: e.target.value as any })} className={inputClass}>
+                              {TIPO_PESSOA_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                            </select>
+                          </div>
+                          <div><label className={labelClass}>Data Nascimento</label>
+                            <input type="date" value={form.birth_date || ""} onChange={(e) => setForm({ ...form, birth_date: e.target.value || null })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Empresa</label>
+                            <input type="text" value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Cargo</label>
+                            <input type="text" value={form.position || ""} onChange={(e) => setForm({ ...form, position: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Endereco</label>
+                            <input type="text" value={form.address || ""} onChange={(e) => setForm({ ...form, address: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>CEP</label>
+                            <input type="text" value={form.zip_code || ""} onChange={(e) => setForm({ ...form, zip_code: e.target.value })} className={inputClass} /></div>
+                          <div><label className={labelClass}>Polo</label>
+                            <select value={form.pole || ""} onChange={(e) => setForm({ ...form, pole: e.target.value || null })} className={inputClass}>
+                              <option value="">Nenhum</option>
+                              {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+                          <p className="text-xs text-gray-500 mb-1">Data de Cadastro</p>
+                          <p className="text-sm text-gray-200">{new Date(selectedCustomer.created_at).toLocaleString("pt-BR")}</p>
+                        </div>
+                        <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+                          <p className="text-xs text-gray-500 mb-1">Ultima Atualizacao</p>
+                          <p className="text-sm text-gray-200">{new Date(selectedCustomer.updated_at).toLocaleString("pt-BR")}</p>
+                        </div>
+                        <div className="flex justify-end pt-2">
+                          <button onClick={handleDetailSave} disabled={saving}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                            {saving && <Loader2 className="w-4 h-4 animate-spin" />} Salvar Alteracoes
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB: Chat */}
+                    {activeTab === "chat" && (
+                      <div className="text-center py-10 text-gray-500">
+                        <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                        <p className="text-sm">Conversas vinculadas ao cliente</p>
+                        <p className="text-xs text-gray-600 mt-1">Integracao com ChatCube/WhatsApp em breve.</p>
+                      </div>
+                    )}
+
+                    {/* TAB: Leads */}
+                    {activeTab === "leads" && (
+                      <div className="text-center py-10 text-gray-500">
+                        <Eye className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                        <p className="text-sm">Leads associados ao cliente</p>
+                        {selectedCustomer.lead ? (
+                          <p className="text-xs text-indigo-400 mt-2">Lead vinculado: {selectedCustomer.lead}</p>
+                        ) : (
+                          <p className="text-xs text-gray-600 mt-1">Nenhum lead vinculado.</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* TAB: Vendas */}
+                    {activeTab === "vendas" && (
+                      <div className="text-center py-10 text-gray-500">
+                        <ShoppingCart className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                        <p className="text-sm">Vendas associadas ao cliente</p>
+                        <p className="text-xs text-gray-600 mt-1">Integracao com SalesCube em breve.</p>
+                      </div>
+                    )}
+
+                    {/* TAB: Turmas */}
+                    {activeTab === "turmas" && (
+                      <div>
+                        {customerEnrollments.length === 0 ? (
+                          <div className="text-center py-10 text-gray-500">
+                            <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                            <p className="text-sm">Nenhuma matricula encontrada.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {customerEnrollments.map((e) => (
+                              <div key={e.id} className="bg-gray-900 rounded-lg border border-gray-800 p-4 flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-200">{e.class_name || "Turma"}</p>
+                                  <p className="text-xs text-gray-500">Matriculado em {new Date(e.enrolled_at).toLocaleDateString("pt-BR")}</p>
+                                </div>
+                                <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+                                  e.status === "confirmado" ? "bg-green-500/20 text-green-400 border-green-500/30" :
+                                  e.status === "pendente" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
+                                  e.status === "ausente" ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                                  e.status === "transferido" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" :
+                                  "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                                )}>
+                                  {e.status === "pendente" ? "Pendente" : e.status === "confirmado" ? "Confirmado" : e.status === "ausente" ? "Ausente" : e.status === "sem_contato" ? "Sem Contato" : e.status === "transferido" ? "Transferido" : e.status}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* TAB: Tarefas */}
+                    {activeTab === "tarefas" && (
+                      <div className="text-center py-10 text-gray-500">
+                        <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                        <p className="text-sm">Tarefas vinculadas ao cliente</p>
+                        <p className="text-xs text-gray-600 mt-1">Integracao com SalesCube Tasks em breve.</p>
+                      </div>
+                    )}
+
+                    {/* TAB: Notas */}
+                    {activeTab === "notas" && (
+                      <div>
+                        <div className="mb-4">
+                          <div className="flex gap-2">
+                            <input type="text" value={noteText} onChange={(e) => setNoteText(e.target.value)}
+                              placeholder="Adicionar uma nota..."
+                              onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
+                              className={cn(inputClass, "flex-1")} />
+                            <button onClick={handleAddNote} disabled={!noteText.trim()}
+                              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors">
+                              Adicionar
+                            </button>
+                          </div>
+                        </div>
+                        {customerNotes ? (
+                          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 space-y-2">
+                            {customerNotes.split("\n").filter(Boolean).reverse().map((note, i) => (
+                              <div key={i} className="text-sm text-gray-300 border-b border-gray-800 pb-2 last:border-0 last:pb-0">
+                                {note}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <StickyNote className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                            <p className="text-sm">Nenhuma nota.</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* TAB: Foto */}
+                    {activeTab === "foto" && (
+                      <div className="text-center">
+                        <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gray-900 border-2 border-gray-800 flex items-center justify-center overflow-hidden">
+                          {selectedCustomer.photo_url ? (
+                            <img src={selectedCustomer.photo_url} alt={selectedCustomer.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-16 h-16 text-gray-700" />
+                          )}
+                        </div>
+                        <div className="max-w-sm mx-auto">
+                          <label className={labelClass}>URL da Foto</label>
+                          <input type="url" value={form.photo_url || ""} onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
+                            placeholder="https://..." className={inputClass} />
+                          <button onClick={handleDetailSave} disabled={saving}
+                            className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors w-full">
+                            Salvar Foto
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Create/Edit Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Aluno" : "Novo Aluno"}</h2>
-                <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-gray-400" /></button>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Cliente" : "Novo Cliente"}</h2>
+                <button onClick={() => setShowForm(false)} className="p-1 rounded-md hover:bg-gray-800 transition-colors">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
               </div>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Nome *</label>
-                  <input type="text" value={formData.name || ""} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
-                </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-1">Email</label>
-                    <input type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                  <div><label className={labelClass}>Nome *</label>
+                    <input type="text" value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome completo" className={inputClass} /></div>
+                  <div><label className={labelClass}>Email</label>
+                    <input type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@exemplo.com" className={inputClass} /></div>
+                  <div><label className={labelClass}>Telefone</label>
+                    <input type="text" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(00) 00000-0000" className={inputClass} /></div>
+                  <div><label className={labelClass}>Tipo Pessoa</label>
+                    <select value={form.tipo_pessoa || "fisica"} onChange={(e) => setForm({ ...form, tipo_pessoa: e.target.value as any })} className={inputClass}>
+                      {TIPO_PESSOA_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-1">Telefone</label>
-                    <input type="text" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                  <div><label className={labelClass}>CPF</label>
+                    <input type="text" value={form.cpf || ""} onChange={(e) => setForm({ ...form, cpf: e.target.value })} placeholder="000.000.000-00" className={inputClass} /></div>
+                  <div><label className={labelClass}>CNPJ</label>
+                    <input type="text" value={form.cnpj || ""} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} placeholder="00.000.000/0000-00" className={inputClass} /></div>
+                  <div><label className={labelClass}>Empresa</label>
+                    <input type="text" value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })} className={inputClass} /></div>
+                  <div><label className={labelClass}>Cargo</label>
+                    <input type="text" value={form.position || ""} onChange={(e) => setForm({ ...form, position: e.target.value })} className={inputClass} /></div>
+                  <div><label className={labelClass}>Cidade</label>
+                    <input type="text" value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inputClass} /></div>
+                  <div><label className={labelClass}>Estado</label>
+                    <select value={form.state || ""} onChange={(e) => setForm({ ...form, state: e.target.value })} className={inputClass}>
+                      <option value="">Selecione...</option>
+                      {STATES_BR.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div><label className={labelClass}>Status</label>
+                    <select value={form.status || "ativo"} onChange={(e) => setForm({ ...form, status: e.target.value as any })} className={inputClass}>
+                      {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                  </div>
+                  <div><label className={labelClass}>Polo</label>
+                    <select value={form.pole || ""} onChange={(e) => setForm({ ...form, pole: e.target.value || null })} className={inputClass}>
+                      <option value="">Nenhum</option>
+                      {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">CPF</label>
-                  <input type="text" value={formData.cpf || ""} onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Turma</label>
-                  <select value={formData.student_class || ""} onChange={(e) => setFormData({ ...formData, student_class: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
-                    <option value="">Nenhuma turma</option>
-                    {classes.map((c) => <option key={c.id} value={c.id}>{c.name}{c.location_name ? ` (${c.location_name})` : ""}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Polo</label>
-                  <select value={formData.location || ""} onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
-                    <option value="">Nenhum polo</option>
-                    {locations.map((l) => <option key={l.id} value={l.id}>{l.name} - {l.city}/{l.state}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Status</label>
-                  <select value={formData.status || "active"} onChange={(e) => setFormData({ ...formData, status: e.target.value as Student["status"] })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
-                    <option value="active">Ativo</option>
-                    <option value="inactive">Inativo</option>
-                    <option value="graduated">Formado</option>
-                  </select>
-                </div>
-                <div className="flex justify-end gap-3 pt-2">
-                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-300 hover:text-gray-100">Cancelar</button>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
-                    {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Aluno"}
+                <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-400 hover:text-gray-200 text-sm transition-colors">Cancelar</button>
+                  <button onClick={handleSave} disabled={saving || !form.name}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Cliente"}
                   </button>
                 </div>
               </div>

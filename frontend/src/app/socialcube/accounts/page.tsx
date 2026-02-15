@@ -57,7 +57,7 @@ export default function AccountsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6 h-full overflow-auto">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push("/socialcube")} className="p-2 hover:bg-card rounded-lg"><ArrowLeft className="w-5 h-5 text-text-secondary" /></button>

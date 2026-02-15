@@ -59,11 +59,11 @@ export default function LeadAdsConfigPage() {
     "/api/v1/socialcube/leadads/webhook/";
 
   if (loading) {
-    return <div className="min-h-screen bg-background p-6 flex items-center justify-center text-text-secondary">Loading...</div>;
+    return <div className="p-6 h-full flex items-center justify-center text-text-secondary">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6 h-full overflow-auto">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">

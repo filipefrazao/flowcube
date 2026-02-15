@@ -63,6 +63,17 @@ services:
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
       - CHATCUBE_ENGINE_API_KEY=chatcube-internal-key-2026
+      # PABX / Telephony
+      - ASTERISK_ARI_URL=${ASTERISK_ARI_URL}
+      - ASTERISK_ARI_USER=${ASTERISK_ARI_USER}
+      - ASTERISK_ARI_PASSWORD=${ASTERISK_ARI_PASSWORD}
+      - PABX_WEBHOOK_TOKEN=${PABX_WEBHOOK_TOKEN}
+      - MINIO_ENDPOINT_URL=${MINIO_ENDPOINT_URL}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - RECORDINGS_BUCKET=${RECORDINGS_BUCKET}
+      - AUTO_TRANSCRIBE_CALLS=${AUTO_TRANSCRIBE_CALLS}
+      - RECORDING_RETENTION_DAYS=${RECORDING_RETENTION_DAYS}
     depends_on:
       flowcube-postgres:
         condition: service_healthy
@@ -86,7 +97,7 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-celery
     restart: unless-stopped
-    command: celery -A flowcube_project worker -l info --concurrency=2 -Q default,webhooks,http,ai,whatsapp,workflows,telegram,analytics,social,pages
+    command: celery -A flowcube_project worker -l info --concurrency=2 -Q default,webhooks,http,ai,whatsapp,workflows,telegram,analytics,social,pages,telephony
     volumes:
       - ./backend:/app
     environment:
@@ -111,6 +122,17 @@ services:
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
       - CHATCUBE_ENGINE_API_KEY=chatcube-internal-key-2026
+      # PABX / Telephony
+      - ASTERISK_ARI_URL=${ASTERISK_ARI_URL}
+      - ASTERISK_ARI_USER=${ASTERISK_ARI_USER}
+      - ASTERISK_ARI_PASSWORD=${ASTERISK_ARI_PASSWORD}
+      - PABX_WEBHOOK_TOKEN=${PABX_WEBHOOK_TOKEN}
+      - MINIO_ENDPOINT_URL=${MINIO_ENDPOINT_URL}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - RECORDINGS_BUCKET=${RECORDINGS_BUCKET}
+      - AUTO_TRANSCRIBE_CALLS=${AUTO_TRANSCRIBE_CALLS}
+      - RECORDING_RETENTION_DAYS=${RECORDING_RETENTION_DAYS}
     depends_on:
       flowcube-postgres:
         condition: service_healthy
@@ -153,6 +175,17 @@ services:
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
       - CHATCUBE_ENGINE_API_KEY=chatcube-internal-key-2026
+      # PABX / Telephony
+      - ASTERISK_ARI_URL=${ASTERISK_ARI_URL}
+      - ASTERISK_ARI_USER=${ASTERISK_ARI_USER}
+      - ASTERISK_ARI_PASSWORD=${ASTERISK_ARI_PASSWORD}
+      - PABX_WEBHOOK_TOKEN=${PABX_WEBHOOK_TOKEN}
+      - MINIO_ENDPOINT_URL=${MINIO_ENDPOINT_URL}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - RECORDINGS_BUCKET=${RECORDINGS_BUCKET}
+      - AUTO_TRANSCRIBE_CALLS=${AUTO_TRANSCRIBE_CALLS}
+      - RECORDING_RETENTION_DAYS=${RECORDING_RETENTION_DAYS}
     depends_on:
       flowcube-postgres:
         condition: service_healthy
@@ -175,10 +208,6 @@ services:
       dockerfile: Dockerfile
     container_name: flowcube-frontend
     restart: unless-stopped
-    command: sh -c "npx next build && npx next start -p 3000 -H 0.0.0.0"
-    user: root
-    volumes:
-      - ./frontend:/app
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NODE_ENV=production

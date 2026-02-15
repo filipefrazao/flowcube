@@ -58,7 +58,7 @@ export default function LeadsListPage() {
   const totalPages = Math.ceil(count / 25);
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6 h-full overflow-auto">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

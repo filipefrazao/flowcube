@@ -41,7 +41,7 @@ function CallbackContent() {
   }, [searchParams, router]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="h-full flex items-center justify-center">
       <div className="bg-card border border-border rounded-2xl p-8 text-center max-w-md">
         {status === "loading" && <Loader2 className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-spin" />}
         {status === "success" && <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />}
@@ -60,7 +60,7 @@ function CallbackContent() {
 export default function OAuthCallbackPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
       </div>
     }>

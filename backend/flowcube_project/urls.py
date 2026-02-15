@@ -49,6 +49,7 @@ urlpatterns = [
     path("api/v1/salescube/", include("salescube.urls")),
     path("api/v1/minicube/", include("minicube.urls")),
     path("api/v1/reports/", include("reports.urls")),
+    path("api/v1/telephony/", include("telephony.urls")),
     path("api/v1/", include("workflows.urls")),
     path("api/v1/billing/", include("billing.urls")),
     path("api/v1/ai/", include("ai.urls")),

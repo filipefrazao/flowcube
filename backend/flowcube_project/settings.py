@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'salescube',
     'minicube',
     'reports',
+    'telephony',
     # Core apps (not yet extracted as plugins)
     'flowcube',
     'workflows',

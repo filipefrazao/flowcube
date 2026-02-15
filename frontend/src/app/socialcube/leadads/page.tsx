@@ -163,7 +163,7 @@ export default function LeadAdsDashboard() {
   const activeForms = forms.filter((f) => f.distribution_mode !== "none").length;
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6 h-full overflow-auto">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">

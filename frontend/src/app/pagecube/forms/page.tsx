@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   FileText,
   Loader2,
@@ -11,6 +12,13 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
+  Layout,
+  ClipboardList,
+  LayoutTemplate,
+  Pencil,
+  Copy,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { pagecubeApi, type FormSchema, type Page } from "@/lib/pagecubeApi";
@@ -130,6 +138,13 @@ export default function FormsPage() {
     return p ? p.title : `Pagina #${pageId}`;
   };
 
+  const navLinks = [
+    { href: "/pagecube", label: "Paginas", icon: Layout, active: false },
+    { href: "/pagecube/forms", label: "Formularios", icon: ClipboardList, active: true },
+    { href: "/pagecube/templates", label: "Templates", icon: LayoutTemplate, active: false },
+    { href: "/pagecube/submissions", label: "Submissoes", icon: FileText, active: false },
+  ];
+
   return (
     <div className="flex h-screen bg-background">
       <AppSidebar />
@@ -150,7 +165,10 @@ export default function FormsPage() {
             </button>
             <button
               type="button"
-              onClick={() => { resetForm(); setShowForm(true); }}
+              onClick={() => {
+                resetForm();
+                setShowForm(true);
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -158,6 +176,26 @@ export default function FormsPage() {
             </button>
           </div>
         </header>
+
+        {/* Sub-navigation */}
+        <div className="border-b border-border bg-background px-6">
+          <div className="flex gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  link.active
+                    ? "border-primary text-primary"
+                    : "border-transparent text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                <link.icon className="w-4 h-4" />
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         <main className="flex-1 overflow-auto p-6">
           {showForm && (
@@ -185,7 +223,9 @@ export default function FormsPage() {
                   >
                     <option value="">Selecione...</option>
                     {pages.map((p) => (
-                      <option key={p.id} value={p.id}>{p.title} (/{p.slug})</option>
+                      <option key={p.id} value={p.id}>
+                        {p.title} (/{p.slug})
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -194,7 +234,9 @@ export default function FormsPage() {
                   <input
                     type="text"
                     value={formData.success_message}
-                    onChange={(e) => setFormData({ ...formData, success_message: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, success_message: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary"
                   />
                 </div>
@@ -203,7 +245,9 @@ export default function FormsPage() {
                   <input
                     type="url"
                     value={formData.redirect_url}
-                    onChange={(e) => setFormData({ ...formData, redirect_url: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, redirect_url: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary"
                     placeholder="https://..."
                   />
@@ -221,7 +265,9 @@ export default function FormsPage() {
                   <input
                     type="checkbox"
                     checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_active: e.target.checked })
+                    }
                     className="rounded"
                   />
                   <label className="text-sm text-text-secondary">Ativo</label>
@@ -258,19 +304,42 @@ export default function FormsPage() {
             </div>
           ) : forms.length === 0 && !showForm ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Inbox className="w-12 h-12 text-text-muted mb-4" />
-              <h3 className="text-text-secondary font-medium mb-1">Nenhum formulario</h3>
-              <p className="text-text-muted text-sm mb-4">
-                Crie formularios para capturar leads nas suas landing pages.
+              <div className="w-16 h-16 rounded-2xl bg-surface border border-border flex items-center justify-center mb-4">
+                <ClipboardList className="w-8 h-8 text-text-muted" />
+              </div>
+              <h3 className="text-text-secondary font-medium mb-1">Nenhum formulario criado</h3>
+              <p className="text-text-muted text-sm mb-6 max-w-sm">
+                Crie formularios para capturar leads nas suas landing pages. Cada formulario pode ser vinculado a uma pagina e personalizado com campos, mensagem de sucesso e redirecionamento.
               </p>
-              <button
-                type="button"
-                onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Criar Formulario
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Criar Formulario
+                </button>
+              </div>
+
+              {/* Quick guide */}
+              <div className="mt-8 text-left max-w-md">
+                <h4 className="text-sm font-medium text-text-secondary mb-3">Como funciona:</h4>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                    <p className="text-sm text-text-muted">Crie uma pagina no PageCube (aba Paginas)</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                    <p className="text-sm text-text-muted">Crie um formulario e vincule a pagina</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                    <p className="text-sm text-text-muted">Acompanhe as submissoes na aba Submissoes</p>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="bg-surface border border-border rounded-lg overflow-hidden">
@@ -287,7 +356,10 @@ export default function FormsPage() {
                 </thead>
                 <tbody>
                   {forms.map((form) => (
-                    <tr key={form.id} className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors">
+                    <tr
+                      key={form.id}
+                      className="border-b border-border last:border-0 hover:bg-surface-hover transition-colors"
+                    >
                       <td className="px-4 py-3 text-sm text-text-primary font-medium">
                         {(form as any).name || `Formulario #${form.id}`}
                       </td>

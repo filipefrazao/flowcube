@@ -1,57 +1,139 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Search, X, Edit2, DollarSign } from "lucide-react";
-import { saleApi, leadApi, productApi, type Sale, type Lead, type Product, type SaleLineItem } from "@/lib/salesApi";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Plus, Search, X, Edit2, DollarSign, ChevronLeft, ChevronRight,
+  Filter, Download, Trash2, Eye, ShoppingCart, CalendarDays, User,
+  Package, CreditCard, ArrowUpDown, RotateCcw
+} from "lucide-react";
+import { saleApi, saleKpiApi, leadApi, productApi, pipelineApi, type Sale, type Lead, type Product, type SaleLineItem, type SaleKPIs, type Pipeline } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 
-const STAGE_CONFIG: Record<string, { label: string; color: string }> = {
-  negotiation: { label: "Negociacao", color: "bg-blue-500/20 text-blue-400" },
-  proposal: { label: "Proposta", color: "bg-purple-500/20 text-purple-400" },
-  won: { label: "Ganha", color: "bg-green-500/20 text-green-400" },
-  lost: { label: "Perdida", color: "bg-red-500/20 text-red-400" },
+/* ── Stage / Status configs ─────────────────────────────────────────── */
+const STAGE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  negotiation: { label: "Negociando", color: "text-blue-400", bg: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  proposal:    { label: "Proposta",   color: "text-purple-400", bg: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
+  won:         { label: "Fechado",    color: "text-emerald-400", bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  lost:        { label: "Perdida",    color: "text-red-400", bg: "bg-red-500/20 text-red-400 border-red-500/30" },
 };
 
-function formatValue(v: string | number) {
+const PAYMENT_CONFIG: Record<string, { label: string; bg: string }> = {
+  sem_pagamento: { label: "Sem Pagamento", bg: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
+  parcial:       { label: "Parcial",       bg: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  liquidado:     { label: "Liquidado",     bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+};
+
+function formatBRL(v: string | number) {
   const num = typeof v === "string" ? parseFloat(v) : v;
   if (isNaN(num)) return "R$ 0,00";
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(num);
 }
 
+function formatDate(d: string | null) {
+  if (!d) return "-";
+  return new Date(d).toLocaleDateString("pt-BR");
+}
+
+function formatDateISO(d: string) {
+  if (!d) return "";
+  return d.slice(0, 10);
+}
+
+const PAGE_SIZE = 20;
+
 export default function SalesPage() {
+  /* ── Data state ─────────────────────────────────────────────────── */
   const [sales, setSales] = useState<Sale[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const [kpis, setKpis] = useState<SaleKPIs | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStage, setFilterStage] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingSale, setEditingSale] = useState<Sale | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Form state
+  /* ── Filter state ───────────────────────────────────────────────── */
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterStage, setFilterStage] = useState("");
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterPriceMin, setFilterPriceMin] = useState("");
+  const [filterPriceMax, setFilterPriceMax] = useState("");
+
+  /* ── Modal state ────────────────────────────────────────────────── */
+  const [showModal, setShowModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [editingSale, setEditingSale] = useState<Sale | null>(null);
+  const [viewingSale, setViewingSale] = useState<Sale | null>(null);
   const [form, setForm] = useState({ lead: "", total_value: "0", stage: "negotiation", notes: "" });
   const [lineItems, setLineItems] = useState<Array<{ product: string; quantity: number; unit_price: string }>>([]);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => { fetchData(); }, []);
-
-  const fetchData = async () => {
+  /* ── Data fetching ──────────────────────────────────────────────── */
+  const fetchSales = useCallback(async () => {
     setLoading(true);
     try {
-      const [salesRes, leadsRes, productsRes] = await Promise.all([
-        saleApi.list(),
-        leadApi.list(),
-        productApi.list(),
+      const params: Record<string, string> = {
+        limit: String(PAGE_SIZE),
+        page: String(currentPage),
+      };
+      if (filterStage) params.stage = filterStage;
+      if (filterSearch) params.search = filterSearch;
+
+      const [salesRes, kpiRes] = await Promise.all([
+        saleApi.list(params),
+        saleKpiApi.getKpis(),
       ]);
-      setSales(salesRes.data.results || salesRes.data);
-      setLeads(leadsRes.data.results || leadsRes.data);
-      setProducts(productsRes.data.results || productsRes.data);
+
+      const salesData = salesRes.data;
+      setSales(salesData.results || salesData);
+      setTotalCount(salesData.count || 0);
+      setKpis(kpiRes.data);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao carregar vendas:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, filterStage, filterSearch]);
 
+  const fetchRefs = useCallback(async () => {
+    try {
+      const [leadsRes, productsRes, pipelinesRes] = await Promise.all([
+        leadApi.list({ limit: "500" }),
+        productApi.list({ limit: "500" }),
+        pipelineApi.list(),
+      ]);
+      setLeads(leadsRes.data.results || leadsRes.data);
+      setProducts(productsRes.data.results || productsRes.data);
+      setPipelines(pipelinesRes.data.results || pipelinesRes.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
+  useEffect(() => { fetchRefs(); }, [fetchRefs]);
+  useEffect(() => { fetchSales(); }, [fetchSales]);
+
+  /* ── Computed values ────────────────────────────────────────────── */
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  /* ── Client-side secondary filters (date range, price range) ──── */
+  const filtered = sales.filter((s) => {
+    if (filterDateFrom) {
+      const d = new Date(s.created_at);
+      if (d < new Date(filterDateFrom)) return false;
+    }
+    if (filterDateTo) {
+      const d = new Date(s.created_at);
+      if (d > new Date(filterDateTo + "T23:59:59")) return false;
+    }
+    if (filterPriceMin && parseFloat(s.total_value) < parseFloat(filterPriceMin)) return false;
+    if (filterPriceMax && parseFloat(s.total_value) > parseFloat(filterPriceMax)) return false;
+    return true;
+  });
+
+  /* ── Modal handlers ─────────────────────────────────────────────── */
   const openCreateModal = () => {
     setEditingSale(null);
     setForm({ lead: "", total_value: "0", stage: "negotiation", notes: "" });
@@ -65,7 +147,7 @@ export default function SalesPage() {
       lead: sale.lead || "",
       total_value: sale.total_value,
       stage: sale.stage,
-      notes: sale.notes,
+      notes: sale.notes || "",
     });
     setLineItems(
       (sale.line_items || []).map((li) => ({
@@ -77,31 +159,38 @@ export default function SalesPage() {
     setShowModal(true);
   };
 
+  const openDetailModal = (sale: Sale) => {
+    setViewingSale(sale);
+    setShowDetailModal(true);
+  };
+
   const addLineItem = () => {
     setLineItems([...lineItems, { product: "", quantity: 1, unit_price: "0" }]);
   };
 
   const removeLineItem = (index: number) => {
-    setLineItems(lineItems.filter((_, i) => i !== index));
+    const updated = lineItems.filter((_, i) => i !== index);
+    setLineItems(updated);
+    const total = updated.reduce((sum, li) => sum + parseFloat(li.unit_price || "0") * li.quantity, 0);
+    setForm((f) => ({ ...f, total_value: total.toFixed(2) }));
   };
 
   const updateLineItem = (index: number, field: string, value: string | number) => {
     const updated = [...lineItems];
     (updated[index] as any)[field] = value;
     setLineItems(updated);
-    // Recalculate total
     const total = updated.reduce((sum, li) => sum + parseFloat(li.unit_price || "0") * li.quantity, 0);
     setForm((f) => ({ ...f, total_value: total.toFixed(2) }));
   };
 
   const handleSave = async () => {
+    setSaving(true);
     try {
       if (editingSale) {
         await saleApi.update(editingSale.id, form);
       } else {
         const res = await saleApi.create(form);
         const saleId = res.data.id;
-        // Create line items
         for (const li of lineItems) {
           if (li.product) {
             await saleApi.addLineItem(saleId, {
@@ -113,160 +202,491 @@ export default function SalesPage() {
         }
       }
       setShowModal(false);
-      fetchData();
+      fetchSales();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta venda?")) return;
+    try {
+      await saleApi.delete(id);
+      fetchSales();
     } catch (err) {
       console.error(err);
     }
   };
 
-  const filtered = sales.filter((s) => {
-    const matchSearch = !searchQuery || s.lead_name?.toLowerCase().includes(searchQuery.toLowerCase()) || s.notes?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchStage = !filterStage || s.stage === filterStage;
-    return matchSearch && matchStage;
-  });
+  const clearFilters = () => {
+    setFilterStage("");
+    setFilterSearch("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+    setFilterPriceMin("");
+    setFilterPriceMax("");
+    setCurrentPage(1);
+  };
 
-  const totalValue = filtered.reduce((sum, s) => sum + parseFloat(s.total_value || "0"), 0);
-  const wonValue = filtered.filter((s) => s.stage === "won").reduce((sum, s) => sum + parseFloat(s.total_value || "0"), 0);
+  const hasActiveFilters = filterStage || filterSearch || filterDateFrom || filterDateTo || filterPriceMin || filterPriceMax;
+
+  /* ── KPI Cards ──────────────────────────────────────────────────── */
+  const kpiCards = kpis ? [
+    { label: "Total Vendas", value: String(kpis.summary.total_sales), icon: ShoppingCart, color: "text-blue-400", bg: "bg-blue-500/10" },
+    { label: "Receita Total", value: formatBRL(kpis.summary.total_amount), icon: DollarSign, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Ticket Medio", value: formatBRL(kpis.summary.average_ticket), icon: CreditCard, color: "text-purple-400", bg: "bg-purple-500/10" },
+    { label: "Taxa Conversao", value: `${kpis.summary.conversion_rate.toFixed(1)}%`, icon: ArrowUpDown, color: "text-amber-400", bg: "bg-amber-500/10" },
+  ] : [];
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Vendas</h1>
-          <p className="text-sm text-gray-400">
-            {filtered.length} vendas | Total: {formatValue(totalValue)} | Ganhas: {formatValue(wonValue)}
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <DollarSign className="w-7 h-7 text-indigo-400" />
+            Vendas
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            {totalCount} vendas registradas
           </p>
         </div>
-        <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors">
+        <button
+          onClick={openCreateModal}
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-indigo-500/20"
+        >
           <Plus className="w-4 h-4" /> Nova Venda
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input type="text" placeholder="Buscar vendas..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
-        </div>
-        <select value={filterStage} onChange={(e) => setFilterStage(e.target.value)} className="bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
-          <option value="">Todos os estagios</option>
-          {Object.entries(STAGE_CONFIG).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
+      {/* ── KPI Cards ───────────────────────────────────────────── */}
+      {kpis && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpiCards.map((kpi, i) => (
+            <div key={i} className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">{kpi.label}</span>
+                <div className={cn("p-2 rounded-lg", kpi.bg)}>
+                  <kpi.icon className={cn("w-4 h-4", kpi.color)} />
+                </div>
+              </div>
+              <p className={cn("text-xl font-bold", kpi.color)}>{kpi.value}</p>
+            </div>
           ))}
-        </select>
+        </div>
+      )}
+
+      {/* ── Filters Bar ─────────────────────────────────────────── */}
+      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+        {/* Primary row */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Buscar por lead, produto, notas..."
+              value={filterSearch}
+              onChange={(e) => { setFilterSearch(e.target.value); setCurrentPage(1); }}
+              className="w-full bg-gray-900/80 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+            />
+          </div>
+          <select
+            value={filterStage}
+            onChange={(e) => { setFilterStage(e.target.value); setCurrentPage(1); }}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all"
+          >
+            <option value="">Todos os Status</option>
+            {Object.entries(STAGE_CONFIG).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
+              showFilters
+                ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400"
+                : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100"
+            )}
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+            {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+          </button>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+              <RotateCcw className="w-3.5 h-3.5" /> Limpar
+            </button>
+          )}
+        </div>
+
+        {/* Expanded filters */}
+        {showFilters && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Criacao De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Criacao Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Minimo (R$)</label>
+              <input type="number" placeholder="0,00" value={filterPriceMin} onChange={(e) => setFilterPriceMin(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Maximo (R$)</label>
+              <input type="number" placeholder="0,00" value={filterPriceMax} onChange={(e) => setFilterPriceMax(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Table */}
+      {/* ── Table ────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+        <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl overflow-hidden backdrop-blur-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-700 text-left">
-                  <th className="px-4 py-3 text-gray-400 font-medium">Lead</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Valor</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Estagio</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Itens</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Notas</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Criado</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium w-10"></th>
+                <tr className="border-b border-gray-700 text-left bg-gray-900/50">
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Lead / Cliente</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Produto(s)</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Valor (R$)</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Status</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Itens</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Data Criacao</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Fechamento</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide w-24">Acoes</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((sale) => {
                   const stageConfig = STAGE_CONFIG[sale.stage] || STAGE_CONFIG.negotiation;
+                  const productNames = (sale.line_items || []).map((li) => li.product_name).filter(Boolean);
                   return (
-                    <tr key={sale.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                      <td className="px-4 py-3 text-gray-100 font-medium">{sale.lead_name || "-"}</td>
-                      <td className="px-4 py-3 text-indigo-400 font-semibold">{formatValue(sale.total_value)}</td>
+                    <tr key={sale.id} className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors">
                       <td className="px-4 py-3">
-                        <span className={cn("text-xs px-2 py-0.5 rounded-full", stageConfig.color)}>{stageConfig.label}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-indigo-400" />
+                          </div>
+                          <span className="text-gray-100 font-medium truncate max-w-[160px]">
+                            {sale.lead_name || "Sem lead"}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs">{sale.line_items?.length || 0} itens</td>
-                      <td className="px-4 py-3 text-gray-400 max-w-[200px] truncate">{sale.notes || "-"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{new Date(sale.created_at).toLocaleDateString("pt-BR")}</td>
                       <td className="px-4 py-3">
-                        <button onClick={() => openEditModal(sale)} className="p-1 text-gray-500 hover:text-indigo-400"><Edit2 className="w-4 h-4" /></button>
+                        <div className="flex flex-col gap-0.5 max-w-[200px]">
+                          {productNames.length > 0 ? (
+                            productNames.slice(0, 2).map((name, i) => (
+                              <span key={i} className="text-xs text-gray-300 truncate">{name}</span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-500">-</span>
+                          )}
+                          {productNames.length > 2 && (
+                            <span className="text-[10px] text-indigo-400">+{productNames.length - 2} mais</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-indigo-400 font-semibold">{formatBRL(sale.total_value)}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={cn("text-[11px] font-medium px-2.5 py-1 rounded-full border", stageConfig.bg)}>
+                          {stageConfig.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs text-gray-400 bg-gray-700/50 px-2 py-0.5 rounded">
+                          {sale.line_items?.length || 0} {(sale.line_items?.length || 0) === 1 ? "item" : "itens"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-xs">{formatDate(sale.created_at)}</td>
+                      <td className="px-4 py-3 text-gray-400 text-xs">{formatDate(sale.closed_at)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => openDetailModal(sale)} className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-all" title="Detalhes">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => openEditModal(sale)} className="p-1.5 text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded transition-all" title="Editar">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDelete(sale.id)} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-all" title="Excluir">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-500">Nenhuma venda encontrada</td></tr>
+                  <tr>
+                    <td colSpan={8} className="px-4 py-16 text-center">
+                      <ShoppingCart className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+                      <p className="text-gray-500">Nenhuma venda encontrada</p>
+                      <p className="text-gray-600 text-xs mt-1">Tente ajustar os filtros ou crie uma nova venda</p>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* ── Pagination ────────────────────────────────────────── */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-700/50">
+              <span className="text-xs text-gray-500">
+                Mostrando {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, totalCount)} de {totalCount}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  className="p-1.5 text-gray-400 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gray-700/50 transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={cn(
+                        "w-8 h-8 rounded text-xs font-medium transition-all",
+                        currentPage === pageNum
+                          ? "bg-indigo-600 text-white"
+                          : "text-gray-400 hover:text-gray-100 hover:bg-gray-700/50"
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className="p-1.5 text-gray-400 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gray-700/50 transition-all"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Sale Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowModal(false)}>
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">{editingSale ? "Editar Venda" : "Nova Venda"}</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-100"><X className="w-5 h-5" /></button>
+      {/* ── Detail Modal ──────────────────────────────────────────── */}
+      {showDetailModal && viewingSale && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowDetailModal(false)}>
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Eye className="w-5 h-5 text-indigo-400" />
+                Detalhes da Venda
+              </h2>
+              <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-100 p-1 rounded hover:bg-gray-700/50 transition-all">
+                <X className="w-5 h-5" />
+              </button>
             </div>
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div className="bg-gray-900/60 rounded-lg p-3">
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide block mb-1">Lead / Cliente</span>
+                <span className="text-sm text-gray-100 font-medium">{viewingSale.lead_name || "Sem lead"}</span>
+              </div>
+              <div className="bg-gray-900/60 rounded-lg p-3">
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide block mb-1">Valor Total</span>
+                <span className="text-sm text-indigo-400 font-bold">{formatBRL(viewingSale.total_value)}</span>
+              </div>
+              <div className="bg-gray-900/60 rounded-lg p-3">
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide block mb-1">Status</span>
+                <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full border", (STAGE_CONFIG[viewingSale.stage] || STAGE_CONFIG.negotiation).bg)}>
+                  {(STAGE_CONFIG[viewingSale.stage] || STAGE_CONFIG.negotiation).label}
+                </span>
+              </div>
+              <div className="bg-gray-900/60 rounded-lg p-3">
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide block mb-1">Fechamento</span>
+                <span className="text-sm text-gray-100">{formatDate(viewingSale.closed_at)}</span>
+              </div>
+            </div>
+
+            {/* Line Items */}
+            <div className="mb-4">
+              <h3 className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3">Itens da Venda</h3>
+              {(viewingSale.line_items || []).length > 0 ? (
+                <div className="space-y-2">
+                  {viewingSale.line_items!.map((li) => (
+                    <div key={li.id} className="flex items-center justify-between bg-gray-900/60 rounded-lg p-3">
+                      <div className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-200">{li.product_name || "Produto"}</span>
+                        <span className="text-[10px] text-gray-500">x{li.quantity}</span>
+                      </div>
+                      <span className="text-sm text-indigo-400 font-medium">{formatBRL(li.subtotal)}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-4">Nenhum item registrado</p>
+              )}
+            </div>
+
+            {/* Notes */}
+            {viewingSale.notes && (
+              <div className="bg-gray-900/60 rounded-lg p-3 mb-4">
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide block mb-1">Observacoes</span>
+                <p className="text-sm text-gray-300">{viewingSale.notes}</p>
+              </div>
+            )}
+
+            <div className="text-[10px] text-gray-600 text-right">
+              Criado em {formatDate(viewingSale.created_at)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Create/Edit Modal ─────────────────────────────────────── */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                {editingSale ? <Edit2 className="w-5 h-5 text-indigo-400" /> : <Plus className="w-5 h-5 text-indigo-400" />}
+                {editingSale ? "Editar Venda" : "Nova Venda"}
+              </h2>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-100 p-1 rounded hover:bg-gray-700/50 transition-all">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
             <div className="space-y-4">
-              {/* Lead select */}
+              {/* Lead */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Lead</label>
-                <select value={form.lead} onChange={(e) => setForm({ ...form, lead: e.target.value })} className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
-                  <option value="">Sem lead</option>
+                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Lead / Cliente</label>
+                <select value={form.lead} onChange={(e) => setForm({ ...form, lead: e.target.value })} className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 transition-all">
+                  <option value="">Sem lead vinculado</option>
                   {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}</option>))}
                 </select>
               </div>
 
               {/* Stage */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Estagio</label>
-                <select value={form.stage} onChange={(e) => setForm({ ...form, stage: e.target.value })} className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
-                  {Object.entries(STAGE_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
-                </select>
+                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Status da Venda</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {Object.entries(STAGE_CONFIG).map(([k, v]) => (
+                    <button
+                      key={k}
+                      onClick={() => setForm({ ...form, stage: k })}
+                      className={cn(
+                        "text-xs py-2 px-2 rounded-lg border font-medium transition-all text-center",
+                        form.stage === k ? v.bg : "bg-gray-900 border-gray-700 text-gray-500 hover:border-gray-600"
+                      )}
+                    >
+                      {v.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Line Items */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs text-gray-500">Itens da Venda</label>
-                  <button onClick={addLineItem} className="text-xs text-indigo-400 hover:text-indigo-300">+ Adicionar item</button>
+                  <label className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Itens da Venda</label>
+                  <button onClick={addLineItem} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+                    <Plus className="w-3 h-3" /> Adicionar item
+                  </button>
                 </div>
-                {lineItems.map((li, i) => (
-                  <div key={i} className="flex items-center gap-2 mb-2">
-                    <select value={li.product} onChange={(e) => {
-                      updateLineItem(i, "product", e.target.value);
-                      const p = products.find((p) => p.id === e.target.value);
-                      if (p) updateLineItem(i, "unit_price", p.price);
-                    }} className="flex-1 bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-2 py-1.5 text-xs">
-                      <option value="">Produto</option>
-                      {products.map((p) => (<option key={p.id} value={p.id}>{p.name} - {formatValue(p.price)}</option>))}
-                    </select>
-                    <input type="number" min={1} value={li.quantity} onChange={(e) => updateLineItem(i, "quantity", parseInt(e.target.value) || 1)} className="w-16 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-100 text-center" />
-                    <input type="number" value={li.unit_price} onChange={(e) => updateLineItem(i, "unit_price", e.target.value)} className="w-24 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-100" placeholder="Preco" />
-                    <span className="text-xs text-gray-400 w-20 text-right">{formatValue((parseFloat(li.unit_price || "0") * li.quantity).toString())}</span>
-                    <button onClick={() => removeLineItem(i)} className="text-red-400 hover:text-red-300"><X className="w-3.5 h-3.5" /></button>
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  {lineItems.map((li, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-gray-900/60 rounded-lg p-2.5">
+                      <select
+                        value={li.product}
+                        onChange={(e) => {
+                          updateLineItem(i, "product", e.target.value);
+                          const p = products.find((p) => p.id === e.target.value);
+                          if (p) updateLineItem(i, "unit_price", p.price);
+                        }}
+                        className="flex-1 bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-2 py-1.5 text-xs focus:border-indigo-500 transition-all"
+                      >
+                        <option value="">Selecionar produto</option>
+                        {products.map((p) => (<option key={p.id} value={p.id}>{p.name} - {formatBRL(p.price)}</option>))}
+                      </select>
+                      <input
+                        type="number" min={1} value={li.quantity}
+                        onChange={(e) => updateLineItem(i, "quantity", parseInt(e.target.value) || 1)}
+                        className="w-16 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-100 text-center focus:border-indigo-500 transition-all"
+                        title="Quantidade"
+                      />
+                      <input
+                        type="number" step="0.01" value={li.unit_price}
+                        onChange={(e) => updateLineItem(i, "unit_price", e.target.value)}
+                        className="w-24 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-100 focus:border-indigo-500 transition-all"
+                        placeholder="Preco"
+                      />
+                      <span className="text-xs text-gray-400 w-20 text-right font-medium">
+                        {formatBRL((parseFloat(li.unit_price || "0") * li.quantity).toString())}
+                      </span>
+                      <button onClick={() => removeLineItem(i)} className="text-red-400 hover:text-red-300 p-1 hover:bg-red-500/10 rounded transition-all">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {lineItems.length === 0 && (
+                    <p className="text-xs text-gray-600 text-center py-3">Nenhum item adicionado</p>
+                  )}
+                </div>
               </div>
 
               {/* Total */}
-              <div className="flex items-center justify-between bg-gray-900 rounded-lg px-4 py-3">
-                <span className="text-sm text-gray-400">Total</span>
-                <span className="text-lg font-bold text-indigo-400">{formatValue(form.total_value)}</span>
+              <div className="flex items-center justify-between bg-gray-900 rounded-lg px-4 py-3 border border-gray-700/50">
+                <span className="text-sm text-gray-400 font-medium">Total da Venda</span>
+                <span className="text-xl font-bold text-indigo-400">{formatBRL(form.total_value)}</span>
               </div>
 
               {/* Notes */}
-              <textarea placeholder="Notas" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 resize-none" />
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Observacoes</label>
+                <textarea
+                  placeholder="Adicione notas sobre esta venda..."
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  rows={3}
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 resize-none focus:border-indigo-500 transition-all"
+                />
+              </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100">Cancelar</button>
-              <button onClick={handleSave} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm">Salvar</button>
+
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-700/50">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2.5 text-sm text-gray-400 hover:text-gray-100 rounded-lg hover:bg-gray-700/50 transition-all">
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-all shadow-lg shadow-indigo-500/20"
+              >
+                {saving ? "Salvando..." : "Salvar Venda"}
+              </button>
             </div>
           </div>
         </div>

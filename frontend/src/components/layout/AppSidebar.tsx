@@ -67,6 +67,7 @@ const sections: SidebarSection[] = [
       { label: "Grupos", href: "/chatcube/groups" },
       { label: "Templates", href: "/chatcube/templates" },
       { label: "Campanhas", href: "/chatcube/campaigns" },
+      { label: "Telefonia", href: "/chatcube/telephony" },
     ],
   },
   {
@@ -125,7 +126,12 @@ const sections: SidebarSection[] = [
     id: "pagecube",
     label: "PageCube",
     icon: Layout,
-    href: "/pagecube",
+    children: [
+      { label: "Páginas", href: "/pagecube" },
+      { label: "Templates", href: "/pagecube/templates" },
+      { label: "Formulários", href: "/pagecube/forms" },
+      { label: "Submissões", href: "/pagecube/submissions" },
+    ],
   },
   {
     id: "funnelcube",
@@ -137,7 +143,16 @@ const sections: SidebarSection[] = [
     id: "socialcube",
     label: "SocialCube",
     icon: Share2,
-    href: "/socialcube",
+    children: [
+      { label: "Dashboard", href: "/socialcube" },
+      { label: "Contas", href: "/socialcube/accounts" },
+      { label: "Calendário", href: "/socialcube/calendar" },
+      { label: "Publicar", href: "/socialcube/posts/new" },
+      { label: "Analytics", href: "/socialcube/analytics" },
+      { label: "Concorrentes", href: "/socialcube/competitors" },
+      { label: "Smart Links", href: "/socialcube/smartlinks" },
+      { label: "Lead Ads", href: "/socialcube/leadads" },
+    ],
   },
   {
     id: "reports",

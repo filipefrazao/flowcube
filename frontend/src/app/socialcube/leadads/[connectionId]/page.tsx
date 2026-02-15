@@ -83,19 +83,19 @@ export default function ConnectionDetailPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-background p-6 flex items-center justify-center text-text-secondary">Loading...</div>;
+    return <div className="p-6 h-full flex items-center justify-center text-text-secondary">Loading...</div>;
   }
 
   if (!connection) {
     return (
-      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+      <div className="p-6 h-full flex items-center justify-center">
         <p className="text-text-secondary">Connection not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="p-6 h-full overflow-auto">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

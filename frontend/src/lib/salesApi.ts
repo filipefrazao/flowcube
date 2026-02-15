@@ -74,6 +74,11 @@ export interface Lead {
 }
 
 export interface LeadDetail extends Lead {
+  pipeline_id?: string;
+  tags?: any[];
+  comments?: any[];
+  total_comments?: number;
+  total_activities?: number;
   lead_notes: LeadNote[];
   activities: LeadActivityItem[];
   tasks: SalesTask[];

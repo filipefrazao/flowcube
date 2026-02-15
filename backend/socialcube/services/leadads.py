@@ -61,21 +61,25 @@ def extract_field_from_lead(lead_data: dict, field_name: str) -> str:
 
 
 def assign_tags_to_lead(api_url: str, api_token: str, lead_id: int, tags: list) -> dict:
-    """Assign tags to a lead in SalesCube CRM."""
+    """Assign tags to a lead in SalesCube CRM via tagged-items endpoint."""
+    # Derive base from api_url (e.g. https://api.frzglobal.com.br/api/leads/ -> .../api/)
     base = api_url.rstrip("/")
-    # SalesCube tag endpoint: POST /api/leads/{id}/add_tags/
-    url = f"{base}/{lead_id}/add_tags/"
-    resp = requests.post(
-        url,
-        json={"tags": tags},
-        headers={
-            "Authorization": api_token,
-            "Content-Type": "application/json",
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
-    return resp.json()
+    base = base.rsplit("/leads", 1)[0]  # Remove /leads suffix
+    url = f"{base}/tagged-items/"
+    results = []
+    for tag_id in tags:
+        resp = requests.post(
+            url,
+            json={"tag": tag_id, "object_id": lead_id, "content_type": 8},
+            headers={
+                "Authorization": api_token,
+                "Content-Type": "application/json",
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        results.append(resp.json())
+    return results[0] if len(results) == 1 else results
 
 
 def subscribe_page_to_leadgen(page_id: str, page_access_token: str) -> dict:

@@ -2,12 +2,12 @@
 const buildStamp = process.env.NEXT_PUBLIC_APP_VERSION || new Date().toISOString();
 
 const nextConfig = {
-  // output: 'standalone', // disabled - docker-compose uses 'next start'
+    output: 'standalone',
   reactStrictMode: true,
   transpilePackages: ['@xyflow/react'],
   env: {
     NEXT_PUBLIC_API_URL:
-      process.env.NEXT_PUBLIC_API_URL || 'https://flowcube.frzgroup.com.br',
+      process.env.NEXT_PUBLIC_API_URL || 'https://platform.frzgroup.com.br',
     // Used by AppUpdateNotifier to detect stale tabs after a deploy.
     NEXT_PUBLIC_APP_VERSION: buildStamp,
   },

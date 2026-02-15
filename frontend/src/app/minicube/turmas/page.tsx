@@ -1,48 +1,97 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { GraduationCap, Plus, Search, Loader2, X } from "lucide-react";
-import { miniApi, type MiniClass, type Location } from "@/lib/miniApi";
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import {
+  GraduationCap, Plus, Search, Loader2, X, Filter, ChevronLeft, ChevronRight,
+  Eye, Pencil, Trash2, Calendar, Users, ClipboardCheck,
+} from "lucide-react";
+import { miniApi, type MiniClass, type Location, type Pole } from "@/lib/miniApi";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 20;
+
+const STATUS_OPTIONS = [
+  { value: "proxima", label: "Proxima", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  { value: "em_andamento", label: "Em Andamento", color: "bg-green-500/20 text-green-400 border-green-500/30" },
+  { value: "finalizada", label: "Finalizada", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
+  { value: "cancelada", label: "Cancelada", color: "bg-red-500/20 text-red-400 border-red-500/30" },
+];
 
 export default function TurmasPage() {
+  const router = useRouter();
   const [classes, setClasses] = useState<MiniClass[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [poles, setPoles] = useState<Pole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Filters
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterPole, setFilterPole] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Modal
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: "", description: "", location: "", capacity: 30, status: "active" as string,
+    name: "", description: "", location: "", pole: "", product: "",
+    capacity: 30, status: "proxima" as string,
     start_date: "", end_date: "",
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  async function loadData() {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [classData, locData] = await Promise.all([
-        miniApi.listClasses({ search }),
-        miniApi.listLocations(),
+      const params: Record<string, any> = {
+        limit: PAGE_SIZE,
+        offset: (page - 1) * PAGE_SIZE,
+      };
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (filterStatus) params.status = filterStatus;
+      if (filterLocation) params.location = filterLocation;
+      if (filterPole) params.pole = filterPole;
+
+      const [classData, locData, poleData] = await Promise.all([
+        miniApi.listClasses(params),
+        miniApi.listLocations({ limit: 200 }),
+        miniApi.listPoles({ limit: 200 }),
       ]);
       setClasses(classData.results || []);
+      setTotalCount(classData.count || 0);
       setLocations(locData.results || []);
+      setPoles(poleData.results || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
-  }
+  }, [page, debouncedSearch, filterStatus, filterLocation, filterPole]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   function openCreate() {
     setEditingId(null);
-    setFormData({ name: "", description: "", location: "", capacity: 30, status: "active", start_date: "", end_date: "" });
+    setFormData({ name: "", description: "", location: "", pole: "", product: "", capacity: 30, status: "proxima", start_date: "", end_date: "" });
     setShowForm(true);
   }
 
   function openEdit(c: MiniClass) {
     setEditingId(c.id);
     setFormData({
-      name: c.name, description: c.description, location: c.location,
+      name: c.name, description: c.description,
+      location: c.location || "", pole: c.pole || "", product: c.product || "",
       capacity: c.capacity, status: c.status,
       start_date: c.start_date || "", end_date: c.end_date || "",
     });
@@ -53,10 +102,12 @@ export default function TurmasPage() {
     try {
       setSaving(true);
       const payload: Record<string, any> = { ...formData };
-      // instructor is FK to User - not editable from this form, send null
       payload.instructor = null;
       if (!payload.start_date) payload.start_date = null;
       if (!payload.end_date) payload.end_date = null;
+      if (!payload.pole) payload.pole = null;
+      if (!payload.product) payload.product = null;
+      if (!payload.location) { alert("Selecione uma unidade."); setSaving(false); return; }
       if (editingId) {
         await miniApi.updateClass(editingId, payload);
       } else {
@@ -64,150 +115,255 @@ export default function TurmasPage() {
       }
       setShowForm(false);
       setEditingId(null);
-      loadData();
-    } catch (err) { console.error(err); }
-    finally { setSaving(false); }
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.response?.data ? JSON.stringify(err.response.data) : "Erro ao salvar turma");
+    } finally { setSaving(false); }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Tem certeza que deseja excluir esta turma?")) return;
-    try { await miniApi.deleteClass(id); loadData(); } catch (err) { console.error(err); }
+    try { await miniApi.deleteClass(id); fetchData(); } catch (err) { console.error(err); }
   }
 
-  const statusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      active: "bg-green-500/20 text-green-400",
-      completed: "bg-gray-500/20 text-gray-400",
-      cancelled: "bg-red-500/20 text-red-400",
-    };
-    const labels: Record<string, string> = { active: "Ativa", completed: "Concluida", cancelled: "Cancelada" };
-    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || colors.active}`}>{labels[status] || status}</span>;
-  };
+  function getStatusBadge(status: string) {
+    const opt = STATUS_OPTIONS.find((s) => s.value === status);
+    return (
+      <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", opt?.color || "bg-gray-500/20 text-gray-400 border-gray-500/30")}>
+        {opt?.label || status}
+      </span>
+    );
+  }
+
+  function clearFilters() {
+    setFilterStatus("");
+    setFilterLocation("");
+    setFilterPole("");
+    setSearch("");
+  }
+
+  const hasActiveFilters = filterStatus || filterLocation || filterPole || search;
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-gray-950">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-gray-700 bg-gray-900 flex items-center justify-between px-6">
+        {/* Header */}
+        <header className="h-14 border-b border-gray-800 bg-gray-950 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
             <GraduationCap className="w-5 h-5 text-indigo-400" />
             <h1 className="text-lg font-semibold text-gray-100">Turmas</h1>
+            <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">{totalCount}</span>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
             <Plus className="w-4 h-4" /> Nova Turma
           </button>
         </header>
 
-        <div className="p-6 flex-1 overflow-auto">
-          <div className="mb-4 flex gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder="Buscar turmas..." value={search}
+        {/* Filters Bar */}
+        <div className="border-b border-gray-800 bg-gray-950/50 px-6 py-3 shrink-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="text" placeholder="Buscar turma..." value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && loadData()}
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-indigo-500" />
+                className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-indigo-500 transition-colors" />
             </div>
+            <button onClick={() => setShowFilters(!showFilters)}
+              className={cn("flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors",
+                showFilters ? "border-indigo-500 text-indigo-400 bg-indigo-500/10" : "border-gray-800 text-gray-400 hover:border-gray-600")}>
+              <Filter className="w-4 h-4" /> Filtros
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-indigo-400" />}
+            </button>
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Limpar filtros</button>
+            )}
           </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
-          ) : classes.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
-              <GraduationCap className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhuma turma encontrada</p>
-              {locations.length === 0 && <p className="text-xs mt-2">Crie um Polo primeiro para poder criar turmas.</p>}
-            </div>
-          ) : (
-            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Nome</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Polo</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Inicio</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Fim</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Alunos</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Status</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">Acoes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {classes.map((c) => (
-                    <tr key={c.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                      <td className="px-4 py-3 text-sm text-gray-100 font-medium">{c.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{c.location_name || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{c.start_date ? new Date(c.start_date).toLocaleDateString("pt-BR") : "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{c.end_date ? new Date(c.end_date).toLocaleDateString("pt-BR") : "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{c.students_count || 0}/{c.capacity}</td>
-                      <td className="px-4 py-3">{statusBadge(c.status)}</td>
-                      <td className="px-4 py-3 text-right space-x-2">
-                        <button onClick={() => openEdit(c)} className="text-indigo-400 hover:text-indigo-300 text-sm">Editar</button>
-                        <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-300 text-sm">Excluir</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {showFilters && (
+            <div className="mt-3 flex items-center gap-3 flex-wrap">
+              <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
+                className="px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500">
+                <option value="">Todos Status</option>
+                {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+              <select value={filterPole} onChange={(e) => { setFilterPole(e.target.value); setPage(1); }}
+                className="px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500">
+                <option value="">Todos Polos</option>
+                {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <select value={filterLocation} onChange={(e) => { setFilterLocation(e.target.value); setPage(1); }}
+                className="px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500">
+                <option value="">Todas Unidades</option>
+                {locations.map((l) => <option key={l.id} value={l.id}>{l.name} - {l.city}/{l.state}</option>)}
+              </select>
             </div>
           )}
         </div>
 
+        {/* Table */}
+        <div className="flex-1 overflow-auto p-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+          ) : classes.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              <GraduationCap className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium text-gray-400">Nenhuma turma encontrada</p>
+              <p className="text-sm mt-1">Crie uma nova turma para comecar.</p>
+            </div>
+          ) : (
+            <>
+              <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-800">
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Unidade</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Polo</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Alunos</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Inicio</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Termino</th>
+                      <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acoes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/50">
+                    {classes.map((c) => (
+                      <tr key={c.id} className="hover:bg-gray-800/40 transition-colors cursor-pointer" onClick={() => router.push(`/minicube/turmas/${c.id}`)}>
+                        <td className="px-4 py-3">
+                          <span className="text-sm font-medium text-gray-100">{c.name}</span>
+                          {c.description && <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[200px]">{c.description}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-300">{c.product_name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-300">{c.location_name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-300">{c.pole_name || "-"}</td>
+                        <td className="px-4 py-3">{getStatusBadge(c.status)}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="inline-flex items-center gap-1 text-sm text-gray-300">
+                            <Users className="w-3.5 h-3.5 text-gray-500" /> {c.enrollments_count || c.students_count || 0}/{c.capacity}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-400">{c.start_date ? new Date(c.start_date).toLocaleDateString("pt-BR") : "-"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-400">{c.end_date ? new Date(c.end_date).toLocaleDateString("pt-BR") : "-"}</td>
+                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => router.push(`/minicube/turmas/${c.id}`)} title="Ver Detalhes"
+                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-gray-200 transition-colors">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => router.push(`/minicube/turmas/${c.id}/presenca`)} title="Presenca"
+                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-green-400 transition-colors">
+                              <ClipboardCheck className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => openEdit(c)} title="Editar"
+                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-indigo-400 transition-colors">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDelete(c.id)} title="Excluir"
+                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-red-400 transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+                  <span>{totalCount} turma{totalCount !== 1 ? "s" : ""} encontrada{totalCount !== 1 ? "s" : ""}</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}
+                      className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="px-3 py-1 text-gray-300">Pagina {page} de {totalPages}</span>
+                    <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages}
+                      className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Create/Edit Dialog */}
         {showForm && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 w-full max-w-lg">
-              <div className="flex items-center justify-between mb-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 w-full max-w-lg shadow-2xl">
+              <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Turma" : "Nova Turma"}</h2>
-                <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-gray-400" /></button>
+                <button onClick={() => setShowForm(false)} className="p-1 rounded-md hover:bg-gray-800 transition-colors">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-300 mb-1">Nome *</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Nome *</label>
                   <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Polo *</label>
-                  <select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
-                    <option value="">Selecione um polo...</option>
-                    {locations.map((l) => <option key={l.id} value={l.id}>{l.name} - {l.city}/{l.state}</option>)}
-                  </select>
-                  {locations.length === 0 && <p className="text-xs text-yellow-400 mt-1">Nenhum polo cadastrado. Crie um polo primeiro.</p>}
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Descricao</label>
-                  <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" rows={2} />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">Capacidade</label>
-                  <input type="number" value={formData.capacity} onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 30 })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                    placeholder="Nome da turma"
+                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500 transition-colors" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-gray-300 mb-1">Data Inicio</label>
-                    <input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Polo</label>
+                    <select value={formData.pole} onChange={(e) => setFormData({ ...formData, pole: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                      <option value="">Selecione...</option>
+                      {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-300 mb-1">Data Fim</label>
-                    <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Unidade *</label>
+                    <select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                      <option value="">Selecione...</option>
+                      {locations.map((l) => <option key={l.id} value={l.id}>{l.name} - {l.city}/{l.state}</option>)}
+                    </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-300 mb-1">Status</label>
-                  <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
-                    <option value="active">Ativa</option>
-                    <option value="completed">Concluida</option>
-                    <option value="cancelled">Cancelada</option>
-                  </select>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Descricao</label>
+                  <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Descricao da turma"
+                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500 transition-colors" rows={2} />
                 </div>
-                <div className="flex justify-end gap-3 pt-2">
-                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-300 hover:text-gray-100">Cancelar</button>
-                  <button onClick={handleSave} disabled={saving || !formData.location} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Capacidade</label>
+                    <input type="number" value={formData.capacity} onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 30 })}
+                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Status</label>
+                    <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                      {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Data Inicio</label>
+                    <input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Data Termino</label>
+                    <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-400 hover:text-gray-200 text-sm transition-colors">Cancelar</button>
+                  <button onClick={handleSave} disabled={saving || !formData.name || !formData.location}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                     {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Turma"}
                   </button>
                 </div>
