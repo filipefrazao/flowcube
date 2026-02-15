@@ -134,7 +134,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
-    'AUTH_HEADER_TYPES': ('Bearer', 'Token'),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 # SalesCube PROD integration
