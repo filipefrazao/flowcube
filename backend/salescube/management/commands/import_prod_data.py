@@ -230,9 +230,10 @@ class Command(BaseCommand):
                 created += 1
                 continue
 
+            pole_name = p.get("name") or p.get("title") or p.get("nome") or f"Pole {p['id']}"
             franchise_id = self.franchise_map.get(p.get("franchise"))
             pole, was_created = Pole.objects.get_or_create(
-                name=p["name"],
+                name=pole_name,
                 defaults={
                     "franchise_id": franchise_id,
                     "is_active": p.get("is_active", True),
