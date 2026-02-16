@@ -561,12 +561,8 @@ export interface TicketSummary {
 }
 
 export interface InvoiceSummary {
-  total: number;
-  draft: number;
-  sent: number;
-  paid: number;
-  overdue: number;
-  cancelled: number;
-  total_amount: number;
-  total_paid: number;
+  total_invoices: number;
+  total_value: number;
+  overdue_count: number;
+  by_status: Array<{ status: string; count: number; total: number }>;
 }

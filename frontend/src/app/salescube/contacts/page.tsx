@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Users, Plus, Upload, Download, Search, Trash2, Edit, Merge, Filter,
-  ChevronLeft, ChevronRight, X, Check, AlertCircle,
+  ChevronLeft, ChevronRight, X, Check, AlertCircle, UserCheck, UserX, Globe,
 } from "lucide-react";
 import { contactApi, type Contact } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
@@ -202,6 +202,16 @@ export default function ContactsPage() {
     }
   };
 
+  // ── Stats ────────────────────────────────────────────────────────────
+  const activeCount = contacts.filter((c) => c.is_active).length;
+  const inactiveCount = contacts.filter((c) => !c.is_active).length;
+  const sourcesMap = contacts.reduce<Record<string, number>>((acc, c) => {
+    const src = c.source || "manual";
+    acc[src] = (acc[src] || 0) + 1;
+    return acc;
+  }, {});
+  const topSource = Object.entries(sourcesMap).sort((a, b) => b[1] - a[1])[0];
+
   // ── Render ───────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6 space-y-6">
@@ -224,6 +234,24 @@ export default function ContactsPage() {
             <Plus className="h-4 w-4" /> Novo Contato
           </button>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Total", value: String(totalCount), color: "text-gray-300", bg: "bg-gray-500/10", icon: Users },
+          { label: "Ativos", value: String(activeCount), color: "text-emerald-400", bg: "bg-emerald-500/10", icon: UserCheck },
+          { label: "Inativos", value: String(inactiveCount), color: "text-red-400", bg: "bg-red-500/10", icon: UserX },
+          { label: "Principal Fonte", value: topSource ? topSource[0].replace(/_/g, " ") : "-", color: "text-indigo-400", bg: "bg-indigo-500/10", icon: Globe },
+        ].map((s, i) => (
+          <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-gray-500 uppercase tracking-wide">{s.label}</span>
+              <div className={cn("p-1.5 rounded-lg", s.bg)}><s.icon className={cn("w-3.5 h-3.5", s.color)} /></div>
+            </div>
+            <span className={cn("text-lg font-bold capitalize", s.color)}>{s.value}</span>
+          </div>
+        ))}
       </div>
 
       {/* Import status toast */}

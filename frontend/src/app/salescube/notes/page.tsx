@@ -194,6 +194,25 @@ export default function NotesPage() {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {Object.entries(NOTE_TYPE_CONFIG).map(([key, cfg]) => {
+          const Icon = cfg.icon;
+          const count = notes.filter((n) => n.note_type === key).length;
+          return (
+            <div key={key} className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg">
+              <div className={cn("w-7 h-7 rounded-md flex items-center justify-center", cfg.color)}>
+                <Icon className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="text-xs text-gray-500 block leading-tight">{cfg.label}</span>
+                <span className="text-sm font-bold text-gray-200">{count}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-md">
