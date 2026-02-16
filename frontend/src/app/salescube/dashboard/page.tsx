@@ -18,8 +18,17 @@ import {
   ChevronUp,
   RotateCcw,
 } from "lucide-react";
-import { saleKpiApi, type SaleKPIs } from "@/lib/salesApi";
+import { saleKpiApi, leadApi, type SaleKPIs, type LeadStats } from "@/lib/salesApi";
+import { cn } from "@/lib/utils";
 import apiClient from "@/lib/api";
+import dynamic from "next/dynamic";
+
+// Lazy-load chart components (Recharts requires client-side rendering)
+const LeadsPerDayChart = dynamic(() => import("@/components/salescube/dashboard/LeadsPerDayChart"), { ssr: false });
+const LeadsPerStageChart = dynamic(() => import("@/components/salescube/dashboard/LeadsPerStageChart"), { ssr: false });
+const ConversionChart = dynamic(() => import("@/components/salescube/dashboard/ConversionChart"), { ssr: false });
+const LeadSourceChart = dynamic(() => import("@/components/salescube/dashboard/LeadSourceChart"), { ssr: false });
+const TopAssigneesChart = dynamic(() => import("@/components/salescube/dashboard/TopAssigneesChart"), { ssr: false });
 
 // ============================================================================
 // Types
@@ -577,10 +586,12 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
 
 export default function SalesCubeDashboard() {
   const [kpis, setKpis] = useState<SaleKPIs | null>(null);
+  const [leadStats, setLeadStats] = useState<LeadStats | null>(null);
   const [squads, setSquads] = useState<Squad[]>([]);
   const [units, setUnits] = useState<BusinessUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"vendas" | "leads">("vendas");
 
   const defaultFilters: DashboardFilters = {
     squad: "",
@@ -628,17 +639,25 @@ export default function SalesCubeDashboard() {
     return params;
   }, [filters]);
 
-  // Fetch KPIs when filters change
+  // Fetch KPIs and Lead Stats when filters change
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
         const params = buildParams();
-        const res = await saleKpiApi.getKpis(params);
-        setKpis(res.data);
+        const leadParams: Record<string, string> = {};
+        if (filters.data_criacao_inicio) leadParams.start_date = filters.data_criacao_inicio;
+        if (filters.data_criacao_fim) leadParams.end_date = filters.data_criacao_fim;
+
+        const [kpiRes, leadStatsRes] = await Promise.all([
+          saleKpiApi.getKpis(params),
+          leadApi.getStats(leadParams).catch(() => ({ data: null })),
+        ]);
+        setKpis(kpiRes.data);
+        setLeadStats(leadStatsRes.data);
       } catch (err: any) {
-        console.error("Error fetching KPIs:", err);
+        console.error("Error fetching dashboard data:", err);
         setError("Erro ao carregar dados do dashboard. Tente novamente.");
       } finally {
         setLoading(false);
@@ -689,11 +708,39 @@ export default function SalesCubeDashboard() {
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard de Vendas</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Visao geral do desempenho comercial
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Visao geral do desempenho comercial e leads
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex bg-gray-800/60 border border-gray-700/50 rounded-lg p-1">
+          <button
+            onClick={() => setActiveTab("vendas")}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "vendas"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <ShoppingCart className="w-3.5 h-3.5 inline-block mr-1.5" />
+            Vendas
+          </button>
+          <button
+            onClick={() => setActiveTab("leads")}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "leads"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            <Users className="w-3.5 h-3.5 inline-block mr-1.5" />
+            Leads
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -728,8 +775,10 @@ export default function SalesCubeDashboard() {
         </>
       )}
 
-      {/* Data Loaded */}
-      {!loading && dashboardData && (
+      {/* ================================================================ */}
+      {/* VENDAS TAB                                                       */}
+      {/* ================================================================ */}
+      {!loading && activeTab === "vendas" && dashboardData && (
         <>
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -967,8 +1016,141 @@ export default function SalesCubeDashboard() {
         </>
       )}
 
-      {/* Empty State */}
-      {!loading && !error && !kpis && (
+      {/* ================================================================ */}
+      {/* LEADS TAB - PROD-faithful lead engagement metrics                */}
+      {/* ================================================================ */}
+      {!loading && activeTab === "leads" && (
+        <>
+          {leadStats ? (
+            <>
+              {/* Lead Engagement KPI Cards (PROD TopCards equivalent) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Total de Leads</span>
+                    <div className="bg-indigo-500/20 p-2 rounded-lg">
+                      <Users className="w-4 h-4 text-indigo-400" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-indigo-400">{leadStats.total_leads}</p>
+                  <p className="text-xs text-gray-500 mt-1">Leads contactados no periodo</p>
+                </div>
+
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Vendas Realizadas</span>
+                    <div className="bg-emerald-500/20 p-2 rounded-lg">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-emerald-400">{leadStats.total_sales}</p>
+                  <p className="text-xs text-gray-500 mt-1">Leads convertidos em venda</p>
+                </div>
+
+                <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Taxa de Conversao</span>
+                    <div className="bg-purple-500/20 p-2 rounded-lg">
+                      <TrendingUp className="w-4 h-4 text-purple-400" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-purple-400">{leadStats.conversion_rate.toFixed(1)}%</p>
+                  <p className="text-xs text-gray-500 mt-1">Percentual de respostas</p>
+                </div>
+
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Ticket Medio</span>
+                    <div className="bg-amber-500/20 p-2 rounded-lg">
+                      <ShoppingCart className="w-4 h-4 text-amber-400" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-amber-400">{formatBRL(leadStats.avg_deal_size)}</p>
+                  <p className="text-xs text-gray-500 mt-1">Valor medio por negocio</p>
+                </div>
+              </div>
+
+              {/* Revenue + Highlight Cards Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Total Revenue */}
+                <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-2xl p-5">
+                  <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Receita Total</span>
+                  <p className="text-2xl font-bold text-white mt-2">{formatBRL(leadStats.total_revenue)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{leadStats.total_sales} vendas no periodo</p>
+                </div>
+
+                {/* Pipeline Summary Cards */}
+                {leadStats.pipeline_summary.slice(0, 2).map((pipe) => (
+                  <div key={pipe.pipeline_id} className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-5">
+                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{pipe.name}</span>
+                    <p className="text-2xl font-bold text-white mt-2">{pipe.count}</p>
+                    <p className="text-xs text-emerald-400 mt-1">{formatBRL(pipe.total_value)}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Leads per Day Area Chart (PROD NewsletterCampaign equivalent) */}
+              <LeadsPerDayChart data={leadStats.leads_per_day} />
+
+              {/* Charts Row: Leads per Stage + Conversion Donut */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <LeadsPerStageChart data={leadStats.leads_per_stage} />
+                <ConversionChart
+                  totalLeads={leadStats.total_leads}
+                  totalSales={leadStats.total_sales}
+                  conversionRate={leadStats.conversion_rate}
+                />
+              </div>
+
+              {/* Charts Row: Lead Source + Top Assignees */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <LeadSourceChart data={leadStats.leads_per_source} />
+                <TopAssigneesChart data={leadStats.top_assignees} />
+              </div>
+
+              {/* Sales Pipeline */}
+              {leadStats.sales_pipeline && leadStats.sales_pipeline.length > 0 && (
+                <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6">
+                  <h3 className="text-sm font-semibold text-gray-200 mb-4">Funil de Vendas</h3>
+                  <div className="space-y-3">
+                    {leadStats.sales_pipeline.map((stage, i) => {
+                      const maxCount = leadStats.sales_pipeline[0]?.count || 1;
+                      const pct = (stage.count / maxCount) * 100;
+                      return (
+                        <div key={stage.stage} className="flex items-center gap-4">
+                          <span className="text-sm text-gray-300 w-32 truncate">{stage.stage}</span>
+                          <div className="flex-1 relative">
+                            <div className="w-full bg-gray-700/50 rounded-full h-6">
+                              <div
+                                className="h-6 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-end pr-3 transition-all duration-700"
+                                style={{ width: `${Math.max(pct, 8)}%` }}
+                              >
+                                <span className="text-[11px] font-semibold text-white">{stage.count}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-xs text-emerald-400 font-medium w-28 text-right">
+                            {formatBRL(stage.total)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+              <Users className="w-16 h-16 mb-4 opacity-20" />
+              <p className="text-lg font-medium">Nenhum dado de leads disponivel</p>
+              <p className="text-sm">Ajuste os filtros ou aguarde novos leads.</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Empty State (vendas tab) */}
+      {!loading && activeTab === "vendas" && !error && !kpis && (
         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
           <ShoppingCart className="w-16 h-16 mb-4 opacity-20" />
           <p className="text-lg font-medium">Nenhum dado disponivel</p>
