@@ -5,6 +5,92 @@ import uuid
 User = get_user_model()
 
 
+# ============================================================================
+# Organizational Models (from PROD accounts app)
+# ============================================================================
+
+
+class Franchise(models.Model):
+    """Franchise/unit of the organization. PROD: accounts.franchise (6 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    code = models.CharField(max_length=50, blank=True, default="")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Pole(models.Model):
+    """Regional pole. PROD: accounts.pole (1 record)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    franchise = models.ForeignKey(
+        Franchise, on_delete=models.SET_NULL, null=True, blank=True, related_name="poles"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Squad(models.Model):
+    """Team/squad within a franchise. PROD: accounts.squad (11 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    franchise = models.ForeignKey(
+        Franchise, on_delete=models.SET_NULL, null=True, blank=True, related_name="squads"
+    )
+    owners = models.ManyToManyField(
+        User, blank=True, related_name="owned_squads"
+    )
+    members = models.ManyToManyField(
+        User, blank=True, related_name="squad_memberships"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Origin(models.Model):
+    """Lead origin/source as a dynamic table. PROD: leads.origin (15 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+# ============================================================================
+# Sprint 1 Models - Pipelines, Leads, Sales, Tasks
+# ============================================================================
+
+
 class Pipeline(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=150)
@@ -13,6 +99,8 @@ class Pipeline(models.Model):
         User, on_delete=models.SET_NULL, null=True, related_name="salescube_pipelines"
     )
     is_default = models.BooleanField(default=False)
+    squads = models.ManyToManyField("Squad", blank=True, related_name="pipelines")
+    franchises = models.ManyToManyField("Franchise", blank=True, related_name="pipelines")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,6 +155,14 @@ class Lead(models.Model):
         blank=True,
         related_name="assigned_leads",
     )
+    responsibles = models.ManyToManyField(
+        User, blank=True, related_name="responsible_leads"
+    )
+    origin = models.ForeignKey(
+        Origin, on_delete=models.SET_NULL, null=True, blank=True, related_name="leads"
+    )
+    squads = models.ManyToManyField("Squad", blank=True, related_name="leads")
+    franchises = models.ManyToManyField("Franchise", blank=True, related_name="leads")
     score = models.IntegerField(default=0)
     source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default="manual")
     notes = models.TextField(blank=True, default="")
@@ -133,6 +229,22 @@ class LeadActivity(models.Model):
         return f"{self.action} - {self.lead.name}"
 
 
+class TaskType(models.Model):
+    """Customizable task types. PROD: api.tasktype (2 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    color = models.CharField(max_length=20, blank=True, default="#6366f1")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Task(models.Model):
     PRIORITY_CHOICES = [
         ("low", "Low"),
@@ -160,6 +272,12 @@ class Task(models.Model):
         null=True,
         blank=True,
         related_name="salescube_tasks",
+    )
+    responsibles = models.ManyToManyField(
+        User, blank=True, related_name="responsible_tasks"
+    )
+    task_type = models.ForeignKey(
+        TaskType, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks"
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     priority = models.CharField(
@@ -242,6 +360,7 @@ class Sale(models.Model):
         related_name="sales",
     )
     products = models.ManyToManyField(Product, blank=True, related_name="sales")
+    squads = models.ManyToManyField("Squad", blank=True, related_name="sales")
     total_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default="negotiation")
     notes = models.TextField(blank=True, default="")
@@ -625,3 +744,185 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# ============================================================================
+# Sprint 3 Models - PROD Parity (Reminder, Pitch, Campaign, Reports, Attachment)
+# ============================================================================
+
+
+class Reminder(models.Model):
+    """Reminders linked to leads/tasks. PROD: api.reminder (60 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    remind_at = models.DateTimeField()
+    lead = models.ForeignKey(
+        Lead, on_delete=models.CASCADE, null=True, blank=True, related_name="reminders"
+    )
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, null=True, blank=True, related_name="reminders"
+    )
+    assigned_to = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="salescube_reminders"
+    )
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="created_reminders"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["remind_at"]
+
+    def __str__(self):
+        return f"{self.title} ({self.remind_at})"
+
+
+class Pitch(models.Model):
+    """Sales pitches/proposals. PROD: sales.pitch (8 records)."""
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("sent", "Sent"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    sale = models.ForeignKey(
+        Sale, on_delete=models.CASCADE, null=True, blank=True, related_name="pitches"
+    )
+    lead = models.ForeignKey(
+        Lead, on_delete=models.SET_NULL, null=True, blank=True, related_name="pitches"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="created_pitches"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name_plural = "pitches"
+
+    def __str__(self):
+        return f"{self.title} - {self.status}"
+
+
+class Campaign(models.Model):
+    """Marketing campaigns linked to pipelines. PROD: pipelines.campaign."""
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("active", "Active"),
+        ("paused", "Paused"),
+        ("completed", "Completed"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    pipeline = models.ForeignKey(
+        Pipeline, on_delete=models.SET_NULL, null=True, blank=True, related_name="campaigns"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="created_campaigns"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.status})"
+
+
+class ReportTemplate(models.Model):
+    """Report templates. PROD: api.reporttemplate (14 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    template_type = models.CharField(max_length=50, blank=True, default="general")
+    config = models.JSONField(default=dict, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="created_report_templates"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class ReportLog(models.Model):
+    """Log of generated reports. PROD: api.reportlog (17 records)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    template = models.ForeignKey(
+        ReportTemplate, on_delete=models.SET_NULL, null=True, related_name="logs"
+    )
+    generated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="generated_reports"
+    )
+    parameters = models.JSONField(default=dict, blank=True)
+    result_url = models.URLField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        template_name = self.template.name if self.template else "N/A"
+        return f"Report: {template_name} ({self.created_at})"
+
+
+class Attachment(models.Model):
+    """Generic attachments for leads, tasks, and other entities.
+    PROD: api.attachment (753 records). Extends beyond sale-only attachments."""
+    ENTITY_CHOICES = [
+        ("lead", "Lead"),
+        ("task", "Task"),
+        ("sale", "Sale"),
+        ("ticket", "Ticket"),
+        ("pitch", "Pitch"),
+        ("other", "Other"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    entity_type = models.CharField(max_length=20, choices=ENTITY_CHOICES, default="lead")
+    entity_id = models.UUIDField(null=True, blank=True, db_index=True)
+    file = models.FileField(upload_to="salescube/attachments/%Y/%m/", blank=True)
+    file_name = models.CharField(max_length=255, blank=True, default="")
+    file_url = models.URLField(blank=True, default="")
+    file_size = models.PositiveIntegerField(default=0)
+    mime_type = models.CharField(max_length=100, blank=True, default="")
+    uploaded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="uploaded_attachments"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["entity_type", "entity_id"]),
+        ]
+
+    def __str__(self):
+        return f"{self.entity_type}:{self.file_name or self.file}"

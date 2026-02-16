@@ -2,10 +2,21 @@ from rest_framework import serializers
 from django.db.models import Count, Sum
 
 from .models import (
+    Attachment,
+    Campaign,
     Contact,
     EmailTemplate,
+    Franchise,
     Invoice,
     InvoiceItem,
+    Origin,
+    Pitch,
+    Pole,
+    Reminder,
+    ReportLog,
+    ReportTemplate,
+    Squad,
+    TaskType,
     Ticket,
     TicketMessage,
     Category,
@@ -25,6 +36,72 @@ from .models import (
     SaleLineItem,
     Task,
 )
+
+
+# ============================================================================
+# Organizational Serializers
+# ============================================================================
+
+
+class FranchiseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Franchise
+        fields = ["id", "name", "code", "is_active", "created_at", "updated_at"]
+
+
+class PoleSerializer(serializers.ModelSerializer):
+    franchise_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Pole
+        fields = ["id", "name", "franchise", "franchise_name", "is_active", "created_at", "updated_at"]
+
+    def get_franchise_name(self, obj):
+        return obj.franchise.name if obj.franchise else None
+
+
+class SquadSerializer(serializers.ModelSerializer):
+    franchise_name = serializers.SerializerMethodField()
+    owners_count = serializers.SerializerMethodField()
+    members_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Squad
+        fields = [
+            "id", "name", "franchise", "franchise_name", "owners", "members",
+            "owners_count", "members_count", "is_active", "created_at", "updated_at",
+        ]
+
+    def get_franchise_name(self, obj):
+        return obj.franchise.name if obj.franchise else None
+
+    def get_owners_count(self, obj):
+        return obj.owners.count()
+
+    def get_members_count(self, obj):
+        return obj.members.count()
+
+
+class OriginSerializer(serializers.ModelSerializer):
+    leads_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Origin
+        fields = ["id", "name", "is_active", "leads_count", "created_at"]
+
+    def get_leads_count(self, obj):
+        return obj.leads.count()
+
+
+class TaskTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskType
+        fields = ["id", "name", "color", "is_active", "created_at"]
+
+
+# ============================================================================
+# Sprint 1 Serializers
+# ============================================================================
 
 
 class PipelineStageSerializer(serializers.ModelSerializer):
@@ -151,13 +228,18 @@ class LeadSerializer(serializers.ModelSerializer):
     stage_name = serializers.SerializerMethodField()
     stage_color = serializers.SerializerMethodField()
     assigned_to_name = serializers.SerializerMethodField()
+    origin_name = serializers.SerializerMethodField()
+    responsibles_names = serializers.SerializerMethodField()
 
     class Meta:
         model = Lead
         fields = [
             "id", "name", "email", "phone", "company", "stage",
-            "stage_name", "stage_color", "assigned_to", "assigned_to_name", "score",
+            "stage_name", "stage_color", "assigned_to", "assigned_to_name",
+            "responsibles", "responsibles_names",
+            "origin", "origin_name", "score",
             "source", "notes", "value", "lost_reason",
+            "squads", "franchises",
             "created_at", "updated_at",
         ]
 
@@ -173,6 +255,15 @@ class LeadSerializer(serializers.ModelSerializer):
             return full if full else obj.assigned_to.username
         return None
 
+    def get_origin_name(self, obj):
+        return obj.origin.name if obj.origin else None
+
+    def get_responsibles_names(self, obj):
+        return [
+            {"id": u.id, "name": u.get_full_name() or u.username}
+            for u in obj.responsibles.all()
+        ]
+
 
 class LeadDetailSerializer(serializers.ModelSerializer):
     """Lead detail with all nested relations."""
@@ -180,6 +271,10 @@ class LeadDetailSerializer(serializers.ModelSerializer):
     stage_color = serializers.SerializerMethodField()
     pipeline_id = serializers.SerializerMethodField()
     assigned_to_name = serializers.SerializerMethodField()
+    origin_name = serializers.SerializerMethodField()
+    responsibles_names = serializers.SerializerMethodField()
+    squad_names = serializers.SerializerMethodField()
+    franchise_names = serializers.SerializerMethodField()
     lead_notes = LeadNoteSerializer(many=True, read_only=True)
     activities = LeadActivitySerializer(many=True, read_only=True)
     comments = LeadCommentSerializer(many=True, read_only=True)
@@ -194,8 +289,11 @@ class LeadDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "email", "phone", "company", "stage",
             "stage_name", "stage_color", "pipeline_id",
-            "assigned_to", "assigned_to_name", "score",
-            "source", "notes", "value", "lost_reason",
+            "assigned_to", "assigned_to_name",
+            "responsibles", "responsibles_names",
+            "origin", "origin_name",
+            "squads", "squad_names", "franchises", "franchise_names",
+            "score", "source", "notes", "value", "lost_reason",
             "created_at", "updated_at",
             "lead_notes", "activities", "comments", "tags",
             "tasks", "sales",
@@ -216,6 +314,21 @@ class LeadDetailSerializer(serializers.ModelSerializer):
             full = obj.assigned_to.get_full_name()
             return full if full else obj.assigned_to.username
         return None
+
+    def get_origin_name(self, obj):
+        return obj.origin.name if obj.origin else None
+
+    def get_responsibles_names(self, obj):
+        return [
+            {"id": u.id, "name": u.get_full_name() or u.username}
+            for u in obj.responsibles.all()
+        ]
+
+    def get_squad_names(self, obj):
+        return [{"id": str(s.id), "name": s.name} for s in obj.squads.all()]
+
+    def get_franchise_names(self, obj):
+        return [{"id": str(f.id), "name": f.name} for f in obj.franchises.all()]
 
     def get_tags(self, obj):
         assignments = obj.tag_assignments.select_related("tag").all()
@@ -252,12 +365,17 @@ class LeadStatsSerializer(serializers.Serializer):
 class TaskSerializer(serializers.ModelSerializer):
     lead_name = serializers.SerializerMethodField()
     assigned_to_name = serializers.SerializerMethodField()
+    task_type_name = serializers.SerializerMethodField()
+    responsibles_names = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         fields = [
             "id", "title", "description", "due_date", "lead", "lead_name",
-            "assigned_to", "assigned_to_name", "status", "priority", "reminder_at",
+            "assigned_to", "assigned_to_name",
+            "responsibles", "responsibles_names",
+            "task_type", "task_type_name",
+            "status", "priority", "reminder_at",
             "completed_at", "created_at", "updated_at",
         ]
 
@@ -269,6 +387,15 @@ class TaskSerializer(serializers.ModelSerializer):
             full = obj.assigned_to.get_full_name()
             return full if full else obj.assigned_to.username
         return None
+
+    def get_task_type_name(self, obj):
+        return obj.task_type.name if obj.task_type else None
+
+    def get_responsibles_names(self, obj):
+        return [
+            {"id": u.id, "name": u.get_full_name() or u.username}
+            for u in obj.responsibles.all()
+        ]
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -575,3 +702,119 @@ class EmailTemplateSerializer(serializers.ModelSerializer):
             "created_at", "updated_at",
         ]
         read_only_fields = ["created_by"]
+
+
+# ============================================================================
+# Sprint 3 Serializers - PROD Parity
+# ============================================================================
+
+
+class ReminderSerializer(serializers.ModelSerializer):
+    lead_name = serializers.SerializerMethodField()
+    assigned_to_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Reminder
+        fields = [
+            "id", "title", "description", "remind_at", "lead", "lead_name",
+            "task", "assigned_to", "assigned_to_name", "is_completed",
+            "completed_at", "created_by", "created_at", "updated_at",
+        ]
+        read_only_fields = ["created_by"]
+
+    def get_lead_name(self, obj):
+        return obj.lead.name if obj.lead else None
+
+    def get_assigned_to_name(self, obj):
+        if obj.assigned_to:
+            full = obj.assigned_to.get_full_name()
+            return full if full else obj.assigned_to.username
+        return None
+
+
+class PitchSerializer(serializers.ModelSerializer):
+    lead_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Pitch
+        fields = [
+            "id", "title", "description", "sale", "lead", "lead_name",
+            "status", "value", "sent_at", "accepted_at",
+            "created_by", "created_by_name", "created_at", "updated_at",
+        ]
+        read_only_fields = ["created_by"]
+
+    def get_lead_name(self, obj):
+        return obj.lead.name if obj.lead else None
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            full = obj.created_by.get_full_name()
+            return full if full else obj.created_by.username
+        return None
+
+
+class CampaignSerializer(serializers.ModelSerializer):
+    pipeline_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Campaign
+        fields = [
+            "id", "name", "description", "pipeline", "pipeline_name",
+            "status", "start_date", "end_date", "budget",
+            "created_by", "created_at", "updated_at",
+        ]
+        read_only_fields = ["created_by"]
+
+    def get_pipeline_name(self, obj):
+        return obj.pipeline.name if obj.pipeline else None
+
+
+class ReportTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportTemplate
+        fields = [
+            "id", "name", "description", "template_type", "config",
+            "is_active", "created_by", "created_at", "updated_at",
+        ]
+        read_only_fields = ["created_by"]
+
+
+class ReportLogSerializer(serializers.ModelSerializer):
+    template_name = serializers.SerializerMethodField()
+    generated_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ReportLog
+        fields = [
+            "id", "template", "template_name", "generated_by",
+            "generated_by_name", "parameters", "result_url", "created_at",
+        ]
+
+    def get_template_name(self, obj):
+        return obj.template.name if obj.template else None
+
+    def get_generated_by_name(self, obj):
+        if obj.generated_by:
+            full = obj.generated_by.get_full_name()
+            return full if full else obj.generated_by.username
+        return None
+
+
+class AttachmentSerializer(serializers.ModelSerializer):
+    uploaded_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Attachment
+        fields = [
+            "id", "entity_type", "entity_id", "file", "file_name",
+            "file_url", "file_size", "mime_type", "uploaded_by",
+            "uploaded_by_name", "created_at",
+        ]
+
+    def get_uploaded_by_name(self, obj):
+        if obj.uploaded_by:
+            full = obj.uploaded_by.get_full_name()
+            return full if full else obj.uploaded_by.username
+        return None

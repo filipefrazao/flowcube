@@ -7,7 +7,7 @@ import {
   ListTodo, LayoutGrid, List, Ban, Flag, User, Link2, Zap,
   AlertTriangle, ChevronDown, ArrowDown, ArrowUp, Minus
 } from "lucide-react";
-import { taskApi, leadApi, type SalesTask, type Lead } from "@/lib/salesApi";
+import { taskApi, leadApi, taskTypeApi, type SalesTask, type Lead, type TaskType } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 
 /* ── Status Config ──────────────────────────────────────────────────── */
@@ -50,6 +50,7 @@ export default function TasksPage() {
   /* ── Data ───────────────────────────────────────────────────────── */
   const [tasks, setTasks] = useState<SalesTask[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +60,7 @@ export default function TasksPage() {
   const [filterSearch, setFilterSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
+  const [filterTaskType, setFilterTaskType] = useState("");
   const [filterLead, setFilterLead] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
@@ -72,7 +74,7 @@ export default function TasksPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState<SalesTask | null>(null);
   const [form, setForm] = useState({
-    title: "", description: "", due_date: "", priority: "medium", status: "pending", lead: "",
+    title: "", description: "", due_date: "", priority: "medium", status: "pending", lead: "", task_type: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -87,6 +89,7 @@ export default function TasksPage() {
       if (filterStatus) params.status = filterStatus;
       if (filterPriority) params.priority = filterPriority;
       if (filterSearch) params.search = filterSearch;
+      if (filterTaskType) params.task_type = filterTaskType;
 
       const res = await taskApi.list(params);
       const data = res.data;
@@ -97,12 +100,16 @@ export default function TasksPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filterStatus, filterPriority, filterSearch]);
+  }, [currentPage, filterStatus, filterPriority, filterSearch, filterTaskType]);
 
   const fetchLeads = useCallback(async () => {
     try {
-      const res = await leadApi.list({ limit: "500" });
-      setLeads(res.data.results || res.data);
+      const [leadsRes, taskTypesRes] = await Promise.all([
+        leadApi.list({ limit: "500" }),
+        taskTypeApi.list({ limit: "200" }),
+      ]);
+      setLeads(leadsRes.data.results || leadsRes.data);
+      setTaskTypes(taskTypesRes.data.results || taskTypesRes.data);
     } catch (err) {
       console.error(err);
     }
@@ -135,7 +142,7 @@ export default function TasksPage() {
   /* ── Handlers ───────────────────────────────────────────────────── */
   const openCreateModal = () => {
     setEditingTask(null);
-    setForm({ title: "", description: "", due_date: "", priority: "medium", status: "pending", lead: "" });
+    setForm({ title: "", description: "", due_date: "", priority: "medium", status: "pending", lead: "", task_type: "" });
     setShowModal(true);
   };
 
@@ -148,6 +155,7 @@ export default function TasksPage() {
       priority: task.priority,
       status: task.status,
       lead: task.lead || "",
+      task_type: task.task_type || "",
     });
     setShowModal(true);
   };
@@ -155,7 +163,7 @@ export default function TasksPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const data = { ...form, due_date: form.due_date || null, lead: form.lead || null };
+      const data = { ...form, due_date: form.due_date || null, lead: form.lead || null, task_type: form.task_type || null };
       if (editingTask) {
         await taskApi.update(editingTask.id, data);
       } else {
@@ -190,12 +198,12 @@ export default function TasksPage() {
   };
 
   const clearFilters = () => {
-    setFilterSearch(""); setFilterStatus(""); setFilterPriority(""); setFilterLead("");
+    setFilterSearch(""); setFilterStatus(""); setFilterPriority(""); setFilterTaskType(""); setFilterLead("");
     setFilterDateFrom(""); setFilterDateTo(""); setFilterDueDateFrom(""); setFilterDueDateTo("");
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = filterSearch || filterStatus || filterPriority || filterLead || filterDateFrom || filterDateTo || filterDueDateFrom || filterDueDateTo;
+  const hasActiveFilters = filterSearch || filterStatus || filterPriority || filterTaskType || filterLead || filterDateFrom || filterDateTo || filterDueDateFrom || filterDueDateTo;
 
   return (
     <div className="p-6 space-y-6">
@@ -246,6 +254,11 @@ export default function TasksPage() {
             className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
             <option value="">Todas as Prioridades</option>
             {Object.entries(PRIORITY_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+          </select>
+          <select value={filterTaskType} onChange={(e) => { setFilterTaskType(e.target.value); setCurrentPage(1); }}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            <option value="">Todos os Tipos</option>
+            {taskTypes.map((tt) => (<option key={tt.id} value={tt.id}>{tt.name}</option>))}
           </select>
 
           {/* View toggle */}
@@ -318,6 +331,7 @@ export default function TasksPage() {
                   <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Status</th>
                   <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Prioridade</th>
                   <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Lead</th>
+                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Tipo</th>
                   <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Responsavel</th>
                   <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Prazo</th>
                   <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Criada em</th>
@@ -362,6 +376,9 @@ export default function TasksPage() {
                         {task.lead_name || "-"}
                       </td>
                       <td className="px-4 py-3 text-gray-300 text-xs">
+                        {task.task_type_name || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300 text-xs">
                         {task.assigned_to_name || "-"}
                       </td>
                       <td className="px-4 py-3">
@@ -391,7 +408,7 @@ export default function TasksPage() {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="px-4 py-16 text-center">
+                    <td colSpan={11} className="px-4 py-16 text-center">
                       <ListTodo className="w-10 h-10 text-gray-700 mx-auto mb-3" />
                       <p className="text-gray-500">Nenhuma tarefa encontrada</p>
                     </td>
@@ -486,6 +503,12 @@ export default function TasksPage() {
                         <span className="flex items-center gap-1">
                           <Link2 className="w-3 h-3" />
                           {task.lead_name}
+                        </span>
+                      )}
+                      {task.task_type_name && (
+                        <span className="flex items-center gap-1">
+                          <Flag className="w-3 h-3" />
+                          {task.task_type_name}
                         </span>
                       )}
                       {task.assigned_to_name && (
@@ -603,7 +626,7 @@ export default function TasksPage() {
                 </div>
               </div>
 
-              {/* Due date and Lead */}
+              {/* Due date, Lead, Task Type */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Prazo</label>
@@ -611,6 +634,14 @@ export default function TasksPage() {
                     className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
                 </div>
                 <div>
+                  <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Tipo de Tarefa</label>
+                  <select value={form.task_type} onChange={(e) => setForm({ ...form, task_type: e.target.value })}
+                    className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 transition-all">
+                    <option value="">Nenhum</option>
+                    {taskTypes.map((tt) => (<option key={tt.id} value={tt.id}>{tt.name}</option>))}
+                  </select>
+                </div>
+                <div className="col-span-2">
                   <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Lead Vinculado</label>
                   <select value={form.lead} onChange={(e) => setForm({ ...form, lead: e.target.value })}
                     className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 transition-all">

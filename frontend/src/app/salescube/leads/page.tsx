@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import {
   leadApi, stageApi, pipelineApi, taskApi,
+  originApi, squadApi, franchiseApi,
   type Lead, type LeadDetail,
   type PipelineStage, type Pipeline,
+  type Origin, type Squad, type Franchise,
 } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +119,9 @@ interface FilterState {
   noStage: boolean;
   assignedTo: string;
   source: string;
+  origin: string;
+  squad: string;
+  franchise: string;
   scoreMin: string;
   scoreMax: string;
   ordering: string;
@@ -136,6 +141,9 @@ const defaultFilters: FilterState = {
   noStage: false,
   assignedTo: "",
   source: "",
+  origin: "",
+  squad: "",
+  franchise: "",
   scoreMin: "",
   scoreMax: "",
   ordering: "-created_at",
@@ -498,6 +506,46 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 resize-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors" />
                   </div>
 
+                  {/* Origin, Responsibles, Squads, Franchises */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {lead.origin_name && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Origem</label>
+                        <span className="text-sm text-gray-200">{lead.origin_name}</span>
+                      </div>
+                    )}
+                    {lead.responsibles_names && lead.responsibles_names.length > 0 && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Responsaveis</label>
+                        <div className="flex flex-wrap gap-1">
+                          {lead.responsibles_names.map((name, i) => (
+                            <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">{name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {lead.squad_names && lead.squad_names.length > 0 && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Squads</label>
+                        <div className="flex flex-wrap gap-1">
+                          {lead.squad_names.map((name, i) => (
+                            <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">{name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {lead.franchise_names && lead.franchise_names.length > 0 && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Franquias</label>
+                        <div className="flex flex-wrap gap-1">
+                          {lead.franchise_names.map((name, i) => (
+                            <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">{name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Tags display */}
                   {(lead as any).tags && (lead as any).tags.length > 0 && (
                     <div>
@@ -733,6 +781,9 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [allStages, setAllStages] = useState<PipelineStage[]>([]);
+  const [origins, setOrigins] = useState<Origin[]>([]);
+  const [squads, setSquads] = useState<Squad[]>([]);
+  const [franchises, setFranchises] = useState<Franchise[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -793,6 +844,9 @@ export default function LeadsPage() {
     if (filters.noStage) count++;
     if (filters.assignedTo) count++;
     if (filters.source) count++;
+    if (filters.origin) count++;
+    if (filters.squad) count++;
+    if (filters.franchise) count++;
     if (filters.scoreMin) count++;
     if (filters.scoreMax) count++;
     if (filters.createdFrom) count++;
@@ -837,10 +891,18 @@ export default function LeadsPage() {
       if (filters.updatedFrom) params.updated_at__gte = filters.updatedFrom;
       if (filters.updatedTo) params.updated_at__lte = filters.updatedTo;
 
-      const [leadsRes, pipelinesRes, stagesRes] = await Promise.all([
+      // Sprint 3 filters
+      if (filters.origin) params.origin = filters.origin;
+      if (filters.squad) params.squads = filters.squad;
+      if (filters.franchise) params.franchises = filters.franchise;
+
+      const [leadsRes, pipelinesRes, stagesRes, originsRes, squadsRes, franchisesRes] = await Promise.all([
         leadApi.list(params),
         pipelineApi.list(),
         stageApi.list(),
+        originApi.list({ limit: "500" }),
+        squadApi.list({ limit: "500" }),
+        franchiseApi.list({ limit: "500" }),
       ]);
 
       const leadsData = leadsRes.data;
@@ -853,6 +915,10 @@ export default function LeadsPage() {
       const stagesData = stagesRes.data;
       const stagesList = stagesData.results || stagesData;
       setAllStages(stagesList);
+
+      setOrigins(originsRes.data.results || originsRes.data);
+      setSquads(squadsRes.data.results || squadsRes.data);
+      setFranchises(franchisesRes.data.results || franchisesRes.data);
     } catch (err) {
       console.error("Error fetching leads:", err);
     } finally {
@@ -1236,6 +1302,39 @@ export default function LeadsPage() {
                 ))}
               </select>
             </div>
+            {/* Origem */}
+            <div>
+              <label className="text-[11px] text-gray-500 font-medium mb-1 block uppercase tracking-wide">Origem</label>
+              <select value={filters.origin} onChange={(e) => updateFilter("origin", e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-1.5 text-sm focus:border-indigo-500 outline-none">
+                <option value="">Todas</option>
+                {origins.map((o) => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </select>
+            </div>
+            {/* Squad */}
+            <div>
+              <label className="text-[11px] text-gray-500 font-medium mb-1 block uppercase tracking-wide">Squad</label>
+              <select value={filters.squad} onChange={(e) => updateFilter("squad", e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-1.5 text-sm focus:border-indigo-500 outline-none">
+                <option value="">Todos</option>
+                {squads.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+            {/* Franquia */}
+            <div>
+              <label className="text-[11px] text-gray-500 font-medium mb-1 block uppercase tracking-wide">Franquia</label>
+              <select value={filters.franchise} onChange={(e) => updateFilter("franchise", e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-1.5 text-sm focus:border-indigo-500 outline-none">
+                <option value="">Todas</option>
+                {franchises.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
             {/* Responsavel */}
             <div>
               <label className="text-[11px] text-gray-500 font-medium mb-1 block uppercase tracking-wide">Responsavel</label>
@@ -1318,6 +1417,7 @@ export default function LeadsPage() {
                 <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Estagio</th>
                 <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider hidden xl:table-cell">Pipeline</th>
                 <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider hidden lg:table-cell">Fonte</th>
+                <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider hidden xl:table-cell">Origem</th>
                 <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Score</th>
                 <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Valor</th>
                 <th className="px-3 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider hidden xl:table-cell">Responsavel</th>
@@ -1328,13 +1428,13 @@ export default function LeadsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={12}>
+                  <td colSpan={13}>
                     <TableSkeleton rows={filters.pageSize > 25 ? 15 : filters.pageSize} />
                   </td>
                 </tr>
               ) : leads.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-16 text-center">
+                  <td colSpan={13} className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <Search className="w-8 h-8 text-gray-600" />
                       <p className="text-gray-500 font-medium">Nenhum lead encontrado</p>
@@ -1379,6 +1479,9 @@ export default function LeadsPage() {
                     </td>
                     <td className="px-3 py-2.5 hidden lg:table-cell">
                       <span className="text-gray-400 text-xs">{formatSourceLabel(lead.source)}</span>
+                    </td>
+                    <td className="px-3 py-2.5 hidden xl:table-cell">
+                      <span className="text-gray-400 text-xs">{lead.origin_name || "-"}</span>
                     </td>
                     <td className="px-3 py-2.5">
                       <span className={cn(

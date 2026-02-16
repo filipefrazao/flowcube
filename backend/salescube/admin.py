@@ -1,10 +1,13 @@
 from django.contrib import admin
 
 from .models import (
+    Attachment,
+    Campaign,
     Category,
     Contact,
     EmailTemplate,
     FinancialRecord,
+    Franchise,
     Invoice,
     InvoiceItem,
     Lead,
@@ -13,17 +16,71 @@ from .models import (
     LeadNote,
     LeadTag,
     LeadTagAssignment,
+    Origin,
     Payment,
     Pipeline,
     PipelineStage,
+    Pitch,
+    Pole,
     Product,
+    Reminder,
+    ReportLog,
+    ReportTemplate,
     Sale,
     SaleAttachment,
     SaleLineItem,
+    Squad,
     Task,
+    TaskType,
     Ticket,
     TicketMessage,
 )
+
+
+# ============================================================================
+# Organizational
+# ============================================================================
+
+
+@admin.register(Franchise)
+class FranchiseAdmin(admin.ModelAdmin):
+    list_display = ["name", "code", "is_active", "created_at"]
+    list_filter = ["is_active"]
+    search_fields = ["name", "code"]
+
+
+@admin.register(Pole)
+class PoleAdmin(admin.ModelAdmin):
+    list_display = ["name", "franchise", "is_active", "created_at"]
+    list_filter = ["is_active", "franchise"]
+    search_fields = ["name"]
+
+
+@admin.register(Squad)
+class SquadAdmin(admin.ModelAdmin):
+    list_display = ["name", "franchise", "is_active", "created_at"]
+    list_filter = ["is_active", "franchise"]
+    search_fields = ["name"]
+    filter_horizontal = ["owners", "members"]
+
+
+@admin.register(Origin)
+class OriginAdmin(admin.ModelAdmin):
+    list_display = ["name", "is_active", "created_at"]
+    list_filter = ["is_active"]
+    search_fields = ["name"]
+
+
+@admin.register(TaskType)
+class TaskTypeAdmin(admin.ModelAdmin):
+    list_display = ["name", "color", "is_active", "created_at"]
+    list_filter = ["is_active"]
+    search_fields = ["name"]
+
+
+# ============================================================================
+# Sprint 1
+# ============================================================================
 
 
 @admin.register(Pipeline)
@@ -31,6 +88,7 @@ class PipelineAdmin(admin.ModelAdmin):
     list_display = ["name", "is_default", "created_by", "created_at"]
     list_filter = ["is_default"]
     search_fields = ["name"]
+    filter_horizontal = ["squads", "franchises"]
 
 
 @admin.register(PipelineStage)
@@ -42,9 +100,10 @@ class PipelineStageAdmin(admin.ModelAdmin):
 
 @admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
-    list_display = ["name", "email", "phone", "stage", "assigned_to", "score", "source"]
-    list_filter = ["source", "stage"]
+    list_display = ["name", "email", "phone", "stage", "assigned_to", "origin", "score", "source"]
+    list_filter = ["source", "stage", "origin"]
     search_fields = ["name", "email", "phone", "company"]
+    filter_horizontal = ["responsibles", "squads", "franchises"]
 
 
 @admin.register(LeadNote)
@@ -63,9 +122,10 @@ class LeadActivityAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ["title", "status", "priority", "assigned_to", "due_date"]
-    list_filter = ["status", "priority"]
+    list_display = ["title", "status", "priority", "task_type", "assigned_to", "due_date"]
+    list_filter = ["status", "priority", "task_type"]
     search_fields = ["title"]
+    filter_horizontal = ["responsibles"]
 
 
 @admin.register(Category)
@@ -87,6 +147,7 @@ class SaleAdmin(admin.ModelAdmin):
     list_display = ["id", "lead", "total_value", "stage", "created_by", "created_at"]
     list_filter = ["stage"]
     search_fields = ["notes"]
+    filter_horizontal = ["squads"]
 
 
 @admin.register(SaleLineItem)
@@ -132,6 +193,11 @@ class SaleAttachmentAdmin(admin.ModelAdmin):
     list_display = ["sale", "file_name", "uploaded_by", "created_at"]
 
 
+# ============================================================================
+# Sprint 2
+# ============================================================================
+
+
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     list_display = ["name", "email", "phone", "company", "source", "is_active"]
@@ -169,3 +235,50 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ["name", "subject", "category", "is_active", "created_at"]
     list_filter = ["category", "is_active"]
     search_fields = ["name", "subject"]
+
+
+# ============================================================================
+# Sprint 3 - PROD Parity
+# ============================================================================
+
+
+@admin.register(Reminder)
+class ReminderAdmin(admin.ModelAdmin):
+    list_display = ["title", "remind_at", "lead", "assigned_to", "is_completed", "created_at"]
+    list_filter = ["is_completed"]
+    search_fields = ["title"]
+    date_hierarchy = "remind_at"
+
+
+@admin.register(Pitch)
+class PitchAdmin(admin.ModelAdmin):
+    list_display = ["title", "status", "value", "lead", "sale", "created_by", "created_at"]
+    list_filter = ["status"]
+    search_fields = ["title"]
+
+
+@admin.register(Campaign)
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ["name", "status", "pipeline", "budget", "start_date", "end_date"]
+    list_filter = ["status"]
+    search_fields = ["name"]
+
+
+@admin.register(ReportTemplate)
+class ReportTemplateAdmin(admin.ModelAdmin):
+    list_display = ["name", "template_type", "is_active", "created_by", "created_at"]
+    list_filter = ["template_type", "is_active"]
+    search_fields = ["name"]
+
+
+@admin.register(ReportLog)
+class ReportLogAdmin(admin.ModelAdmin):
+    list_display = ["template", "generated_by", "created_at"]
+    list_filter = ["template"]
+
+
+@admin.register(Attachment)
+class AttachmentAdmin(admin.ModelAdmin):
+    list_display = ["entity_type", "file_name", "mime_type", "uploaded_by", "created_at"]
+    list_filter = ["entity_type"]
+    search_fields = ["file_name"]

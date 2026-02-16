@@ -64,6 +64,12 @@ export interface Lead {
   pipeline?: string;
   assigned_to: string | null;
   assigned_to_name?: string;
+  origin?: string | null;
+  origin_name?: string;
+  responsibles?: string[];
+  responsibles_names?: string[];
+  squads?: string[];
+  franchises?: string[];
   score: number;
   source: string;
   notes: string;
@@ -79,6 +85,10 @@ export interface LeadDetail extends Lead {
   comments?: any[];
   total_comments?: number;
   total_activities?: number;
+  origin_name?: string;
+  responsibles_names?: string[];
+  squad_names?: string[];
+  franchise_names?: string[];
   lead_notes: LeadNote[];
   activities: LeadActivityItem[];
   tasks: SalesTask[];
@@ -115,6 +125,10 @@ export interface SalesTask {
   lead_name?: string;
   assigned_to: string | null;
   assigned_to_name?: string;
+  task_type: string | null;
+  task_type_name?: string;
+  responsibles?: string[];
+  responsibles_names?: string[];
   status: string;
   priority: string;
   created_at: string;
@@ -566,3 +580,247 @@ export interface InvoiceSummary {
   overdue_count: number;
   by_status: Array<{ status: string; count: number; total: number }>;
 }
+
+// ============================================================================
+// Sprint 3 - Organizational Types
+// ============================================================================
+
+export interface Franchise {
+  id: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+  legacy_id: number | null;
+  created_at: string;
+}
+
+export interface Pole {
+  id: string;
+  name: string;
+  franchise: string;
+  franchise_name?: string;
+  is_active: boolean;
+  legacy_id: number | null;
+  created_at: string;
+}
+
+export interface Squad {
+  id: string;
+  name: string;
+  franchise: string | null;
+  franchise_name?: string;
+  owners: string[];
+  members: string[];
+  owners_count?: number;
+  members_count?: number;
+  is_active: boolean;
+  legacy_id: number | null;
+  created_at: string;
+}
+
+export interface Origin {
+  id: string;
+  name: string;
+  is_active: boolean;
+  legacy_id: number | null;
+  leads_count?: number;
+  created_at: string;
+}
+
+export interface TaskType {
+  id: string;
+  name: string;
+  color: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+// ============================================================================
+// Sprint 3 - Business Types
+// ============================================================================
+
+export interface Reminder {
+  id: string;
+  title: string;
+  description: string;
+  remind_at: string;
+  lead: string | null;
+  lead_name?: string;
+  task: string | null;
+  task_title?: string;
+  assigned_to: string | null;
+  assigned_to_name?: string;
+  is_completed: boolean;
+  created_by: string | null;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface Pitch {
+  id: string;
+  title: string;
+  description: string;
+  sale: string | null;
+  sale_display?: string;
+  lead: string | null;
+  lead_name?: string;
+  status: string;
+  value: string;
+  sent_at: string | null;
+  accepted_at: string | null;
+  rejected_at: string | null;
+  created_by: string | null;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  description: string;
+  pipeline: string | null;
+  pipeline_name?: string;
+  status: string;
+  budget: string;
+  start_date: string | null;
+  end_date: string | null;
+  created_by: string | null;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  description: string;
+  template_type: string;
+  config: Record<string, unknown>;
+  is_active: boolean;
+  created_by: string | null;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface ReportLog {
+  id: string;
+  template: string;
+  template_name?: string;
+  generated_by: string | null;
+  generated_by_name?: string;
+  parameters: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface GenericAttachment {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  file: string | null;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_by: string | null;
+  uploaded_by_name?: string;
+  created_at: string;
+}
+
+// ============================================================================
+// Sprint 3 - Organizational API Clients
+// ============================================================================
+
+export const franchiseApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/franchises/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/franchises/${id}/`),
+  create: (data: Partial<Franchise>) => apiClient.post("/salescube/franchises/", data),
+  update: (id: string, data: Partial<Franchise>) => apiClient.patch(`/salescube/franchises/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/franchises/${id}/`),
+};
+
+export const poleApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/poles/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/poles/${id}/`),
+  create: (data: Partial<Pole>) => apiClient.post("/salescube/poles/", data),
+  update: (id: string, data: Partial<Pole>) => apiClient.patch(`/salescube/poles/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/poles/${id}/`),
+};
+
+export const squadApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/squads/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/squads/${id}/`),
+  create: (data: Partial<Squad>) => apiClient.post("/salescube/squads/", data),
+  update: (id: string, data: Partial<Squad>) => apiClient.patch(`/salescube/squads/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/squads/${id}/`),
+  addMember: (id: string, userId: string) => apiClient.post(`/salescube/squads/${id}/add-member/`, { user_id: userId }),
+  removeMember: (id: string, userId: string) => apiClient.post(`/salescube/squads/${id}/remove-member/`, { user_id: userId }),
+};
+
+export const originApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/origins/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/origins/${id}/`),
+  create: (data: Partial<Origin>) => apiClient.post("/salescube/origins/", data),
+  update: (id: string, data: Partial<Origin>) => apiClient.patch(`/salescube/origins/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/origins/${id}/`),
+};
+
+export const taskTypeApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/task-types/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/task-types/${id}/`),
+  create: (data: Partial<TaskType>) => apiClient.post("/salescube/task-types/", data),
+  update: (id: string, data: Partial<TaskType>) => apiClient.patch(`/salescube/task-types/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/task-types/${id}/`),
+};
+
+// ============================================================================
+// Sprint 3 - Business API Clients
+// ============================================================================
+
+export const reminderApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/reminders/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/reminders/${id}/`),
+  create: (data: Partial<Reminder>) => apiClient.post("/salescube/reminders/", data),
+  update: (id: string, data: Partial<Reminder>) => apiClient.patch(`/salescube/reminders/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/reminders/${id}/`),
+  complete: (id: string) => apiClient.post(`/salescube/reminders/${id}/complete/`),
+  upcoming: (params?: Record<string, string>) => apiClient.get("/salescube/reminders/upcoming/", { params }),
+  overdue: (params?: Record<string, string>) => apiClient.get("/salescube/reminders/overdue/", { params }),
+};
+
+export const pitchApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/pitches/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/pitches/${id}/`),
+  create: (data: Partial<Pitch>) => apiClient.post("/salescube/pitches/", data),
+  update: (id: string, data: Partial<Pitch>) => apiClient.patch(`/salescube/pitches/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/pitches/${id}/`),
+  send: (id: string) => apiClient.post(`/salescube/pitches/${id}/send/`),
+  accept: (id: string) => apiClient.post(`/salescube/pitches/${id}/accept/`),
+};
+
+export const campaignApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/campaigns/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/campaigns/${id}/`),
+  create: (data: Partial<Campaign>) => apiClient.post("/salescube/campaigns/", data),
+  update: (id: string, data: Partial<Campaign>) => apiClient.patch(`/salescube/campaigns/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/campaigns/${id}/`),
+};
+
+export const reportTemplateApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/report-templates/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/report-templates/${id}/`),
+  create: (data: Partial<ReportTemplate>) => apiClient.post("/salescube/report-templates/", data),
+  update: (id: string, data: Partial<ReportTemplate>) => apiClient.patch(`/salescube/report-templates/${id}/`, data),
+  delete: (id: string) => apiClient.delete(`/salescube/report-templates/${id}/`),
+  generate: (id: string, params?: Record<string, unknown>) => apiClient.post(`/salescube/report-templates/${id}/generate/`, { parameters: params }),
+};
+
+export const reportLogApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/report-logs/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/report-logs/${id}/`),
+};
+
+export const attachmentApi = {
+  list: (params?: Record<string, string>) => apiClient.get("/salescube/generic-attachments/", { params }),
+  get: (id: string) => apiClient.get(`/salescube/generic-attachments/${id}/`),
+  upload: (data: FormData) => apiClient.post("/salescube/generic-attachments/", data, { headers: { "Content-Type": "multipart/form-data" } }),
+  delete: (id: string) => apiClient.delete(`/salescube/generic-attachments/${id}/`),
+};

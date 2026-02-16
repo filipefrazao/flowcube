@@ -24,6 +24,13 @@ import {
   PanelLeftClose,
   PanelLeft,
   Trophy,
+  Building2,
+  Users,
+  Target,
+  Bell,
+  Presentation,
+  Megaphone,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clearAuthToken } from "@/lib/auth";
@@ -86,9 +93,16 @@ const sections: SidebarSection[] = [
       { label: "Contatos", href: "/salescube/contacts" },
       { label: "Faturas", href: "/salescube/invoices" },
       { label: "Tickets", href: "/salescube/tickets" },
+      { label: "Lembretes", href: "/salescube/reminders" },
+      { label: "Propostas", href: "/salescube/pitches" },
+      { label: "Campanhas", href: "/salescube/campaigns" },
+      { label: "Origens", href: "/salescube/origins" },
+      { label: "Franquias", href: "/salescube/franchises" },
+      { label: "Squads", href: "/salescube/squads" },
       { label: "Notas", href: "/salescube/notes" },
       { label: "Calendario", href: "/salescube/calendar" },
       { label: "Email", href: "/salescube/email" },
+      { label: "Relatorios", href: "/salescube/reports" },
     ],
   },
   {

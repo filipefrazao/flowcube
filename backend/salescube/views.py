@@ -16,14 +16,26 @@ from .filters import (
     FinancialRecordFilter,
     LeadFilter,
     ProductFilter,
+    ReminderFilter,
     SaleFilter,
     TaskFilter,
 )
 from .models import (
+    Attachment,
+    Campaign,
     Contact,
     EmailTemplate,
+    Franchise,
     Invoice,
     InvoiceItem,
+    Origin,
+    Pitch,
+    Pole,
+    Reminder,
+    ReportLog,
+    ReportTemplate,
+    Squad,
+    TaskType,
     Ticket,
     TicketMessage,
     Category,
@@ -44,10 +56,21 @@ from .models import (
     Task,
 )
 from .serializers import (
+    AttachmentSerializer,
+    CampaignSerializer,
     ContactSerializer,
     EmailTemplateSerializer,
+    FranchiseSerializer,
     InvoiceItemSerializer,
     InvoiceSerializer,
+    OriginSerializer,
+    PitchSerializer,
+    PoleSerializer,
+    ReminderSerializer,
+    ReportLogSerializer,
+    ReportTemplateSerializer,
+    SquadSerializer,
+    TaskTypeSerializer,
     TicketListSerializer,
     TicketMessageSerializer,
     TicketSerializer,
@@ -71,6 +94,84 @@ from .serializers import (
     SaleSerializer,
     TaskSerializer,
 )
+
+
+# ============================================================================
+# Organizational ViewSets
+# ============================================================================
+
+
+class FranchiseViewSet(viewsets.ModelViewSet):
+    queryset = Franchise.objects.all()
+    serializer_class = FranchiseSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ["name", "code"]
+    ordering_fields = ["name", "created_at"]
+
+
+class PoleViewSet(viewsets.ModelViewSet):
+    queryset = Pole.objects.select_related("franchise")
+    serializer_class = PoleSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ["franchise", "is_active"]
+    search_fields = ["name"]
+
+
+class SquadViewSet(viewsets.ModelViewSet):
+    queryset = Squad.objects.select_related("franchise").prefetch_related("owners", "members")
+    serializer_class = SquadSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["franchise", "is_active"]
+    search_fields = ["name"]
+    ordering_fields = ["name", "created_at"]
+
+    @action(detail=True, methods=["post"], url_path="add-member")
+    def add_member(self, request, pk=None):
+        squad = self.get_object()
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response({"error": "user_id required"}, status=status.HTTP_400_BAD_REQUEST)
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        squad.members.add(user)
+        return Response(SquadSerializer(squad).data)
+
+    @action(detail=True, methods=["post"], url_path="remove-member")
+    def remove_member(self, request, pk=None):
+        squad = self.get_object()
+        user_id = request.data.get("user_id")
+        if user_id:
+            squad.members.remove(user_id)
+        return Response(SquadSerializer(squad).data)
+
+
+class OriginViewSet(viewsets.ModelViewSet):
+    queryset = Origin.objects.all()
+    serializer_class = OriginSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filterset_fields = ["is_active"]
+    search_fields = ["name"]
+
+
+class TaskTypeViewSet(viewsets.ModelViewSet):
+    queryset = TaskType.objects.all()
+    serializer_class = TaskTypeSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
+
+
+# ============================================================================
+# Sprint 1 ViewSets
+# ============================================================================
 
 
 class PipelineViewSet(viewsets.ModelViewSet):
@@ -1265,3 +1366,131 @@ class AllNotesView(APIView):
                 "created_at": n.created_at.isoformat(),
             })
         return Response({"count": total, "page": page, "page_size": page_size, "results": data})
+
+
+# ============================================================================
+# Sprint 3 ViewSets - PROD Parity
+# ============================================================================
+
+
+class ReminderViewSet(viewsets.ModelViewSet):
+    queryset = Reminder.objects.select_related("lead", "task", "assigned_to", "created_by")
+    serializer_class = ReminderSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ReminderFilter
+    search_fields = ["title", "description"]
+    ordering_fields = ["remind_at", "created_at"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="complete")
+    def complete(self, request, pk=None):
+        reminder = self.get_object()
+        reminder.is_completed = True
+        reminder.completed_at = timezone.now()
+        reminder.save(update_fields=["is_completed", "completed_at", "updated_at"])
+        return Response(ReminderSerializer(reminder).data)
+
+    @action(detail=False, methods=["get"], url_path="upcoming")
+    def upcoming(self, request):
+        now = timezone.now()
+        upcoming = self.get_queryset().filter(
+            is_completed=False, remind_at__gte=now
+        ).order_by("remind_at")[:20]
+        return Response(ReminderSerializer(upcoming, many=True).data)
+
+    @action(detail=False, methods=["get"], url_path="overdue")
+    def overdue(self, request):
+        now = timezone.now()
+        overdue = self.get_queryset().filter(
+            is_completed=False, remind_at__lt=now
+        ).order_by("remind_at")
+        return Response(ReminderSerializer(overdue, many=True).data)
+
+
+class PitchViewSet(viewsets.ModelViewSet):
+    queryset = Pitch.objects.select_related("sale", "lead", "created_by")
+    serializer_class = PitchSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["status", "sale", "lead"]
+    search_fields = ["title", "description"]
+    ordering_fields = ["value", "created_at"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="send")
+    def send_pitch(self, request, pk=None):
+        pitch = self.get_object()
+        pitch.status = "sent"
+        pitch.sent_at = timezone.now()
+        pitch.save(update_fields=["status", "sent_at", "updated_at"])
+        return Response(PitchSerializer(pitch).data)
+
+    @action(detail=True, methods=["post"], url_path="accept")
+    def accept(self, request, pk=None):
+        pitch = self.get_object()
+        pitch.status = "accepted"
+        pitch.accepted_at = timezone.now()
+        pitch.save(update_fields=["status", "accepted_at", "updated_at"])
+        return Response(PitchSerializer(pitch).data)
+
+
+class CampaignViewSet(viewsets.ModelViewSet):
+    queryset = Campaign.objects.select_related("pipeline", "created_by")
+    serializer_class = CampaignSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["status", "pipeline"]
+    search_fields = ["name", "description"]
+    ordering_fields = ["start_date", "budget", "created_at"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class ReportTemplateViewSet(viewsets.ModelViewSet):
+    queryset = ReportTemplate.objects.all()
+    serializer_class = ReportTemplateSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ["template_type", "is_active"]
+    search_fields = ["name", "description"]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="generate")
+    def generate(self, request, pk=None):
+        template = self.get_object()
+        params = request.data.get("parameters", {})
+        log = ReportLog.objects.create(
+            template=template,
+            generated_by=request.user,
+            parameters=params,
+        )
+        return Response(ReportLogSerializer(log).data, status=status.HTTP_201_CREATED)
+
+
+class ReportLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ReportLog.objects.select_related("template", "generated_by")
+    serializer_class = ReportLogSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ["template"]
+    ordering_fields = ["created_at"]
+
+
+class AttachmentViewSet(viewsets.ModelViewSet):
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ["entity_type", "entity_id"]
+    ordering_fields = ["created_at"]
+
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
