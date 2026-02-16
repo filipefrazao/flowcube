@@ -108,7 +108,7 @@ export default function ProductsPage() {
   /* ── Handlers ───────────────────────────────────────────────────── */
   const openCreateModal = () => {
     setEditingProduct(null);
-    setForm({ name: "", description: "", price: "0", cost: "0", sku: "", category: "", active: true });
+    setForm({ name: "", description: "", price: "0", cost: "0", sku: "", category: "", active: true, image_url: "" });
     setShowModal(true);
   };
 
@@ -122,6 +122,7 @@ export default function ProductsPage() {
       sku: product.sku || "",
       category: product.category || "",
       active: product.active,
+      image_url: product.image_url || "",
     });
     setShowModal(true);
   };
@@ -317,9 +318,13 @@ export default function ProductsPage() {
                   <tr key={product.id} className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-500/15 flex items-center justify-center flex-shrink-0">
-                          <Package className="w-4 h-4 text-indigo-400" />
-                        </div>
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-indigo-500/15 flex items-center justify-center flex-shrink-0 text-xs font-bold text-indigo-400">
+                            {product.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <span className="text-gray-100 font-medium truncate max-w-[200px]">{product.name}</span>
                       </div>
                     </td>
@@ -415,8 +420,12 @@ export default function ProductsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((product) => (
               <div key={product.id} className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 hover:border-gray-600 transition-all group backdrop-blur-sm">
-                <div className="w-full h-28 bg-gray-900/60 rounded-lg flex items-center justify-center mb-3 relative">
-                  <Package className="w-10 h-10 text-gray-700" />
+                <div className="w-full h-28 bg-gray-900/60 rounded-lg flex items-center justify-center mb-3 relative overflow-hidden">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl font-bold text-gray-700">{product.name.charAt(0).toUpperCase()}</span>
+                  )}
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => openEditModal(product)} className="p-1.5 bg-gray-800 rounded-lg text-gray-400 hover:text-indigo-400 transition-colors">
                       <Edit2 className="w-3.5 h-3.5" />
@@ -550,11 +559,19 @@ export default function ProductsPage() {
                   className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 resize-none focus:border-indigo-500 transition-all" />
               </div>
 
-              <div>
-                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">SKU</label>
-                <input type="text" placeholder="Codigo SKU" value={form.sku}
-                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 font-mono focus:border-indigo-500 transition-all" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">SKU</label>
+                  <input type="text" placeholder="Codigo SKU" value={form.sku}
+                    onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                    className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 font-mono focus:border-indigo-500 transition-all" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">URL da Imagem</label>
+                  <input type="url" placeholder="https://..." value={form.image_url || ""}
+                    onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                    className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

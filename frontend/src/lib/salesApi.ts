@@ -145,6 +145,7 @@ export interface Product {
   category: string | null;
   category_name?: string;
   active: boolean;
+  image_url: string;
   created_at: string;
 }
 
