@@ -194,7 +194,7 @@ function TableSkeleton({ rows = 10 }: { rows?: number }) {
 // Lead Detail Drawer
 // ============================================================================
 
-type DrawerTab = "dados" | "notas" | "historico" | "tarefas" | "vendas";
+type DrawerTab = "dados" | "notas" | "comentarios" | "historico" | "tarefas" | "vendas";
 
 interface LeadDrawerProps {
   leadId: string;
@@ -213,8 +213,9 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
   const [formData, setFormData] = useState({
     name: "", email: "", phone: "", company: "", source: "manual",
     value: "0", score: 0, stage: "", assigned_to: "" as string | null,
-    notes: "", lost_reason: "", cpf: "",
+    notes: "", lost_reason: "", cpf: "", origin: "" as string | null,
   });
+  const [origins, setOrigins] = useState<Origin[]>([]);
 
   const [newNote, setNewNote] = useState({ content: "", note_type: "note" });
   const [addingNote, setAddingNote] = useState(false);
@@ -240,6 +241,7 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
         notes: data.notes || "",
         lost_reason: data.lost_reason || "",
         cpf: (data as any).cpf || "",
+        origin: data.origin || "",
       });
     } catch (err) {
       console.error("Failed to load lead:", err);
@@ -250,11 +252,18 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
 
   useEffect(() => { fetchLead(); }, [fetchLead]);
 
+  useEffect(() => {
+    originApi.list({ limit: "500" }).then((res) => {
+      setOrigins(res.data.results || res.data);
+    }).catch(console.error);
+  }, []);
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const payload: any = { ...formData };
       if (!payload.assigned_to) payload.assigned_to = null;
+      if (!payload.origin) delete payload.origin;
       await leadApi.update(leadId, payload);
       onUpdated();
     } catch (err) {
@@ -333,6 +342,7 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
   const tabs: { id: DrawerTab; label: string; count?: number }[] = [
     { id: "dados", label: "Dados" },
     { id: "notas", label: "Notas", count: lead?.lead_notes?.length || 0 },
+    { id: "comentarios", label: "Comentarios", count: lead?.comments?.length || 0 },
     { id: "historico", label: "Historico", count: lead?.activities?.length || 0 },
     { id: "tarefas", label: "Tarefas", count: lead?.tasks?.length || 0 },
     { id: "vendas", label: "Vendas", count: lead?.sales?.length || 0 },
@@ -382,6 +392,9 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
                   >
                     Score {lead.score}
                   </span>
+                  {lead.origin_name && (
+                    <span className="bg-gray-800 px-2 py-0.5 rounded text-gray-400">{lead.origin_name}</span>
+                  )}
                   {lead.company && (
                     <span className="flex items-center gap-1">
                       <Building className="w-3 h-3" /> {lead.company}
@@ -508,12 +521,16 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
 
                   {/* Origin, Responsibles, Squads, Franchises */}
                   <div className="grid grid-cols-2 gap-4">
-                    {lead.origin_name && (
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Origem</label>
-                        <span className="text-sm text-gray-200">{lead.origin_name}</span>
-                      </div>
-                    )}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Origem</label>
+                      <select value={formData.origin || ""} onChange={(e) => setFormData({ ...formData, origin: e.target.value || null })}
+                        className="w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 outline-none transition-colors">
+                        <option value="">Selecionar origem...</option>
+                        {origins.map((o) => (
+                          <option key={o.id} value={o.id}>{o.name}</option>
+                        ))}
+                      </select>
+                    </div>
                     {lead.responsibles_names && lead.responsibles_names.length > 0 && (
                       <div>
                         <label className="text-xs text-gray-500 mb-1 block">Responsaveis</label>
@@ -606,6 +623,29 @@ function LeadDrawer({ leadId, stages, pipelines, onClose, onUpdated }: LeadDrawe
                   })}
                   {(!lead.lead_notes || lead.lead_notes.length === 0) && (
                     <p className="text-center text-sm text-gray-600 py-8">Nenhuma nota ainda</p>
+                  )}
+                </div>
+              )}
+
+              {/* ===== TAB: COMENTARIOS (PROD comments) ===== */}
+              {activeTab === "comentarios" && (
+                <div className="space-y-3">
+                  {(lead.comments || []).map((comment: any) => (
+                    <div key={comment.id} className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-gray-200">{comment.author_name || "Sistema"}</span>
+                          <span className="text-xs text-gray-600">{timeAgo(comment.created_at)}</span>
+                        </div>
+                        <p className="text-sm text-gray-400 whitespace-pre-wrap">{comment.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {(!lead.comments || lead.comments.length === 0) && (
+                    <p className="text-center text-sm text-gray-600 py-8">Nenhum comentario</p>
                   )}
                 </div>
               )}

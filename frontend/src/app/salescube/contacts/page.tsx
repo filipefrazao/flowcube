@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Users, Plus, Upload, Download, Search, Trash2, Edit, Merge, Filter,
-  ChevronLeft, ChevronRight, X, Check, AlertCircle, UserCheck, UserX, Globe,
+  ChevronLeft, ChevronRight, X, Check, AlertCircle, UserCheck, UserX, Globe, Star,
 } from "lucide-react";
 import { contactApi, type Contact } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ const PAGE_SIZE = 25;
 
 const emptyForm = (): Partial<Contact> => ({
   name: "", email: "", phone: "", company: "", city: "", state: "",
-  source: "manual", is_active: true, notes: "",
+  source: "manual", is_active: true, is_starred: false, notes: "",
 });
 
 export default function ContactsPage() {
@@ -32,6 +32,7 @@ export default function ContactsPage() {
   const [filterSource, setFilterSource] = useState("");
   const [filterActive, setFilterActive] = useState("");
   const [filterState, setFilterState] = useState("");
+  const [filterStarred, setFilterStarred] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Selection
@@ -73,6 +74,7 @@ export default function ContactsPage() {
       if (filterSource) params.source = filterSource;
       if (filterActive) params.is_active = filterActive;
       if (filterState) params.state = filterState;
+      if (filterStarred) params.is_starred = "true";
 
       const res = await contactApi.list(params);
       const data = res.data;
@@ -83,7 +85,7 @@ export default function ContactsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, filterSource, filterActive, filterState]);
+  }, [page, debouncedSearch, filterSource, filterActive, filterState, filterStarred]);
 
   useEffect(() => { fetchContacts(); }, [fetchContacts]);
 
@@ -137,6 +139,15 @@ export default function ContactsPage() {
       setFormError(err?.response?.data?.detail || "Erro ao salvar contato.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleStar = async (contact: Contact) => {
+    try {
+      await contactApi.update(contact.id, { is_starred: !contact.is_starred });
+      setContacts((prev) => prev.map((c) => c.id === contact.id ? { ...c, is_starred: !c.is_starred } : c));
+    } catch (err) {
+      console.error("Failed to toggle star:", err);
     }
   };
 
@@ -205,6 +216,7 @@ export default function ContactsPage() {
   // ── Stats ────────────────────────────────────────────────────────────
   const activeCount = contacts.filter((c) => c.is_active).length;
   const inactiveCount = contacts.filter((c) => !c.is_active).length;
+  const starredCount = contacts.filter((c) => c.is_starred).length;
   const sourcesMap = contacts.reduce<Record<string, number>>((acc, c) => {
     const src = c.source || "manual";
     acc[src] = (acc[src] || 0) + 1;
@@ -242,7 +254,7 @@ export default function ContactsPage() {
           { label: "Total", value: String(totalCount), color: "text-gray-300", bg: "bg-gray-500/10", icon: Users },
           { label: "Ativos", value: String(activeCount), color: "text-emerald-400", bg: "bg-emerald-500/10", icon: UserCheck },
           { label: "Inativos", value: String(inactiveCount), color: "text-red-400", bg: "bg-red-500/10", icon: UserX },
-          { label: "Principal Fonte", value: topSource ? topSource[0].replace(/_/g, " ") : "-", color: "text-indigo-400", bg: "bg-indigo-500/10", icon: Globe },
+          { label: "Favoritos", value: String(starredCount), color: "text-yellow-400", bg: "bg-yellow-500/10", icon: Star },
         ].map((s, i) => (
           <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <div className="flex items-center justify-between mb-1">
@@ -273,6 +285,9 @@ export default function ContactsPage() {
         </div>
         <button onClick={() => setShowFilters(!showFilters)} className={cn("flex items-center gap-1.5 px-3 py-2.5 text-sm border rounded-lg transition-colors", showFilters ? "bg-indigo-600 border-indigo-500 text-white" : "bg-gray-900 border-gray-800 hover:bg-gray-800 text-gray-300")}>
           <Filter className="h-4 w-4" /> Filtros
+        </button>
+        <button onClick={() => { setFilterStarred(!filterStarred); setPage(1); }} className={cn("flex items-center gap-1.5 px-3 py-2.5 text-sm border rounded-lg transition-colors", filterStarred ? "bg-yellow-600/20 border-yellow-600 text-yellow-400" : "bg-gray-900 border-gray-800 hover:bg-gray-800 text-gray-300")}>
+          <Star className={cn("h-4 w-4", filterStarred && "fill-yellow-400")} /> Favoritos
         </button>
 
         {selectedIds.size > 0 && (
@@ -330,6 +345,7 @@ export default function ContactsPage() {
                   <input type="checkbox" checked={contacts.length > 0 && selectedIds.size === contacts.length}
                     onChange={toggleSelectAll} className="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0" />
                 </th>
+                <th className="w-10 px-2 py-3"></th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-300">Nome</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-300">Email</th>
                 <th className="px-4 py-3 text-left font-semibold text-gray-300">Telefone</th>
@@ -343,14 +359,20 @@ export default function ContactsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-500">Carregando...</td></tr>
+                <tr><td colSpan={11} className="px-4 py-12 text-center text-gray-500">Carregando...</td></tr>
               ) : contacts.length === 0 ? (
-                <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-500">Nenhum contato encontrado.</td></tr>
+                <tr><td colSpan={11} className="px-4 py-12 text-center text-gray-500">Nenhum contato encontrado.</td></tr>
               ) : contacts.map((c) => (
                 <tr key={c.id} className={cn("border-b border-gray-800/50 hover:bg-gray-800/40 transition-colors", selectedIds.has(c.id) && "bg-indigo-900/20")}>
                   <td className="px-4 py-3">
                     <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => toggleSelect(c.id)}
                       className="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0" />
+                  </td>
+                  <td className="px-2 py-3">
+                    <button onClick={(e) => { e.stopPropagation(); handleToggleStar(c); }}
+                      className="p-1 text-gray-500 hover:text-yellow-400 transition-colors">
+                      <Star className={cn("h-4 w-4", c.is_starred && "fill-yellow-400 text-yellow-400")} />
+                    </button>
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-100">{c.name}</td>
                   <td className="px-4 py-3 text-gray-300">{c.email || "-"}</td>

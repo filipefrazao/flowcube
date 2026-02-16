@@ -550,7 +550,7 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "email", "phone", "company", "position", "cpf",
             "address", "city", "state", "source", "notes", "lead", "lead_name",
-            "tags", "tag_names", "owner", "owner_name", "is_active",
+            "tags", "tag_names", "owner", "owner_name", "is_active", "is_starred",
             "created_at", "updated_at",
         ]
 
