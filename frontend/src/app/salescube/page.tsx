@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, RefreshCw, Settings, GripVertical, Search, X } from "lucide-react";
+import { Plus, RefreshCw, Settings, GripVertical, Search, X, Phone, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -17,7 +17,7 @@ import {
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { pipelineApi, stageApi, leadApi, type Pipeline, type PipelineStage, type Lead } from "@/lib/salesApi";
+import { pipelineApi, stageApi, leadApi, originApi, type Pipeline, type PipelineStage, type Lead, type Origin } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 import LeadModal from "@/components/salescube/LeadModal";
 import PipelineManager from "@/components/salescube/PipelineManager";
@@ -62,34 +62,32 @@ function SortableLeadCard({
           <GripVertical className="w-3.5 h-3.5 text-gray-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-1">
-            <h4 className="text-sm font-medium text-gray-100 truncate flex-1">{lead.name}</h4>
-            {lead.score > 0 && (
-              <span
-                className={cn(
-                  "text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 flex-shrink-0",
-                  lead.score >= 80 ? "bg-green-500/20 text-green-400" :
-                  lead.score >= 50 ? "bg-yellow-500/20 text-yellow-400" :
-                  "bg-gray-700 text-gray-400"
-                )}
-              >
-                {lead.score}
-              </span>
-            )}
+          {/* Name + relative time (PROD style) */}
+          <div className="flex items-center justify-between mb-1">
+            <h4 className="text-sm font-semibold text-gray-100 truncate flex-1">{lead.name}</h4>
+            <span className="text-[10px] text-gray-500 ml-1 flex-shrink-0 whitespace-nowrap">{timeAgo(lead.created_at)}</span>
           </div>
-          {lead.company && <p className="text-xs text-gray-500 mb-1 truncate">{lead.company}</p>}
-          <div className="flex items-center justify-between mt-1.5">
-            <span className="text-xs font-medium text-indigo-400">{formatCurrency(lead.value)}</span>
-            {lead.source && lead.source !== "manual" && (
-              <span className="text-[10px] text-gray-500 bg-gray-900 px-1.5 py-0.5 rounded">{lead.source}</span>
-            )}
-          </div>
-          {(lead.phone || lead.email) && (
-            <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-600">
-              {lead.phone && <span>{lead.phone}</span>}
-              {lead.email && <span className="truncate">{lead.email}</span>}
+          {/* Phone */}
+          {lead.phone && (
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Phone className="w-3 h-3 text-gray-600" />
+              <span className="text-xs text-gray-300 truncate">{lead.phone}</span>
             </div>
           )}
+          {/* Email */}
+          {lead.email && (
+            <p className="text-xs text-gray-500 truncate mb-1">{lead.email}</p>
+          )}
+          {/* Origin chip + date (PROD style) */}
+          <div className="flex items-center justify-between mt-1.5">
+            <span className="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded-lg truncate max-w-[60%]">
+              {lead.origin_name || "Origem desconhecida"}
+            </span>
+            <div className="flex items-center gap-1 text-[10px] text-gray-600">
+              <Calendar className="w-3 h-3" />
+              <span>{new Date(lead.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -163,23 +161,19 @@ function KanbanColumn({
 function DragOverlayCard({ lead }: { lead: Lead }) {
   return (
     <div className="bg-gray-800 border-2 border-indigo-500 rounded-lg p-3 w-72 shadow-2xl shadow-indigo-500/20 rotate-2">
-      <div className="flex items-start justify-between mb-1">
-        <h4 className="text-sm font-medium text-gray-100 truncate flex-1">{lead.name}</h4>
-        {lead.score > 0 && (
-          <span
-            className={cn(
-              "text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2",
-              lead.score >= 80 ? "bg-green-500/20 text-green-400" :
-              lead.score >= 50 ? "bg-yellow-500/20 text-yellow-400" :
-              "bg-gray-700 text-gray-400"
-            )}
-          >
-            {lead.score}
-          </span>
-        )}
+      <div className="flex items-center justify-between mb-1">
+        <h4 className="text-sm font-semibold text-gray-100 truncate flex-1">{lead.name}</h4>
+        <span className="text-[10px] text-gray-500 ml-1">{timeAgo(lead.created_at)}</span>
       </div>
-      {lead.company && <p className="text-xs text-gray-500 truncate">{lead.company}</p>}
-      <span className="text-xs font-medium text-indigo-400">{formatCurrency(lead.value)}</span>
+      {lead.phone && (
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <Phone className="w-3 h-3 text-gray-600" />
+          <span className="text-xs text-gray-300">{lead.phone}</span>
+        </div>
+      )}
+      <span className="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded-lg">
+        {lead.origin_name || "Origem desconhecida"}
+      </span>
     </div>
   );
 }
@@ -192,6 +186,20 @@ function formatCurrency(v: string | number) {
   const num = typeof v === "string" ? parseFloat(v) : v;
   if (isNaN(num)) return "R$ 0";
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(num);
+}
+
+function timeAgo(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHrs = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHrs / 24);
+  if (diffMin < 1) return "agora";
+  if (diffMin < 60) return `${diffMin}m`;
+  if (diffHrs < 24) return `${diffHrs}h`;
+  if (diffDays < 30) return `${diffDays}d`;
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 }
 
 // ============================================================================
@@ -214,7 +222,8 @@ export default function SalesCubeKanban() {
   const [showPipelineManager, setShowPipelineManager] = useState(false);
 
   // New lead form
-  const [newLead, setNewLead] = useState({ name: "", email: "", phone: "", company: "", value: "0", source: "manual" });
+  const [newLead, setNewLead] = useState({ name: "", email: "", phone: "", company: "", value: "0", source: "manual", origin: "" });
+  const [origins, setOrigins] = useState<Origin[]>([]);
 
   // DnD state
   const [activeDragLead, setActiveDragLead] = useState<Lead | null>(null);
@@ -273,7 +282,16 @@ export default function SalesCubeKanban() {
     }
   }, [activePipeline]);
 
-  useEffect(() => { fetchPipelines(); }, [fetchPipelines]);
+  const fetchOrigins = useCallback(async () => {
+    try {
+      const res = await originApi.list({ limit: "500" });
+      setOrigins(res.data.results || res.data);
+    } catch (err) {
+      console.error("Failed to load origins:", err);
+    }
+  }, []);
+
+  useEffect(() => { fetchPipelines(); fetchOrigins(); }, [fetchPipelines, fetchOrigins]);
   useEffect(() => { fetchBoard(); }, [fetchBoard]);
 
   // ========================================================================
@@ -363,9 +381,11 @@ export default function SalesCubeKanban() {
 
   const handleAddLead = async () => {
     try {
-      await leadApi.create({ ...newLead, stage: addToStage });
+      const payload: Record<string, any> = { ...newLead, stage: addToStage };
+      if (!payload.origin) delete payload.origin;
+      await leadApi.create(payload);
       setShowAddModal(false);
-      setNewLead({ name: "", email: "", phone: "", company: "", value: "0", source: "manual" });
+      setNewLead({ name: "", email: "", phone: "", company: "", value: "0", source: "manual", origin: "" });
       await fetchBoard();
     } catch (err) {
       console.error("Failed to add lead:", err);
@@ -408,48 +428,72 @@ export default function SalesCubeKanban() {
 
   return (
     <div className="p-4 h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-xl font-bold text-white">Quadro</h1>
-            <p className="text-xs text-gray-400">Kanban de Vendas</p>
-          </div>
-          {pipelines.length > 0 && (
-            <select
-              value={activePipeline}
-              onChange={(e) => setActivePipeline(e.target.value)}
-              className="bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-1.5 text-sm"
+      {/* Header - Board Tab Bar (PROD style) */}
+      <div className="mb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Add Board Button */}
+            <button
+              onClick={() => setShowPipelineManager(true)}
+              className="p-1.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0 transition-colors"
+              title="Adicionar Quadro"
             >
-              {pipelines.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-3 py-1.5 text-sm text-gray-100 placeholder-gray-500 w-48"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2">
-                <X className="w-3.5 h-3.5 text-gray-500 hover:text-gray-300" />
-              </button>
-            )}
+              <Plus className="w-4 h-4" />
+            </button>
+
+            {/* Board Tabs with scroll */}
+            <div className="flex items-center flex-1 min-w-0 overflow-hidden">
+              <div className="flex overflow-x-auto scrollbar-hide border-t-2 border-l-2 border-r-2 border-gray-700 rounded-t-lg">
+                {pipelines.map((p) => {
+                  const isSelected = activePipeline === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        if (activePipeline !== p.id) setActivePipeline(p.id);
+                      }}
+                      className={cn(
+                        "flex items-center gap-1 px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors rounded-t-lg",
+                        isSelected
+                          ? "bg-gray-800/60 text-white"
+                          : "text-gray-400 hover:bg-gray-800/30 hover:text-gray-200"
+                      )}
+                    >
+                      {p.name}
+                      {isSelected && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowPipelineManager(true);
+                          }}
+                          className="ml-1 p-0.5 text-gray-500 hover:text-gray-300"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="relative flex-shrink-0">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Pesquisar"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-8 py-1.5 text-sm text-gray-100 placeholder-gray-500 w-52"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <X className="w-3.5 h-3.5 text-gray-500 hover:text-gray-300" />
+                </button>
+              )}
+            </div>
           </div>
-          <button onClick={fetchBoard} className="p-2 text-gray-400 hover:text-gray-100 transition-colors" title="Atualizar">
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          <button onClick={() => setShowPipelineManager(true)} className="p-2 text-gray-400 hover:text-gray-100 transition-colors" title="Gerenciar Pipelines">
-            <Settings className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
@@ -490,25 +534,19 @@ export default function SalesCubeKanban() {
           <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-white mb-4">Novo Lead</h2>
             <div className="space-y-3">
-              <input type="text" placeholder="Nome *" value={newLead.name} onChange={(e) => setNewLead({ ...newLead, name: e.target.value })} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" autoFocus />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="text" placeholder="Nome *" value={newLead.name} onChange={(e) => setNewLead({ ...newLead, name: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" autoFocus />
+                <input type="tel" placeholder="Telefone *" value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <input type="email" placeholder="Email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
-                <input type="tel" placeholder="Telefone" value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
+                <select value={newLead.origin} onChange={(e) => setNewLead({ ...newLead, origin: e.target.value })} className="bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Origem *</option>
+                  {origins.map((o) => (
+                    <option key={o.id} value={o.id}>{o.name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <input type="text" placeholder="Empresa" value={newLead.company} onChange={(e) => setNewLead({ ...newLead, company: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
-                <input type="number" placeholder="Valor (R$)" value={newLead.value} onChange={(e) => setNewLead({ ...newLead, value: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
-              </div>
-              <select value={newLead.source} onChange={(e) => setNewLead({ ...newLead, source: e.target.value })} className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
-                <option value="manual">Manual</option>
-                <option value="website">Website</option>
-                <option value="whatsapp">WhatsApp</option>
-                <option value="facebook">Facebook</option>
-                <option value="instagram">Instagram</option>
-                <option value="referral">Indicacao</option>
-                <option value="event">Evento</option>
-                <option value="other">Outro</option>
-              </select>
             </div>
             <div className="flex justify-end gap-3 mt-6">
               <button onClick={() => setShowAddModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100 transition-colors">Cancelar</button>

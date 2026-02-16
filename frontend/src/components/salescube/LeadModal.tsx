@@ -7,8 +7,8 @@ import {
   AlertCircle, CheckCircle2, Circle, Plus
 } from "lucide-react";
 import {
-  leadApi, taskApi, saleApi, type LeadDetail, type LeadNote, type LeadActivityItem,
-  type PipelineStage, type SalesTask, type Sale
+  leadApi, taskApi, saleApi, originApi, type LeadDetail, type LeadNote, type LeadActivityItem,
+  type PipelineStage, type SalesTask, type Sale, type Origin
 } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ interface LeadModalProps {
   onUpdated: () => void;
 }
 
-type TabType = "dados" | "notas" | "historico" | "tarefas" | "vendas";
+type TabType = "dados" | "notas" | "comentarios" | "historico" | "tarefas" | "vendas";
 
 const NOTE_TYPE_OPTIONS = [
   { value: "note", label: "Nota", icon: FileText },
@@ -76,8 +76,9 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
   // Editable fields
   const [formData, setFormData] = useState({
     name: "", email: "", phone: "", company: "", source: "manual",
-    value: "0", score: 0, stage: "", notes: "", lost_reason: "",
+    value: "0", score: 0, stage: "", notes: "", lost_reason: "", origin: "" as string | null,
   });
+  const [origins, setOrigins] = useState<Origin[]>([]);
 
   // Notes
   const [newNote, setNewNote] = useState({ content: "", note_type: "note" });
@@ -108,6 +109,7 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
         stage: data.stage || "",
         notes: data.notes || "",
         lost_reason: data.lost_reason || "",
+        origin: data.origin || "",
       });
     } catch (err) {
       console.error("Failed to load lead:", err);
@@ -117,6 +119,12 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
   }, [leadId]);
 
   useEffect(() => { fetchLead(); }, [fetchLead]);
+
+  useEffect(() => {
+    originApi.list({ limit: "500" }).then((res) => {
+      setOrigins(res.data.results || res.data);
+    }).catch(console.error);
+  }, []);
 
   // ========================================================================
   // Save lead
@@ -222,6 +230,7 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
   const tabs: { id: TabType; label: string; count?: number }[] = [
     { id: "dados", label: "Dados" },
     { id: "notas", label: "Notas", count: lead.lead_notes?.length || 0 },
+    { id: "comentarios", label: "Comentarios", count: lead.comments?.length || 0 },
     { id: "historico", label: "Historico", count: lead.activities?.length || 0 },
     { id: "tarefas", label: "Tarefas", count: lead.tasks?.length || 0 },
     { id: "vendas", label: "Vendas", count: lead.sales?.length || 0 },
@@ -239,6 +248,9 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
             <div>
               <h2 className="text-lg font-semibold text-white">{lead.name}</h2>
               <div className="flex items-center gap-2 text-xs text-gray-500">
+                {lead.origin_name && (
+                  <span className="bg-gray-800 px-2 py-0.5 rounded text-gray-400">{lead.origin_name}</span>
+                )}
                 {lead.company && <span>{lead.company}</span>}
                 <span>Criado {timeAgo(lead.created_at)}</span>
               </div>
@@ -317,16 +329,12 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                   <input type="number" min={0} max={100} value={formData.score} onChange={(e) => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Fonte</label>
-                  <select value={formData.source} onChange={(e) => setFormData({ ...formData, source: e.target.value })} className="w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
-                    <option value="manual">Manual</option>
-                    <option value="website">Website</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="referral">Indicacao</option>
-                    <option value="event">Evento</option>
-                    <option value="other">Outro</option>
+                  <label className="text-xs text-gray-500 mb-1 block">Origem</label>
+                  <select value={formData.origin || ""} onChange={(e) => setFormData({ ...formData, origin: e.target.value || null })} className="w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
+                    <option value="">Selecionar origem...</option>
+                    {origins.map((o) => (
+                      <option key={o.id} value={o.id}>{o.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -403,6 +411,31 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
               })}
               {(!lead.lead_notes || lead.lead_notes.length === 0) && (
                 <p className="text-center text-sm text-gray-600 py-8">Nenhuma nota ainda</p>
+              )}
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB: Comentarios (PROD comments) */}
+          {/* ============================================================ */}
+          {activeTab === "comentarios" && (
+            <div className="space-y-3">
+              {(lead.comments || []).map((comment: any) => (
+                <div key={comment.id} className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-4 h-4 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-gray-200">{comment.author_name || "Sistema"}</span>
+                      <span className="text-xs text-gray-600">{timeAgo(comment.created_at)}</span>
+                    </div>
+                    <p className="text-sm text-gray-400 whitespace-pre-wrap">{comment.text}</p>
+                  </div>
+                </div>
+              ))}
+              {(!lead.comments || lead.comments.length === 0) && (
+                <p className="text-center text-sm text-gray-600 py-8">Nenhum comentario</p>
               )}
             </div>
           )}
