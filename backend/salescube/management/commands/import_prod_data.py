@@ -106,6 +106,10 @@ class Command(BaseCommand):
             "--only",
             help="Import only specific entity: users,franchises,squads,boards,products,leads,sales,payments,comments,tags,tasks,reminders,pitches,task_types",
         )
+        parser.add_argument(
+            "--flush", action="store_true",
+            help="Flush ALL SalesCube data before importing (clean slate)",
+        )
 
     def handle(self, *args, **options):
         self.dry_run = options["dry_run"]
@@ -113,11 +117,14 @@ class Command(BaseCommand):
         only = options.get("only")
 
         self.stdout.write(self.style.SUCCESS("=" * 60))
-        self.stdout.write(self.style.SUCCESS("SalesCube PROD → FRZ Platform ETL v2.0"))
+        self.stdout.write(self.style.SUCCESS("SalesCube PROD → FRZ Platform ETL v2.1"))
         self.stdout.write(self.style.SUCCESS("=" * 60))
 
         if self.dry_run:
             self.stdout.write(self.style.WARNING("DRY RUN MODE - no data will be written"))
+
+        if options.get("flush"):
+            self._flush_all_data()
 
         steps = [
             ("franchises", self.import_franchises),
@@ -160,6 +167,154 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("ETL COMPLETE"))
         for k, v in self.stats.items():
             self.stdout.write(f"  {k}: {v}")
+
+    def _flush_all_data(self):
+        """Delete ALL SalesCube data for a clean re-import."""
+        from django.db import connection
+
+        self.stdout.write(self.style.WARNING("\n" + "!" * 60))
+        self.stdout.write(self.style.WARNING("FLUSHING ALL SALESCUBE DATA"))
+        self.stdout.write(self.style.WARNING("!" * 60))
+
+        # Order matters: delete children first, then parents
+        flush_models = [
+            # Sprint 3
+            Attachment, ReportLog, ReportTemplate,
+            Pitch, Reminder,
+            # Sprint 2 (imported from salescube.models in the import block)
+            # Sprint 1 - children first
+            Payment, SaleLineItem, FinancialRecord,
+            LeadTagAssignment, LeadComment,
+            # These need special handling for M2M
+        ]
+
+        from salescube.models import (
+            Campaign, Contact, EmailTemplate, Invoice, InvoiceItem,
+            LeadActivity, LeadNote, SaleAttachment, Ticket, TicketMessage,
+        )
+
+        flush_models_extra = [
+            InvoiceItem, Invoice,
+            TicketMessage, Ticket,
+            SaleAttachment,
+            LeadActivity, LeadNote,
+            EmailTemplate,
+            Campaign,
+        ]
+
+        # Delete simple models first
+        for model in flush_models + flush_models_extra:
+            count = model.objects.count()
+            if count > 0:
+                model.objects.all().delete()
+                self.stdout.write(f"  Deleted {count} {model.__name__} records")
+
+        # Clear M2M then delete Task
+        tasks = Task.objects.all()
+        task_count = tasks.count()
+        if task_count > 0:
+            for t in tasks:
+                t.responsibles.clear()
+            tasks.delete()
+            self.stdout.write(f"  Deleted {task_count} Task records")
+
+        # Clear M2M then delete Sale
+        sales = Sale.objects.all()
+        sale_count = sales.count()
+        if sale_count > 0:
+            for s in sales:
+                s.products.clear()
+                s.squads.clear()
+            sales.delete()
+            self.stdout.write(f"  Deleted {sale_count} Sale records")
+
+        # Clear M2M then delete Lead
+        leads = Lead.objects.all()
+        lead_count = leads.count()
+        if lead_count > 0:
+            # Use raw SQL for speed on large datasets
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM salescube_lead_responsibles")
+                cursor.execute("DELETE FROM salescube_lead_squads")
+                cursor.execute("DELETE FROM salescube_lead_franchises")
+            leads.delete()
+            self.stdout.write(f"  Deleted {lead_count} Lead records")
+
+        # Delete Contact (has M2M tags)
+        contacts = Contact.objects.all()
+        contact_count = contacts.count()
+        if contact_count > 0:
+            for c in contacts:
+                c.tags.clear()
+            contacts.delete()
+            self.stdout.write(f"  Deleted {contact_count} Contact records")
+
+        # Delete remaining entity models
+        for model in [LeadTag, Product, PipelineStage, TaskType]:
+            count = model.objects.count()
+            if count > 0:
+                model.objects.all().delete()
+                self.stdout.write(f"  Deleted {count} {model.__name__} records")
+
+        # Delete Pipeline (has M2M squads, franchises)
+        pipelines = Pipeline.objects.all()
+        pipeline_count = pipelines.count()
+        if pipeline_count > 0:
+            for p in pipelines:
+                p.squads.clear()
+                p.franchises.clear()
+            pipelines.delete()
+            self.stdout.write(f"  Deleted {pipeline_count} Pipeline records")
+
+        # Delete organizational models
+        for model in [Origin, Pole]:
+            count = model.objects.count()
+            if count > 0:
+                model.objects.all().delete()
+                self.stdout.write(f"  Deleted {count} {model.__name__} records")
+
+        # Delete Squad (has M2M owners, members)
+        squads = Squad.objects.all()
+        squad_count = squads.count()
+        if squad_count > 0:
+            for sq in squads:
+                sq.owners.clear()
+                sq.members.clear()
+            squads.delete()
+            self.stdout.write(f"  Deleted {squad_count} Squad records")
+
+        # Delete Franchise
+        franchise_count = Franchise.objects.count()
+        if franchise_count > 0:
+            Franchise.objects.all().delete()
+            self.stdout.write(f"  Deleted {franchise_count} Franchise records")
+
+        # Delete imported users (keep superusers and staff)
+        imported_users = User.objects.filter(
+            email__endswith="@imported.local"
+        ).exclude(is_superuser=True)
+        imported_count = imported_users.count()
+        if imported_count > 0:
+            imported_users.delete()
+            self.stdout.write(f"  Deleted {imported_count} imported users")
+
+        # Also delete users that were imported from PROD (non-staff, non-superuser)
+        prod_users = User.objects.filter(
+            is_superuser=False, is_staff=False
+        ).exclude(email__endswith="@imported.local")
+        prod_count = prod_users.count()
+        if prod_count > 0:
+            prod_users.delete()
+            self.stdout.write(f"  Deleted {prod_count} PROD-imported users")
+
+        # Reset Category
+        from salescube.models import Category
+        cat_count = Category.objects.count()
+        if cat_count > 0:
+            Category.objects.all().delete()
+            self.stdout.write(f"  Deleted {cat_count} Category records")
+
+        self.stdout.write(self.style.SUCCESS("  FLUSH COMPLETE - Clean slate ready"))
 
     def fetch_all(self, endpoint, params=None):
         """Paginate through all results from a PROD API endpoint."""
