@@ -500,6 +500,7 @@ export const contactApi = {
     fd.append("file", file);
     return apiClient.post("/salescube/contacts/import-csv/", fd, { headers: { "Content-Type": "multipart/form-data" } });
   },
+  bulkDelete: (ids: string[]) => apiClient.post("/salescube/contacts/bulk-delete/", { contact_ids: ids }),
   merge: (primaryId: string, mergeIds: string[]) => apiClient.post("/salescube/contacts/merge/", { primary_id: primaryId, merge_ids: mergeIds }),
   export: () => apiClient.get("/salescube/contacts/export/", { responseType: "blob" }),
 };
@@ -557,4 +558,15 @@ export interface TicketSummary {
   waiting: number;
   resolved: number;
   closed: number;
+}
+
+export interface InvoiceSummary {
+  total: number;
+  draft: number;
+  sent: number;
+  paid: number;
+  overdue: number;
+  cancelled: number;
+  total_amount: number;
+  total_paid: number;
 }

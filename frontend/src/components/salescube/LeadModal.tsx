@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   X, Save, Trash2, Phone, Mail, MessageSquare, Calendar, Clock,
   FileText, ArrowRight, ChevronRight, Building, User, DollarSign,
-  AlertCircle, CheckCircle2, Circle
+  AlertCircle, CheckCircle2, Circle, Plus
 } from "lucide-react";
 import {
   leadApi, taskApi, saleApi, type LeadDetail, type LeadNote, type LeadActivityItem,
