@@ -39,10 +39,19 @@ from django.utils.dateparse import parse_datetime
 from django.utils.text import slugify
 
 from salescube.models import (
+    Attachment,
+    Campaign,
+    Category,
+    Contact,
+    EmailTemplate,
     FinancialRecord,
     Franchise,
+    Invoice,
+    InvoiceItem,
     Lead,
+    LeadActivity,
     LeadComment,
+    LeadNote,
     LeadTag,
     LeadTagAssignment,
     Origin,
@@ -53,11 +62,16 @@ from salescube.models import (
     Pole,
     Product,
     Reminder,
+    ReportLog,
+    ReportTemplate,
     Sale,
+    SaleAttachment,
     SaleLineItem,
     Squad,
     Task,
     TaskType,
+    Ticket,
+    TicketMessage,
 )
 
 User = get_user_model()
@@ -181,19 +195,10 @@ class Command(BaseCommand):
             # Sprint 3
             Attachment, ReportLog, ReportTemplate,
             Pitch, Reminder,
-            # Sprint 2 (imported from salescube.models in the import block)
             # Sprint 1 - children first
             Payment, SaleLineItem, FinancialRecord,
             LeadTagAssignment, LeadComment,
-            # These need special handling for M2M
-        ]
-
-        from salescube.models import (
-            Campaign, Contact, EmailTemplate, Invoice, InvoiceItem,
-            LeadActivity, LeadNote, SaleAttachment, Ticket, TicketMessage,
-        )
-
-        flush_models_extra = [
+            # Sprint 2
             InvoiceItem, Invoice,
             TicketMessage, Ticket,
             SaleAttachment,
@@ -203,7 +208,7 @@ class Command(BaseCommand):
         ]
 
         # Delete simple models first
-        for model in flush_models + flush_models_extra:
+        for model in flush_models:
             count = model.objects.count()
             if count > 0:
                 model.objects.all().delete()
@@ -308,7 +313,6 @@ class Command(BaseCommand):
             self.stdout.write(f"  Deleted {prod_count} PROD-imported users")
 
         # Reset Category
-        from salescube.models import Category
         cat_count = Category.objects.count()
         if cat_count > 0:
             Category.objects.all().delete()
