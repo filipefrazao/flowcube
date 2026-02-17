@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Receipt, Plus, DollarSign, Clock, CheckCircle, AlertTriangle, Search, X, Trash2, Eye } from "lucide-react";
+import { Receipt, Plus, DollarSign, Clock, CheckCircle, AlertTriangle, Search, X, Trash2, Eye, Filter, RotateCcw } from "lucide-react";
 import { invoiceApi, leadApi, productApi, type Invoice, type InvoiceItemType, type Lead, type Product, type InvoiceSummary } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,14 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterValueMin, setFilterValueMin] = useState("");
+  const [filterValueMax, setFilterValueMax] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const hasActiveFilters = !!(filterDateFrom || filterDateTo || filterValueMin || filterValueMax);
+  const clearFilters = () => { setFilterDateFrom(""); setFilterDateTo(""); setFilterValueMin(""); setFilterValueMax(""); };
 
   // Create modal
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -159,6 +167,15 @@ export default function InvoicesPage() {
     }
   };
 
+  const filteredInvoices = invoices.filter((inv) => {
+    if (filterDateFrom && inv.issue_date && inv.issue_date < filterDateFrom) return false;
+    if (filterDateTo && inv.due_date && inv.due_date > filterDateTo) return false;
+    const total = parseFloat(inv.total || "0");
+    if (filterValueMin && total < parseFloat(filterValueMin)) return false;
+    if (filterValueMax && total > parseFloat(filterValueMax)) return false;
+    return true;
+  });
+
   return (
     <div className="p-6 space-y-6 bg-gray-950 min-h-screen">
       {/* Header */}
@@ -167,7 +184,7 @@ export default function InvoicesPage() {
           <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
             <Receipt className="w-6 h-6 text-indigo-400" /> Faturas
           </h1>
-          <p className="text-sm text-gray-400 mt-1">{invoices.length} faturas encontradas</p>
+          <p className="text-sm text-gray-400 mt-1">{filteredInvoices.length} faturas encontradas</p>
         </div>
         <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors">
           <Plus className="w-4 h-4" /> Nova Fatura
@@ -215,17 +232,49 @@ export default function InvoicesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input type="text" placeholder="Buscar por numero..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:outline-none" />
+      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input type="text" placeholder="Buscar por numero..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-900/80 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all" />
+          </div>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            <option value="">Todos os status</option>
+            {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+          </select>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
+              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+          </button>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+              <RotateCcw className="w-3.5 h-3.5" /> Limpar
+            </button>
+          )}
         </div>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-gray-900 border border-gray-800 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-          <option value="">Todos os status</option>
-          {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
-        </select>
+        {showFilters && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Emissao De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Vencimento Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Min (R$)</label>
+              <input type="number" placeholder="0,00" value={filterValueMin} onChange={(e) => setFilterValueMin(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Max (R$)</label>
+              <input type="number" placeholder="0,00" value={filterValueMax} onChange={(e) => setFilterValueMax(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -249,7 +298,7 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((inv) => {
+                {filteredInvoices.map((inv) => {
                   const sc = STATUS_CONFIG[inv.status] || STATUS_CONFIG.draft;
                   return (
                     <tr key={inv.id} className="border-b border-gray-800/50 hover:bg-gray-800/40 transition-colors">
@@ -275,7 +324,7 @@ export default function InvoicesPage() {
                     </tr>
                   );
                 })}
-                {invoices.length === 0 && (
+                {filteredInvoices.length === 0 && (
                   <tr><td colSpan={7} className="px-4 py-16 text-center text-gray-500">Nenhuma fatura encontrada</td></tr>
                 )}
               </tbody>

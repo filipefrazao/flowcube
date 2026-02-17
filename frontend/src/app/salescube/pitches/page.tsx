@@ -12,6 +12,8 @@ import {
   DollarSign,
   Trash2,
   Edit2,
+  Filter,
+  RotateCcw,
 } from "lucide-react";
 import {
   pitchApi,
@@ -55,6 +57,15 @@ export default function PitchesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterLead, setFilterLead] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterValueMin, setFilterValueMin] = useState("");
+  const [filterValueMax, setFilterValueMax] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const hasActiveFilters = !!(filterLead || filterDateFrom || filterDateTo || filterValueMin || filterValueMax);
+  const clearFilters = () => { setFilterLead(""); setFilterDateFrom(""); setFilterDateTo(""); setFilterValueMin(""); setFilterValueMax(""); };
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -138,7 +149,17 @@ export default function PitchesPage() {
     }
   };
 
-  const totalValue = pitches.reduce((sum, p) => sum + parseFloat(p.value || "0"), 0);
+  const filteredPitches = pitches.filter((p) => {
+    if (filterLead && p.lead !== filterLead) return false;
+    if (filterDateFrom && p.created_at && p.created_at < filterDateFrom) return false;
+    if (filterDateTo && p.created_at && p.created_at > filterDateTo + "T23:59:59") return false;
+    const val = parseFloat(p.value || "0");
+    if (filterValueMin && val < parseFloat(filterValueMin)) return false;
+    if (filterValueMax && val > parseFloat(filterValueMax)) return false;
+    return true;
+  });
+
+  const totalValue = filteredPitches.reduce((sum, p) => sum + parseFloat(p.value || "0"), 0);
   const acceptedValue = pitches
     .filter((p) => p.status === "accepted")
     .reduce((sum, p) => sum + parseFloat(p.value || "0"), 0);
@@ -166,7 +187,7 @@ export default function PitchesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Total de Propostas</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{pitches.length}</p>
+              <p className="mt-1 text-2xl font-bold text-gray-100">{filteredPitches.length}</p>
             </div>
             <div className="rounded-lg bg-purple-500/20 p-2.5 text-purple-400">
               <Presentation className="h-5 w-5" />
@@ -188,7 +209,7 @@ export default function PitchesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Aceitas</p>
-              <p className="mt-1 text-2xl font-bold text-green-400">{pitches.filter((p) => p.status === "accepted").length}</p>
+              <p className="mt-1 text-2xl font-bold text-green-400">{filteredPitches.filter((p) => p.status === "accepted").length}</p>
             </div>
             <div className="rounded-lg bg-green-500/20 p-2.5 text-green-400">
               <CheckCircle className="h-5 w-5" />
@@ -209,27 +230,54 @@ export default function PitchesPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar propostas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-800 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-purple-600"
-          />
+      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <input type="text" placeholder="Buscar propostas..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-gray-700 bg-gray-900/80 py-2 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all" />
+          </div>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            <option value="">Todos os Status</option>
+            {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+          </select>
+          <select value={filterLead} onChange={(e) => setFilterLead(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            <option value="">Todos os Leads</option>
+            {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}</option>))}
+          </select>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
+              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+          </button>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+              <RotateCcw className="w-3.5 h-3.5" /> Limpar
+            </button>
+          )}
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-purple-600"
-        >
-          <option value="">Todos os Status</option>
-          {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
-        </select>
+        {showFilters && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Min (R$)</label>
+              <input type="number" placeholder="0,00" value={filterValueMin} onChange={(e) => setFilterValueMin(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Max (R$)</label>
+              <input type="number" placeholder="0,00" value={filterValueMax} onChange={(e) => setFilterValueMax(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -254,14 +302,14 @@ export default function PitchesPage() {
                     Carregando propostas...
                   </td>
                 </tr>
-              ) : pitches.length === 0 ? (
+              ) : filteredPitches.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
                     Nenhuma proposta encontrada.
                   </td>
                 </tr>
               ) : (
-                pitches.map((pitch) => {
+                filteredPitches.map((pitch) => {
                   const st = STATUS_CONFIG[pitch.status] || STATUS_CONFIG.draft;
                   return (
                     <tr

@@ -11,6 +11,8 @@ import {
   AlertTriangle,
   Calendar,
   Trash2,
+  Filter,
+  RotateCcw,
 } from "lucide-react";
 import {
   reminderApi,
@@ -46,6 +48,13 @@ export default function RemindersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCompleted, setFilterCompleted] = useState("");
+  const [filterLead, setFilterLead] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const hasActiveFilters = !!(filterLead || filterDateFrom || filterDateTo);
+  const clearFilters = () => { setFilterLead(""); setFilterDateFrom(""); setFilterDateTo(""); };
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     title: "",
@@ -127,8 +136,15 @@ export default function RemindersPage() {
     }
   };
 
-  const totalReminders = reminders.length;
-  const completedCount = reminders.filter((r) => r.is_completed).length;
+  const filteredReminders = reminders.filter((r) => {
+    if (filterLead && r.lead !== filterLead) return false;
+    if (filterDateFrom && r.remind_at && r.remind_at < filterDateFrom) return false;
+    if (filterDateTo && r.remind_at && r.remind_at > filterDateTo + "T23:59:59") return false;
+    return true;
+  });
+
+  const totalReminders = filteredReminders.length;
+  const completedCount = filteredReminders.filter((r) => r.is_completed).length;
   const pendingCount = totalReminders - completedCount;
 
   return (
@@ -197,26 +213,47 @@ export default function RemindersPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar lembretes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-800 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-amber-600"
-          />
+      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <input type="text" placeholder="Buscar lembretes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-gray-700 bg-gray-900/80 py-2 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all" />
+          </div>
+          <select value={filterCompleted} onChange={(e) => setFilterCompleted(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            <option value="">Todos</option>
+            <option value="false">Pendentes</option>
+            <option value="true">Concluidos</option>
+          </select>
+          <select value={filterLead} onChange={(e) => setFilterLead(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            <option value="">Todos os Leads</option>
+            {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}</option>))}
+          </select>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
+              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+          </button>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+              <RotateCcw className="w-3.5 h-3.5" /> Limpar
+            </button>
+          )}
         </div>
-        <select
-          value={filterCompleted}
-          onChange={(e) => setFilterCompleted(e.target.value)}
-          className="rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-amber-600"
-        >
-          <option value="">Todos</option>
-          <option value="false">Pendentes</option>
-          <option value="true">Concluidos</option>
-        </select>
+        {showFilters && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -240,14 +277,14 @@ export default function RemindersPage() {
                     Carregando lembretes...
                   </td>
                 </tr>
-              ) : reminders.length === 0 ? (
+              ) : filteredReminders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
                     Nenhum lembrete encontrado.
                   </td>
                 </tr>
               ) : (
-                reminders.map((reminder) => {
+                filteredReminders.map((reminder) => {
                   const isOverdue = !reminder.is_completed && new Date(reminder.remind_at) < new Date();
                   return (
                     <tr

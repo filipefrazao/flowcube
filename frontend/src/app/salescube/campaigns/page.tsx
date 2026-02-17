@@ -10,6 +10,8 @@ import {
   Calendar,
   Trash2,
   Edit2,
+  Filter,
+  RotateCcw,
 } from "lucide-react";
 import {
   campaignApi,
@@ -52,6 +54,15 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterPipeline, setFilterPipeline] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterBudgetMin, setFilterBudgetMin] = useState("");
+  const [filterBudgetMax, setFilterBudgetMax] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const hasActiveFilters = !!(filterPipeline || filterDateFrom || filterDateTo || filterBudgetMin || filterBudgetMax);
+  const clearFilters = () => { setFilterPipeline(""); setFilterDateFrom(""); setFilterDateTo(""); setFilterBudgetMin(""); setFilterBudgetMax(""); };
 
   const [showModal, setShowModal] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
@@ -148,8 +159,18 @@ export default function CampaignsPage() {
     }
   };
 
-  const totalBudget = campaigns.reduce((sum, c) => sum + parseFloat(c.budget || "0"), 0);
-  const activeCount = campaigns.filter((c) => c.status === "active").length;
+  const filteredCampaigns = campaigns.filter((c) => {
+    if (filterPipeline && c.pipeline !== filterPipeline) return false;
+    if (filterDateFrom && c.start_date && c.start_date < filterDateFrom) return false;
+    if (filterDateTo && c.end_date && c.end_date > filterDateTo) return false;
+    const budget = parseFloat(c.budget || "0");
+    if (filterBudgetMin && budget < parseFloat(filterBudgetMin)) return false;
+    if (filterBudgetMax && budget > parseFloat(filterBudgetMax)) return false;
+    return true;
+  });
+
+  const totalBudget = filteredCampaigns.reduce((sum, c) => sum + parseFloat(c.budget || "0"), 0);
+  const activeCount = filteredCampaigns.filter((c) => c.status === "active").length;
 
   return (
     <div className="min-h-screen bg-gray-950 p-6">
@@ -174,7 +195,7 @@ export default function CampaignsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Total de Campanhas</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{campaigns.length}</p>
+              <p className="mt-1 text-2xl font-bold text-gray-100">{filteredCampaigns.length}</p>
             </div>
             <div className="rounded-lg bg-indigo-500/20 p-2.5 text-indigo-400">
               <Megaphone className="h-5 w-5" />
@@ -206,27 +227,69 @@ export default function CampaignsPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar campanhas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-800 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-indigo-600"
-          />
+      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Buscar campanhas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-gray-700 bg-gray-900/80 py-2 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+            />
+          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all"
+          >
+            <option value="">Todos os Status</option>
+            {Object.entries(STATUS_CONFIG).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <select
+            value={filterPipeline}
+            onChange={(e) => setFilterPipeline(e.target.value)}
+            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all"
+          >
+            <option value="">Todos os Pipelines</option>
+            {pipelines.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
+              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+          </button>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+              <RotateCcw className="w-3.5 h-3.5" /> Limpar
+            </button>
+          )}
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-indigo-600"
-        >
-          <option value="">Todos os Status</option>
-          {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
-        </select>
+        {showFilters && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Inicio De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Fim Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Orcamento Min (R$)</label>
+              <input type="number" placeholder="0,00" value={filterBudgetMin} onChange={(e) => setFilterBudgetMin(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Orcamento Max (R$)</label>
+              <input type="number" placeholder="0,00" value={filterBudgetMax} onChange={(e) => setFilterBudgetMax(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -251,14 +314,14 @@ export default function CampaignsPage() {
                     Carregando campanhas...
                   </td>
                 </tr>
-              ) : campaigns.length === 0 ? (
+              ) : filteredCampaigns.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
                     Nenhuma campanha encontrada.
                   </td>
                 </tr>
               ) : (
-                campaigns.map((campaign) => {
+                filteredCampaigns.map((campaign) => {
                   const st = STATUS_CONFIG[campaign.status] || STATUS_CONFIG.draft;
                   return (
                     <tr
