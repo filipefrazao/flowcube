@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, RefreshCw, Settings, GripVertical, Search, X, Phone, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, RefreshCw, Settings, GripVertical, Search, X, Phone, Calendar, ChevronLeft, ChevronRight, Users, DollarSign, BarChart3, TrendingUp } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -496,6 +496,54 @@ export default function SalesCubeKanban() {
           </div>
         </div>
       </div>
+
+      {/* Stats Cards */}
+      {(() => {
+        const allLeads = Object.values(leadsByStage).flat();
+        const totalLeads = allLeads.length;
+        const totalValue = allLeads.reduce((sum, l) => sum + parseFloat(l.value || "0"), 0);
+        const avgTicket = totalLeads > 0 ? totalValue / totalLeads : 0;
+        return (
+          <div className="grid grid-cols-4 gap-3 mb-3">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 flex items-center gap-3">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <Users className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Total Leads</p>
+                <p className="text-lg font-bold text-blue-400">{totalLeads.toLocaleString("pt-BR")}</p>
+              </div>
+            </div>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 flex items-center gap-3">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <DollarSign className="w-5 h-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Valor Total</p>
+                <p className="text-lg font-bold text-green-400">{formatCurrency(totalValue)}</p>
+              </div>
+            </div>
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 flex items-center gap-3">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <BarChart3 className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Etapas</p>
+                <p className="text-lg font-bold text-purple-400">{stages.length}</p>
+              </div>
+            </div>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex items-center gap-3">
+              <div className="p-2 bg-amber-500/20 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Ticket Médio</p>
+                <p className="text-lg font-bold text-amber-400">{formatCurrency(avgTicket)}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Kanban Board with DnD */}
       <DndContext
