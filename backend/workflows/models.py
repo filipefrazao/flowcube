@@ -45,6 +45,11 @@ class BlockTypeChoices(models.TextChoices):
     # Triggers
     WHATSAPP_TRIGGER = "whatsapp_trigger", "WhatsApp Trigger"
     SCHEDULE = "schedule", "Schedule"
+    FACEBOOK_LEAD_ADS = "facebook_lead_ads", "Facebook Lead Ads"
+
+    # Integrations
+    DEDUPLICATE = "deduplicate", "Deduplicate"
+    SEND_TO_SALESCUBE = "send_to_salescube", "Send to SalesCube"
     
     # AI Models
     OPENAI = "openai", "OpenAI"

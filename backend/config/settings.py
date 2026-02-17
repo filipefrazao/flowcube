@@ -142,6 +142,10 @@ SIMPLE_JWT = {
 SALESCUBE_API_URL = os.environ.get('SALESCUBE_API_URL', 'https://api.frzglobal.com.br')
 SALESCUBE_API_TOKEN = os.environ.get('SALESCUBE_API_TOKEN', '')
 
+# Facebook Lead Ads
+FACEBOOK_VERIFY_TOKEN = os.environ.get("FACEBOOK_VERIFY_TOKEN", "flowcube_fb_verify_2026")
+FACEBOOK_PAGE_ACCESS_TOKEN = os.environ.get("FACEBOOK_PAGE_ACCESS_TOKEN", "")
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",

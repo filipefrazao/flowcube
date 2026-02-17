@@ -9,3 +9,4 @@ from . import messaging      # noqa: F401
 from . import router         # noqa: F401
 from . import data           # noqa: F401
 from . import subworkflow    # noqa: F401
+from . import integrations   # noqa: F401

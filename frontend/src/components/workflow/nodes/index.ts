@@ -47,6 +47,7 @@ const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
   evolution_trigger: MakeTriggerNode,
   schedule: MakeTriggerNode,
   manual_trigger: MakeTriggerNode,
+  facebook_lead_ads: MakeTriggerNode,
 
   // Router → diamond with multi-output
   router: MakeRouterNode,
@@ -54,6 +55,7 @@ const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
   // Condition → diamond with true/false/else
   condition: MakeConditionNode,
   decision_tree: MakeConditionNode,
+  deduplicate: MakeConditionNode,
 
   // All other nodes → generic circular bubble
   // HTTP / API
@@ -89,6 +91,8 @@ const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
 
   // FlowCube modules
   sub_workflow: MakeActionNode,
+  send_to_salescube: MakeActionNode,
+  salescube_push: MakeActionNode,
   salescube_create_lead: MakeActionNode,
   salescube_update_lead: MakeActionNode,
   chatcube_send: MakeActionNode,
@@ -225,6 +229,7 @@ export const nodeCategories = [
       { type: "webhook_trigger", label: "Webhook", description: "HTTP webhook trigger" },
       { type: "whatsapp_trigger", label: "WhatsApp", description: "Evolution API message" },
       { type: "schedule", label: "Schedule", description: "Time-based trigger" },
+      { type: "facebook_lead_ads", label: "Facebook Lead Ads", description: "Meta Lead Ads form" },
     ],
   },
   telegramNodeCategory,
@@ -248,6 +253,7 @@ export const nodeCategories = [
       { type: "condition", label: "Condition", description: "If/else branching" },
       { type: "router", label: "Router", description: "Multi-way routing (Make-style)" },
       { type: "set_variable", label: "Set Variable", description: "Store data" },
+      { type: "deduplicate", label: "Deduplicate", description: "Filter duplicates" },
       { type: "wait", label: "Wait/Delay", description: "Add delay" },
       { type: "merge", label: "Merge", description: "Merge branches" },
       { type: "sub_workflow", label: "Sub-Workflow", description: "Run another workflow" },
@@ -286,6 +292,7 @@ export const nodeCategories = [
     color: "#FF6D5A",
     description: "Built-in FlowCube integrations",
     nodes: [
+      { type: "send_to_salescube", label: "Send to SalesCube", description: "Push lead to SalesCube CRM" },
       { type: "salescube_create_lead", label: "SalesCube Lead", description: "Create CRM lead" },
       { type: "salescube_update_lead", label: "Update Lead", description: "Update CRM lead" },
       { type: "chatcube_send", label: "ChatCube Send", description: "Send via ChatCube" },
@@ -393,6 +400,16 @@ function getDefaultConfig(type: string): Record<string, unknown> {
       return { channel: "whatsapp", text: "" };
     case "condition":
       return { conditions: [], default_output: "else" };
+    case "facebook_lead_ads":
+      return { page_id: "", form_id: "" };
+    case "deduplicate":
+      return { field: "phone", ttl_hours: 24, dedup_service_url: "https://sc.frzgroup.com.br/dedup" };
+    case "send_to_salescube":
+    case "salescube_push":
+      return {
+        name_field: "{{name}}", phone_field: "{{phone}}", email_field: "{{email}}",
+        channel: 78, column: 48, origin: 11, responsibles: [], random_distribution: true, tags: [],
+      };
     case "salescube_create_lead":
       return { action: "create_lead", channel: 78, column: 48, origin: 11 };
     case "router":

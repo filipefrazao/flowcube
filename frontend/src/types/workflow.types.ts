@@ -10,6 +10,7 @@ export type BlockType =
   | "webhook"
   | "whatsapp_trigger"
   | "schedule"
+  | "facebook_lead_ads"
   // Inputs
   | "text_input"
   | "email_input"
@@ -23,10 +24,13 @@ export type BlockType =
   | "condition"
   | "set_variable"
   | "wait"
+  | "deduplicate"
   // Outputs
   | "text_response"
   | "image_response"
-  | "whatsapp_template";
+  | "whatsapp_template"
+  // Integrations
+  | "send_to_salescube";
 
 // ============ Block Content Types ============
 
@@ -129,6 +133,29 @@ export interface WhatsAppTemplateContent {
   components: Array<Record<string, unknown>>;
 }
 
+export interface FacebookLeadAdsContent {
+  page_id: string;
+  form_id: string;
+}
+
+export interface DeduplicateContent {
+  field: string;
+  ttl_hours: number;
+  dedup_service_url: string;
+}
+
+export interface SendToSalesCubeContent {
+  name_field: string;
+  phone_field: string;
+  email_field: string;
+  tags: number[];
+  channel: number;
+  column: number;
+  origin: number;
+  responsibles: number[];
+  random_distribution: boolean;
+}
+
 export type BlockContent =
   | WebhookContent
   | WhatsAppTriggerContent
@@ -145,7 +172,10 @@ export type BlockContent =
   | WaitContent
   | TextResponseContent
   | ImageResponseContent
-  | WhatsAppTemplateContent;
+  | WhatsAppTemplateContent
+  | FacebookLeadAdsContent
+  | DeduplicateContent
+  | SendToSalesCubeContent;
 
 // ============ Main Types ============
 
@@ -262,7 +292,7 @@ export interface BlockDefinition {
   defaultContent: Partial<BlockContent>;
 }
 
-export type BlockCategory = "triggers" | "inputs" | "ai" | "logic" | "outputs";
+export type BlockCategory = "triggers" | "inputs" | "ai" | "logic" | "outputs" | "integrations";
 
 export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   // Triggers
@@ -289,6 +319,14 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     icon: "Clock",
     category: "triggers",
     defaultContent: { timezone: "America/Sao_Paulo" },
+  },
+  {
+    type: "facebook_lead_ads",
+    label: "Facebook Lead Ads",
+    description: "Trigger on Facebook Lead Ads form",
+    icon: "Target",
+    category: "triggers",
+    defaultContent: { page_id: "", form_id: "" },
   },
   // Inputs
   {
@@ -373,6 +411,14 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     category: "logic",
     defaultContent: { duration_seconds: 1, duration_type: "seconds" },
   },
+  {
+    type: "deduplicate",
+    label: "Deduplicate",
+    description: "Filter duplicate leads",
+    icon: "Filter",
+    category: "logic",
+    defaultContent: { field: "phone", ttl_hours: 24, dedup_service_url: "https://sc.frzgroup.com.br/dedup" },
+  },
   // Outputs
   {
     type: "text_response",
@@ -397,6 +443,25 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     icon: "Send",
     category: "outputs",
     defaultContent: { template_name: "", template_language: "pt_BR", components: [] },
+  },
+  // Integrations
+  {
+    type: "send_to_salescube",
+    label: "Send to SalesCube",
+    description: "Create lead in SalesCube CRM",
+    icon: "Users",
+    category: "integrations",
+    defaultContent: {
+      name_field: "{{name}}",
+      phone_field: "{{phone}}",
+      email_field: "{{email}}",
+      channel: 78,
+      column: 48,
+      origin: 11,
+      responsibles: [],
+      random_distribution: true,
+      tags: [],
+    },
   },
 ];
 

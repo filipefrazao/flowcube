@@ -7,6 +7,7 @@ from .views.api import UserPreferenceViewSet, CredentialViewSet
 from .views.chat import ChatSessionViewSet, HandoffQueueViewSet
 from .views.webhooks import (
     EvolutionWebhookView,
+    FacebookLeadAdsWebhookView,
     GenericWebhookView,
     WebhookTestView,
     N8NWebhookView,
@@ -48,6 +49,12 @@ urlpatterns = router.urls + [
         "webhooks/salescube/<str:workflow_id>/",
         SalesCubeWebhookView.as_view(),
         name="salescube-webhook",
+    ),
+    # Facebook Lead Ads Webhook
+    path(
+        "webhooks/facebook-leads/<str:workflow_id>/",
+        FacebookLeadAdsWebhookView.as_view(),
+        name="facebook-leads-webhook",
     ),
     # Test Webhook
     path("webhooks/test/", WebhookTestView.as_view(), name="webhook-test"),
