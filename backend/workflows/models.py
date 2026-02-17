@@ -155,7 +155,11 @@ class Execution(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE, related_name="executions")
     version = models.ForeignKey(WorkflowVersion, on_delete=models.SET_NULL, null=True, related_name="executions")
-    
+    parent_execution = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="child_executions", help_text="Parent execution for sub-workflows"
+    )
+
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     
     # Trigger data (webhook body, schedule params, etc)
@@ -410,6 +414,61 @@ class BrazilianContext(models.Model):
     
     def __str__(self):
         return self.get_context_type_display()
+
+
+class WorkflowSchedule(models.Model):
+    """
+    Schedule configuration for a workflow (Make-style 9 types).
+    Syncs with django-celery-beat PeriodicTask.
+    """
+    class ScheduleType(models.TextChoices):
+        IMMEDIATELY = "immediately", "Immediately"
+        INTERVAL = "interval", "Every X minutes"
+        CRON = "cron", "Cron Expression"
+        DAILY = "daily", "Daily at time"
+        WEEKLY = "weekly", "Weekly on day"
+        MONTHLY = "monthly", "Monthly on date"
+        ONCE = "once", "Once at datetime"
+        ON_DEMAND = "on_demand", "On Demand"
+        EVENT = "event", "On Event"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workflow = models.OneToOneField(Workflow, on_delete=models.CASCADE, related_name="schedule")
+
+    schedule_type = models.CharField(max_length=20, choices=ScheduleType.choices, default=ScheduleType.ON_DEMAND)
+    is_active = models.BooleanField(default=False)
+
+    # Interval config (minutes)
+    interval_minutes = models.PositiveIntegerField(default=60)
+
+    # Cron config
+    cron_expression = models.CharField(max_length=100, blank=True, default="")
+
+    # Daily/Weekly/Monthly config
+    time_of_day = models.TimeField(null=True, blank=True)
+    day_of_week = models.PositiveSmallIntegerField(null=True, blank=True, help_text="0=Mon, 6=Sun")
+    day_of_month = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    # Once config
+    run_at = models.DateTimeField(null=True, blank=True)
+
+    # Celery-beat link
+    celery_task_name = models.CharField(max_length=255, blank=True, default="")
+
+    # Tracking
+    last_run = models.DateTimeField(null=True, blank=True)
+    next_run = models.DateTimeField(null=True, blank=True)
+    run_count = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Workflow Schedule"
+        verbose_name_plural = "Workflow Schedules"
+
+    def __str__(self):
+        return f"{self.workflow.name} - {self.get_schedule_type_display()}"
 
 
 class AutomationSuggestion(models.Model):

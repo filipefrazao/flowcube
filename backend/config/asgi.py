@@ -1,27 +1,25 @@
 """
-ASGI config for FRZ Platform.
-Supports both HTTP and WebSocket protocols via Django Channels.
+ASGI config for FlowCube.
+
+Supports HTTP via Django and WebSocket via Channels.
 """
-
 import os
-import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-django.setup()
-
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
 from django.core.asgi import get_asgi_application
 
-# Import WebSocket routing from apps
-from flowcube.routing import websocket_urlpatterns as flowcube_ws
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "flowcube_project.settings")
 
-# Combine all WebSocket URL patterns
-all_websocket_urlpatterns = flowcube_ws
+# Initialize Django ASGI application first
+django_asgi_app = get_asgi_application()
 
-application = ProtocolTypeRouter({
-    'http': get_asgi_application(),
-    'websocket': AuthMiddlewareStack(
-        URLRouter(all_websocket_urlpatterns)
-    ),
-})
+# Import after Django setup
+from channels.auth import AuthMiddlewareStack  # noqa: E402
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from flowcube.routing import websocket_urlpatterns  # noqa: E402
+
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+    }
+)
