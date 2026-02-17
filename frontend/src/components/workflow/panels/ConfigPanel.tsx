@@ -151,6 +151,36 @@ const blockFieldConfigs: Record<BlockType, FieldConfig[]> = {
     ]},
   ],
   
+  // Facebook Lead Ads
+  facebook_lead_ads: [
+    { key: 'page_id', label: 'Facebook Page ID', type: 'text', placeholder: '123456789', description: 'The Facebook Page ID receiving lead ads' },
+    { key: 'form_id', label: 'Form ID (optional)', type: 'text', placeholder: '987654321', description: 'Filter to a specific lead form' },
+  ],
+
+  // Dedup
+  deduplicate: [
+    { key: 'field', label: 'Dedup Field', type: 'select', options: [
+      { value: 'phone', label: 'Phone' },
+      { value: 'email', label: 'Email' },
+      { value: 'leadgen_id', label: 'Leadgen ID' },
+    ], description: 'Field to check for duplicates' },
+    { key: 'ttl_hours', label: 'TTL (hours)', type: 'number', min: 1, max: 720, description: 'Dedup window in hours (default 24)' },
+    { key: 'dedup_service_url', label: 'Dedup Service URL', type: 'text', placeholder: 'https://sc.frzgroup.com.br/dedup' },
+  ],
+
+  // Send to SalesCube
+  send_to_salescube: [
+    { key: 'name_field', label: 'Name Field', type: 'text', placeholder: '{{name}}', description: 'Template for lead name' },
+    { key: 'phone_field', label: 'Phone Field', type: 'text', placeholder: '{{phone}}', description: 'Template for lead phone' },
+    { key: 'email_field', label: 'Email Field', type: 'text', placeholder: '{{email}}', description: 'Template for lead email' },
+    { key: 'channel', label: 'Channel ID', type: 'number', min: 1, description: 'SalesCube channel ID' },
+    { key: 'column', label: 'Column ID', type: 'number', min: 1, description: 'SalesCube column/funnel stage ID' },
+    { key: 'origin', label: 'Origin ID', type: 'number', min: 1, description: 'SalesCube lead origin ID' },
+    { key: 'responsibles', label: 'Responsible IDs', type: 'json', placeholder: '[78, 92, 105]', description: 'Array of consultant user IDs' },
+    { key: 'random_distribution', label: 'Random Distribution', type: 'boolean', description: 'Randomly pick one responsible from the list' },
+    { key: 'tags', label: 'Tag IDs', type: 'json', placeholder: '[1, 2]', description: 'Tags to apply to the lead' },
+  ],
+
   // Outputs
   text_response: [
     { key: 'message', label: 'Message', type: 'textarea', placeholder: 'Hello {{user_name}}!' },
