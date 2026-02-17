@@ -1,4 +1,27 @@
-/* Workflow Node Design System - FRZ Platform (Make.com Redesign) */
+/* Workflow Node Design System - FRZ Platform (Make.com Redesign v2) */
+
+/* ── CRITICAL: Override React Flow default node styling ── */
+/* React Flow injects white bg, border, padding on .react-flow__node */
+/* This MUST come before other rules to ensure dark theme works */
+
+.react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.react-flow__node.selected {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.react-flow__node:focus,
+.react-flow__node:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
 
 :root {
   --node-triggers-primary: #10B981;

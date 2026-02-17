@@ -1,9 +1,12 @@
 /**
- * MakeNode - Make.com-style circular bubble node
+ * MakeNode - Make.com-style circular bubble node (v2)
  *
- * Unified base component for all workflow nodes.
- * Renders compact icon-centric bubbles with label below.
- * Supports circle, hexagon, and diamond shapes.
+ * Redesigned with insights from Gemini, v0, and Google AI:
+ * - SOLID dark backgrounds (bg-{color}-950), NOT transparent overlays
+ * - Gradient overlay for depth
+ * - Proper glow on selection via box-shadow
+ * - Status indicator dot (top-right corner)
+ * - React Flow default white bg overridden via CSS
  */
 "use client";
 
@@ -26,13 +29,6 @@ export interface MakeNodeProps {
   status?: string;
 }
 
-// Shape CSS classes for the icon container
-const SHAPE_CLASSES: Record<string, string> = {
-  circle: "rounded-full",
-  hexagon: "make-node-hexagon",
-  diamond: "make-node-diamond",
-};
-
 function MakeNode({
   icon: Icon,
   color,
@@ -47,9 +43,16 @@ function MakeNode({
   status,
 }: MakeNodeProps) {
   const palette = COLOR_PALETTE[color] || COLOR_PALETTE.blue;
-  const shapeClass = SHAPE_CLASSES[shape] || SHAPE_CLASSES.circle;
 
-  // Status border classes
+  // Shape-specific classes
+  const shapeClass =
+    shape === "hexagon"
+      ? "make-node-hexagon"
+      : shape === "diamond"
+        ? "make-node-diamond"
+        : "rounded-full";
+
+  // Status animation class (on the outer wrapper for drop-shadow)
   const statusClass =
     status === "running"
       ? "make-node-running"
@@ -59,29 +62,24 @@ function MakeNode({
           ? "make-node-error"
           : "";
 
-  // Calculate handle positions for multiple source handles
+  // Multi-handle spacing
   const multiHandleSpacing = sourceHandles
     ? 100 / (sourceHandles.length + 1)
     : 0;
 
   return (
     <div
-      className={`
-        relative flex flex-col items-center
-        transition-all duration-200
-        ${statusClass}
-      `}
-      style={{ width: 120 }}
+      className={`relative flex flex-col items-center ${statusClass}`}
+      style={{ width: 128 }}
     >
       {/* Badge (optional - for FlowCube modules) */}
       {badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
           <span
             className={`
-              text-[9px] font-bold uppercase tracking-wider
-              px-1.5 py-0.5 rounded-sm
-              ${palette.bgLight} ${palette.text}
-              border ${palette.border}
+              text-[8px] font-bold uppercase tracking-widest
+              px-2 py-0.5 rounded-full border
+              ${palette.badgeBg}
             `}
           >
             {badge}
@@ -89,28 +87,36 @@ function MakeNode({
         </div>
       )}
 
-      {/* Icon bubble */}
+      {/* Icon bubble - the main visual */}
       <div
         className={`
           relative w-16 h-16 flex items-center justify-center
           ${shapeClass}
-          ${palette.bgLight}
+          ${palette.bg}
           border-2
-          ${selected ? `${palette.borderSelected} shadow-lg ${palette.glow}` : palette.border}
-          ${selected ? "scale-110" : ""}
+          ${selected ? `${palette.borderSelected} ${palette.glow}` : palette.border}
           transition-all duration-200
-          hover:brightness-110
+          ${selected ? "scale-105" : "hover:scale-[1.03]"}
         `}
       >
-        <Icon className={`w-6 h-6 ${palette.text}`} strokeWidth={1.8} />
+        {/* Gradient overlay for depth/glass effect */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-br from-white/[0.08] to-transparent pointer-events-none ${shapeClass}`}
+        />
+
+        {/* Icon */}
+        <Icon
+          className={`relative z-10 w-7 h-7 ${palette.text} drop-shadow-sm`}
+          strokeWidth={1.6}
+        />
 
         {/* Input handle (left of shape) */}
         {hasInput && !sourceHandles && (
           <Handle
             type="target"
             position={Position.Left}
-            className={`${palette.handle} ${palette.handleBorder} !w-2.5 !h-2.5`}
-            style={{ left: -5 }}
+            className={`${palette.handle} ${palette.handleBorder} !w-2.5 !h-2.5 !border-2`}
+            style={{ left: -6 }}
           />
         )}
 
@@ -119,8 +125,8 @@ function MakeNode({
           <Handle
             type="source"
             position={Position.Right}
-            className={`${palette.handle} ${palette.handleBorder} !w-2.5 !h-2.5`}
-            style={{ right: -5 }}
+            className={`${palette.handle} ${palette.handleBorder} !w-2.5 !h-2.5 !border-2`}
+            style={{ right: -6 }}
           />
         )}
 
@@ -131,8 +137,8 @@ function MakeNode({
               <Handle
                 type="target"
                 position={Position.Left}
-                className={`${palette.handle} ${palette.handleBorder} !w-2.5 !h-2.5`}
-                style={{ left: -5 }}
+                className={`${palette.handle} ${palette.handleBorder} !w-2.5 !h-2.5 !border-2`}
+                style={{ left: -6 }}
               />
             )}
             {sourceHandles.map((handle, index) => (
@@ -141,9 +147,9 @@ function MakeNode({
                 type="source"
                 position={Position.Right}
                 id={handle.id}
-                className={`${palette.handle} ${palette.handleBorder} !w-2 !h-2`}
+                className={`${palette.handle} ${palette.handleBorder} !w-2 !h-2 !border-2`}
                 style={{
-                  right: -4,
+                  right: -5,
                   top: `${multiHandleSpacing * (index + 1)}%`,
                 }}
                 title={handle.label}
@@ -153,15 +159,34 @@ function MakeNode({
         )}
       </div>
 
-      {/* Label */}
-      <div className="mt-1.5 text-center max-w-[120px]">
-        <div className="text-[11px] font-medium text-gray-200 truncate leading-tight">
+      {/* Labels below the bubble */}
+      <div className="mt-2 text-center w-full max-w-[128px]">
+        <div
+          className="text-[11px] font-medium text-gray-200 truncate leading-tight px-1"
+          title={label}
+        >
           {label}
         </div>
-        <div className="text-[9px] text-gray-500 truncate leading-tight">
+        <div
+          className="text-[9px] text-gray-500 truncate leading-tight mt-0.5 px-1"
+          title={subtitle}
+        >
           {subtitle}
         </div>
       </div>
+
+      {/* Status indicator dot (top-right corner) */}
+      {status && status !== "draft" && status !== "idle" && (
+        <div
+          className={`
+            absolute -top-1 -right-1 w-3 h-3 rounded-full
+            border-2 border-gray-950
+            ${status === "running" ? "bg-blue-500 animate-pulse" : ""}
+            ${status === "success" ? "bg-emerald-500" : ""}
+            ${status === "error" ? "bg-red-500 animate-pulse" : ""}
+          `}
+        />
+      )}
     </div>
   );
 }
