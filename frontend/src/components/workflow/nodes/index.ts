@@ -16,6 +16,12 @@ import TextResponseNode from "./TextResponseNode";
 import ConditionNode from "./ConditionNode";
 import SalesCubeNode from "./SalesCubeNode";
 import { PremiumNode } from "./PremiumNode";
+// New visual node types (Phase 2)
+import TriggerNode from "./TriggerNode";
+import TransformNode from "./TransformNode";
+import RouterNode from "./RouterNode";
+import FlowCubeModuleNode from "./FlowCubeModuleNode";
+import ErrorNode from "./ErrorNode";
 
 // Telegram nodes
 import {
@@ -60,11 +66,12 @@ const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
   ai: AINode,
   llm: AINode,
 
-  // Trigger nodes
-  webhook_trigger: WebhookTriggerNode,
-  whatsapp_trigger: WebhookTriggerNode,
-  evolution_trigger: WebhookTriggerNode,
-  schedule: WebhookTriggerNode,
+  // Trigger nodes (new visual shape)
+  webhook_trigger: TriggerNode,
+  whatsapp_trigger: TriggerNode,
+  evolution_trigger: TriggerNode,
+  schedule: TriggerNode,
+  manual_trigger: TriggerNode,
 
   // Response/Output nodes
   text_response: TextResponseNode,
@@ -77,9 +84,34 @@ const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
   set_variable: ConditionNode,
   wait: ConditionNode,
 
-  // Integration nodes
-  salescube_create_lead: SalesCubeNode,
-  salescube_update_lead: SalesCubeNode,
+  // Router node (Make-style diamond)
+  router: RouterNode,
+
+  // Data transform nodes
+  json_transform: TransformNode,
+  iterator: TransformNode,
+  aggregator: TransformNode,
+  text_parser: TransformNode,
+  filter: TransformNode,
+  sort: TransformNode,
+
+  // Sub-workflow
+  sub_workflow: FlowCubeModuleNode,
+
+  // Error handler
+  error_handler: ErrorNode,
+
+  // FlowCube module integration nodes
+  salescube_create_lead: FlowCubeModuleNode,
+  salescube_update_lead: FlowCubeModuleNode,
+  chatcube_send: FlowCubeModuleNode,
+  whatsapp_send: FlowCubeModuleNode,
+  socialcube_post: FlowCubeModuleNode,
+  funnelcube_track: FlowCubeModuleNode,
+  pagecube_submissions: FlowCubeModuleNode,
+
+  // Email
+  send_email: HttpRequestNode,
 
   // Traffic source nodes (use AnalyticsNode for tracking)
   google_organic: AnalyticsNode,
@@ -216,7 +248,7 @@ export const nodeCategories = [
   {
     id: "triggers",
     label: "Triggers",
-    color: "#10B981",
+    color: "#EAB308",
     description: "Entry points that start your workflow",
     nodes: [
       { type: "webhook_trigger", label: "Webhook", description: "HTTP webhook trigger" },
@@ -239,13 +271,29 @@ export const nodeCategories = [
   {
     id: "logic",
     label: "Logic & Flow",
-    color: "#F59E0B",
+    color: "#EF4444",
     description: "Conditional branching and routing",
     nodes: [
       { type: "condition", label: "Condition", description: "If/else branching" },
-      { type: "decision_tree", label: "Router", description: "Multi-way routing" },
+      { type: "router", label: "Router", description: "Multi-way routing (Make-style)" },
       { type: "set_variable", label: "Set Variable", description: "Store data" },
       { type: "wait", label: "Wait/Delay", description: "Add delay" },
+      { type: "merge", label: "Merge", description: "Merge branches" },
+      { type: "sub_workflow", label: "Sub-Workflow", description: "Run another workflow" },
+    ],
+  },
+  {
+    id: "data",
+    label: "Data Transform",
+    color: "#0EA5E9",
+    description: "Process and transform data",
+    nodes: [
+      { type: "json_transform", label: "JSON Transform", description: "JMESPath expressions" },
+      { type: "iterator", label: "Iterator", description: "Loop over array items" },
+      { type: "aggregator", label: "Aggregator", description: "Collect items into array" },
+      { type: "text_parser", label: "Text Parser", description: "Regex extract/replace" },
+      { type: "filter", label: "Filter", description: "Filter array by condition" },
+      { type: "sort", label: "Sort", description: "Sort array items" },
     ],
   },
   {
@@ -257,7 +305,22 @@ export const nodeCategories = [
       { type: "http_request", label: "HTTP Request", description: "REST API calls" },
       { type: "webhook", label: "Send Webhook", description: "POST to URL" },
       { type: "n8n_webhook", label: "N8N Webhook", description: "Trigger N8N workflow" },
+      { type: "send_email", label: "Send Email", description: "SMTP email" },
+      { type: "whatsapp_send", label: "WhatsApp Send", description: "Evolution API message" },
+    ],
+  },
+  {
+    id: "flowcube_modules",
+    label: "FlowCube Modules",
+    color: "#FF6D5A",
+    description: "Built-in FlowCube integrations",
+    nodes: [
       { type: "salescube_create_lead", label: "SalesCube Lead", description: "Create CRM lead" },
+      { type: "salescube_update_lead", label: "Update Lead", description: "Update CRM lead" },
+      { type: "chatcube_send", label: "ChatCube Send", description: "Send via ChatCube" },
+      { type: "socialcube_post", label: "Social Post", description: "Schedule social post" },
+      { type: "funnelcube_track", label: "Track Event", description: "Track analytics event" },
+      { type: "pagecube_submissions", label: "Form Data", description: "Get form submissions" },
     ],
   },
   {
@@ -366,6 +429,30 @@ function getDefaultConfig(type: string): Record<string, unknown> {
       return { conditions: [], default_output: "else" };
     case "salescube_create_lead":
       return { action: "create_lead", channel: 78, column: 48, origin: 11 };
+    case "router":
+      return { routes: [{ handle: "route_1", label: "Route 1", filters: [] }] };
+    case "json_transform":
+      return { expression: "", input_variable: "", output_variable: "transform_result" };
+    case "iterator":
+      return { input_variable: "" };
+    case "aggregator":
+      return { input_variable: "", output_variable: "aggregated_result" };
+    case "text_parser":
+      return { action: "extract", pattern: "", text: "", output_variable: "parsed_result" };
+    case "filter":
+      return { input_variable: "", field: "", operator: "not_empty", value: "" };
+    case "sort":
+      return { input_variable: "", field: "", direction: "asc" };
+    case "sub_workflow":
+      return { workflow_id: "", input_mapping: {}, output_variable: "sub_workflow_result" };
+    case "send_email":
+      return { to: "", subject: "", body: "" };
+    case "whatsapp_send":
+      return { instance: "", to: "", message: "" };
+    case "manual_trigger":
+      return {};
+    case "merge":
+      return {};
     default:
       return {};
   }
@@ -400,6 +487,12 @@ export {
   ConditionNode,
   SalesCubeNode,
   PremiumNode,
+  // New visual nodes
+  TriggerNode,
+  TransformNode,
+  RouterNode,
+  FlowCubeModuleNode,
+  ErrorNode,
   // Telegram nodes
   TelegramTriggerNode,
   TelegramSendNode,

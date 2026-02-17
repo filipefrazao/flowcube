@@ -333,6 +333,16 @@ export const executionApi = {
     return response.data;
   },
 
+  /**
+   * Replay execution from a specific node (with pinned data)
+   */
+  replay: async (executionId: string, fromNodeId: string): Promise<any> => {
+    const response = await apiClient.post(`/executions/${executionId}/replay/`, {
+      from_node_id: fromNodeId,
+    });
+    return response.data;
+  },
+
   // CORREÇÃO 5: Aliases para compatibilidade com código existente
   listExecutions: async (params?: any) => executionApi.list(params),
   getExecutionDetail: async (id: string) => executionApi.get(id),
@@ -412,6 +422,40 @@ export const workflowApi = {
   execute: async (workflowId: string, inputData?: any): Promise<any> => {
     const response = await apiClient.post(`/workflows/${workflowId}/execute/`, {
       input_data: inputData,
+    });
+    return response.data;
+  },
+
+  /**
+   * Get schedule for a workflow
+   */
+  getSchedule: async (workflowId: string): Promise<any> => {
+    const response = await apiClient.get(`/workflows/${workflowId}/schedule/`);
+    return response.data;
+  },
+
+  /**
+   * Update schedule for a workflow
+   */
+  updateSchedule: async (workflowId: string, data: any): Promise<any> => {
+    const response = await apiClient.patch(`/workflows/${workflowId}/schedule/`, data);
+    return response.data;
+  },
+
+  /**
+   * Generate workflow graph from natural language (AI Builder)
+   */
+  aiBuild: async (
+    description: string,
+    provider: string = "openai",
+    create: boolean = false,
+    name?: string,
+  ): Promise<any> => {
+    const response = await apiClient.post('/workflows/ai-build/', {
+      description,
+      provider,
+      create,
+      ...(name ? { name } : {}),
     });
     return response.data;
   },

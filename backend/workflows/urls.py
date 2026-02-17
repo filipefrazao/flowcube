@@ -11,6 +11,7 @@ from .views import (
     AIAssistantViewSet, BrazilianContextViewSet
 )
 from .webhook_handler import webhook_receiver
+from .webhook_public import public_webhook_trigger
 
 # Main router
 router = DefaultRouter()
@@ -31,4 +32,6 @@ urlpatterns = [
     path("", include(workflow_router.urls)),
     # Webhook trigger endpoint
     path("webhooks/<str:token>/", webhook_receiver, name="webhook-receiver"),
+    # Public webhook trigger (no auth required)
+    path("workflows/webhook/<uuid:workflow_id>/", public_webhook_trigger, name="public-webhook-trigger"),
 ]

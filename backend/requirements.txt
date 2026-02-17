@@ -19,6 +19,9 @@ djangorestframework-simplejwt>=5.3.0
 httpx
 django-celery-beat
 
+# Workflow engine
+jmespath>=1.0.0
+
 # AI Agents - LangChain & LangGraph
 langchain>=0.3.0
 langchain-core>=0.3.0
