@@ -1,35 +1,26 @@
 /**
- * FlowCube 4.0 - Node Types Registry (DEFINITIVE FIX)
+ * FlowCube 4.0 - Node Types Registry (Make.com Redesign)
  *
- * Registers all custom node types for React Flow
- * Uses comprehensive Proxy with multiple traps to prevent React Error #130
+ * All nodes use unified Make.com-style circular bubbles.
+ * Visual config centralized in nodeVisualConfig.ts.
+ * Uses Proxy with multiple traps to prevent React Error #130.
  */
 "use client";
 
-import React, { memo } from "react";
+import React from "react";
 import { NodeTypes, NodeProps } from "@xyflow/react";
-import AnalyticsNode from "./AnalyticsNode";
-import HttpRequestNode from "./HttpRequestNode";
-import AINode from "./AINode";
-import WebhookTriggerNode from "./WebhookTriggerNode";
-import TextResponseNode from "./TextResponseNode";
-import ConditionNode from "./ConditionNode";
-import SalesCubeNode from "./SalesCubeNode";
-import { PremiumNode } from "./PremiumNode";
-// New visual node types (Phase 2)
-import TriggerNode from "./TriggerNode";
-import TransformNode from "./TransformNode";
-import RouterNode from "./RouterNode";
-import FlowCubeModuleNode from "./FlowCubeModuleNode";
-import ErrorNode from "./ErrorNode";
 
-// Telegram nodes
+// Make-style node components
+import MakeActionNode from "./MakeActionNode";
+import MakeTriggerNode from "./MakeTriggerNode";
+import MakeRouterNode from "./MakeRouterNode";
+import MakeConditionNode from "./MakeConditionNode";
+
+// Premium keeps its own glassmorphism style
+import { PremiumNode } from "./PremiumNode";
+
+// Telegram default configs (still needed for createNode)
 import {
-  TelegramTriggerNode,
-  TelegramSendNode,
-  TelegramButtonsNode,
-  TelegramMediaNode,
-  TelegramCallbackNode,
   telegramNodeCategory,
   getTelegramNodeDefaultConfig,
 } from "./telegram";
@@ -40,189 +31,169 @@ type NodeComponent = React.ComponentType<NodeProps<any>>;
 // ================================
 // ALL NODE TYPE MAPPINGS
 // ================================
-// This object maps ALL possible node types to their React components
-// ANY type not explicitly listed will use AnalyticsNode as fallback
-
 const NODE_COMPONENT_MAP: Record<string, NodeComponent> = {
-  // Default/Fallback
-  analyticsNode: AnalyticsNode,
-  default: AnalyticsNode,
+  // Default fallback
+  default: MakeActionNode,
 
-  // Premium nodes (glassmorphism)
+  // Premium nodes (keep glassmorphism)
   premium_trigger: PremiumNode,
   premium_action: PremiumNode,
   premium_condition: PremiumNode,
   premium_ai: PremiumNode,
 
-  // HTTP nodes
-  http_request: HttpRequestNode,
-  webhook: HttpRequestNode,
-  n8n_webhook: HttpRequestNode,
+  // Trigger nodes → hexagon
+  webhook_trigger: MakeTriggerNode,
+  whatsapp_trigger: MakeTriggerNode,
+  evolution_trigger: MakeTriggerNode,
+  schedule: MakeTriggerNode,
+  manual_trigger: MakeTriggerNode,
 
-  // AI/LLM nodes
-  openai: AINode,
-  claude: AINode,
-  deepseek: AINode,
-  ai: AINode,
-  llm: AINode,
+  // Router → diamond with multi-output
+  router: MakeRouterNode,
 
-  // Trigger nodes (new visual shape)
-  webhook_trigger: TriggerNode,
-  whatsapp_trigger: TriggerNode,
-  evolution_trigger: TriggerNode,
-  schedule: TriggerNode,
-  manual_trigger: TriggerNode,
+  // Condition → diamond with true/false/else
+  condition: MakeConditionNode,
+  decision_tree: MakeConditionNode,
 
-  // Response/Output nodes
-  text_response: TextResponseNode,
-  whatsapp_template: TextResponseNode,
-  image_response: TextResponseNode,
+  // All other nodes → generic circular bubble
+  // HTTP / API
+  http_request: MakeActionNode,
+  webhook: MakeActionNode,
+  n8n_webhook: MakeActionNode,
+  send_email: MakeActionNode,
 
-  // Logic/Flow nodes
-  condition: ConditionNode,
-  decision_tree: ConditionNode,
-  set_variable: ConditionNode,
-  wait: ConditionNode,
+  // AI / LLM
+  openai: MakeActionNode,
+  claude: MakeActionNode,
+  deepseek: MakeActionNode,
+  ai: MakeActionNode,
+  llm: MakeActionNode,
 
-  // Router node (Make-style diamond)
-  router: RouterNode,
+  // Logic (non-branching)
+  set_variable: MakeActionNode,
+  wait: MakeActionNode,
+  merge: MakeActionNode,
 
-  // Data transform nodes
-  json_transform: TransformNode,
-  iterator: TransformNode,
-  aggregator: TransformNode,
-  text_parser: TransformNode,
-  filter: TransformNode,
-  sort: TransformNode,
+  // Data transform
+  json_transform: MakeActionNode,
+  iterator: MakeActionNode,
+  aggregator: MakeActionNode,
+  text_parser: MakeActionNode,
+  filter: MakeActionNode,
+  sort: MakeActionNode,
 
-  // Sub-workflow
-  sub_workflow: FlowCubeModuleNode,
+  // Output
+  text_response: MakeActionNode,
+  whatsapp_template: MakeActionNode,
+  image_response: MakeActionNode,
+
+  // FlowCube modules
+  sub_workflow: MakeActionNode,
+  salescube_create_lead: MakeActionNode,
+  salescube_update_lead: MakeActionNode,
+  chatcube_send: MakeActionNode,
+  whatsapp_send: MakeActionNode,
+  socialcube_post: MakeActionNode,
+  funnelcube_track: MakeActionNode,
+  pagecube_submissions: MakeActionNode,
 
   // Error handler
-  error_handler: ErrorNode,
+  error_handler: MakeActionNode,
 
-  // FlowCube module integration nodes
-  salescube_create_lead: FlowCubeModuleNode,
-  salescube_update_lead: FlowCubeModuleNode,
-  chatcube_send: FlowCubeModuleNode,
-  whatsapp_send: FlowCubeModuleNode,
-  socialcube_post: FlowCubeModuleNode,
-  funnelcube_track: FlowCubeModuleNode,
-  pagecube_submissions: FlowCubeModuleNode,
+  // Traffic sources
+  google_organic: MakeActionNode,
+  google_ads: MakeActionNode,
+  facebook_ads: MakeActionNode,
+  meta_ads: MakeActionNode,
+  direct: MakeActionNode,
+  referral: MakeActionNode,
+  social: MakeActionNode,
 
-  // Email
-  send_email: HttpRequestNode,
+  // Pages
+  landing_page: MakeActionNode,
+  sales_page: MakeActionNode,
+  checkout: MakeActionNode,
+  thank_you: MakeActionNode,
+  upsell: MakeActionNode,
+  downsell: MakeActionNode,
 
-  // Traffic source nodes (use AnalyticsNode for tracking)
-  google_organic: AnalyticsNode,
-  google_ads: AnalyticsNode,
-  facebook_ads: AnalyticsNode,
-  meta_ads: AnalyticsNode,
-  direct: AnalyticsNode,
-  referral: AnalyticsNode,
-  social: AnalyticsNode,
+  // Actions
+  button_click: MakeActionNode,
+  form_submit: MakeActionNode,
+  purchase: MakeActionNode,
+  custom_event: MakeActionNode,
+  scroll: MakeActionNode,
+  video_play: MakeActionNode,
 
-  // Page nodes (use AnalyticsNode for funnel tracking)
-  landing_page: AnalyticsNode,
-  sales_page: AnalyticsNode,
-  checkout: AnalyticsNode,
-  thank_you: AnalyticsNode,
-  upsell: AnalyticsNode,
-  downsell: AnalyticsNode,
-
-  // Action/Event nodes
-  button_click: AnalyticsNode,
-  form_submit: AnalyticsNode,
-  purchase: AnalyticsNode,
-  custom_event: AnalyticsNode,
-  scroll: AnalyticsNode,
-  video_play: AnalyticsNode,
-
-  // Telegram nodes
-  telegram_trigger: TelegramTriggerNode,
-  telegram_message_trigger: TelegramTriggerNode,
-  telegram_command_trigger: TelegramTriggerNode,
-  telegram_callback_trigger: TelegramTriggerNode,
-  telegram_send: TelegramSendNode,
-  telegram_send_message: TelegramSendNode,
-  telegram_buttons: TelegramButtonsNode,
-  telegram_keyboard: TelegramButtonsNode,
-  telegram_media: TelegramMediaNode,
-  telegram_photo: TelegramMediaNode,
-  telegram_video: TelegramMediaNode,
-  telegram_document: TelegramMediaNode,
-  telegram_callback: TelegramCallbackNode,
-  telegram_callback_handler: TelegramCallbackNode,
+  // Telegram nodes → triggers get hexagon, actions get circle
+  telegram_trigger: MakeTriggerNode,
+  telegram_message_trigger: MakeTriggerNode,
+  telegram_command_trigger: MakeTriggerNode,
+  telegram_callback_trigger: MakeTriggerNode,
+  telegram_send: MakeActionNode,
+  telegram_send_message: MakeActionNode,
+  telegram_buttons: MakeActionNode,
+  telegram_keyboard: MakeActionNode,
+  telegram_media: MakeActionNode,
+  telegram_photo: MakeActionNode,
+  telegram_video: MakeActionNode,
+  telegram_document: MakeActionNode,
+  telegram_callback: MakeActionNode,
+  telegram_callback_handler: MakeActionNode,
 };
 
 // ================================
 // SAFE NODE TYPE RESOLVER
 // ================================
-// This function ALWAYS returns a valid component
 function getNodeComponent(type: string | symbol): NodeComponent {
   if (typeof type !== "string") {
-    return AnalyticsNode;
+    return MakeActionNode;
   }
-  
+
   const component = NODE_COMPONENT_MAP[type];
   if (component) {
     return component;
   }
-  
-  // Log unknown type for debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.warn(`[FlowCube] Unknown node type: "${type}", using AnalyticsNode`);
+
+  if (process.env.NODE_ENV === "development") {
+    console.warn(`[FlowCube] Unknown node type: "${type}", using MakeActionNode`);
   }
-  
-  return AnalyticsNode;
+
+  return MakeActionNode;
 }
 
 // ================================
 // PROXY-BASED NODE TYPES
 // ================================
-// Comprehensive Proxy that handles all access patterns used by React Flow
-
 export const nodeTypes: NodeTypes = new Proxy(NODE_COMPONENT_MAP as NodeTypes, {
-  // GET trap - handles property access
   get(target, prop: string | symbol, receiver): any {
-    // Handle special properties that React/ReactFlow might access
     if (typeof prop === "symbol") {
-      // Handle Symbol.iterator, Symbol.toStringTag, etc.
       return Reflect.get(target, prop, receiver);
     }
-    
-    // Handle Object prototype methods
     if (prop === "hasOwnProperty" || prop === "toString" || prop === "valueOf") {
       return Reflect.get(target, prop, receiver);
     }
-    
-    // Return valid component for any string key
     return getNodeComponent(prop);
   },
-  
-  // HAS trap - handles "in" operator
+
   has(target, prop: string | symbol): boolean {
-    // All node types are "available" - we return AnalyticsNode for unknowns
     if (typeof prop === "string") {
       return true;
     }
     return Reflect.has(target, prop);
   },
-  
-  // OWN_KEYS trap - handles Object.keys()
+
   ownKeys(target): (string | symbol)[] {
     return Reflect.ownKeys(target);
   },
-  
-  // GET_OWN_PROPERTY_DESCRIPTOR trap
+
   getOwnPropertyDescriptor(target, prop: string | symbol) {
     if (typeof prop === "string" && !(prop in target)) {
-      // Create descriptor for unknown types that we'll handle
       return {
         configurable: true,
         enumerable: true,
         writable: true,
-        value: AnalyticsNode,
+        value: MakeActionNode,
       };
     }
     return Reflect.getOwnPropertyDescriptor(target, prop);
@@ -376,16 +347,14 @@ export const nodeCategories = [
 // HELPER FUNCTIONS
 // ================================
 
-// Helper to create a new node with safe type
 export function createNode(
   type: string,
   label: string,
   position: { x: number; y: number }
 ) {
-  // Use the actual type - the Proxy will handle fallback
   return {
     id: `${type}-${Date.now()}`,
-    type: type, // Keep original type, Proxy handles rendering
+    type: type,
     position,
     data: {
       label,
@@ -396,14 +365,11 @@ export function createNode(
   };
 }
 
-// Get default config for each node type
 function getDefaultConfig(type: string): Record<string, unknown> {
-  // Check Telegram nodes first
   if (type.startsWith("telegram_")) {
     return getTelegramNodeDefaultConfig(type);
   }
 
-  // Check Premium nodes
   if (type.startsWith("premium_")) {
     const nodeType = type.replace("premium_", "") as "trigger" | "action" | "condition" | "ai";
     return { type: nodeType, label: "", description: "" };
@@ -458,7 +424,6 @@ function getDefaultConfig(type: string): Record<string, unknown> {
   }
 }
 
-// Get category for a node type
 export function getCategoryForType(type: string): string | undefined {
   for (const category of nodeCategories) {
     if (category.nodes.some((n) => n.type === type)) {
@@ -468,7 +433,6 @@ export function getCategoryForType(type: string): string | undefined {
   return undefined;
 }
 
-// Get label for a node type
 export function getLabelForType(type: string): string {
   for (const category of nodeCategories) {
     const node = category.nodes.find((n) => n.type === type);
@@ -477,28 +441,13 @@ export function getLabelForType(type: string): string {
   return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Export individual components
+// Export new Make-style components
 export {
-  AnalyticsNode,
-  HttpRequestNode,
-  AINode,
-  WebhookTriggerNode,
-  TextResponseNode,
-  ConditionNode,
-  SalesCubeNode,
+  MakeActionNode,
+  MakeTriggerNode,
+  MakeRouterNode,
+  MakeConditionNode,
   PremiumNode,
-  // New visual nodes
-  TriggerNode,
-  TransformNode,
-  RouterNode,
-  FlowCubeModuleNode,
-  ErrorNode,
-  // Telegram nodes
-  TelegramTriggerNode,
-  TelegramSendNode,
-  TelegramButtonsNode,
-  TelegramMediaNode,
-  TelegramCallbackNode,
 };
 
 export default nodeTypes;
