@@ -7,7 +7,7 @@ import uuid
 from .models import (
     AIAssistant, BrazilianContext, AutomationSuggestion,
     Workflow, WorkflowVersion, Execution, NodeExecutionLog,
-    NodeAnalytics, Group, Block, Edge, Variable
+    NodeAnalytics, Group, Block, Edge, Variable, WorkflowSchedule
 )
 
 
@@ -205,6 +205,22 @@ class WorkflowDetailSerializer(serializers.ModelSerializer):
         )
 
         return NodeAnalyticsSerializer(analytics, many=True).data
+
+
+class WorkflowScheduleSerializer(serializers.ModelSerializer):
+    """Serializer for workflow schedule configuration."""
+    schedule_type_display = serializers.CharField(source='get_schedule_type_display', read_only=True)
+
+    class Meta:
+        model = WorkflowSchedule
+        fields = [
+            'id', 'workflow', 'schedule_type', 'schedule_type_display',
+            'is_active', 'interval_minutes', 'cron_expression',
+            'time_of_day', 'day_of_week', 'day_of_month', 'run_at',
+            'last_run', 'next_run', 'run_count',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['workflow', 'last_run', 'next_run', 'run_count', 'created_at', 'updated_at']
 
 
 class WorkflowCreateSerializer(serializers.ModelSerializer):

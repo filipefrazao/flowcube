@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { useCallback, useRef, useEffect, useState } from 'react';
+import { useCallback, useRef, useEffect, useState, useMemo } from 'react';
 import { workflowApi } from '../../lib/api';
 import {
   ReactFlow,
@@ -16,10 +16,13 @@ import {
   useReactFlow,
   ReactFlowProvider,
   BackgroundVariant,
+  Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { useWorkflowStore, useTemporalStore } from '../../stores/workflowStore';
+import { useExecutionStore } from '../../stores/executionStore';
+import { useExecutionWebSocket } from '../../hooks/useExecutionWebSocket';
 import { nodeTypes, createNode } from './nodes';
 import ElementsPalette from './panels/ElementsPalette';
 import PropertiesPanel from './panels/PropertiesPanel';
@@ -77,6 +80,35 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
 
   // Undo/redo from temporal store
   const { undo, redo, pastStates, futureStates } = useTemporalStore();
+
+  // Execution tracking
+  const { activeExecutionId, nodeStatuses, isExecuting } = useExecutionStore();
+  useExecutionWebSocket(activeExecutionId);
+
+  // Apply execution status overlay to nodes (border colors)
+  const styledNodes = useMemo(() => {
+    if (!isExecuting && Object.keys(nodeStatuses).length === 0) return nodes;
+    return nodes.map((node: Node) => {
+      const status = nodeStatuses[node.id];
+      if (!status || status === 'idle') return node;
+      const borderColor =
+        status === 'running' ? '#3B82F6' :  // blue
+        status === 'success' ? '#22C55E' :  // green
+        status === 'error'   ? '#EF4444' :  // red
+        status === 'skipped' ? '#6B7280' :  // gray
+        undefined;
+      if (!borderColor) return node;
+      return {
+        ...node,
+        style: {
+          ...node.style,
+          border: `2px solid ${borderColor}`,
+          boxShadow: status === 'running' ? `0 0 12px ${borderColor}40` : undefined,
+          transition: 'border-color 0.3s, box-shadow 0.3s',
+        },
+      };
+    });
+  }, [nodes, nodeStatuses, isExecuting]);
 
   // Load workflow on mount - FETCH FROM API FIRST!
   useEffect(() => {
@@ -349,7 +381,7 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
           onDragOver={onDragOver}
         >
           <ReactFlow
-            nodes={nodes}
+            nodes={styledNodes}
             edges={edges}
             nodeTypes={nodeTypes}
             onNodesChange={onNodesChange}

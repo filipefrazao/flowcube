@@ -12,11 +12,11 @@ from django.db.models import Count, Avg, Max
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import Workflow, Group, Block, Edge, Variable, Execution
+from .models import Workflow, Group, Block, Edge, Variable, Execution, WorkflowSchedule
 from .serializers import (
     WorkflowListSerializer, WorkflowDetailSerializer, WorkflowCreateSerializer,
     GroupSerializer, BlockSerializer, EdgeSerializer, VariableSerializer,
-    ExecutionSerializer, ExecutionListSerializer
+    ExecutionSerializer, ExecutionListSerializer, WorkflowScheduleSerializer
 )
 
 
@@ -147,6 +147,63 @@ class WorkflowViewSet(viewsets.ModelViewSet):
             "status": "pending",
             "task_id": task.id
         }, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=["get", "put", "patch"], url_path="schedule")
+    def schedule(self, request, pk=None):
+        """Get or update the schedule for a workflow."""
+        workflow = self.get_object()
+        schedule, created = WorkflowSchedule.objects.get_or_create(workflow=workflow)
+
+        if request.method == "GET":
+            return Response(WorkflowScheduleSerializer(schedule).data)
+
+        serializer = WorkflowScheduleSerializer(schedule, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Sync to celery-beat
+        from .schedule_sync import sync_schedule_to_celery_beat
+        sync_schedule_to_celery_beat(schedule)
+
+        return Response(WorkflowScheduleSerializer(schedule).data)
+
+    @action(detail=False, methods=["post"], url_path="ai-build")
+    def ai_build(self, request):
+        """
+        Generate a workflow graph from natural language description.
+
+        POST /api/v1/workflows/ai-build/
+        {"description": "When a webhook is received, send an email", "provider": "openai"}
+        """
+        import asyncio
+        from .ai_builder import generate_workflow_graph
+
+        description = request.data.get("description", "")
+        if not description:
+            return Response({"error": "description is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        provider = request.data.get("provider", "openai")
+
+        try:
+            graph = asyncio.run(generate_workflow_graph(description, provider))
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Optionally create the workflow directly
+        if request.data.get("create", False):
+            workflow = Workflow.objects.create(
+                name=request.data.get("name", "AI-Generated Workflow"),
+                description=description,
+                graph=graph,
+                owner=request.user,
+                tags=["ai-generated"],
+            )
+            return Response({
+                "workflow_id": str(workflow.id),
+                "graph": graph,
+            }, status=status.HTTP_201_CREATED)
+
+        return Response({"graph": graph})
 
     @action(detail=False, methods=["get"], url_path="stats")
     def workflow_stats(self, request):
@@ -281,15 +338,48 @@ class ExecutionViewSet(viewsets.ReadOnlyModelViewSet):
                 {"error": "Only failed executions can be retried"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        # Create new execution with same trigger_data
+        from .tasks import execute_workflow_task
         new_execution = Execution.objects.create(
             workflow=execution.workflow,
             version=execution.version,
             trigger_data=execution.trigger_data,
             triggered_by='retry'
         )
-        # TODO: Trigger async execution via Celery
-        return Response(ExecutionListSerializer(new_execution).data, status=status.HTTP_201_CREATED)
+        task = execute_workflow_task.delay(str(new_execution.id))
+        return Response({
+            **ExecutionListSerializer(new_execution).data,
+            "task_id": task.id,
+        }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def replay(self, request, pk=None):
+        """
+        Replay execution from a specific node.
+        Uses pinned data from node.data.pinned_output if available.
+        """
+        execution = self.get_object()
+        from_node_id = request.data.get("from_node_id")
+        if not from_node_id:
+            return Response({"error": "from_node_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .tasks import execute_workflow_task
+        new_execution = Execution.objects.create(
+            workflow=execution.workflow,
+            version=execution.version,
+            trigger_data={
+                **(execution.trigger_data or {}),
+                "_replay_from": from_node_id,
+                "_pinned_outputs": execution.result_data.get("node_outputs", {}) if execution.result_data else {},
+            },
+            triggered_by="replay",
+        )
+        task = execute_workflow_task.delay(str(new_execution.id))
+        return Response({
+            "execution_id": str(new_execution.id),
+            "status": "pending",
+            "task_id": task.id,
+            "replay_from": from_node_id,
+        }, status=status.HTTP_202_ACCEPTED)
 
     @action(detail=False, methods=['get'])
     def stats(self, request):

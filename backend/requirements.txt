@@ -52,3 +52,6 @@ django-ratelimit==4.1.0
 # Static files
 whitenoise>=6.6.0
 maxminddb>=2.6.0
+
+# Workflow engine
+jmespath>=1.0.0

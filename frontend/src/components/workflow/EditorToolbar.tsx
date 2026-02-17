@@ -7,12 +7,14 @@
 
 import Link from 'next/link';
 import { useWorkflowStore } from '../../stores/workflowStore';
+import { useExecutionStore } from '../../stores/executionStore';
 import {
   ArrowLeft,
   Loader2,
   Check,
   Settings,
   Play,
+  Square,
   Save,
   Share2,
   MoreHorizontal,
@@ -46,14 +48,24 @@ export function EditorToolbar({
     setWorkflowName,
   } = useWorkflowStore();
 
-  const [isExecuting, setIsExecuting] = useState(false);
+  const { isExecuting, startExecution, reset: resetExecution } = useExecutionStore();
 
-  const handleExecute = async () => {
-    setIsExecuting(true);
-    // TODO: Implement workflow execution
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsExecuting(false);
-  };
+  const handleExecute = useCallback(async () => {
+    const workflowId = useWorkflowStore.getState().workflowId;
+    if (!workflowId) return;
+
+    try {
+      // Call API to create execution + dispatch Celery task
+      const response = await workflowApi.execute(workflowId);
+      const executionId = response.execution_id;
+
+      // Start tracking in execution store (WebSocket connects via WorkflowEditor)
+      startExecution(executionId);
+    } catch (error) {
+      console.error('Failed to start execution:', error);
+      resetExecution();
+    }
+  }, [startExecution, resetExecution]);
   const handleSave = useCallback(async () => {
     const workflowId = useWorkflowStore.getState().workflowId;
 
