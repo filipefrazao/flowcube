@@ -324,6 +324,9 @@ export interface KanbanLeadCard {
   value: string;
   assigned_to: string | null;
   assigned_to_name: string | null;
+  stage: string;
+  origin: string | null;
+  origin_name: string | null;
   created_at: string;
 }
 

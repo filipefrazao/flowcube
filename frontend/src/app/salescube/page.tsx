@@ -17,7 +17,7 @@ import {
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { pipelineApi, stageApi, leadApi, originApi, type Pipeline, type PipelineStage, type Lead, type Origin } from "@/lib/salesApi";
+import { pipelineApi, stageApi, leadApi, originApi, kanbanApi, type Pipeline, type PipelineStage, type Lead, type Origin, type KanbanLeadCard } from "@/lib/salesApi";
 import { cn } from "@/lib/utils";
 import LeadModal from "@/components/salescube/LeadModal";
 import PipelineManager from "@/components/salescube/PipelineManager";
@@ -255,24 +255,26 @@ export default function SalesCubeKanban() {
     if (!activePipeline) return;
     setLoading(true);
     try {
-      const [stagesRes, leadsRes] = await Promise.all([
-        stageApi.list(activePipeline),
-        leadApi.list({ pipeline: activePipeline }),
-      ]);
-      const stagesData: PipelineStage[] = stagesRes.data.results || stagesRes.data;
-      const leadsData: Lead[] = leadsRes.data.results || leadsRes.data;
+      const boardRes = await kanbanApi.getBoard(activePipeline, { page_size: "500" });
+      const columns = boardRes.data.columns || [];
 
-      const sorted = [...stagesData].sort((a, b) => a.order - b.order);
-      setStages(sorted);
+      const stagesFromBoard: PipelineStage[] = columns.map((col) => ({
+        id: col.stage_id,
+        name: col.stage_name,
+        color: col.color,
+        order: col.order,
+        probability: col.probability,
+        pipeline: activePipeline,
+      }));
+      setStages(stagesFromBoard);
 
       const grouped: Record<string, Lead[]> = {};
-      for (const s of sorted) grouped[s.id] = [];
-      for (const lead of leadsData) {
-        if (grouped[lead.stage]) grouped[lead.stage].push(lead);
-        else {
-          const firstStage = sorted[0];
-          if (firstStage) grouped[firstStage.id]?.push(lead);
-        }
+      for (const col of columns) {
+        grouped[col.stage_id] = col.leads.map((card) => ({
+          ...card,
+          stage: col.stage_id,
+          origin_name: card.origin_name || null,
+        } as unknown as Lead));
       }
       setLeadsByStage(grouped);
     } catch (err) {

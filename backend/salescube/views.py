@@ -212,7 +212,7 @@ class PipelineViewSet(viewsets.ModelViewSet):
 
         for stage in stages:
             leads_qs = Lead.objects.filter(stage=stage).select_related(
-                "assigned_to"
+                "assigned_to", "origin"
             ).order_by("-created_at")
 
             if search:
@@ -255,6 +255,9 @@ class PipelineViewSet(viewsets.ModelViewSet):
                     "value": str(lead.value),
                     "assigned_to": lead.assigned_to_id,
                     "assigned_to_name": assigned_name,
+                    "stage": str(stage.id),
+                    "origin": str(lead.origin_id) if lead.origin_id else None,
+                    "origin_name": lead.origin.name if lead.origin else None,
                     "created_at": lead.created_at.isoformat(),
                 })
 
