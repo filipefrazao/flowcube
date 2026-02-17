@@ -1,14 +1,14 @@
 /**
  * FlowCube 3.0 - Node Configuration Editor
- * 
+ *
  * Dynamic configuration forms for each node type
  */
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useWorkflowStore, useSelectedNode } from "../../../stores/workflowStore";
 import { cn } from "../../../lib/utils";
-import { 
+import {
   Globe, Bot, MessageSquare, GitBranch, Users,
-  Plus, Minus, ChevronDown
+  Plus, Minus, ChevronDown, ShieldAlert, ChevronRight
 } from "lucide-react";
 
 interface NodeConfigEditorProps {
@@ -39,6 +39,15 @@ export default function NodeConfigEditor({ className }: NodeConfigEditorProps) {
   const rawNodeType = nodeData.type || "default";
   const config = nodeData.config || {};
 
+  // Error handling lives in node.data.error_handling (Make-style)
+  const errorHandling = (selectedNode.data as any).error_handling || "stop";
+  const fallbackOutput = (selectedNode.data as any).fallback_output || "";
+
+  const updateErrorHandling = useCallback((key: string, value: unknown) => {
+    if (!selectedNode) return;
+    updateNodeData(selectedNode.id, { [key]: value });
+  }, [selectedNode, updateNodeData]);
+
   // Normalize premium types to their base type for config editor
   const premiumTypeMap: Record<string, string> = {
     premium_trigger: "webhook_trigger",
@@ -48,54 +57,71 @@ export default function NodeConfigEditor({ className }: NodeConfigEditorProps) {
   };
   const nodeType = premiumTypeMap[rawNodeType] || rawNodeType;
 
+  // Don't show error handling for trigger nodes
+  const isTrigger = ["webhook_trigger", "whatsapp_trigger", "manual_trigger", "schedule"].includes(nodeType);
+
   // Render config based on node type
+  let configEditor: React.ReactNode;
   switch (nodeType) {
     case "http_request":
     case "webhook":
     case "n8n_webhook":
-      return <HttpConfigEditor config={config} updateConfig={updateConfig} className={className} />;
-    
+      configEditor = <HttpConfigEditor config={config} updateConfig={updateConfig} className={className} />;
+      break;
     case "openai":
     case "claude":
     case "deepseek":
-      return <AIConfigEditor config={config} nodeType={nodeType} updateConfig={updateConfig} className={className} />;
-    
+      configEditor = <AIConfigEditor config={config} nodeType={nodeType} updateConfig={updateConfig} className={className} />;
+      break;
     case "webhook_trigger":
     case "whatsapp_trigger":
-      return <WebhookTriggerConfigEditor config={config} updateConfig={updateConfig} className={className} />;
-    
+      configEditor = <WebhookTriggerConfigEditor config={config} updateConfig={updateConfig} className={className} />;
+      break;
     case "text_response":
     case "whatsapp_template":
-      return <TextResponseConfigEditor config={config} updateConfig={updateConfig} className={className} />;
-    
+      configEditor = <TextResponseConfigEditor config={config} updateConfig={updateConfig} className={className} />;
+      break;
     case "condition":
     case "decision_tree":
-      return <ConditionConfigEditor config={config} updateConfig={updateConfig} className={className} />;
-    
+      configEditor = <ConditionConfigEditor config={config} updateConfig={updateConfig} className={className} />;
+      break;
     case "salescube_create_lead":
-      return <SalesCubeConfigEditor config={config} updateConfig={updateConfig} className={className} />;
-    
+      configEditor = <SalesCubeConfigEditor config={config} updateConfig={updateConfig} className={className} />;
+      break;
     default:
-      return (
+      configEditor = (
         <div className={cn("text-sm text-gray-500 p-4", className)}>
           No configuration options for this node type.
         </div>
       );
   }
+
+  return (
+    <div className={cn("space-y-0", className)}>
+      {configEditor}
+      {!isTrigger && (
+        <ErrorHandlingSection
+          errorHandling={errorHandling}
+          fallbackOutput={fallbackOutput}
+          onUpdate={updateErrorHandling}
+        />
+      )}
+    </div>
+  );
 }
 
 // HTTP Request Config
-function HttpConfigEditor({ 
-  config, 
-  updateConfig, 
-  className 
-}: { 
-  config: Record<string, unknown>; 
+function HttpConfigEditor({
+  config,
+  updateConfig,
+  className
+}: {
+  config: Record<string, unknown>;
   updateConfig: (key: string, value: unknown) => void;
   className?: string;
 }) {
   const methods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
-  
+
   return (
     <div className={cn("space-y-4", className)}>
       {/* Method */}
@@ -144,7 +170,7 @@ function HttpConfigEditor({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Headers
         </label>
-        <HeadersEditor 
+        <HeadersEditor
           headers={(config.headers as Record<string, string>) || {}}
           onChange={(headers) => updateConfig("headers", headers)}
         />
@@ -197,18 +223,18 @@ function HeadersEditor({
   onChange: (headers: Record<string, string>) => void;
 }) {
   const entries = Object.entries(headers);
-  
+
   const addHeader = () => {
     onChange({ ...headers, "": "" });
   };
-  
+
   const updateHeader = (oldKey: string, newKey: string, value: string) => {
     const newHeaders = { ...headers };
     if (oldKey !== newKey) delete newHeaders[oldKey];
     newHeaders[newKey] = value;
     onChange(newHeaders);
   };
-  
+
   const removeHeader = (key: string) => {
     const newHeaders = { ...headers };
     delete newHeaders[key];
@@ -536,7 +562,7 @@ function ConditionConfigEditor({
                   <Minus className="w-4 h-4" />
                 </button>
               </div>
-              
+
               <input
                 type="text"
                 value={condition.field}
@@ -544,7 +570,7 @@ function ConditionConfigEditor({
                 placeholder="Field (e.g., intent, message)"
                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
               />
-              
+
               <div className="flex gap-2">
                 <select
                   value={condition.operator}
@@ -555,7 +581,7 @@ function ConditionConfigEditor({
                     <option key={op.value} value={op.value}>{op.label}</option>
                   ))}
                 </select>
-                
+
                 {!["is_empty", "is_not_empty"].includes(condition.operator) && (
                   <input
                     type="text"
@@ -691,6 +717,101 @@ function SalesCubeConfigEditor({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Error Handling Section (Make-style 5 types)
+const ERROR_HANDLING_TYPES = [
+  { value: "stop", label: "Stop", description: "Stop entire workflow on error (default)" },
+  { value: "ignore", label: "Ignore", description: "Log error and continue with empty output" },
+  { value: "resume", label: "Resume", description: "Use fallback output and continue" },
+  { value: "break", label: "Break", description: "Stop this branch, continue other branches" },
+  { value: "rollback", label: "Rollback", description: "Mark execution as rollback" },
+];
+
+function ErrorHandlingSection({
+  errorHandling,
+  fallbackOutput,
+  onUpdate,
+}: {
+  errorHandling: string;
+  fallbackOutput: string;
+  onUpdate: (key: string, value: unknown) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="border-t border-gray-200 mt-4 pt-4">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-800 w-full"
+      >
+        {expanded ? (
+          <ChevronDown className="w-4 h-4" />
+        ) : (
+          <ChevronRight className="w-4 h-4" />
+        )}
+        <ShieldAlert className="w-4 h-4" />
+        Error Handling
+        <span className="ml-auto text-xs text-gray-400 capitalize">
+          {errorHandling}
+        </span>
+      </button>
+
+      {expanded && (
+        <div className="mt-3 space-y-3">
+          {/* Type Selector */}
+          <div className="space-y-1">
+            {ERROR_HANDLING_TYPES.map((type) => (
+              <label
+                key={type.value}
+                className={cn(
+                  "flex items-start gap-2 p-2 rounded-lg cursor-pointer border transition-colors",
+                  errorHandling === type.value
+                    ? "border-blue-300 bg-blue-50"
+                    : "border-transparent hover:bg-gray-50"
+                )}
+              >
+                <input
+                  type="radio"
+                  name="error_handling"
+                  value={type.value}
+                  checked={errorHandling === type.value}
+                  onChange={() => onUpdate("error_handling", type.value)}
+                  className="mt-0.5"
+                />
+                <div>
+                  <div className="text-xs font-medium text-gray-700">{type.label}</div>
+                  <div className="text-[10px] text-gray-500">{type.description}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+
+          {/* Fallback Output (only for resume) */}
+          {errorHandling === "resume" && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Fallback Output (JSON)
+              </label>
+              <textarea
+                value={typeof fallbackOutput === "string" ? fallbackOutput : JSON.stringify(fallbackOutput || {}, null, 2)}
+                onChange={(e) => {
+                  try {
+                    onUpdate("fallback_output", JSON.parse(e.target.value));
+                  } catch {
+                    onUpdate("fallback_output", e.target.value);
+                  }
+                }}
+                rows={3}
+                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono"
+                placeholder='{"default": "value"}'
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
