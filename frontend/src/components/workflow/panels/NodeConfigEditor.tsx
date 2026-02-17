@@ -1,6 +1,6 @@
 /**
  * FlowCube 3.0 - Node Configuration Editor
- * 
+ *
  * Dynamic configuration forms for each node type
  */
 import { useCallback, useState } from "react";
@@ -111,17 +111,17 @@ export default function NodeConfigEditor({ className }: NodeConfigEditorProps) {
 }
 
 // HTTP Request Config
-function HttpConfigEditor({ 
-  config, 
-  updateConfig, 
-  className 
-}: { 
-  config: Record<string, unknown>; 
+function HttpConfigEditor({
+  config,
+  updateConfig,
+  className
+}: {
+  config: Record<string, unknown>;
   updateConfig: (key: string, value: unknown) => void;
   className?: string;
 }) {
   const methods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
-  
+
   return (
     <div className={cn("space-y-4", className)}>
       {/* Method */}
@@ -170,7 +170,7 @@ function HttpConfigEditor({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Headers
         </label>
-        <HeadersEditor 
+        <HeadersEditor
           headers={(config.headers as Record<string, string>) || {}}
           onChange={(headers) => updateConfig("headers", headers)}
         />
@@ -223,18 +223,18 @@ function HeadersEditor({
   onChange: (headers: Record<string, string>) => void;
 }) {
   const entries = Object.entries(headers);
-  
+
   const addHeader = () => {
     onChange({ ...headers, "": "" });
   };
-  
+
   const updateHeader = (oldKey: string, newKey: string, value: string) => {
     const newHeaders = { ...headers };
     if (oldKey !== newKey) delete newHeaders[oldKey];
     newHeaders[newKey] = value;
     onChange(newHeaders);
   };
-  
+
   const removeHeader = (key: string) => {
     const newHeaders = { ...headers };
     delete newHeaders[key];
@@ -562,7 +562,7 @@ function ConditionConfigEditor({
                   <Minus className="w-4 h-4" />
                 </button>
               </div>
-              
+
               <input
                 type="text"
                 value={condition.field}
@@ -570,7 +570,7 @@ function ConditionConfigEditor({
                 placeholder="Field (e.g., intent, message)"
                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
               />
-              
+
               <div className="flex gap-2">
                 <select
                   value={condition.operator}
@@ -581,7 +581,7 @@ function ConditionConfigEditor({
                     <option key={op.value} value={op.value}>{op.label}</option>
                   ))}
                 </select>
-                
+
                 {!["is_empty", "is_not_empty"].includes(condition.operator) && (
                   <input
                     type="text"

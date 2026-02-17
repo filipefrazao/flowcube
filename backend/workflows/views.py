@@ -209,7 +209,7 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     def workflow_stats(self, request):
         """
         GET /api/v1/workflows/stats/
-        
+
         Returns workflow statistics:
         - Most executed workflows
         - Average execution time
