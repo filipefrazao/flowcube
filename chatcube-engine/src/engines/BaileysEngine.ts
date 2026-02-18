@@ -391,6 +391,8 @@ export class BaileysEngine extends EventEmitter implements IEngine {
 
       switch (content.type) {
         case "text":
+          // Simulate human typing before sending (anti-ban)
+          await this.simulateTyping(normalizedJid, content.content.length);
           sentMsg = await this.socket.sendMessage(normalizedJid, {
             text: content.content,
           });

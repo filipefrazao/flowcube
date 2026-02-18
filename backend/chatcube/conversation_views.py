@@ -5,6 +5,7 @@ Groups messages by (instance, remote_jid) and presents them as "conversations"
 for the /conversations frontend page. This bridges the ChatCube messaging system
 with the conversations UI.
 """
+from django.core.exceptions import ValidationError
 from django.db.models import Count, Max, Q, F, Value
 from django.db.models.functions import Replace
 from django.utils import timezone
@@ -140,14 +141,14 @@ def conversation_detail(request, conversation_id):
         )
         instance = contact.instance
         remote_jid = contact.jid
-    except (Contact.DoesNotExist, ValueError):
+    except (Contact.DoesNotExist, ValueError, ValidationError):
         # Try composite ID: "instance_id_remote_jid"
         if "_" in conversation_id:
             parts = conversation_id.split("_", 1)
             try:
                 instance = WhatsAppInstance.objects.get(id=parts[0], owner=user)
                 remote_jid = parts[1]
-            except (WhatsAppInstance.DoesNotExist, ValueError):
+            except (WhatsAppInstance.DoesNotExist, ValueError, ValidationError):
                 pass
 
     if not instance or not remote_jid:
@@ -225,13 +226,13 @@ def conversation_send_message(request, conversation_id):
         )
         instance = contact.instance
         remote_jid = contact.jid
-    except (Contact.DoesNotExist, ValueError):
+    except (Contact.DoesNotExist, ValueError, ValidationError):
         if "_" in conversation_id:
             parts = conversation_id.split("_", 1)
             try:
                 instance = WhatsAppInstance.objects.get(id=parts[0], owner=user)
                 remote_jid = parts[1]
-            except (WhatsAppInstance.DoesNotExist, ValueError):
+            except (WhatsAppInstance.DoesNotExist, ValueError, ValidationError):
                 pass
 
     if not instance or not remote_jid:
