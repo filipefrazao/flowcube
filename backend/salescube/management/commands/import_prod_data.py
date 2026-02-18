@@ -28,6 +28,7 @@ Maps:
 
 import json
 import logging
+import os
 import time
 from decimal import Decimal
 
@@ -78,7 +79,7 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 PROD_BASE = "https://api.frzglobal.com.br/api"
-PROD_TOKEN = "Token c3e1d02d51b6acb16488a16c6b0d0938b470e71d"
+PROD_TOKEN = f"Token {os.environ.get('SALESCUBE_PROD_TOKEN', '')}"
 PAGE_SIZE = 100
 
 

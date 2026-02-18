@@ -4,14 +4,12 @@ dotenv.config();
 export const config = {
   port: parseInt(process.env.PORT || "3100"),
   nodeEnv: process.env.NODE_ENV || "development",
-  databaseUrl:
-    process.env.DATABASE_URL ||
-    "postgres://flowcube:FlowCube2026!@flowcube-postgres:5432/flowcube",
+  databaseUrl: process.env.DATABASE_URL || "",
   redisUrl: process.env.REDIS_URL || "redis://flowcube-redis:6379/3",
   djangoWebhookUrl:
     process.env.DJANGO_WEBHOOK_URL ||
     "http://flowcube-backend:8000/api/v1/chatcube/webhook/",
-  engineApiKey: process.env.ENGINE_API_KEY || "chatcube-internal-key-2026",
+  engineApiKey: process.env.ENGINE_API_KEY || "",
   sessionsDir: process.env.SESSIONS_DIR || "/app/sessions",
   defaultMessageDelay: parseInt(process.env.MESSAGE_DELAY || "3000"),
   maxQueueSize: parseInt(process.env.MAX_QUEUE_SIZE || "1000"),

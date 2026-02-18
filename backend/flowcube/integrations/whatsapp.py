@@ -23,7 +23,7 @@ class EvolutionAPIClient:
         timeout: int = 30
     ):
         self.base_url = base_url or getattr(settings, 'EVOLUTION_API_URL', 'https://evolution.frzgroup.com.br')
-        self.api_key = api_key or getattr(settings, 'EVOLUTION_API_KEY', '429683C4C977415CAAFCCE10F7D57E11')
+        self.api_key = api_key or getattr(settings, 'EVOLUTION_API_KEY', '')
         self.timeout = timeout
         self._client = None
     

@@ -15,7 +15,7 @@ class EngineClient:
 
     def __init__(self, base_url: Optional[str] = None, timeout: int = 15):
         self.base_url = (base_url or os.getenv("CHATCUBE_ENGINE_URL", "http://chatcube-engine:3100")).rstrip("/")
-        self.api_key = os.getenv("CHATCUBE_ENGINE_API_KEY", "chatcube-internal-key-2026")
+        self.api_key = os.getenv("CHATCUBE_ENGINE_API_KEY", "")
         self.timeout = timeout
         self.session = requests.Session()
         self.session.headers.update({"X-Engine-Key": self.api_key})

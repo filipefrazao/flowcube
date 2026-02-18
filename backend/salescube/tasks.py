@@ -1,5 +1,6 @@
 """Celery tasks for incremental SalesCube PROD sync."""
 import logging
+import os
 from decimal import Decimal
 
 import requests
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 PROD_BASE = "https://api.frzglobal.com.br/api"
-PROD_TOKEN = "Token c3e1d02d51b6acb16488a16c6b0d0938b470e71d"
+PROD_TOKEN = f"Token {os.environ.get('SALESCUBE_PROD_TOKEN', '')}"
 SYNC_LOCK_KEY = "salescube:sync:lock"
 LAST_SYNC_KEY = "salescube:sync:last_ts"
 
