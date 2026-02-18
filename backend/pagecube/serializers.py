@@ -41,7 +41,7 @@ class FormSchemaSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormSchema
         fields = '__all__'
-        read_only_fields = ['submissions_count', 'created_at', 'updated_at']
+        read_only_fields = ['submissions_count', 'webhook_token', 'google_sheets_synced_count', 'created_at', 'updated_at']
 
 
 class FormSubmissionSerializer(serializers.ModelSerializer):
