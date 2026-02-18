@@ -20,14 +20,16 @@ def _parse_timestamp(value: Any):
         ts = float(value)
         if ts > 1_000_000_000_000:
             ts = ts / 1000.0
-        return timezone.datetime.fromtimestamp(ts, tz=timezone.utc)
+        import datetime as _dt
+        return _dt.datetime.fromtimestamp(ts, tz=_dt.timezone.utc)
 
     if isinstance(value, str):
         dt = parse_datetime(value)
         if dt is None:
             return timezone.now()
         if timezone.is_naive(dt):
-            return timezone.make_aware(dt, timezone=timezone.utc)
+            import datetime as _dt
+            return dt.replace(tzinfo=_dt.timezone.utc)
         return dt
 
     return timezone.now()
@@ -128,19 +130,62 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
     instance = _resolve_instance(payload)
 
     if event == "message_received":
-        message_data = payload.get("message") or payload.get("data") or payload
+        # Baileys engine sends: {event, instanceId, timestamp, data: {messageId, from, fromName, to, type, content, isGroup, groupId, timestamp}}
+        message_data = payload.get("data") or payload.get("message") or payload
 
-        remote_jid = message_data.get("remote_jid") or message_data.get("remoteJid") or message_data.get("jid")
+        # remote_jid: group JID for groups, sender JID for 1:1
+        is_group = bool(message_data.get("isGroup") or message_data.get("is_group"))
+        if is_group:
+            remote_jid = (
+                message_data.get("groupId")
+                or message_data.get("group_id")
+                or message_data.get("remote_jid")
+                or message_data.get("remoteJid")
+            )
+        else:
+            remote_jid = (
+                message_data.get("remote_jid")
+                or message_data.get("remoteJid")
+                or message_data.get("from")
+                or message_data.get("jid")
+            )
+
         if not remote_jid:
             return {"ok": False, "detail": "Missing remote_jid."}
 
-        from_me = bool(message_data.get("from_me") or message_data.get("fromMe") or False)
-        message_type = message_data.get("message_type") or message_data.get("messageType") or message_data.get("type") or "text"
+        message_type = (
+            message_data.get("message_type")
+            or message_data.get("messageType")
+            or message_data.get("type")
+            or "text"
+        )
         content = message_data.get("content") or message_data.get("text") or ""
         media_url = message_data.get("media_url") or message_data.get("mediaUrl") or None
-        wa_message_id = message_data.get("wa_message_id") or message_data.get("waMessageId") or message_data.get("id")
+        wa_message_id = (
+            message_data.get("wa_message_id")
+            or message_data.get("waMessageId")
+            or message_data.get("messageId")
+            or message_data.get("id")
+        )
+
+        # from_me: engine doesn't send fromMe; infer from instance phone number
+        from_me = bool(message_data.get("from_me") or message_data.get("fromMe") or False)
+        if not from_me and instance.phone_number:
+            sender = message_data.get("from") or ""
+            from_me = bool(sender and instance.phone_number and sender.startswith(instance.phone_number))
+
         status = message_data.get("status") or ("sent" if from_me else "delivered")
         timestamp = _parse_timestamp(message_data.get("timestamp") or message_data.get("ts"))
+
+        # Sender name: Baileys sends "fromName"
+        sender_name = (
+            message_data.get("fromName")
+            or message_data.get("from_name")
+            or message_data.get("name")
+            or message_data.get("push_name")
+            or message_data.get("pushName")
+            or ""
+        )
 
         defaults = {
             "remote_jid": remote_jid,
@@ -150,7 +195,7 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
             "media_url": media_url,
             "status": status,
             "timestamp": timestamp,
-            "metadata": message_data.get("metadata") or message_data,
+            "metadata": message_data,
         }
 
         if wa_message_id:
@@ -163,12 +208,15 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
             msg = Message.objects.create(instance=instance, wa_message_id=None, **defaults)
             created = True
 
-        _upsert_contact_or_group(
-            instance,
-            remote_jid,
-            name=message_data.get("name") or message_data.get("push_name") or message_data.get("pushName") or "",
-            phone=message_data.get("phone") or "",
-        )
+        # Upsert conversation contact/group
+        _upsert_contact_or_group(instance, remote_jid, name=sender_name, phone="")
+
+        # For group messages, also upsert individual sender as contact
+        if is_group:
+            sender_jid = message_data.get("from") or ""
+            if sender_jid and not sender_jid.endswith("@g.us"):
+                _upsert_contact_or_group(instance, sender_jid, name=sender_name, phone="")
+
         if not remote_jid.endswith("@g.us"):
             Contact.objects.filter(instance=instance, jid=remote_jid).update(last_message_at=timestamp)
 
@@ -178,15 +226,20 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
         return {"ok": True, "event": event, "message_id": str(msg.id), "created": created}
 
     if event == "message_status_update":
-        message_data = payload.get("message") or payload.get("data") or payload
-        wa_message_id = message_data.get("wa_message_id") or message_data.get("waMessageId") or message_data.get("id")
+        message_data = payload.get("data") or payload.get("message") or payload
+        wa_message_id = (
+            message_data.get("wa_message_id")
+            or message_data.get("waMessageId")
+            or message_data.get("messageId")
+            or message_data.get("id")
+        )
         status = message_data.get("status")
         if not wa_message_id or not status:
             return {"ok": False, "detail": "Missing wa_message_id or status."}
 
         updated = Message.objects.filter(instance=instance, wa_message_id=wa_message_id).update(
             status=status,
-            metadata=message_data.get("metadata") or message_data,
+            metadata=message_data,
         )
         return {"ok": True, "event": event, "updated": int(updated)}
 
@@ -205,6 +258,50 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
         WhatsAppInstance.objects.filter(id=instance.id).update(status="connecting")
         logger.info("QR code updated for instance id=%s", instance.id)
         return {"ok": True, "event": event}
+
+    if event == "history_sync":
+        data = payload.get("data") or payload
+        messages = data.get("messages") or []
+        imported = 0
+        import datetime as _dt
+        for item in messages:
+            remote_jid = item.get("remoteJid") or ""
+            wa_id = item.get("messageId") or ""
+            from_me = bool(item.get("fromMe", False))
+            msg_type_raw = item.get("messageType") or "conversation"
+            msg_type_map = {"conversation": "text", "extendedTextMessage": "text", "imageMessage": "image", "videoMessage": "video", "audioMessage": "audio", "documentMessage": "document", "stickerMessage": "sticker", "locationMessage": "location", "reactionMessage": "reaction"}
+            msg_type = msg_type_map.get(msg_type_raw, "text")
+            ts = item.get("messageTimestamp")
+            try:
+                timestamp = _dt.datetime.fromtimestamp(int(ts), tz=_dt.timezone.utc) if ts else timezone.now()
+            except Exception:
+                timestamp = timezone.now()
+            if not remote_jid or msg_type_raw == "protocolMessage":
+                continue
+            push_name = item.get("pushName") or ""
+            msg_obj = item.get("message") or {}
+            # Extract content
+            content_str = msg_obj.get("conversation") or (msg_obj.get("extendedTextMessage") or {}).get("text") or ""
+            if not content_str and msg_type_raw not in ("conversation", "extendedTextMessage"):
+                content_str = f"[{msg_type_raw}]"
+            if wa_id:
+                _, created = Message.objects.update_or_create(
+                    instance=instance,
+                    wa_message_id=wa_id,
+                    defaults={"remote_jid": remote_jid, "from_me": from_me, "message_type": msg_type, "content": content_str, "status": "read", "timestamp": timestamp, "metadata": item},
+                )
+            else:
+                Message.objects.create(instance=instance, wa_message_id=None, remote_jid=remote_jid, from_me=from_me, message_type=msg_type, content=content_str, status="read", timestamp=timestamp, metadata=item)
+                created = True
+            if created:
+                imported += 1
+                sender_jid = item.get("participant") or remote_jid
+                if sender_jid and not sender_jid.endswith("@g.us"):
+                    phone = sender_jid.split("@")[0] if "@" in sender_jid else ""
+                    Contact.objects.update_or_create(instance=instance, jid=sender_jid, defaults={"name": push_name, "phone": phone})
+        sync_type = data.get("syncType", "")
+        logger.info("history_sync: imported=%d sync_type=%s instance=%s", imported, sync_type, instance.id)
+        return {"ok": True, "event": event, "imported": imported, "sync_type": sync_type}
 
     logger.warning("Unknown engine webhook event=%r payload_keys=%s", event, sorted(payload.keys()))
     return {"ok": False, "detail": f"Unknown event: {event}"}

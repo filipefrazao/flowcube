@@ -264,7 +264,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
                             instance=instance,
                             jid=jid,
                             defaults={
-                                "name": c.get("name") or c.get("push_name") or c.get("pushName") or "",
+                                "name": c.get("name") or c.get("notify") or c.get("push_name") or c.get("pushName") or "",
                                 "phone": c.get("phone") or "",
                                 "profile_picture": c.get("profile_picture") or c.get("profilePicture"),
                                 "is_business": bool(c.get("is_business") or c.get("isBusiness") or False),
@@ -300,9 +300,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
                             instance=instance,
                             jid=jid,
                             defaults={
-                                "name": g.get("name") or "",
+                                "name": g.get("name") or g.get("subject") or "",
                                 "description": g.get("description") or "",
-                                "participants_count": int(g.get("participants_count") or g.get("participantsCount") or 0),
+                                "participants_count": int(g.get("participants_count") or g.get("participantsCount") or g.get("participants") or 0),
                                 "is_admin": bool(g.get("is_admin") or g.get("isAdmin") or False),
                             },
                         )
@@ -335,30 +335,6 @@ class InstanceViewSet(viewsets.ModelViewSet):
         }
         return Response(data)
 
-
-class TemplateViewSet(viewsets.ModelViewSet):
-    serializer_class = MessageTemplateSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return MessageTemplate.objects.filter(owner=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-
-
-class CampaignViewSet(viewsets.ModelViewSet):
-    serializer_class = CampaignSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Campaign.objects.filter(owner=self.request.user).select_related("instance", "template")
-
-    def perform_create(self, serializer):
-        instance = serializer.validated_data.get("instance")
-        if instance and instance.owner_id != self.request.user.id:
-            raise ValueError("Instance does not belong to current user.")
-        serializer.save(owner=self.request.user)
 
     @action(detail=True, methods=["post"], url_path="start")
     def start(self, request, pk=None):
@@ -396,6 +372,172 @@ class CampaignViewSet(viewsets.ModelViewSet):
             pass
         return Response({"detail": "Campaign resumed."})
 
+
+
+    # ------------------------------------------------------------------
+    # Group Management Actions (native Baileys)
+    # ------------------------------------------------------------------
+
+    @action(detail=True, methods=["post"], url_path="groups/create")
+    def group_create(self, request, pk=None):
+        """Create a new WhatsApp group.
+        Body: { subject: str, participants: ["5511...@s.whatsapp.net", ...] }"""
+        instance = self.get_object()
+        if not instance.engine_instance_id:
+            return Response({"detail": "Instance not connected."}, status=status.HTTP_400_BAD_REQUEST)
+        subject = request.data.get("subject") or ""
+        participants = request.data.get("participants") or []
+        if not subject or not participants:
+            return Response({"detail": "subject and participants required."}, status=status.HTTP_400_BAD_REQUEST)
+        client = EngineClient()
+        try:
+            data = client.group_create(instance.engine_instance_id, subject, participants)
+            return Response(data, status=status.HTTP_201_CREATED)
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["patch"], url_path=r"groups/(?P<jid>[^/.]+)/subject")
+    def group_update_subject(self, request, pk=None, jid=None):
+        """Rename a group. Body: { subject: str }"""
+        instance = self.get_object()
+        subject = request.data.get("subject") or ""
+        if not subject:
+            return Response({"detail": "subject required."}, status=status.HTTP_400_BAD_REQUEST)
+        client = EngineClient()
+        try:
+            return Response(client.group_update_subject(instance.engine_instance_id, jid, subject))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["patch"], url_path=r"groups/(?P<jid>[^/.]+)/description")
+    def group_update_description(self, request, pk=None, jid=None):
+        """Update group description. Body: { description: str }"""
+        instance = self.get_object()
+        client = EngineClient()
+        try:
+            return Response(client.group_update_description(instance.engine_instance_id, jid, request.data.get("description") or ""))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["post"], url_path=r"groups/(?P<jid>[^/.]+)/participants")
+    def group_participants_update(self, request, pk=None, jid=None):
+        """Manage participants. Body: { participants: [...], action: add|remove|promote|demote }"""
+        instance = self.get_object()
+        participants = request.data.get("participants") or []
+        action_str = request.data.get("action") or ""
+        if not participants or action_str not in ("add", "remove", "promote", "demote"):
+            return Response({"detail": "participants and action (add|remove|promote|demote) required."}, status=status.HTTP_400_BAD_REQUEST)
+        client = EngineClient()
+        try:
+            return Response(client.group_participants_update(instance.engine_instance_id, jid, participants, action_str))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["get"], url_path=r"groups/(?P<jid>[^/.]+)/metadata")
+    def group_metadata(self, request, pk=None, jid=None):
+        """Get full group metadata (participants, description, admin, etc.)"""
+        instance = self.get_object()
+        client = EngineClient()
+        try:
+            return Response(client.group_metadata(instance.engine_instance_id, jid))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["get"], url_path=r"groups/(?P<jid>[^/.]+)/invite-code")
+    def group_invite_code(self, request, pk=None, jid=None):
+        """Get group invite link."""
+        instance = self.get_object()
+        client = EngineClient()
+        try:
+            return Response(client.group_invite_code(instance.engine_instance_id, jid))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["post"], url_path=r"groups/(?P<jid>[^/.]+)/leave")
+    def group_leave(self, request, pk=None, jid=None):
+        """Leave a WhatsApp group."""
+        instance = self.get_object()
+        client = EngineClient()
+        try:
+            return Response(client.group_leave(instance.engine_instance_id, jid))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    @action(detail=True, methods=["post"], url_path="fetch-history")
+    def fetch_history(self, request, pk=None):
+        """Trigger history fetch for a specific chat (messages arrive via history_sync webhook).
+        Body: { jid: str, count: int (default 50) }"""
+        instance = self.get_object()
+        if not instance.engine_instance_id:
+            return Response({"detail": "Instance not connected."}, status=status.HTTP_400_BAD_REQUEST)
+        jid = request.data.get("jid") or ""
+        count = int(request.data.get("count") or 50)
+        if not jid:
+            return Response({"detail": "jid required."}, status=status.HTTP_400_BAD_REQUEST)
+        client = EngineClient()
+        try:
+            return Response(client.fetch_history(instance.engine_instance_id, jid, count))
+        except EngineClientError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+
+
+
+class TemplateViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageTemplateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return MessageTemplate.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class CampaignViewSet(viewsets.ModelViewSet):
+    serializer_class = CampaignSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Campaign.objects.filter(owner=self.request.user).select_related("instance", "template")
+
+    def perform_create(self, serializer):
+        instance = serializer.validated_data.get("instance")
+        if instance and instance.owner_id != self.request.user.id:
+            raise ValueError("Instance does not belong to current user.")
+        serializer.save(owner=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="start")
+    def start(self, request, pk=None):
+        campaign = self.get_object()
+        now = timezone.now()
+        if campaign.scheduled_at and campaign.scheduled_at > now:
+            Campaign.objects.filter(id=campaign.id).update(status="scheduled")
+            return Response({"detail": "Campaign scheduled.", "scheduled_at": campaign.scheduled_at})
+        Campaign.objects.filter(id=campaign.id).update(status="running", started_at=campaign.started_at or now)
+        try:
+            from .tasks import run_campaign
+            run_campaign.delay(str(campaign.id))
+        except Exception:
+            pass
+        return Response({"detail": "Campaign started."})
+
+    @action(detail=True, methods=["post"], url_path="pause")
+    def pause(self, request, pk=None):
+        campaign = self.get_object()
+        Campaign.objects.filter(id=campaign.id).update(status="paused")
+        return Response({"detail": "Campaign paused."})
+
+    @action(detail=True, methods=["post"], url_path="resume")
+    def resume(self, request, pk=None):
+        campaign = self.get_object()
+        Campaign.objects.filter(id=campaign.id).update(status="running")
+        try:
+            from .tasks import run_campaign
+            run_campaign.delay(str(campaign.id))
+        except Exception:
+            pass
+        return Response({"detail": "Campaign resumed."})
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

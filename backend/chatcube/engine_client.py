@@ -113,3 +113,28 @@ class EngineClient:
 
     def get_groups(self, engine_instance_id: str) -> Dict[str, Any]:
         return self._request("GET", f"/api/instances/{engine_instance_id}/groups")
+
+    def group_create(self, engine_instance_id: str, subject: str, participants: list) -> Dict[str, Any]:
+        return self._request("POST", f"/api/instances/{engine_instance_id}/groups/create", json={"subject": subject, "participants": participants})
+
+    def group_update_subject(self, engine_instance_id: str, jid: str, subject: str) -> Dict[str, Any]:
+        return self._request("PATCH", f"/api/instances/{engine_instance_id}/groups/{jid}/subject", json={"subject": subject})
+
+    def group_update_description(self, engine_instance_id: str, jid: str, description: str) -> Dict[str, Any]:
+        return self._request("PATCH", f"/api/instances/{engine_instance_id}/groups/{jid}/description", json={"description": description})
+
+    def group_participants_update(self, engine_instance_id: str, jid: str, participants: list, action: str) -> Dict[str, Any]:
+        return self._request("POST", f"/api/instances/{engine_instance_id}/groups/{jid}/participants", json={"participants": participants, "action": action})
+
+    def group_metadata(self, engine_instance_id: str, jid: str) -> Dict[str, Any]:
+        return self._request("GET", f"/api/instances/{engine_instance_id}/groups/{jid}/metadata")
+
+    def group_invite_code(self, engine_instance_id: str, jid: str) -> Dict[str, Any]:
+        return self._request("GET", f"/api/instances/{engine_instance_id}/groups/{jid}/invite-code")
+
+    def group_leave(self, engine_instance_id: str, jid: str) -> Dict[str, Any]:
+        return self._request("POST", f"/api/instances/{engine_instance_id}/groups/{jid}/leave")
+
+    def fetch_history(self, engine_instance_id: str, jid: str, count: int = 50) -> Dict[str, Any]:
+        return self._request("POST", f"/api/instances/{engine_instance_id}/fetch-history", json={"jid": jid, "count": count})
+

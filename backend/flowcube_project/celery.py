@@ -80,6 +80,8 @@ app.conf.update(
         'pagecube.tasks.render_page': {'queue': 'pages'},
         'pagecube.tasks.distribute_submission': {'queue': 'pages'},
         'pagecube.tasks.verify_domain': {'queue': 'pages'},
+        # SalesCube sync
+        'salescube.tasks.sync_from_prod': {'queue': 'default'},
     },
 
     # Queues

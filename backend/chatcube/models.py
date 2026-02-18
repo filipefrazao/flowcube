@@ -47,6 +47,7 @@ class WhatsAppInstance(models.Model):
 
     # Engine internal reference
     engine_instance_id = models.CharField(max_length=100, blank=True, null=True)
+    evolution_instance_name = models.CharField(max_length=100, blank=True, null=True, help_text="Nome da instância na Evolution API para sync de histórico")
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

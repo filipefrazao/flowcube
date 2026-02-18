@@ -334,6 +334,7 @@ class Product(models.Model):
     )
     active = models.BooleanField(default=True)
     image_url = models.URLField(blank=True, default="")
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -371,6 +372,7 @@ class Sale(models.Model):
         null=True,
         related_name="salescube_sales",
     )
+    legacy_id = models.IntegerField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

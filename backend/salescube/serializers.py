@@ -471,13 +471,17 @@ class SaleAttachmentSerializer(serializers.ModelSerializer):
 class SaleSerializer(serializers.ModelSerializer):
     lead_name = serializers.SerializerMethodField()
     line_items = SaleLineItemSerializer(many=True, read_only=True)
+    total_amount = serializers.DecimalField(
+        source="total_value", max_digits=12, decimal_places=2, read_only=True
+    )
+    status = serializers.CharField(source="stage", read_only=True)
 
     class Meta:
         model = Sale
         fields = [
             "id", "lead", "lead_name", "products", "total_value",
-            "stage", "notes", "closed_at", "created_by",
-            "line_items", "created_at", "updated_at",
+            "total_amount", "stage", "status", "notes", "closed_at",
+            "created_by", "line_items", "created_at", "updated_at",
         ]
         read_only_fields = ["created_by"]
 
