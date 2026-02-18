@@ -62,7 +62,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
-      - CHATCUBE_ENGINE_API_KEY=chatcube-internal-key-2026
+      - CHATCUBE_ENGINE_API_KEY=${CHATCUBE_ENGINE_API_KEY}
     depends_on:
       flowcube-postgres:
         condition: service_healthy
@@ -110,7 +110,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
-      - CHATCUBE_ENGINE_API_KEY=chatcube-internal-key-2026
+      - CHATCUBE_ENGINE_API_KEY=${CHATCUBE_ENGINE_API_KEY}
     depends_on:
       flowcube-postgres:
         condition: service_healthy
@@ -152,7 +152,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
-      - CHATCUBE_ENGINE_API_KEY=chatcube-internal-key-2026
+      - CHATCUBE_ENGINE_API_KEY=${CHATCUBE_ENGINE_API_KEY}
     depends_on:
       flowcube-postgres:
         condition: service_healthy
@@ -212,7 +212,7 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@flowcube-postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@flowcube-redis:6379/3
       - DJANGO_WEBHOOK_URL=http://flowcube-backend:8000/api/v1/chatcube/webhook/engine/
-      - ENGINE_API_KEY=chatcube-internal-key-2026
+      - ENGINE_API_KEY=${CHATCUBE_ENGINE_API_KEY}
     depends_on:
       flowcube-postgres:
         condition: service_healthy

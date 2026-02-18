@@ -6,9 +6,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
 
   // Database (shared with FlowCube)
-  databaseUrl:
-    process.env.DATABASE_URL ||
-    "postgres://flowcube:FlowCube2026!@flowcube-postgres:5432/flowcube",
+  databaseUrl: process.env.DATABASE_URL || "",
 
   // Redis
   redisUrl: process.env.REDIS_URL || "redis://flowcube-redis:6379/3",
@@ -19,7 +17,7 @@ export const config = {
     "http://flowcube-backend:8000/api/v1/chatcube/webhook/",
 
   // Internal API key for auth between services
-  engineApiKey: process.env.ENGINE_API_KEY || "chatcube-internal-key-2026",
+  engineApiKey: process.env.ENGINE_API_KEY || "",
 
   // Sessions directory for Baileys auth (file-based fallback)
   sessionsDir: process.env.SESSIONS_DIR || "/app/sessions",
