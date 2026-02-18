@@ -78,10 +78,16 @@ def webhook_receiver(request, token):
         except json.JSONDecodeError:
             payload = {'raw_body': request.body.decode('utf-8', errors='replace')}
         
-        # Add request metadata
-        trigger_data = {
-            'payload': payload,
-            'headers': dict(request.headers),
+        # Use payload directly as trigger_data so handlers access fields at root level
+        # (e.g., facebook_lead_ads reads trigger_data.nome_completo directly)
+        if isinstance(payload, dict):
+            trigger_data = payload
+        else:
+            trigger_data = {'raw_body': payload}
+
+        # Store webhook metadata under reserved key
+        trigger_data['_webhook'] = {
+            'headers': {k: v for k, v in request.headers.items() if k.lower() not in ('authorization', 'cookie')},
             'method': request.method,
             'path': request.path,
             'query_params': dict(request.GET),
@@ -129,7 +135,7 @@ def setup_webhook_trigger(workflow):
     nodes = graph.get('nodes', [])
     
     has_webhook_trigger = any(
-        node.get('type') in ['trigger', 'webhook', 'webhook_trigger', 'premium_trigger']
+        node.get('type') in ['trigger', 'webhook', 'webhook_trigger', 'premium_trigger', 'facebook_lead_ads', 'whatsapp_trigger', 'evolution_trigger', 'manual_trigger', 'schedule']
         for node in nodes
     )
     
