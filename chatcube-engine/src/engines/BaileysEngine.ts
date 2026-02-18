@@ -22,6 +22,7 @@ import {
   SendMessagePayload,
   MessageResult,
   MessageType,
+  GroupMetadata,
 } from "../types";
 import { config } from "../config";
 import {
@@ -276,6 +277,31 @@ export class BaileysEngine extends EventEmitter implements IEngine {
           this.emit("message_status_update", this.instanceId, eventData);
         }
       });
+
+      // --- History Sync Handler ---
+      this.socket.ev.on("messaging-history.set", ({ chats, contacts, messages, isLatest }) => {
+        this.logger.info({ messages: messages.length, chats: chats.length }, "History sync received");
+
+        // Emit one event per historical message batch
+        this.emit("history_sync", this.instanceId, {
+          isLatest: Boolean(isLatest),
+          messages: messages.map((m: any) => ({
+            messageId: m.key?.id || "",
+            fromMe: Boolean(m.key?.fromMe),
+            remoteJid: m.key?.remoteJid || "",
+            participant: m.key?.participant || "",
+            pushName: m.pushName || "",
+            messageType: Object.keys(m.message || {}).filter((k: string) => k !== "messageContextInfo" && k !== "senderKeyDistributionMessage")[0] || "conversation",
+            message: m.message || {},
+            messageTimestamp: typeof m.messageTimestamp === "number" ? m.messageTimestamp : Number(m.messageTimestamp) || 0,
+          })),
+          chats: chats.map((c: any) => ({
+            id: c.id,
+            name: c.name || "",
+            unreadCount: c.unreadCount || 0,
+          })),
+        });
+      });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Unknown error";
       this.logger.error({ error: errMsg }, "Failed to connect");
@@ -498,6 +524,83 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     } catch {
       this.logger.error("Failed to get groups");
       return [];
+    }
+  }
+
+
+  // ---------- Group Management Methods ----------
+
+  async groupCreate(subject: string, participants: string[]): Promise<{ id: string; subject: string }> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const result = await this.socket.groupCreate(subject, participants);
+    return { id: result.id, subject: result.subject || subject };
+  }
+
+  async groupUpdateSubject(jid: string, subject: string): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    await this.socket.groupUpdateSubject(jid, subject);
+  }
+
+  async groupUpdateDescription(jid: string, description: string): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    await this.socket.groupUpdateDescription(jid, description);
+  }
+
+  async groupParticipantsUpdate(jid: string, participants: string[], action: "add" | "remove" | "promote" | "demote"): Promise<Array<{ jid: string; status: string }>> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const results = await this.socket.groupParticipantsUpdate(jid, participants, action);
+    return (results || []).map((r: any) => ({
+      jid: r.jid || (typeof r === "string" ? r : ""),
+      status: r.status || "ok",
+    }));
+  }
+
+  async groupMetadata(jid: string): Promise<GroupMetadata> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const meta = await this.socket.groupMetadata(jid);
+    return {
+      id: meta.id,
+      subject: meta.subject || "",
+      description: meta.desc || "",
+      owner: meta.owner || "",
+      participants: (meta.participants || []).map((p: any) => ({
+        id: p.id,
+        admin: p.admin || null,
+      })),
+      creation: meta.creation,
+    };
+  }
+
+  async groupInviteCode(jid: string): Promise<string> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const code = await this.socket.groupInviteCode(jid);
+    return code || "";
+  }
+
+  async groupLeave(jid: string): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    await this.socket.groupLeave(jid);
+  }
+
+  async fetchHistory(jid: string, count: number = 50): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    // History sync happens passively on connect via messaging-history.set event.
+    // This method triggers a manual fetch request for a specific chat.
+    try {
+      const msgs = await (this.socket as any).loadMessages?.(jid, 1, undefined);
+      const oldestKey = msgs?.[0]?.key;
+      if (oldestKey) {
+        await (this.socket as any).fetchMessageHistory?.(count, oldestKey, Date.now().toString());
+      } else {
+        await (this.socket as any).chatModify?.({ clear: false }, jid);
+      }
+    } catch (err) {
+      this.logger.warn({ jid, err }, "fetchHistory: could not get cursor, trying direct fetch");
+      try {
+        await (this.socket as any).fetchMessageHistory?.(count, { remoteJid: jid, id: "", fromMe: false }, Date.now().toString());
+      } catch {
+        this.logger.info({ jid }, "fetchHistory: will receive history passively");
+      }
     }
   }
 

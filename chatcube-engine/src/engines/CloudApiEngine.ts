@@ -7,6 +7,7 @@ import {
   InstanceStatus,
   SendMessagePayload,
   MessageResult,
+  GroupMetadata,
 } from "../types";
 
 const logger = pino({ name: "cloud-api-engine" });
@@ -187,6 +188,41 @@ export class CloudApiEngine extends EventEmitter implements IEngine {
 
   async getGroups(): Promise<Array<{ id: string; subject: string; participants: number }>> {
     return [];
+  }
+
+
+  // ---------- Group Management (not supported by Cloud API) ----------
+
+  async groupCreate(_subject: string, _participants: string[]): Promise<{ id: string; subject: string }> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async groupUpdateSubject(_jid: string, _subject: string): Promise<void> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async groupUpdateDescription(_jid: string, _description: string): Promise<void> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async groupParticipantsUpdate(_jid: string, _participants: string[], _action: "add" | "remove" | "promote" | "demote"): Promise<Array<{ jid: string; status: string }>> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async groupMetadata(_jid: string): Promise<GroupMetadata> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async groupInviteCode(_jid: string): Promise<string> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async groupLeave(_jid: string): Promise<void> {
+    throw new Error("Group management is not supported by Cloud API engine");
+  }
+
+  async fetchHistory(_jid: string, _count?: number): Promise<void> {
+    throw new Error("History fetch is not supported by Cloud API engine");
   }
 
   getInfo(): {

@@ -212,4 +212,115 @@ router.post("/:id/logout", async (req: Request<{ id: string }>, res: Response<Ap
   }
 });
 
+
+
+// ---------- Group Management Routes ----------
+
+router.post("/:id/groups/create", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { subject, participants } = req.body;
+    if (!subject || !participants?.length) {
+      res.status(400).json({ success: false, error: "subject and participants required" });
+      return;
+    }
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    const result = await (engine as any).groupCreate(subject, participants);
+    res.status(201).json({ success: true, data: result });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.patch("/:id/groups/:jid/subject", async (req, res) => {
+  try {
+    const { id, jid } = req.params;
+    const { subject } = req.body;
+    if (!subject) { res.status(400).json({ success: false, error: "subject required" }); return; }
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    await (engine as any).groupUpdateSubject(jid, subject);
+    res.json({ success: true, message: `Group ${jid} renamed to "${subject}"` });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.patch("/:id/groups/:jid/description", async (req, res) => {
+  try {
+    const { id, jid } = req.params;
+    const { description } = req.body;
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    await (engine as any).groupUpdateDescription(jid, description || "");
+    res.json({ success: true });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.post("/:id/groups/:jid/participants", async (req, res) => {
+  try {
+    const { id, jid } = req.params;
+    const { participants, action } = req.body;
+    if (!participants?.length || !action) {
+      res.status(400).json({ success: false, error: "participants and action required" });
+      return;
+    }
+    if (!["add", "remove", "promote", "demote"].includes(action)) {
+      res.status(400).json({ success: false, error: "action must be add|remove|promote|demote" });
+      return;
+    }
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    const results = await (engine as any).groupParticipantsUpdate(jid, participants, action);
+    res.json({ success: true, data: results });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.get("/:id/groups/:jid/metadata", async (req, res) => {
+  try {
+    const { id, jid } = req.params;
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    const meta = await (engine as any).groupMetadata(jid);
+    res.json({ success: true, data: meta });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.get("/:id/groups/:jid/invite-code", async (req, res) => {
+  try {
+    const { id, jid } = req.params;
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    const code = await (engine as any).groupInviteCode(jid);
+    res.json({ success: true, data: { code, url: `https://chat.whatsapp.com/${code}` } });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.post("/:id/groups/:jid/leave", async (req, res) => {
+  try {
+    const { id, jid } = req.params;
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    await (engine as any).groupLeave(jid);
+    res.json({ success: true, message: `Left group ${jid}` });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.post("/:id/fetch-history", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { jid, count = 50 } = req.body;
+    if (!jid) { res.status(400).json({ success: false, error: "jid required" }); return; }
+    const manager = InstanceManager.getInstance();
+    const engine = manager.getEngine(id);
+    if (!engine) { res.status(404).json({ success: false, error: `Instance ${id} not found` }); return; }
+    await (engine as any).fetchHistory(jid, count);
+    res.json({ success: true, message: `History fetch triggered for ${jid}. Messages arrive via webhook event history_sync.` });
+  } catch (e: any) { res.status(500).json({ success: false, error: e.message }); }
+});
+
 export default router;

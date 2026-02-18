@@ -55,7 +55,9 @@ export type WebhookEventType =
   | "message_sent"
   | "message_status_update"
   | "instance_status_change"
-  | "qr_code_update";
+  | "qr_code_update"
+  | "history_sync"
+  | "group_update";
 
 export interface WebhookEvent {
   event: WebhookEventType;
@@ -115,6 +117,20 @@ export interface QueuedMessage {
   retries: number;
 }
 
+
+export interface GroupMetadata {
+  id: string;
+  subject: string;
+  description?: string;
+  owner?: string;
+  participants: Array<{
+    id: string;
+    admin?: "admin" | "superadmin" | null;
+  }>;
+  creation?: number;
+  inviteCode?: string;
+}
+
 export interface IEngine {
   instanceId: string;
   status: InstanceStatus;
@@ -128,6 +144,16 @@ export interface IEngine {
   getContacts(): Promise<Array<{ id: string; name?: string; notify?: string }>>;
   getGroups(): Promise<Array<{ id: string; subject: string; participants: number }>>;
   isAlive(): boolean;
+  // Group management
+  groupCreate(subject: string, participants: string[]): Promise<{ id: string; subject: string }>;
+  groupUpdateSubject(jid: string, subject: string): Promise<void>;
+  groupUpdateDescription(jid: string, description: string): Promise<void>;
+  groupParticipantsUpdate(jid: string, participants: string[], action: "add" | "remove" | "promote" | "demote"): Promise<Array<{ jid: string; status: string }>>;
+  groupMetadata(jid: string): Promise<GroupMetadata>;
+  groupInviteCode(jid: string): Promise<string>;
+  groupLeave(jid: string): Promise<void>;
+  // History
+  fetchHistory(jid: string, count?: number): Promise<void>;
   on(event: string, listener: (...args: unknown[]) => void): void;
   removeAllListeners(): void;
 }

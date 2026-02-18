@@ -536,5 +536,16 @@ export class InstanceManager {
           logger.error({ instanceId, error: err }, "Failed to dispatch qr_code_update");
         });
     });
+
+    engine.on(
+      "history_sync",
+      (instanceId: string, data: Record<string, unknown>) => {
+        this.webhookDispatcher
+          .dispatch("history_sync", instanceId, data)
+          .catch((err: unknown) => {
+            logger.error({ instanceId, error: err }, "Failed to dispatch history_sync");
+          });
+      }
+    );
   }
 }
