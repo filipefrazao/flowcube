@@ -396,8 +396,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
         except EngineClientError as e:
             return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    @action(detail=True, methods=["patch"], url_path=r"groups/(?P<jid>[^/.]+)/subject")
+    @action(detail=True, methods=["patch"], url_path=r"groups/(?P<jid>[^/]+)/subject")
     def group_update_subject(self, request, pk=None, jid=None):
+        jid = request.query_params.get("jid") or jid or ""
         """Rename a group. Body: { subject: str }"""
         instance = self.get_object()
         subject = request.data.get("subject") or ""
@@ -409,8 +410,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
         except EngineClientError as e:
             return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    @action(detail=True, methods=["patch"], url_path=r"groups/(?P<jid>[^/.]+)/description")
+    @action(detail=True, methods=["patch"], url_path=r"groups/(?P<jid>[^/]+)/description")
     def group_update_description(self, request, pk=None, jid=None):
+        jid = request.query_params.get("jid") or jid or ""
         """Update group description. Body: { description: str }"""
         instance = self.get_object()
         client = EngineClient()
@@ -419,8 +421,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
         except EngineClientError as e:
             return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    @action(detail=True, methods=["post"], url_path=r"groups/(?P<jid>[^/.]+)/participants")
+    @action(detail=True, methods=["post"], url_path=r"groups/(?P<jid>[^/]+)/participants")
     def group_participants_update(self, request, pk=None, jid=None):
+        jid = request.query_params.get("jid") or jid or ""
         """Manage participants. Body: { participants: [...], action: add|remove|promote|demote }"""
         instance = self.get_object()
         participants = request.data.get("participants") or []
@@ -433,8 +436,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
         except EngineClientError as e:
             return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    @action(detail=True, methods=["get"], url_path=r"groups/(?P<jid>[^/.]+)/metadata")
+    @action(detail=True, methods=["get"], url_path=r"groups/(?P<jid>[^/]+)/metadata")
     def group_metadata(self, request, pk=None, jid=None):
+        jid = request.query_params.get("jid") or jid or ""
         """Get full group metadata (participants, description, admin, etc.)"""
         instance = self.get_object()
         client = EngineClient()
@@ -443,8 +447,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
         except EngineClientError as e:
             return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    @action(detail=True, methods=["get"], url_path=r"groups/(?P<jid>[^/.]+)/invite-code")
+    @action(detail=True, methods=["get"], url_path=r"groups/(?P<jid>[^/]+)/invite-code")
     def group_invite_code(self, request, pk=None, jid=None):
+        jid = request.query_params.get("jid") or jid or ""
         """Get group invite link."""
         instance = self.get_object()
         client = EngineClient()
@@ -453,8 +458,9 @@ class InstanceViewSet(viewsets.ModelViewSet):
         except EngineClientError as e:
             return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-    @action(detail=True, methods=["post"], url_path=r"groups/(?P<jid>[^/.]+)/leave")
+    @action(detail=True, methods=["post"], url_path=r"groups/(?P<jid>[^/]+)/leave")
     def group_leave(self, request, pk=None, jid=None):
+        jid = request.query_params.get("jid") or jid or ""
         """Leave a WhatsApp group."""
         instance = self.get_object()
         client = EngineClient()
