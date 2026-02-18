@@ -24,13 +24,6 @@ import {
   PanelLeftClose,
   PanelLeft,
   Trophy,
-  Building2,
-  Users,
-  Target,
-  Bell,
-  Presentation,
-  Megaphone,
-  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clearAuthToken } from "@/lib/auth";
@@ -82,7 +75,6 @@ const sections: SidebarSection[] = [
     label: "SalesCube",
     icon: Kanban,
     children: [
-      { label: "Dashboard", href: "/salescube/dashboard" },
       { label: "Quadro", href: "/salescube" },
       { label: "Leads", href: "/salescube/leads" },
       { label: "Tarefas", href: "/salescube/tasks" },
@@ -90,19 +82,6 @@ const sections: SidebarSection[] = [
       { label: "Categorias", href: "/salescube/categories" },
       { label: "Vendas", href: "/salescube/sales" },
       { label: "Financeiro", href: "/salescube/financial" },
-      { label: "Contatos", href: "/salescube/contacts" },
-      { label: "Faturas", href: "/salescube/invoices" },
-      { label: "Tickets", href: "/salescube/tickets" },
-      { label: "Lembretes", href: "/salescube/reminders" },
-      { label: "Propostas", href: "/salescube/pitches" },
-      { label: "Campanhas", href: "/salescube/campaigns" },
-      { label: "Origens", href: "/salescube/origins" },
-      { label: "Franquias", href: "/salescube/franchises" },
-      { label: "Squads", href: "/salescube/squads" },
-      { label: "Notas", href: "/salescube/notes" },
-      { label: "Calendario", href: "/salescube/calendar" },
-      { label: "Email", href: "/salescube/email" },
-      { label: "Relatorios", href: "/salescube/reports" },
     ],
   },
   {
