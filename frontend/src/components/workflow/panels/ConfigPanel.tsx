@@ -16,6 +16,24 @@ import {
 } from 'lucide-react';
 import { BlockType, Block, BLOCK_DEFINITIONS } from '@/types/workflow.types';
 
+interface MetaConnection {
+  id: number;
+  page_id: string;
+  page_name: string;
+}
+
+interface MetaForm {
+  id: number;
+  form_id: string;
+  form_name: string;
+  distribution_mode: string;
+  connection__page_id: string;
+  connection__page_name: string;
+  leads_count: number;
+  linked_workflow_id?: string;
+  linked_workflow_name?: string;
+}
+
 interface ConfigPanelProps {
   node: Node;
   onClose: () => void;
@@ -151,10 +169,10 @@ const blockFieldConfigs: Record<BlockType, FieldConfig[]> = {
     ]},
   ],
   
-  // Facebook Lead Ads
+  // Facebook Lead Ads (Meta / SocialCube)
   facebook_lead_ads: [
-    { key: 'page_id', label: 'Facebook Page ID', type: 'text', placeholder: '123456789', description: 'The Facebook Page ID receiving lead ads' },
-    { key: 'form_id', label: 'Form ID (optional)', type: 'text', placeholder: '987654321', description: 'Filter to a specific lead form' },
+    { key: 'page_id', label: 'Pagina Facebook', type: 'select', options: [], description: 'Pagina conectada via SocialCube Lead Ads' },
+    { key: 'form_id', label: 'Formulario Lead Ads', type: 'select', options: [], description: 'Formulario de leads a ser monitorado' },
   ],
 
   // Dedup
@@ -211,6 +229,46 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
   const [content, setContent] = useState<Record<string, any>>(node.data.content || {});
   const [saving, setSaving] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['general', 'config']));
+  const [metaConnections, setMetaConnections] = useState<MetaConnection[]>([]);
+  const [metaForms, setMetaForms] = useState<MetaForm[]>([]);
+
+  // Fetch SocialCube Lead Ads connections/forms for facebook_lead_ads trigger
+  useEffect(() => {
+    const nodeType = node?.data?.type as string;
+    if (nodeType !== 'facebook_lead_ads') return;
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!token) return;
+
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    fetch(`${apiBase}/workflows/meta/connections/`, {
+      headers: { Authorization: `Token ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setMetaConnections(data.connections || []);
+        setMetaForms(data.forms || []);
+
+        // Populate page_id select options dynamically
+        const pageOpts = (data.connections || []).map((c: MetaConnection) => ({
+          value: c.page_id,
+          label: `${c.page_name} (${c.page_id})`,
+        }));
+        const formOpts = (data.forms || []).map((f: MetaForm) => ({
+          value: f.form_id,
+          label: `${f.form_name}${f.linked_workflow_name ? ' [' + f.linked_workflow_name + ']' : ''} (${f.leads_count} leads)`,
+        }));
+
+        // Update field configs dynamically
+        if (blockFieldConfigs.facebook_lead_ads) {
+          blockFieldConfigs.facebook_lead_ads = [
+            { key: 'page_id', label: 'Pagina Facebook', type: 'select' as const, options: pageOpts, description: 'Pagina conectada via SocialCube Lead Ads' },
+            { key: 'form_id', label: 'Formulario Lead Ads', type: 'select' as const, options: formOpts, description: 'Formulario de leads. Ao publicar, sera vinculado automaticamente.' },
+          ];
+        }
+      })
+      .catch(err => console.warn('Failed to fetch meta connections:', err));
+  }, [node?.data?.type]);
 
   useEffect(() => {
     setName(String(node.data.label || ''));

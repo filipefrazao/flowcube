@@ -52,10 +52,32 @@ class FacebookLeadAdsHandler(BaseNodeHandler):
             "raw": td,
         }
 
-        # Store key fields as variables for easy template access
+        # Also extract from Facebook field_data array (SocialCube format)
+        for field in td.get("field_data", []):
+            fname = field.get("name", "").lower().strip()
+            values = field.get("values", [])
+            val = values[0] if values else ""
+            if fname in ("full_name", "nome_completo", "nome", "qual_o_seu_nome"):
+                output["name"] = output["name"] or val
+            elif fname in ("phone_number", "telefone", "phone", "whatsapp",
+                           "celular_(ddd+numero)", "qual_o_seu_whatsapp"):
+                output["phone"] = output["phone"] or val
+            elif fname in ("email", "e-mail", "qual_seu_melhor_email"):
+                output["email"] = output["email"] or val
+            elif fname in ("cargo", "profissao", "profession",
+                           "qual_sua_profissao"):
+                output["profession"] = output["profession"] or val
+
+        # SocialCube context: page and form info
+        output["page_name"] = td.get("page_name", "")
+        output["form_name"] = td.get("form_name", "")
+
+        # Always set key variables (even empty) so templates resolve properly
         for key in ("name", "phone", "email", "leadgen_id"):
-            if output[key]:
-                context.set_variable(key, output[key])
+            context.set_variable(key, output.get(key, ""))
+        # Also set profession if available
+        if output.get("profession"):
+            context.set_variable("profession", output["profession"])
 
         return NodeResult(output=output)
 

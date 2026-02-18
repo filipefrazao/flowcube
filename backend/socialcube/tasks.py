@@ -380,6 +380,61 @@ def distribute_lead(self, lead_entry_id):
             resp.raise_for_status()
             result = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {"status": resp.status_code}
 
+        elif mode == "workflow":
+            # ── FlowCube Workflow execution ──────────────────
+            workflow_id = config.get("workflow_id")
+            if not workflow_id:
+                raise ValueError("workflow distribution requires workflow_id in config")
+
+            from workflows.models import Workflow, Execution
+            from workflows.tasks import execute_workflow_task
+
+            workflow = Workflow.objects.get(
+                id=workflow_id, is_published=True, is_active=True
+            )
+
+            # Build trigger_data from the parsed lead
+            trigger_data = {
+                "name": entry.name,
+                "phone": entry.phone,
+                "email": entry.email,
+                "leadgen_id": entry.leadgen_id,
+                "form_id": form.form_id,
+                "form_name": form.form_name,
+            }
+            # Add connection context
+            if form.connection:
+                trigger_data["page_id"] = form.connection.page_id
+                trigger_data["page_name"] = form.connection.page_name
+
+            # Merge raw Facebook field_data as flat keys
+            if entry.data and isinstance(entry.data, dict):
+                for field in entry.data.get("field_data", []):
+                    fname = field.get("name", "")
+                    values = field.get("values", [])
+                    if fname and values:
+                        trigger_data[fname] = values[0]
+                # Also pass ad/campaign metadata
+                for meta_key in ("ad_id", "adgroup_id", "campaign_id", "created_time"):
+                    if meta_key in entry.data:
+                        trigger_data[meta_key] = entry.data[meta_key]
+
+            execution = Execution.objects.create(
+                workflow=workflow,
+                status=Execution.Status.PENDING,
+                trigger_data=trigger_data,
+                triggered_by="leadads",
+            )
+            execute_workflow_task.delay(str(execution.id))
+            result = {
+                "execution_id": str(execution.id),
+                "workflow_id": str(workflow_id),
+                "workflow_name": workflow.name,
+            }
+            logger.info(
+                f"Dispatched workflow {workflow.name} for lead {entry.leadgen_id}"
+            )
+
         else:
             return
 

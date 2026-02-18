@@ -124,6 +124,7 @@ class LeadAdsForm(models.Model):
         ("none", "No Distribution"),
         ("salescube", "SalesCube CRM"),
         ("webhook", "External Webhook"),
+        ("workflow", "FlowCube Workflow"),
     ]
     STATUS_CHOICES = [
         ("active", "Active"),

@@ -86,6 +86,9 @@ class WorkflowViewSet(viewsets.ModelViewSet):
         # Setup webhook trigger if applicable
         from .webhook_handler import setup_webhook_trigger
         webhook_url = setup_webhook_trigger(workflow)
+
+        # Auto-configure SocialCube Lead Ads form if facebook_lead_ads trigger present
+        self._link_leadads_forms(workflow)
         
         return Response({
             "status": "published",
@@ -251,6 +254,79 @@ class WorkflowViewSet(viewsets.ModelViewSet):
             "total": Workflow.objects.filter(owner=user).count()
         })
 
+
+
+
+    def _link_leadads_forms(self, workflow):
+        """Auto-configure SocialCube LeadAds forms when workflow has facebook_lead_ads trigger."""
+        try:
+            from socialcube.models import LeadAdsForm
+        except ImportError:
+            return
+
+        graph = workflow.graph or {}
+        nodes = graph.get("nodes", [])
+
+        for node in nodes:
+            node_type = node.get("type") or node.get("data", {}).get("type", "")
+            if node_type != "facebook_lead_ads":
+                continue
+
+            config = node.get("data", {}).get("config", {})
+            form_id = config.get("form_id")
+            if not form_id:
+                continue
+
+            try:
+                form_obj = LeadAdsForm.objects.get(form_id=form_id)
+                form_obj.distribution_mode = "workflow"
+                form_obj.distribution_config = {
+                    "workflow_id": str(workflow.id),
+                    "workflow_name": workflow.name,
+                }
+                form_obj.save(update_fields=["distribution_mode", "distribution_config", "updated_at"])
+                import logging
+                logging.getLogger(__name__).info(
+                    f"Linked LeadAds form {form_id} -> workflow {workflow.name}"
+                )
+            except LeadAdsForm.DoesNotExist:
+                pass
+
+    @action(detail=False, methods=["get"], url_path="meta/connections")
+    def meta_connections(self, request):
+        """List available SocialCube Lead Ads connections and forms for workflow trigger config."""
+        try:
+            from socialcube.models import LeadAdsConnection, LeadAdsForm
+        except ImportError:
+            return Response({"connections": [], "forms": []})
+
+        connections = LeadAdsConnection.objects.filter(is_subscribed=True).values(
+            "id", "page_id", "page_name"
+        )
+        forms = LeadAdsForm.objects.filter(form_status="active").select_related("connection").values(
+            "id", "form_id", "form_name", "distribution_mode",
+            "connection__page_id", "connection__page_name",
+            "leads_count", "last_lead_at",
+        )
+
+        # Add workflow info if form is linked
+        forms_list = []
+        for f in forms:
+            form_data = dict(f)
+            if f["distribution_mode"] == "workflow":
+                try:
+                    form_obj = LeadAdsForm.objects.get(form_id=f["form_id"])
+                    wf_id = (form_obj.distribution_config or {}).get("workflow_id")
+                    form_data["linked_workflow_id"] = wf_id
+                    form_data["linked_workflow_name"] = (form_obj.distribution_config or {}).get("workflow_name")
+                except Exception:
+                    pass
+            forms_list.append(form_data)
+
+        return Response({
+            "connections": list(connections),
+            "forms": forms_list,
+        })
 
 
 class GroupViewSet(viewsets.ModelViewSet):
