@@ -15,7 +15,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("chatcube", "0001_initial"),
+        ("chatcube", "0002_whatsappinstance_evolution_instance_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
