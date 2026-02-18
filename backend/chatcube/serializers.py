@@ -1,12 +1,18 @@
 from datetime import timedelta
 
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Campaign, Contact, Group, Message, MessageTemplate, WhatsAppInstance
+from .models import Campaign, Contact, Group, GroupNote, GroupTask, Message, MessageTemplate, WhatsAppInstance
+
+User = get_user_model()
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.SerializerMethodField()
+    sender_jid = serializers.SerializerMethodField()
+
     class Meta:
         model = Message
         fields = [
@@ -21,8 +27,22 @@ class MessageSerializer(serializers.ModelSerializer):
             "status",
             "timestamp",
             "metadata",
+            "sender_name",
+            "sender_jid",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "sender_name", "sender_jid"]
+
+    def get_sender_name(self, obj):
+        if obj.from_me:
+            return None
+        meta = obj.metadata or {}
+        return meta.get("pushName") or meta.get("push_name") or meta.get("sender_name") or None
+
+    def get_sender_jid(self, obj):
+        if obj.from_me:
+            return None
+        meta = obj.metadata or {}
+        return meta.get("participant") or meta.get("sender_jid") or None
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -41,9 +61,42 @@ class ContactSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
+class GroupNoteSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GroupNote
+        fields = ["id", "group", "user", "user_name", "content", "note_type", "created_at"]
+        read_only_fields = ["id", "group", "user", "user_name", "created_at"]
+
+    def get_user_name(self, obj):
+        if not obj.user:
+            return "Sistema"
+        return obj.user.get_full_name() or obj.user.username
+
+
+class GroupTaskSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GroupTask
+        fields = [
+            "id", "group", "created_by", "created_by_name",
+            "title", "description", "is_completed", "priority",
+            "due_date", "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "group", "created_by", "created_by_name", "created_at", "updated_at"]
+
+    def get_created_by_name(self, obj):
+        if not obj.created_by:
+            return "Sistema"
+        return obj.created_by.get_full_name() or obj.created_by.username
+
+
 class GroupSerializer(serializers.ModelSerializer):
     message_count = serializers.IntegerField(default=0, read_only=True)
     last_message_at = serializers.DateTimeField(default=None, read_only=True)
+    assigned_to_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
@@ -55,10 +108,17 @@ class GroupSerializer(serializers.ModelSerializer):
             "description",
             "participants_count",
             "is_admin",
+            "assigned_to",
+            "assigned_to_name",
             "message_count",
             "last_message_at",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "assigned_to_name"]
+
+    def get_assigned_to_name(self, obj):
+        if not obj.assigned_to:
+            return None
+        return obj.assigned_to.get_full_name() or obj.assigned_to.username
 
 
 class WhatsAppInstanceSerializer(serializers.ModelSerializer):

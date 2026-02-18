@@ -11,12 +11,16 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from django.contrib.auth import get_user_model
+
 from .engine_client import EngineClient, EngineClientError
-from .models import Campaign, Contact, Group, Message, MessageTemplate, WhatsAppInstance
+from .models import Campaign, Contact, Group, GroupNote, GroupTask, Message, MessageTemplate, WhatsAppInstance
 from .serializers import (
     CampaignSerializer,
     ContactSerializer,
+    GroupNoteSerializer,
     GroupSerializer,
+    GroupTaskSerializer,
     MessageSerializer,
     MessageTemplateSerializer,
     WhatsAppInstanceSerializer,
@@ -447,6 +451,124 @@ def chatcube_stats(request):
         "campaigns_scheduled": campaigns.filter(status="scheduled").count(),
         "campaigns_failed": campaigns.filter(status="failed").count(),
     }
+    return Response(data)
+
+
+class GroupViewSet(viewsets.GenericViewSet):
+    """
+    ViewSet for Group-level operations: notes, tasks, assignment, instance change.
+    Groups are accessed by their UUID (not nested under an instance).
+    """
+    serializer_class = GroupSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Group.objects.filter(instance__owner=self.request.user).select_related(
+            "instance", "assigned_to"
+        )
+
+    def list(self, request):
+        qs = self.get_queryset().annotate(
+            message_count=Count("instance__messages", filter=Q(instance__messages__remote_jid=F("jid"))),
+            last_message_at=Max("instance__messages__timestamp", filter=Q(instance__messages__remote_jid=F("jid"))),
+        ).order_by(F("last_message_at").desc(nulls_last=True), "name")
+        return Response(GroupSerializer(qs, many=True).data)
+
+    def retrieve(self, request, pk=None):
+        group = self.get_object()
+        return Response(GroupSerializer(group).data)
+
+    def partial_update(self, request, pk=None):
+        group = self.get_object()
+        # Allow updating instance (canal) and assigned_to
+        data = {}
+        if "instance" in request.data:
+            # Verify the new instance belongs to the user
+            try:
+                inst = WhatsAppInstance.objects.get(id=request.data["instance"], owner=request.user)
+                data["instance"] = inst
+            except WhatsAppInstance.DoesNotExist:
+                return Response({"detail": "Instância não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        if "assigned_to" in request.data:
+            val = request.data["assigned_to"]
+            if val is None:
+                data["assigned_to"] = None
+            else:
+                User = get_user_model()
+                try:
+                    data["assigned_to"] = User.objects.get(pk=val)
+                except User.DoesNotExist:
+                    return Response({"detail": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        Group.objects.filter(pk=group.pk).update(**data)
+        group.refresh_from_db()
+        return Response(GroupSerializer(group).data)
+
+    # ── Notes ──────────────────────────────────────────────────────────────
+
+    @action(detail=True, methods=["get", "post"], url_path="notes")
+    def notes(self, request, pk=None):
+        group = self.get_object()
+        if request.method == "GET":
+            return Response(GroupNoteSerializer(group.notes.all(), many=True).data)
+        ser = GroupNoteSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        ser.save(group=group, user=request.user)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"], url_path=r"notes/(?P<note_id>[^/.]+)")
+    def delete_note(self, request, pk=None, note_id=None):
+        group = self.get_object()
+        try:
+            note = group.notes.get(pk=note_id)
+            note.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except GroupNote.DoesNotExist:
+            return Response({"detail": "Nota não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    # ── Tasks ───────────────────────────────────────────────────────────────
+
+    @action(detail=True, methods=["get", "post"], url_path="tasks")
+    def tasks(self, request, pk=None):
+        group = self.get_object()
+        if request.method == "GET":
+            return Response(GroupTaskSerializer(group.tasks.all(), many=True).data)
+        ser = GroupTaskSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        ser.save(group=group, created_by=request.user)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["patch", "delete"], url_path=r"tasks/(?P<task_id>[^/.]+)")
+    def task_detail(self, request, pk=None, task_id=None):
+        group = self.get_object()
+        try:
+            task = group.tasks.get(pk=task_id)
+        except GroupTask.DoesNotExist:
+            return Response({"detail": "Tarefa não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        if request.method == "DELETE":
+            task.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        # PATCH
+        ser = GroupTaskSerializer(task, data=request.data, partial=True)
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return Response(ser.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def chatcube_users_list(request):
+    """Return a list of all users for assignment dropdowns."""
+    User = get_user_model()
+    users = User.objects.filter(is_active=True).order_by("first_name", "username")
+    data = [
+        {
+            "id": u.pk,
+            "username": u.username,
+            "full_name": u.get_full_name() or u.username,
+            "email": u.email,
+        }
+        for u in users
+    ]
     return Response(data)
 
 
