@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Max, OuterRef, Q, Subquery
 from django.http import HttpResponse
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, authentication_classes, permission_classes, throttle_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -238,6 +239,20 @@ class InstanceViewSet(viewsets.ModelViewSet):
             qs = qs.filter(remote_jid=remote_jid)
 
         qs = qs.order_by("-timestamp")
+
+        # Allow caller to request a larger page via ?limit= or ?page_size=
+        requested_limit = request.query_params.get("limit") or request.query_params.get("page_size")
+        if requested_limit:
+            try:
+                page_size = min(int(requested_limit), 500)
+                paginator = PageNumberPagination()
+                paginator.page_size = page_size
+                page = paginator.paginate_queryset(qs, request)
+                if page is not None:
+                    return paginator.get_paginated_response(MessageSerializer(page, many=True).data)
+            except (ValueError, TypeError):
+                pass
+
         page = self.paginate_queryset(qs)
         if page is not None:
             return self.get_paginated_response(MessageSerializer(page, many=True).data)
@@ -309,7 +324,16 @@ class InstanceViewSet(viewsets.ModelViewSet):
             except EngineClientError as e:
                 return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
-        qs = instance.groups.all().order_by("jid")
+        # Annotate each group with message count and last message timestamp,
+        # then sort: groups with messages first (most recent at top), then the rest
+        qs = (
+            instance.groups.all()
+            .annotate(
+                message_count=Count("instance__messages", filter=Q(instance__messages__remote_jid=F("jid"))),
+                last_message_at=Max("instance__messages__timestamp", filter=Q(instance__messages__remote_jid=F("jid"))),
+            )
+            .order_by(F("last_message_at").desc(nulls_last=True), "name")
+        )
         page = self.paginate_queryset(qs)
         if page is not None:
             return self.get_paginated_response(GroupSerializer(page, many=True).data)

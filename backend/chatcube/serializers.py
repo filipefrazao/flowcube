@@ -42,6 +42,9 @@ class ContactSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    message_count = serializers.IntegerField(default=0, read_only=True)
+    last_message_at = serializers.DateTimeField(default=None, read_only=True)
+
     class Meta:
         model = Group
         fields = [
@@ -52,6 +55,8 @@ class GroupSerializer(serializers.ModelSerializer):
             "description",
             "participants_count",
             "is_admin",
+            "message_count",
+            "last_message_at",
         ]
         read_only_fields = ["id"]
 
