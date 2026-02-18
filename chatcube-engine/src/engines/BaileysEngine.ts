@@ -22,6 +22,7 @@ import {
   SendMessagePayload,
   MessageResult,
   MessageType,
+  GroupMetadata,
 } from "../types";
 import { config } from "../config";
 import {
@@ -227,12 +228,6 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             content = msg.message.documentMessage.fileName || "";
           }
 
-          const msgTs = msg.messageTimestamp
-            ? typeof msg.messageTimestamp === "number"
-              ? msg.messageTimestamp * 1000
-              : Number(msg.messageTimestamp) * 1000
-            : Date.now();
-
           const eventData = {
             // Fields expected by Django webhook handler
             id: msg.key.id || "",
@@ -248,7 +243,11 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             isGroup,
             isLid,
             groupId: isGroup ? from : undefined,
-            timestamp: msgTs,
+            timestamp: msg.messageTimestamp
+              ? typeof msg.messageTimestamp === "number"
+                ? msg.messageTimestamp * 1000
+                : Number(msg.messageTimestamp) * 1000
+              : Date.now(),
           };
 
           this.logger.info(
@@ -283,10 +282,11 @@ export class BaileysEngine extends EventEmitter implements IEngine {
           this.emit("message_status_update", this.instanceId, eventData);
         }
       });
+
       // --- Historical Messages Sync Handler ---
-      // Fires when Baileys syncs WhatsApp's message history (up to 90 days).
-      // syncFullHistory: true enables this on every fresh connection.
-      this.socket.ev.on("messaging-history.set", ({ messages: historicalMsgs, isLatest }: BaileysEventMap["messaging-history.set"]) => {
+      // Fires when Baileys syncs WhatsApp message history (up to 90 days).
+      // syncFullHistory: true triggers this on every fresh connection.
+      this.socket.ev.on("messaging-history.set", ({ messages: historicalMsgs, isLatest }) => {
         const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
         const cutoff = Date.now() - NINETY_DAYS_MS;
         let processed = 0;
@@ -297,9 +297,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
 
           const remoteJid = msg.key.remoteJid || "";
           if (!remoteJid) { skipped++; continue; }
-
-          // Skip broadcast/status lists
-          if (remoteJid.includes("@broadcast") || remoteJid === "status@broadcast") { skipped++; continue; }
+          if (remoteJid.includes("@broadcast")) { skipped++; continue; }
 
           const msgTs = msg.messageTimestamp
             ? typeof msg.messageTimestamp === "number"
@@ -307,7 +305,6 @@ export class BaileysEngine extends EventEmitter implements IEngine {
               : Number(msg.messageTimestamp) * 1000
             : 0;
 
-          // Skip messages older than 90 days
           if (msgTs > 0 && msgTs < cutoff) { skipped++; continue; }
 
           const fromMe = msg.key.fromMe || false;
@@ -323,20 +320,14 @@ export class BaileysEngine extends EventEmitter implements IEngine {
           } else if (msg.message.extendedTextMessage?.text) {
             content = msg.message.extendedTextMessage.text;
           } else if (msg.message.imageMessage) {
-            msgType = "image";
-            content = msg.message.imageMessage.caption || "";
+            msgType = "image"; content = msg.message.imageMessage.caption || "";
           } else if (msg.message.videoMessage) {
-            msgType = "video";
-            content = msg.message.videoMessage.caption || "";
+            msgType = "video"; content = msg.message.videoMessage.caption || "";
           } else if (msg.message.audioMessage) {
             msgType = "audio";
           } else if (msg.message.documentMessage) {
-            msgType = "document";
-            content = msg.message.documentMessage.fileName || "";
-          } else {
-            skipped++;
-            continue;
-          }
+            msgType = "document"; content = msg.message.documentMessage.fileName || "";
+          } else { skipped++; continue; }
 
           this.emit("message_received", this.instanceId, {
             id: msg.key.id || "",
@@ -353,16 +344,11 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             timestamp: msgTs || Date.now(),
             isHistorical: true,
           });
-
           processed++;
         }
 
-        this.logger.info(
-          { processed, skipped, isLatest },
-          "Historical messages sync completed"
-        );
+        this.logger.info({ processed, skipped, isLatest }, "Historical messages sync completed");
       });
-
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Unknown error";
       this.logger.error({ error: errMsg }, "Failed to connect");
@@ -478,8 +464,6 @@ export class BaileysEngine extends EventEmitter implements IEngine {
 
       switch (content.type) {
         case "text":
-          // Simulate human typing before sending (anti-ban)
-          await this.simulateTyping(normalizedJid, content.content.length);
           sentMsg = await this.socket.sendMessage(normalizedJid, {
             text: content.content,
           });
@@ -587,6 +571,83 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     } catch {
       this.logger.error("Failed to get groups");
       return [];
+    }
+  }
+
+
+  // ---------- Group Management Methods ----------
+
+  async groupCreate(subject: string, participants: string[]): Promise<{ id: string; subject: string }> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const result = await this.socket.groupCreate(subject, participants);
+    return { id: result.id, subject: result.subject || subject };
+  }
+
+  async groupUpdateSubject(jid: string, subject: string): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    await this.socket.groupUpdateSubject(jid, subject);
+  }
+
+  async groupUpdateDescription(jid: string, description: string): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    await this.socket.groupUpdateDescription(jid, description);
+  }
+
+  async groupParticipantsUpdate(jid: string, participants: string[], action: "add" | "remove" | "promote" | "demote"): Promise<Array<{ jid: string; status: string }>> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const results = await this.socket.groupParticipantsUpdate(jid, participants, action);
+    return (results || []).map((r: any) => ({
+      jid: r.jid || (typeof r === "string" ? r : ""),
+      status: r.status || "ok",
+    }));
+  }
+
+  async groupMetadata(jid: string): Promise<GroupMetadata> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const meta = await this.socket.groupMetadata(jid);
+    return {
+      id: meta.id,
+      subject: meta.subject || "",
+      description: meta.desc || "",
+      owner: meta.owner || "",
+      participants: (meta.participants || []).map((p: any) => ({
+        id: p.id,
+        admin: p.admin || null,
+      })),
+      creation: meta.creation,
+    };
+  }
+
+  async groupInviteCode(jid: string): Promise<string> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    const code = await this.socket.groupInviteCode(jid);
+    return code || "";
+  }
+
+  async groupLeave(jid: string): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    await this.socket.groupLeave(jid);
+  }
+
+  async fetchHistory(jid: string, count: number = 50): Promise<void> {
+    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
+    // History sync happens passively on connect via messaging-history.set event.
+    // This method triggers a manual fetch request for a specific chat.
+    try {
+      const msgs = await (this.socket as any).loadMessages?.(jid, 1, undefined);
+      const oldestKey = msgs?.[0]?.key;
+      if (oldestKey) {
+        await (this.socket as any).fetchMessageHistory?.(count, oldestKey, Date.now().toString());
+      } else {
+        await (this.socket as any).chatModify?.({ clear: false }, jid);
+      }
+    } catch (err) {
+      this.logger.warn({ jid, err }, "fetchHistory: could not get cursor, trying direct fetch");
+      try {
+        await (this.socket as any).fetchMessageHistory?.(count, { remoteJid: jid, id: "", fromMe: false }, Date.now().toString());
+      } catch {
+        this.logger.info({ jid }, "fetchHistory: will receive history passively");
+      }
     }
   }
 
