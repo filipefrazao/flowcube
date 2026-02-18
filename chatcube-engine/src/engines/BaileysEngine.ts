@@ -22,7 +22,6 @@ import {
   SendMessagePayload,
   MessageResult,
   MessageType,
-  GroupMetadata,
 } from "../types";
 import { config } from "../config";
 import {
@@ -116,7 +115,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
         logger: baileysLogger,
         printQRInTerminal: false,
         generateHighQualityLinkPreview: false,
-        syncFullHistory: false,
+        syncFullHistory: true,
         markOnlineOnConnect: true,
       });
 
@@ -228,7 +227,18 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             content = msg.message.documentMessage.fileName || "";
           }
 
+          const msgTs = msg.messageTimestamp
+            ? typeof msg.messageTimestamp === "number"
+              ? msg.messageTimestamp * 1000
+              : Number(msg.messageTimestamp) * 1000
+            : Date.now();
+
           const eventData = {
+            // Fields expected by Django webhook handler
+            id: msg.key.id || "",
+            remote_jid: from,
+            from_me: false,
+            // Extra context
             messageId: msg.key.id || "",
             from: senderJid,
             fromName: msg.pushName || "",
@@ -238,11 +248,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             isGroup,
             isLid,
             groupId: isGroup ? from : undefined,
-            timestamp: msg.messageTimestamp
-              ? typeof msg.messageTimestamp === "number"
-                ? msg.messageTimestamp * 1000
-                : Number(msg.messageTimestamp) * 1000
-              : Date.now(),
+            timestamp: msgTs,
           };
 
           this.logger.info(
@@ -277,31 +283,86 @@ export class BaileysEngine extends EventEmitter implements IEngine {
           this.emit("message_status_update", this.instanceId, eventData);
         }
       });
+      // --- Historical Messages Sync Handler ---
+      // Fires when Baileys syncs WhatsApp's message history (up to 90 days).
+      // syncFullHistory: true enables this on every fresh connection.
+      this.socket.ev.on("messaging-history.set", ({ messages: historicalMsgs, isLatest }: BaileysEventMap["messaging-history.set"]) => {
+        const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+        const cutoff = Date.now() - NINETY_DAYS_MS;
+        let processed = 0;
+        let skipped = 0;
 
-      // --- History Sync Handler ---
-      this.socket.ev.on("messaging-history.set", ({ chats, contacts, messages, isLatest }) => {
-        this.logger.info({ messages: messages.length, chats: chats.length }, "History sync received");
+        for (const msg of historicalMsgs) {
+          if (!msg.message) { skipped++; continue; }
 
-        // Emit one event per historical message batch
-        this.emit("history_sync", this.instanceId, {
-          isLatest: Boolean(isLatest),
-          messages: messages.map((m: any) => ({
-            messageId: m.key?.id || "",
-            fromMe: Boolean(m.key?.fromMe),
-            remoteJid: m.key?.remoteJid || "",
-            participant: m.key?.participant || "",
-            pushName: m.pushName || "",
-            messageType: Object.keys(m.message || {}).filter((k: string) => k !== "messageContextInfo" && k !== "senderKeyDistributionMessage")[0] || "conversation",
-            message: m.message || {},
-            messageTimestamp: typeof m.messageTimestamp === "number" ? m.messageTimestamp : Number(m.messageTimestamp) || 0,
-          })),
-          chats: chats.map((c: any) => ({
-            id: c.id,
-            name: c.name || "",
-            unreadCount: c.unreadCount || 0,
-          })),
-        });
+          const remoteJid = msg.key.remoteJid || "";
+          if (!remoteJid) { skipped++; continue; }
+
+          // Skip broadcast/status lists
+          if (remoteJid.includes("@broadcast") || remoteJid === "status@broadcast") { skipped++; continue; }
+
+          const msgTs = msg.messageTimestamp
+            ? typeof msg.messageTimestamp === "number"
+              ? msg.messageTimestamp * 1000
+              : Number(msg.messageTimestamp) * 1000
+            : 0;
+
+          // Skip messages older than 90 days
+          if (msgTs > 0 && msgTs < cutoff) { skipped++; continue; }
+
+          const fromMe = msg.key.fromMe || false;
+          const isGroup = remoteJid.endsWith("@g.us");
+          const participant = msg.key.participant || "";
+          const senderJid = isGroup ? (fromMe ? (this.phoneNumber || "") : participant) : remoteJid;
+
+          let content = "";
+          let msgType: MessageType = "text";
+
+          if (msg.message.conversation) {
+            content = msg.message.conversation;
+          } else if (msg.message.extendedTextMessage?.text) {
+            content = msg.message.extendedTextMessage.text;
+          } else if (msg.message.imageMessage) {
+            msgType = "image";
+            content = msg.message.imageMessage.caption || "";
+          } else if (msg.message.videoMessage) {
+            msgType = "video";
+            content = msg.message.videoMessage.caption || "";
+          } else if (msg.message.audioMessage) {
+            msgType = "audio";
+          } else if (msg.message.documentMessage) {
+            msgType = "document";
+            content = msg.message.documentMessage.fileName || "";
+          } else {
+            skipped++;
+            continue;
+          }
+
+          this.emit("message_received", this.instanceId, {
+            id: msg.key.id || "",
+            remote_jid: remoteJid,
+            from_me: fromMe,
+            messageId: msg.key.id || "",
+            from: senderJid,
+            fromName: msg.pushName || "",
+            to: isGroup ? remoteJid : (fromMe ? senderJid : (this.phoneNumber || "")),
+            type: msgType,
+            content,
+            isGroup,
+            groupId: isGroup ? remoteJid : undefined,
+            timestamp: msgTs || Date.now(),
+            isHistorical: true,
+          });
+
+          processed++;
+        }
+
+        this.logger.info(
+          { processed, skipped, isLatest },
+          "Historical messages sync completed"
+        );
       });
+
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Unknown error";
       this.logger.error({ error: errMsg }, "Failed to connect");
@@ -529,83 +590,6 @@ export class BaileysEngine extends EventEmitter implements IEngine {
     }
   }
 
-
-  // ---------- Group Management Methods ----------
-
-  async groupCreate(subject: string, participants: string[]): Promise<{ id: string; subject: string }> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    const result = await this.socket.groupCreate(subject, participants);
-    return { id: result.id, subject: result.subject || subject };
-  }
-
-  async groupUpdateSubject(jid: string, subject: string): Promise<void> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    await this.socket.groupUpdateSubject(jid, subject);
-  }
-
-  async groupUpdateDescription(jid: string, description: string): Promise<void> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    await this.socket.groupUpdateDescription(jid, description);
-  }
-
-  async groupParticipantsUpdate(jid: string, participants: string[], action: "add" | "remove" | "promote" | "demote"): Promise<Array<{ jid: string; status: string }>> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    const results = await this.socket.groupParticipantsUpdate(jid, participants, action);
-    return (results || []).map((r: any) => ({
-      jid: r.jid || (typeof r === "string" ? r : ""),
-      status: r.status || "ok",
-    }));
-  }
-
-  async groupMetadata(jid: string): Promise<GroupMetadata> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    const meta = await this.socket.groupMetadata(jid);
-    return {
-      id: meta.id,
-      subject: meta.subject || "",
-      description: meta.desc || "",
-      owner: meta.owner || "",
-      participants: (meta.participants || []).map((p: any) => ({
-        id: p.id,
-        admin: p.admin || null,
-      })),
-      creation: meta.creation,
-    };
-  }
-
-  async groupInviteCode(jid: string): Promise<string> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    const code = await this.socket.groupInviteCode(jid);
-    return code || "";
-  }
-
-  async groupLeave(jid: string): Promise<void> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    await this.socket.groupLeave(jid);
-  }
-
-  async fetchHistory(jid: string, count: number = 50): Promise<void> {
-    if (!this.socket || this.status !== "connected") throw new Error("Not connected");
-    // History sync happens passively on connect via messaging-history.set event.
-    // This method triggers a manual fetch request for a specific chat.
-    try {
-      const msgs = await (this.socket as any).loadMessages?.(jid, 1, undefined);
-      const oldestKey = msgs?.[0]?.key;
-      if (oldestKey) {
-        await (this.socket as any).fetchMessageHistory?.(count, oldestKey, Date.now().toString());
-      } else {
-        await (this.socket as any).chatModify?.({ clear: false }, jid);
-      }
-    } catch (err) {
-      this.logger.warn({ jid, err }, "fetchHistory: could not get cursor, trying direct fetch");
-      try {
-        await (this.socket as any).fetchMessageHistory?.(count, { remoteJid: jid, id: "", fromMe: false }, Date.now().toString());
-      } catch {
-        this.logger.info({ jid }, "fetchHistory: will receive history passively");
-      }
-    }
-  }
-
   /**
    * Get instance info
    */
@@ -635,31 +619,6 @@ export class BaileysEngine extends EventEmitter implements IEngine {
   }
 
   // ---------- Private Methods ----------
-
-  /**
-   * Simulate human typing with presence update (anti-ban).
-   * Sends composing before message, paused after delay.
-   */
-  private async simulateTyping(jid: string, textLength: number): Promise<void> {
-    if (!this.socket || this.status !== "connected") return;
-    try {
-      await this.socket.sendPresenceUpdate("composing", jid);
-      // ~40 chars/sec typing speed, min 1s, max 4s, with ±30% jitter
-      const baseDuration = Math.min(Math.max(textLength * 25, 1000), 4000);
-      const jitter = baseDuration * 0.3 * (Math.random() * 2 - 1);
-      await this.sleep(Math.round(baseDuration + jitter));
-      await this.socket.sendPresenceUpdate("paused", jid);
-    } catch {
-      // Non-critical: presence update failure doesn't block send
-    }
-  }
-
-  /**
-   * Promise-based sleep
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 
   /**
    * Normalize JID to proper format.
