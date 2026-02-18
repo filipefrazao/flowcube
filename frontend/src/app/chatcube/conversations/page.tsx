@@ -719,17 +719,44 @@ export default function ChatCubeConversationsPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  const selectedSessionRef = useRef<string | null>(null);
+  selectedSessionRef.current = selectedSession;
+
   useEffect(() => {
     fetchSessions();
+    // Poll conversation list every 15s for new messages
+    const listTimer = setInterval(() => fetchSessionsSilent(), 15000);
+    return () => clearInterval(listTimer);
   }, []);
 
   useEffect(() => {
     if (selectedSession) fetchDetail(selectedSession);
+    // Poll open conversation every 10s for new messages
+    const detailTimer = setInterval(() => {
+      if (selectedSessionRef.current) fetchDetailSilent(selectedSessionRef.current);
+    }, 10000);
+    return () => clearInterval(detailTimer);
   }, [selectedSession]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [sessionDetail?.messages]);
+
+  // Silent refresh: updates list without showing full-page spinner
+  const fetchSessionsSilent = async () => {
+    try {
+      const data = await chatApi.getSessions();
+      setSessions(Array.isArray(data) ? data : []);
+    } catch (_) {}
+  };
+
+  // Silent refresh of open conversation (preserves scroll position)
+  const fetchDetailSilent = async (id: string) => {
+    try {
+      const data = await chatApi.getSession(id);
+      setSessionDetail(data);
+    } catch (_) {}
+  };
 
   const fetchSessions = async () => {
     setLoading(true);

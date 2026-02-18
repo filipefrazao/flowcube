@@ -51,8 +51,12 @@ def conversation_list(request):
 
     # Aggregate unique conversations from messages, normalizing JID format
     # Strip @s.whatsapp.net for consistent grouping (some msgs have it, some don't)
+    # Exclude group chats (@g.us), broadcast lists (status@broadcast), and lid contacts (@lid)
     convs = (
         Message.objects.filter(instance_id__in=instance_ids)
+        .exclude(remote_jid__endswith="@g.us")
+        .exclude(remote_jid__exact="status@broadcast")
+        .exclude(remote_jid__endswith="@lid")
         .annotate(
             normalized_jid=Replace(
                 "remote_jid", Value("@s.whatsapp.net"), Value("")
