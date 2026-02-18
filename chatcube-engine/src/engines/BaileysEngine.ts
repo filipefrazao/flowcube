@@ -635,6 +635,31 @@ export class BaileysEngine extends EventEmitter implements IEngine {
   // ---------- Private Methods ----------
 
   /**
+   * Simulate human typing with presence update (anti-ban).
+   * Sends composing before message, paused after delay.
+   */
+  private async simulateTyping(jid: string, textLength: number): Promise<void> {
+    if (!this.socket || this.status !== "connected") return;
+    try {
+      await this.socket.sendPresenceUpdate("composing", jid);
+      // ~40 chars/sec typing speed, min 1s, max 4s, with ±30% jitter
+      const baseDuration = Math.min(Math.max(textLength * 25, 1000), 4000);
+      const jitter = baseDuration * 0.3 * (Math.random() * 2 - 1);
+      await this.sleep(Math.round(baseDuration + jitter));
+      await this.socket.sendPresenceUpdate("paused", jid);
+    } catch {
+      // Non-critical: presence update failure doesn't block send
+    }
+  }
+
+  /**
+   * Promise-based sleep
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
    * Normalize JID to proper format.
    * Handles @s.whatsapp.net, @g.us, and @lid formats.
    */

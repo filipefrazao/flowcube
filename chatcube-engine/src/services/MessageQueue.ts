@@ -32,6 +32,8 @@ export class MessageQueue {
   private queues: Map<string, QueuedMessage[]> = new Map();
   private senders: Map<string, RegisteredSender> = new Map();
   private processing: Map<string, boolean> = new Map();
+  // Tracks last recipient JID per instance for inter-conversation delay (anti-ban)
+  private lastJid: Map<string, string> = new Map();
 
   constructor() {
     this.redis = new Redis(config.redisUrl, {
@@ -336,10 +338,29 @@ export class MessageQueue {
           );
         });
 
-        // Anti-ban delay between messages (only if more items remain)
+        // Anti-ban delay: randomized base delay + extra pause between conversations
         if (queue.length > 0) {
-          await this.sleep(registration.delay);
+          const nextItem = queue[0];
+          const lastJid = this.lastJid.get(instanceId);
+          const isDifferentConversation = !!lastJid && lastJid !== item.jid;
+
+          // Jitter: base * [0.7 .. 1.5]
+          const jitter = registration.delay * 0.8 * Math.random();
+          const baseDelay = registration.delay + jitter;
+
+          // Extra pause when switching to a new conversation (2–5s)
+          const interConvExtra = isDifferentConversation
+            ? 2000 + Math.random() * 3000
+            : 0;
+
+          if (interConvExtra > 0) {
+            logger.debug({ instanceId, extraMs: Math.round(interConvExtra) }, "Anti-ban: inter-conversation pause");
+          }
+
+          await this.sleep(Math.round(baseDelay + interConvExtra));
         }
+
+        this.lastJid.set(instanceId, item.jid);
       }
     } finally {
       this.processing.set(instanceId, false);

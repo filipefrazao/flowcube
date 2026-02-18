@@ -183,6 +183,22 @@ class InstanceViewSet(viewsets.ModelViewSet):
         media_url = request.data.get("media_url") or request.data.get("mediaUrl")
         metadata = request.data.get("metadata") if isinstance(request.data.get("metadata"), dict) else None
 
+        # Anti-ban: check daily message limit before sending
+        if instance.messages_sent_today >= instance.daily_limit:
+            warmup_info = f" (warm-up day {instance.warmup_day})" if not instance.is_warmed_up else ""
+            return Response(
+                {
+                    "detail": (
+                        f"Daily limit reached: {instance.messages_sent_today}/{instance.daily_limit} "                        f"messages sent today{warmup_info}. Limit resets at midnight."
+                    ),
+                    "messages_sent_today": instance.messages_sent_today,
+                    "daily_limit": instance.daily_limit,
+                    "is_warmed_up": instance.is_warmed_up,
+                    "warmup_day": instance.warmup_day,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
         client = EngineClient()
         try:
             engine_id = _ensure_engine_instance_id(instance, client)

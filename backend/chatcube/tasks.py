@@ -24,10 +24,65 @@ except Exception:  # pragma: no cover
         return decorator
 
 
+# Warm-up schedule: progressive daily limit increase to avoid WhatsApp bans
+# Format: (max_day, daily_limit) - applies when warmup_day <= max_day
+WARMUP_SCHEDULE = [
+    (3,  20),   # days 1-3:   20 msgs/day
+    (7,  50),   # days 4-7:   50 msgs/day
+    (14, 100),  # days 8-14:  100 msgs/day
+    (30, 200),  # days 15-30: 200 msgs/day
+]
+WARMUP_FULL_LIMIT = 500  # limit after warm-up complete
+
+
 @shared_task
 def reset_daily_counters() -> Dict[str, Any]:
-    updated = WhatsAppInstance.objects.update(messages_sent_today=0)
-    return {"instances_updated": int(updated)}
+    """
+    Reset daily message counters for all instances.
+    For Baileys instances still in warm-up: increment warmup_day
+    and adjust daily_limit according to WARMUP_SCHEDULE.
+    """
+    instances = WhatsAppInstance.objects.all()
+    reset_count = 0
+    warmup_advanced = 0
+
+    for instance in instances:
+        update_fields: Dict[str, Any] = {"messages_sent_today": 0}
+
+        if instance.engine == "baileys" and not instance.is_warmed_up:
+            new_day = instance.warmup_day + 1
+            new_limit = WARMUP_FULL_LIMIT
+            is_now_warmed_up = True
+
+            for max_day, limit in WARMUP_SCHEDULE:
+                if new_day <= max_day:
+                    new_limit = limit
+                    is_now_warmed_up = False
+                    break
+
+            update_fields["warmup_day"] = new_day
+            update_fields["daily_limit"] = new_limit
+            update_fields["is_warmed_up"] = is_now_warmed_up
+            warmup_advanced += 1
+
+            if is_now_warmed_up:
+                logger.info(
+                    "WhatsApp instance %s (%s) warm-up complete after %d days. Limit: %d/day",
+                    instance.id, instance.name, new_day, new_limit,
+                )
+            else:
+                logger.info(
+                    "WhatsApp instance %s (%s) warm-up day %d. Limit: %d/day",
+                    instance.id, instance.name, new_day, new_limit,
+                )
+
+        WhatsAppInstance.objects.filter(id=instance.id).update(**update_fields)
+        reset_count += 1
+
+    return {
+        "instances_reset": reset_count,
+        "warmup_advanced": warmup_advanced,
+    }
 
 
 @shared_task
