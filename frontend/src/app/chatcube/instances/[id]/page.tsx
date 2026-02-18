@@ -485,15 +485,7 @@ export default function InstanceDetailPage() {
                   <span className="text-sm text-text-muted">Phone Number</span>
                   <span className="text-sm text-text-primary">{instance.phone_number || "Not connected"}</span>
                 </div>
-                <div className="p-4 flex items-center justify-between">
-                  <span className="text-sm text-text-muted">Daily Limit</span>
-                  <span className="text-sm text-text-primary">{instance.daily_limit}</span>
-                </div>
-                <div className="p-4 flex items-center justify-between">
-                  <span className="text-sm text-text-muted">Warm-up Day</span>
-                  <span className="text-sm text-text-primary">{instance.warmup_day}/30</span>
-                </div>
-                <div className="p-4 flex items-center justify-between">
+<div className="p-4 flex items-center justify-between">
                   <span className="text-sm text-text-muted">Webhook URL</span>
                   <span className="text-sm text-text-primary font-mono truncate max-w-xs">
                     {instance.webhook_url || "Not configured"}

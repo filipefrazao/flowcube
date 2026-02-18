@@ -39,11 +39,11 @@ class WhatsAppInstance(models.Model):
     webhook_secret = models.CharField(max_length=64, blank=True, null=True)
     webhook_events = models.JSONField(default=list)
 
-    # Anti-ban
-    is_warmed_up = models.BooleanField(default=False)
+    # Anti-ban (warm-up desativado — ilimitado por padrão)
+    is_warmed_up = models.BooleanField(default=True)
     messages_sent_today = models.IntegerField(default=0)
-    daily_limit = models.IntegerField(default=200)
-    warmup_day = models.IntegerField(default=0)
+    daily_limit = models.IntegerField(default=999999)
+    warmup_day = models.IntegerField(default=30)
 
     # Engine internal reference
     engine_instance_id = models.CharField(max_length=100, blank=True, null=True)
