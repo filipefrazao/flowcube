@@ -115,7 +115,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
         logger: baileysLogger,
         printQRInTerminal: false,
         generateHighQualityLinkPreview: false,
-        syncFullHistory: false,
+        syncFullHistory: true,
         markOnlineOnConnect: true,
       });
 
@@ -227,7 +227,18 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             content = msg.message.documentMessage.fileName || "";
           }
 
+          const msgTs = msg.messageTimestamp
+            ? typeof msg.messageTimestamp === "number"
+              ? msg.messageTimestamp * 1000
+              : Number(msg.messageTimestamp) * 1000
+            : Date.now();
+
           const eventData = {
+            // Fields expected by Django webhook handler
+            id: msg.key.id || "",
+            remote_jid: from,
+            from_me: false,
+            // Extra context
             messageId: msg.key.id || "",
             from: senderJid,
             fromName: msg.pushName || "",
@@ -237,11 +248,7 @@ export class BaileysEngine extends EventEmitter implements IEngine {
             isGroup,
             isLid,
             groupId: isGroup ? from : undefined,
-            timestamp: msg.messageTimestamp
-              ? typeof msg.messageTimestamp === "number"
-                ? msg.messageTimestamp * 1000
-                : Number(msg.messageTimestamp) * 1000
-              : Date.now(),
+            timestamp: msgTs,
           };
 
           this.logger.info(
@@ -276,6 +283,86 @@ export class BaileysEngine extends EventEmitter implements IEngine {
           this.emit("message_status_update", this.instanceId, eventData);
         }
       });
+      // --- Historical Messages Sync Handler ---
+      // Fires when Baileys syncs WhatsApp's message history (up to 90 days).
+      // syncFullHistory: true enables this on every fresh connection.
+      this.socket.ev.on("messaging-history.set", ({ messages: historicalMsgs, isLatest }: BaileysEventMap["messaging-history.set"]) => {
+        const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+        const cutoff = Date.now() - NINETY_DAYS_MS;
+        let processed = 0;
+        let skipped = 0;
+
+        for (const msg of historicalMsgs) {
+          if (!msg.message) { skipped++; continue; }
+
+          const remoteJid = msg.key.remoteJid || "";
+          if (!remoteJid) { skipped++; continue; }
+
+          // Skip broadcast/status lists
+          if (remoteJid.includes("@broadcast") || remoteJid === "status@broadcast") { skipped++; continue; }
+
+          const msgTs = msg.messageTimestamp
+            ? typeof msg.messageTimestamp === "number"
+              ? msg.messageTimestamp * 1000
+              : Number(msg.messageTimestamp) * 1000
+            : 0;
+
+          // Skip messages older than 90 days
+          if (msgTs > 0 && msgTs < cutoff) { skipped++; continue; }
+
+          const fromMe = msg.key.fromMe || false;
+          const isGroup = remoteJid.endsWith("@g.us");
+          const participant = msg.key.participant || "";
+          const senderJid = isGroup ? (fromMe ? (this.phoneNumber || "") : participant) : remoteJid;
+
+          let content = "";
+          let msgType: MessageType = "text";
+
+          if (msg.message.conversation) {
+            content = msg.message.conversation;
+          } else if (msg.message.extendedTextMessage?.text) {
+            content = msg.message.extendedTextMessage.text;
+          } else if (msg.message.imageMessage) {
+            msgType = "image";
+            content = msg.message.imageMessage.caption || "";
+          } else if (msg.message.videoMessage) {
+            msgType = "video";
+            content = msg.message.videoMessage.caption || "";
+          } else if (msg.message.audioMessage) {
+            msgType = "audio";
+          } else if (msg.message.documentMessage) {
+            msgType = "document";
+            content = msg.message.documentMessage.fileName || "";
+          } else {
+            skipped++;
+            continue;
+          }
+
+          this.emit("message_received", this.instanceId, {
+            id: msg.key.id || "",
+            remote_jid: remoteJid,
+            from_me: fromMe,
+            messageId: msg.key.id || "",
+            from: senderJid,
+            fromName: msg.pushName || "",
+            to: isGroup ? remoteJid : (fromMe ? senderJid : (this.phoneNumber || "")),
+            type: msgType,
+            content,
+            isGroup,
+            groupId: isGroup ? remoteJid : undefined,
+            timestamp: msgTs || Date.now(),
+            isHistorical: true,
+          });
+
+          processed++;
+        }
+
+        this.logger.info(
+          { processed, skipped, isLatest },
+          "Historical messages sync completed"
+        );
+      });
+
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : "Unknown error";
       this.logger.error({ error: errMsg }, "Failed to connect");
