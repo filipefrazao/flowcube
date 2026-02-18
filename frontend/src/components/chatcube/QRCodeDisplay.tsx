@@ -80,10 +80,13 @@ export function QRCodeDisplay({ instanceId, onConnected }: QRCodeDisplayProps) {
     }
   }, [instanceId]);
 
-  // Initial fetch
+  // On mount: trigger reconnect to wake up the Baileys socket, then start polling
   useEffect(() => {
+    chatcubeApi.reconnect(instanceId).catch(() => {
+      // Ignore reconnect errors — instance may already be connecting
+    });
     fetchQRCode();
-  }, [fetchQRCode]);
+  }, [instanceId, fetchQRCode]);
 
   // Poll for QR when it's not yet available (retry every 3s)
   useEffect(() => {
