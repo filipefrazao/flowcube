@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django.db.models import Count, Avg, Max
+from django.db.models import Count, Avg, Max, F, ExpressionWrapper, DurationField
 from django.utils import timezone
 from datetime import timedelta
 
@@ -220,7 +220,13 @@ class WorkflowViewSet(viewsets.ModelViewSet):
         # Top workflows by execution count
         workflows = Workflow.objects.filter(owner=user).annotate(
             execution_count=Count("executions"),
-            last_executed=Max("executions__started_at")
+            last_executed=Max("executions__started_at"),
+            avg_duration=Avg(
+                ExpressionWrapper(
+                    F("executions__finished_at") - F("executions__started_at"),
+                    output_field=DurationField()
+                )
+            )
         ).order_by("-execution_count")[:10]
         
         # Workflows by status
@@ -236,7 +242,7 @@ class WorkflowViewSet(viewsets.ModelViewSet):
                     "id": str(w.id),
                     "name": w.name,
                     "execution_count": w.execution_count or 0,
-                    "avg_duration_ms": round(w.avg_duration or 0, 2),
+                    "avg_duration_ms": round(w.avg_duration.total_seconds() * 1000, 2) if w.avg_duration else 0,
                     "last_executed": w.last_executed.isoformat() if w.last_executed else None
                 }
                 for w in workflows
