@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.conf import settings
 from django.utils import timezone
 import logging
 import json
@@ -152,8 +153,8 @@ def _distribute_whatsapp(submission, config):
     if len(phone) == 11:
         phone = f'55{phone}'
 
-    evolution_url = 'https://evolution.frzgroup.com.br'
-    api_key = '429683C4C977415CAAFCCE10F7D57E11'
+    evolution_url = getattr(settings, 'EVOLUTION_API_URL', 'https://evolution.frzgroup.com.br')
+    api_key = getattr(settings, 'EVOLUTION_API_KEY', '')
 
     with httpx.Client(timeout=30) as client:
         resp = client.post(

@@ -88,7 +88,7 @@ class WhatsAppSendHandler(BaseNodeHandler):
         message = context.resolve_template(config.get("message", config.get("content", "")))
 
         evolution_url = getattr(django_settings, "EVOLUTION_API_URL", "https://evolution.frzgroup.com.br")
-        evolution_key = getattr(django_settings, "EVOLUTION_API_KEY", "429683C4C977415CAAFCCE10F7D57E11")
+        evolution_key = getattr(django_settings, "EVOLUTION_API_KEY", "")
 
         if not instance:
             return NodeResult(error="WhatsApp instance is required")
