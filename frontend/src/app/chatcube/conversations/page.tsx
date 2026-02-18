@@ -773,7 +773,13 @@ export default function ChatCubeConversationsPage() {
     setSelectedSession(id);
   };
 
-  const filtered = sessions.filter((s) => {
+  // Exclude groups (@g.us), broadcasts (@broadcast) and linked devices (@lid)
+  const individualSessions = sessions.filter((s) => {
+    const combined = `${s.contact_name || ""} ${s.contact_phone || ""}`;
+    return !combined.includes("@g.us") && !combined.includes("@broadcast") && !combined.includes("@lid");
+  });
+
+  const filtered = individualSessions.filter((s) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -793,7 +799,7 @@ export default function ChatCubeConversationsPage() {
             <MessageSquare className="w-5 h-5 text-primary" />
             <h1 className="text-lg font-semibold text-text-primary">Conversas</h1>
             <span className="text-sm text-text-muted">
-              {sessions.length} conversa{sessions.length !== 1 ? "s" : ""}
+              {individualSessions.length} conversa{individualSessions.length !== 1 ? "s" : ""}
             </span>
           </div>
           {selectedSession && (
