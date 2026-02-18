@@ -1,4 +1,5 @@
 import logging
+import os
 
 import requests
 from celery import shared_task
@@ -7,7 +8,7 @@ from django.utils.timezone import now
 logger = logging.getLogger("flowcube.salesforce")
 
 SALESCUBE_API_URL = "https://api.frzglobal.com.br"
-SALESCUBE_TOKEN = "c3e1d02d51b6acb16488a16c6b0d0938b470e71d"
+SALESCUBE_TOKEN = os.environ.get("SALESCUBE_PROD_TOKEN", "")
 
 
 @shared_task(name="salesforce.poll_salescube_approved_sales")
