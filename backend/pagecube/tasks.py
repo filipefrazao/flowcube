@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.conf import settings
 from django.utils import timezone
 import logging
 import json
@@ -152,8 +153,8 @@ def _distribute_whatsapp(submission, config):
     if len(phone) == 11:
         phone = f'55{phone}'
 
-    evolution_url = 'https://evolution.frzgroup.com.br'
-    api_key = '429683C4C977415CAAFCCE10F7D57E11'
+    evolution_url = getattr(settings, 'EVOLUTION_API_URL', 'https://evolution.frzgroup.com.br')
+    api_key = getattr(settings, 'EVOLUTION_API_KEY', '')
 
     with httpx.Client(timeout=30) as client:
         resp = client.post(
@@ -234,26 +235,60 @@ def _generate_traefik_config(domain_obj):
     domain_obj.save(update_fields=['traefik_config_path'])
 
 
-# ─── GOOGLE SHEETS INTEGRATION ─────────────────────────────────────────────
+# ─── GOOGLE SHEETS INTEGRATION (via Service Account do FlowCube) ────────────
+#
+# Usa a credencial "Google Sheets + Drive (Service Account)" armazenada no
+# modelo Credential do FlowCube (credential_type='google_sheets').
+# A planilha precisa ser compartilhada com:
+#   cc-connect@gen-lang-client-0730103318.iam.gserviceaccount.com
+
 
 def _get_gspread_client():
-    """Build gspread client from GOOGLE_SHEETS_SERVICE_ACCOUNT env variable (JSON string)."""
-    import os
+    """Build authenticated gspread client using the stored FlowCube Google credential."""
     import json
     import gspread
     from google.oauth2.service_account import Credentials
+    from flowcube.models import Credential
 
-    sa_json = os.environ.get('GOOGLE_SHEETS_SERVICE_ACCOUNT', '')
-    if not sa_json:
-        raise ValueError("GOOGLE_SHEETS_SERVICE_ACCOUNT env var not set")
+    cred = Credential.objects.filter(credential_type='google_sheets').first()
+    if not cred:
+        raise ValueError("Nenhuma credencial Google Sheets configurada no FlowCube")
 
-    creds_dict = json.loads(sa_json)
+    data = cred.data or {}
+    raw = data.get('credentials_json', '')
+    if isinstance(raw, str):
+        sa_info = json.loads(raw)
+    else:
+        sa_info = raw
+
+    if not sa_info.get('private_key'):
+        raise ValueError("Credencial Google Sheets incompleta — falta private_key")
+
     scopes = [
         'https://spreadsheets.google.com/feeds',
         'https://www.googleapis.com/auth/drive',
     ]
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+    creds = Credentials.from_service_account_info(sa_info, scopes=scopes)
     return gspread.authorize(creds)
+
+
+def _build_rows_from_submissions(submissions):
+    """Build headers list and list of rows from a queryset of FormSubmission."""
+    all_keys: list[str] = []
+    for sub in submissions:
+        for k in sub.data.keys():
+            if k not in all_keys:
+                all_keys.append(k)
+    headers = ['ID', 'Data', 'IP'] + all_keys
+    rows = []
+    for sub in submissions:
+        row = [
+            str(sub.id),
+            sub.created_at.strftime('%d/%m/%Y %H:%M'),
+            sub.ip_address or '',
+        ] + [str(sub.data.get(k, '')) for k in all_keys]
+        rows.append(row)
+    return headers, rows
 
 
 def _extract_sheet_id(url: str) -> str:
@@ -261,29 +296,25 @@ def _extract_sheet_id(url: str) -> str:
     import re
     match = re.search(r'/spreadsheets/d/([a-zA-Z0-9-_]+)', url)
     if not match:
-        raise ValueError(f"Could not extract sheet ID from URL: {url}")
+        raise ValueError(f"Não foi possível extrair o ID da planilha: {url}")
     return match.group(1)
 
 
 @shared_task(queue='default', bind=True, max_retries=3)
 def append_submission_to_sheets(self, submission_id: int):
-    """Append a single submission to its form's connected Google Sheet."""
+    """Append a single new submission to the connected Google Sheet."""
     from .models import FormSubmission
     try:
         submission = FormSubmission.objects.select_related('form').get(id=submission_id)
         form = submission.form
-
         if not form.google_sheets_url:
             return
 
         gc = _get_gspread_client()
         sheet_id = _extract_sheet_id(form.google_sheets_url)
-        sh = gc.open_by_key(sheet_id)
-        ws = sh.sheet1
+        ws = gc.open_by_key(sheet_id).sheet1
 
-        existing = ws.get_all_values()
-        if not existing:
-            # Create header row from submission data keys
+        if ws.row_count == 0 or not ws.get_all_values():
             headers = ['ID', 'Data', 'IP'] + list(submission.data.keys())
             ws.append_row(headers)
 
@@ -292,7 +323,6 @@ def append_submission_to_sheets(self, submission_id: int):
             submission.created_at.strftime('%d/%m/%Y %H:%M'),
             submission.ip_address or '',
         ] + [str(v) for v in submission.data.values()]
-
         ws.append_row(row)
         logger.info(f"Submission {submission_id} appended to sheet {sheet_id}")
 
@@ -303,43 +333,26 @@ def append_submission_to_sheets(self, submission_id: int):
 
 @shared_task(queue='default', bind=True, max_retries=2)
 def sync_to_google_sheets(self, form_id: int):
-    """Sync ALL submissions of a form to Google Sheets (full overwrite after header)."""
+    """Full sync — overwrites the sheet with ALL submissions of the form."""
     from .models import FormSchema, FormSubmission
     try:
         form = FormSchema.objects.get(id=form_id)
         if not form.google_sheets_url:
             return
 
-        submissions = FormSubmission.objects.filter(form=form).order_by('created_at')
-        if not submissions.exists():
+        submissions = list(FormSubmission.objects.filter(form=form).order_by('created_at'))
+        if not submissions:
             return
 
         gc = _get_gspread_client()
         sheet_id = _extract_sheet_id(form.google_sheets_url)
-        sh = gc.open_by_key(sheet_id)
-        ws = sh.sheet1
+        ws = gc.open_by_key(sheet_id).sheet1
 
-        # Build all keys from all submissions
-        all_keys: list[str] = []
-        for sub in submissions:
-            for k in sub.data.keys():
-                if k not in all_keys:
-                    all_keys.append(k)
-
-        headers = ['ID', 'Data', 'IP'] + all_keys
-        rows = [headers]
-        for sub in submissions:
-            row = [
-                str(sub.id),
-                sub.created_at.strftime('%d/%m/%Y %H:%M'),
-                sub.ip_address or '',
-            ] + [str(sub.data.get(k, '')) for k in all_keys]
-            rows.append(row)
-
+        headers, rows = _build_rows_from_submissions(submissions)
         ws.clear()
-        ws.update('A1', rows)
+        ws.update('A1', [headers] + rows)
 
-        synced = len(rows) - 1
+        synced = len(rows)
         FormSchema.objects.filter(pk=form_id).update(google_sheets_synced_count=synced)
         logger.info(f"Synced {synced} submissions for form {form_id} to sheet {sheet_id}")
 
