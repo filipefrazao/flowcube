@@ -44,7 +44,7 @@ class FacebookLeadAdsWebhookView(APIView):
         challenge = request.query_params.get("hub.challenge")
 
         verify_token = getattr(
-            settings, "FACEBOOK_VERIFY_TOKEN", "flowcube_fb_verify_2026"
+            settings, "FACEBOOK_VERIFY_TOKEN", ""
         )
 
         if mode == "subscribe" and token == verify_token:
