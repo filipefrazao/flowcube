@@ -133,6 +133,13 @@ class Group(models.Model):
     description = models.TextField(blank=True, default="")
     participants_count = models.IntegerField(default=0)
     is_admin = models.BooleanField(default=False)
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_groups",
+    )
 
     class Meta:
         ordering = ["jid"]
@@ -159,6 +166,54 @@ class MessageTemplate(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.owner_id})"
+
+
+class GroupNote(models.Model):
+    NOTE_TYPE_CHOICES = [
+        ("note", "Nota"),
+        ("call", "Ligação"),
+        ("email", "E-mail"),
+        ("meeting", "Reunião"),
+        ("task", "Tarefa"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    group = models.ForeignKey("Group", on_delete=models.CASCADE, related_name="notes")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="group_notes")
+    content = models.TextField()
+    note_type = models.CharField(max_length=20, choices=NOTE_TYPE_CHOICES, default="note")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.note_type} - {self.group.name} ({self.created_at:%Y-%m-%d})"
+
+
+class GroupTask(models.Model):
+    PRIORITY_CHOICES = [
+        ("low", "Baixa"),
+        ("medium", "Média"),
+        ("high", "Alta"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    group = models.ForeignKey("Group", on_delete=models.CASCADE, related_name="tasks")
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="group_tasks")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    is_completed = models.BooleanField(default=False)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default="medium")
+    due_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["is_completed", "-created_at"]
+
+    def __str__(self):
+        return f"{self.title} ({'✓' if self.is_completed else '○'}) - {self.group.name}"
 
 
 class Campaign(models.Model):

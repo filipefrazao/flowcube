@@ -4,6 +4,9 @@ import type {
   WhatsAppMessage,
   WhatsAppContact,
   WhatsAppGroup,
+  GroupNote,
+  GroupTask,
+  ChatUser,
   InstanceStats,
   ChatCubeStats,
   CreateInstanceRequest,
@@ -140,6 +143,67 @@ export const chatcubeApi = {
 
   getInstanceStats: async (instanceId: string): Promise<InstanceStats> => {
     const response = await chatcubeClient.get(`/instances/${instanceId}/stats/`);
+    return response.data;
+  },
+
+  // ---- Group Management ----
+
+  listAllGroups: async (): Promise<WhatsAppGroup[]> => {
+    const response = await chatcubeClient.get('/groups/');
+    return response.data;
+  },
+
+  getGroup: async (groupId: string): Promise<WhatsAppGroup> => {
+    const response = await chatcubeClient.get(`/groups/${groupId}/`);
+    return response.data;
+  },
+
+  updateGroup: async (groupId: string, data: { assigned_to?: number | null; instance?: string }): Promise<WhatsAppGroup> => {
+    const response = await chatcubeClient.patch(`/groups/${groupId}/`, data);
+    return response.data;
+  },
+
+  // ---- Group Notes ----
+
+  listGroupNotes: async (groupId: string): Promise<GroupNote[]> => {
+    const response = await chatcubeClient.get(`/groups/${groupId}/notes/`);
+    return response.data;
+  },
+
+  addGroupNote: async (groupId: string, data: { content: string; note_type: string }): Promise<GroupNote> => {
+    const response = await chatcubeClient.post(`/groups/${groupId}/notes/`, data);
+    return response.data;
+  },
+
+  deleteGroupNote: async (groupId: string, noteId: string): Promise<void> => {
+    await chatcubeClient.delete(`/groups/${groupId}/notes/${noteId}/`);
+  },
+
+  // ---- Group Tasks ----
+
+  listGroupTasks: async (groupId: string): Promise<GroupTask[]> => {
+    const response = await chatcubeClient.get(`/groups/${groupId}/tasks/`);
+    return response.data;
+  },
+
+  createGroupTask: async (groupId: string, data: { title: string; priority?: string; due_date?: string }): Promise<GroupTask> => {
+    const response = await chatcubeClient.post(`/groups/${groupId}/tasks/`, data);
+    return response.data;
+  },
+
+  updateGroupTask: async (groupId: string, taskId: string, data: Partial<GroupTask>): Promise<GroupTask> => {
+    const response = await chatcubeClient.patch(`/groups/${groupId}/tasks/${taskId}/`, data);
+    return response.data;
+  },
+
+  deleteGroupTask: async (groupId: string, taskId: string): Promise<void> => {
+    await chatcubeClient.delete(`/groups/${groupId}/tasks/${taskId}/`);
+  },
+
+  // ---- Users (for assignment) ----
+
+  listUsers: async (): Promise<ChatUser[]> => {
+    const response = await chatcubeClient.get('/users/');
     return response.data;
   },
 };

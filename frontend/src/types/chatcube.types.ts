@@ -42,6 +42,13 @@ export interface WhatsAppMessage {
   media_url: string | null;
   timestamp: string;
   status: MessageStatus;
+  sender_name: string | null;
+  sender_jid: string | null;
+  metadata?: {
+    pushName?: string;
+    participant?: string;
+    [key: string]: any;
+  };
 }
 
 export interface WhatsAppContact {
@@ -56,11 +63,47 @@ export interface WhatsAppContact {
 
 export interface WhatsAppGroup {
   id: string;
+  instance: string;
   jid: string;
   name: string;
   description: string;
   participants_count: number;
   is_admin: boolean;
+  assigned_to: number | null;
+  assigned_to_name: string | null;
+  message_count?: number;
+  last_message_at?: string | null;
+}
+
+export interface GroupNote {
+  id: string;
+  group: string;
+  user: number | null;
+  user_name: string;
+  content: string;
+  note_type: 'note' | 'call' | 'email' | 'meeting' | 'task';
+  created_at: string;
+}
+
+export interface GroupTask {
+  id: string;
+  group: string;
+  created_by: number | null;
+  created_by_name: string;
+  title: string;
+  description: string;
+  is_completed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  due_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatUser {
+  id: number;
+  username: string;
+  full_name: string;
+  email: string;
 }
 
 export interface Campaign {
