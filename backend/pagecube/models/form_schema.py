@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 
@@ -30,6 +31,11 @@ class FormSchema(models.Model):
     distribution_config = models.JSONField(default=dict, blank=True)
     submissions_count = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    # External webhook token for receiving submissions from external forms
+    webhook_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    # Google Sheets integration
+    google_sheets_url = models.URLField(blank=True, max_length=500)
+    google_sheets_synced_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

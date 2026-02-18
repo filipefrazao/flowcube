@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'ai',
     'achievements',
     'chatcube',
+    'salesforce',
 ]
 
 
@@ -230,6 +231,10 @@ EVOLUTION_API_KEY = _env('EVOLUTION_API_KEY', '')
 
 SALESCUBE_API_URL = _env('SALESCUBE_API_URL', 'https://api.frzglobal.com.br')
 SALESCUBE_API_TOKEN = _env('SALESCUBE_API_TOKEN', '')
+
+# Facebook Lead Ads
+FACEBOOK_VERIFY_TOKEN = _env("FACEBOOK_VERIFY_TOKEN", "flowcube_fb_verify_2026")
+FACEBOOK_PAGE_ACCESS_TOKEN = _env("FACEBOOK_PAGE_ACCESS_TOKEN", "")
 
 N8N_WEBHOOK_URL = _env('N8N_WEBHOOK_URL', 'https://n8n.frzgroup.com.br/webhook')
 

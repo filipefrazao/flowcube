@@ -102,6 +102,25 @@ class FormSchemaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return FormSchema.objects.filter(page__user=self.request.user)
 
+    @action(detail=True, methods=['post'])
+    def connect_sheets(self, request, pk=None):
+        """Connect or update Google Sheets URL for this form."""
+        form = self.get_object()
+        sheets_url = request.data.get('url', '').strip()
+        form.google_sheets_url = sheets_url
+        form.save(update_fields=['google_sheets_url', 'updated_at'])
+        return Response({'status': 'connected', 'url': sheets_url})
+
+    @action(detail=True, methods=['post'])
+    def sync_sheets(self, request, pk=None):
+        """Trigger async sync of all submissions to Google Sheets."""
+        form = self.get_object()
+        if not form.google_sheets_url:
+            return Response({'error': 'Nenhuma planilha conectada'}, status=status.HTTP_400_BAD_REQUEST)
+        from .tasks import sync_to_google_sheets
+        sync_to_google_sheets.delay(form.id)
+        return Response({'status': 'syncing'})
+
 
 class FormSubmissionViewSet(viewsets.ReadOnlyModelViewSet):
     """Read-only for submissions (created via public endpoint)"""
@@ -221,6 +240,47 @@ def public_submit(request, page_slug):
         'message': form.success_message,
         'redirect_url': form.redirect_url or None,
     }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+@throttle_classes([])
+def webhook_submit(request, token):
+    """
+    External form webhook endpoint.
+    POST /api/v1/pagecube/webhook/{token}/
+    Receives submissions from external forms (e.g. forms.frzgroup.com.br).
+    """
+    form = get_object_or_404(FormSchema, webhook_token=token, is_active=True)
+
+    data = request.data
+    if not isinstance(data, dict):
+        return Response({'error': 'Dados inválidos'}, status=status.HTTP_400_BAD_REQUEST)
+    if len(str(data)) > 100000:
+        return Response({'error': 'Dados muito grandes'}, status=status.HTTP_400_BAD_REQUEST)
+
+    submission = FormSubmission.objects.create(
+        form=form,
+        data=data,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+        referrer=request.META.get('HTTP_REFERER', '')[:500],
+    )
+
+    FormSchema.objects.filter(pk=form.pk).update(submissions_count=models.F('submissions_count') + 1)
+
+    # Trigger distribution if configured
+    if form.distribution_mode != 'none':
+        from .tasks import distribute_submission
+        distribute_submission.delay(submission.id)
+
+    # Trigger Google Sheets append if connected
+    if form.google_sheets_url:
+        from .tasks import append_submission_to_sheets
+        append_submission_to_sheets.delay(submission.id)
+
+    return Response({'success': True, 'id': submission.id}, status=status.HTTP_201_CREATED)
 
 
 def get_client_ip(request):

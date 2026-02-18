@@ -12,6 +12,7 @@ router.register(r'domains', views.CustomDomainViewSet, basename='pagecube-domain
 urlpatterns = [
     path('', include(router.urls)),
     path('submit/<slug:page_slug>/', views.public_submit, name='pagecube-public-submit'),
+    path('webhook/<uuid:token>/', views.webhook_submit, name='pagecube-webhook-submit'),
 ]
 
 # Public page serving routes (mounted at project-level urls.py):

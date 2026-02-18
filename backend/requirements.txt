@@ -59,3 +59,4 @@ maxminddb>=2.6.0
 
 # Workflow engine
 jmespath>=1.0.0
+simple-salesforce>=1.12.0

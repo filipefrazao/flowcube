@@ -50,6 +50,9 @@ export interface FormSchema {
   distribution_config?: any;
   submissions_count?: number;
   is_active?: boolean;
+  webhook_token?: string;
+  google_sheets_url?: string;
+  google_sheets_synced_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -134,8 +137,16 @@ export const pagecubeApi = {
     await apiClient.delete(`/pagecube/forms/${id}/`);
   },
 
+  connectSheets: async (formId: number, url: string): Promise<void> => {
+    await apiClient.post(`/pagecube/forms/${formId}/connect_sheets/`, { url });
+  },
+
+  syncSheets: async (formId: number): Promise<void> => {
+    await apiClient.post(`/pagecube/forms/${formId}/sync_sheets/`);
+  },
+
   // Submissions
-  listSubmissions: async (params?: { page?: number }): Promise<FormSubmission[]> => {
+  listSubmissions: async (params?: { page?: number; form_id?: number }): Promise<FormSubmission[]> => {
     const response = await apiClient.get("/pagecube/submissions/", { params });
     return response.data.results || response.data || [];
   },

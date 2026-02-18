@@ -57,6 +57,7 @@ urlpatterns = [
     path("api/v1/settings/", include("flowcube.settings_urls")),
     path("api/telegram/", include("telegram_integration.urls")),
     path("api/v1/chatcube/", include("chatcube.urls")),
+    path("api/v1/salesforce/", include("salesforce.urls")),
     # PageCube public page serving
     path("p/<slug:slug>/", include(("pagecube.public_urls", "pagecube"), namespace="pagecube-public")),
 ]
