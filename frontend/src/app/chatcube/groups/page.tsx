@@ -7,6 +7,21 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import type { WhatsAppGroup, WhatsAppMessage } from "@/types/chatcube.types";
 import { cn } from "@/lib/utils";
 
+function timeAgo(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "agora";
+  if (mins < 60) return `${mins}min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
+
 // ============================================================================
 // Helpers
 // ============================================================================
@@ -34,7 +49,25 @@ export default function GroupsPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { loadInstances(); }, []);
+  const selectedGroupRef = useRef<WhatsAppGroup | null>(null);
+  selectedGroupRef.current = selectedGroup;
+
+  useEffect(() => {
+    loadInstances();
+  }, []);
+
+  useEffect(() => {
+    // Auto-refresh: list every 15s, messages every 10s
+    const listTimer = setInterval(() => {
+      if (selectedInstance) loadGroupsSilent(selectedInstance);
+    }, 15000);
+    const msgTimer = setInterval(() => {
+      if (selectedGroupRef.current && selectedInstance) {
+        loadGroupMessagesSilent(selectedGroupRef.current);
+      }
+    }, 10000);
+    return () => { clearInterval(listTimer); clearInterval(msgTimer); };
+  }, [selectedInstance]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,18 +103,33 @@ export default function GroupsPage() {
     }
   }
 
+  async function loadGroupsSilent(instanceId: string) {
+    try {
+      const d = await chatcubeApi.getGroups(instanceId);
+      setGroups(d.results || []);
+    } catch (_) {}
+  }
+
   async function loadGroupMessages(group: WhatsAppGroup) {
     if (!selectedInstance) return;
     setMessagesLoading(true);
     setMessages([]);
     try {
-      const d = await chatcubeApi.getMessages(selectedInstance, { remote_jid: group.jid, limit: 100 });
+      const d = await chatcubeApi.getMessages(selectedInstance, { remote_jid: group.jid, limit: 200 });
       setMessages(d.results || []);
     } catch (err) {
       console.error(err);
     } finally {
       setMessagesLoading(false);
     }
+  }
+
+  async function loadGroupMessagesSilent(group: WhatsAppGroup) {
+    if (!selectedInstance) return;
+    try {
+      const d = await chatcubeApi.getMessages(selectedInstance, { remote_jid: group.jid, limit: 200 });
+      setMessages(d.results || []);
+    } catch (_) {}
   }
 
   async function handleSend() {
@@ -176,13 +224,25 @@ export default function GroupsPage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between mb-0.5">
                             <h4 className="text-sm font-medium text-text-primary truncate">{g.name}</h4>
-                            {g.is_admin && (
-                              <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full ml-1 flex-shrink-0">Admin</span>
+                            <div className="flex items-center gap-1 ml-1 flex-shrink-0">
+                              {g.is_admin && (
+                                <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">Admin</span>
+                              )}
+                              {(g as any).last_message_at && (
+                                <span className="text-[10px] text-text-muted">{timeAgo((g as any).last_message_at)}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-text-muted">
+                              {g.participants_count} participante{g.participants_count !== 1 ? "s" : ""}
+                            </p>
+                            {(g as any).message_count > 0 && (
+                              <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">
+                                {(g as any).message_count} msg{(g as any).message_count !== 1 ? "s" : ""}
+                              </span>
                             )}
                           </div>
-                          <p className="text-xs text-text-muted">
-                            {g.participants_count} participante{g.participants_count !== 1 ? "s" : ""}
-                          </p>
                         </div>
                       </div>
                     </button>
