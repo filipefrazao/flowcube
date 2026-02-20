@@ -39,6 +39,18 @@ def api_root(request):
             "chatcube": "/api/v1/chatcube/",
             "salescube": "/api/v1/salescube/",
             "minicube": "/api/v1/minicube/",
+            "funnelcube": "/api/v1/funnelcube/",
+            "socialcube": "/api/v1/socialcube/",
+            "pagecube": "/api/v1/pagecube/",
+            "reports": "/api/v1/reports/",
+            "telephony": "/api/v1/telephony/",
+            "billing": "/api/v1/billing/",
+            "ai": "/api/v1/ai/",
+            "salesforce": "/api/v1/salesforce/",
+            "payments": "/api/v1/payments/",
+            "whatsapp": "/api/v1/whatsapp/",
+            "analytics": "/api/v1/analytics/",
+            "plugins": "/api/v1/plugins/",
             "admin": "/admin/",
         }
     })
@@ -84,6 +96,22 @@ urlpatterns = [
     path('api/v1/chatcube/', include('chatcube.urls')),
     path('api/v1/salescube/', include('salescube.urls')),
     path('api/v1/minicube/', include('minicube.urls')),
+    # Module apps
+    path('api/v1/funnelcube/', include('funnelcube.urls')),
+    path('api/v1/socialcube/', include('socialcube.urls')),
+    path('api/v1/pagecube/', include('pagecube.urls')),
+    path('api/v1/reports/', include('reports.urls')),
+    path('api/v1/telephony/', include('telephony.urls')),
+    path('api/v1/billing/', include('billing.urls')),
+    path('api/v1/ai/', include('ai.urls')),
+    path('api/v1/salesforce/', include('salesforce.urls')),
+    path('api/v1/payments/', include('payments.urls')),
+    path('api/v1/whatsapp/', include('whatsapp.urls')),
+    path('api/v1/', include('analytics.urls')),
+    # Plugin framework
+    path('api/v1/plugins/', include('flowcube_core.urls')),
+    # PageCube public pages
+    path('p/<slug:slug>/', include(('pagecube.public_urls', 'pagecube'), namespace='pagecube-public')),
     path('api/', api_root, name='api-root'),
     path('', api_root, name='root'),
 ]

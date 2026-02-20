@@ -23,7 +23,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    # Local apps
+    # Plugin framework
+    'flowcube_core',
+    # Core apps
     'workflows',
     'django_celery_beat',
     'flowcube',
@@ -35,6 +37,18 @@ INSTALLED_APPS = [
     'chatcube',
     'salescube',
     'minicube',
+    # Module apps
+    'funnelcube',
+    'socialcube',
+    'pagecube',
+    'reports',
+    'telephony',
+    'billing',
+    'ai',
+    'salesforce',
+    'payments',
+    'whatsapp',
+    'analytics',
 ]
 
 MIDDLEWARE = [
