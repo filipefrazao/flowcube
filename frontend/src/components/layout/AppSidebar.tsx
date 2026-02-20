@@ -55,7 +55,7 @@ const sections: SidebarSection[] = [
     id: "dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    href: "/",
+    href: "/salescube/dashboard",
     groupLabel: "Aplicação",
   },
   {
