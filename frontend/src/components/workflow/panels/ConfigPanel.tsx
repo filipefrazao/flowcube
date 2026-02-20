@@ -320,7 +320,7 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
             value={value}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
             placeholder={field.placeholder}
-            className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         );
 
@@ -331,7 +331,7 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
             placeholder={field.placeholder}
             rows={3}
-            className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
           />
         );
 
@@ -344,7 +344,7 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
             min={field.min}
             max={field.max}
             step={field.step}
-            className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         );
 
@@ -353,7 +353,7 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
           <select
             value={value}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
-            className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           >
             <option value="">Select...</option>
             {field.options?.map(opt => (
@@ -369,9 +369,9 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
               type="checkbox"
               checked={!!value}
               onChange={(e) => handleFieldChange(field.key, e.target.checked)}
-              className="w-4 h-4 rounded border-gray-700 bg-background text-primary focus:ring-primary focus:ring-offset-0"
+              className="w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary focus:ring-offset-0"
             />
-            <span className="text-sm text-gray-300">Enabled</span>
+            <span className="text-sm text-text-primary">Enabled</span>
           </label>
         );
 
@@ -389,7 +389,7 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
             }}
             placeholder={field.placeholder}
             rows={4}
-            className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 font-mono placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary font-mono placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
           />
         );
 
@@ -399,56 +399,56 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
   };
 
   return (
-    <div className="w-80 bg-surface border-l border-gray-800 flex flex-col h-full">
+    <div className="w-80 bg-surface border-l border-border flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Settings className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-gray-200">Configure Block</h2>
+          <h2 className="text-sm font-semibold text-text-primary">Configure Block</h2>
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-gray-800 transition-colors"
+          className="p-1 rounded hover:bg-surface-hover transition-colors"
         >
-          <X className="w-4 h-4 text-gray-400" />
+          <X className="w-4 h-4 text-text-secondary" />
         </button>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {/* General Section */}
-        <div className="border-b border-gray-800">
+        <div className="border-b border-border">
           <button
             onClick={() => toggleSection('general')}
-            className="w-full flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors"
+            className="w-full flex items-center justify-between p-4 hover:bg-surface-hover/50 transition-colors"
           >
-            <span className="text-sm font-medium text-gray-300">General</span>
+            <span className="text-sm font-medium text-text-primary">General</span>
             {expandedSections.has('general') ? (
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-text-muted" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-text-muted" />
             )}
           </button>
           
           {expandedSections.has('general') && (
             <div className="px-4 pb-4 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
                   Block Name
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
                   Block Type
                 </label>
-                <div className="px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-sm text-gray-400">
+                <div className="px-3 py-2 bg-surface/50 border border-border rounded-lg text-sm text-text-secondary">
                   {blockDef?.label || blockType}
                 </div>
               </div>
@@ -457,16 +457,16 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
         </div>
 
         {/* Configuration Section */}
-        <div className="border-b border-gray-800">
+        <div className="border-b border-border">
           <button
             onClick={() => toggleSection('config')}
-            className="w-full flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors"
+            className="w-full flex items-center justify-between p-4 hover:bg-surface-hover/50 transition-colors"
           >
-            <span className="text-sm font-medium text-gray-300">Configuration</span>
+            <span className="text-sm font-medium text-text-primary">Configuration</span>
             {expandedSections.has('config') ? (
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-text-muted" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-text-muted" />
             )}
           </button>
           
@@ -474,19 +474,19 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
             <div className="px-4 pb-4 space-y-4">
               {fields.map(field => (
                 <div key={field.key}>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  <label className="block text-xs font-medium text-text-secondary mb-1.5">
                     {field.label}
                     {field.required && <span className="text-red-400 ml-1">*</span>}
                   </label>
                   {renderField(field)}
                   {field.description && (
-                    <p className="mt-1 text-xs text-gray-500">{field.description}</p>
+                    <p className="mt-1 text-xs text-text-muted">{field.description}</p>
                   )}
                 </div>
               ))}
 
               {fields.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">
+                <p className="text-sm text-text-muted text-center py-4">
                   No configuration options for this block type.
                 </p>
               )}
@@ -495,26 +495,26 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
         </div>
 
         {/* Advanced Section */}
-        <div className="border-b border-gray-800">
+        <div className="border-b border-border">
           <button
             onClick={() => toggleSection('advanced')}
-            className="w-full flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors"
+            className="w-full flex items-center justify-between p-4 hover:bg-surface-hover/50 transition-colors"
           >
-            <span className="text-sm font-medium text-gray-300">Advanced</span>
+            <span className="text-sm font-medium text-text-primary">Advanced</span>
             {expandedSections.has('advanced') ? (
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-text-muted" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-text-muted" />
             )}
           </button>
           
           {expandedSections.has('advanced') && (
             <div className="px-4 pb-4 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
                   Block ID
                 </label>
-                <div className="px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-xs text-gray-500 font-mono">
+                <div className="px-3 py-2 bg-surface/50 border border-border rounded-lg text-xs text-text-muted font-mono">
                   {node.id}
                 </div>
               </div>
@@ -534,10 +534,10 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-800 flex gap-2">
+      <div className="p-4 border-t border-border flex gap-2">
         <button
           onClick={handleReset}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-surface text-text-primary rounded-lg hover:bg-surface-hover transition-colors"
         >
           <RotateCcw className="w-4 h-4" />
           Reset
@@ -545,7 +545,7 @@ export function ConfigPanel({ node, onClose, onUpdate, onDelete }: ConfigPanelPr
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-gray-900 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save'}

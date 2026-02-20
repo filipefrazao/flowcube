@@ -148,16 +148,16 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <FileText className="h-7 w-7 text-indigo-400" />
-          <h1 className="text-2xl font-bold text-gray-100">Relatorios</h1>
+          <FileText className="h-7 w-7 text-primary" />
+          <h1 className="text-2xl font-bold text-text-primary">Relatorios</h1>
         </div>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-primary-hover"
         >
           <Plus className="h-4 w-4" />
           Novo Template
@@ -166,21 +166,21 @@ export default function ReportsPage() {
 
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Templates</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{templates.length}</p>
+              <p className="text-sm text-text-secondary">Templates</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{templates.length}</p>
             </div>
-            <div className="rounded-lg bg-indigo-500/20 p-2.5 text-indigo-400">
+            <div className="rounded-lg bg-primary/20 p-2.5 text-primary">
               <FileText className="h-5 w-5" />
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Ativos</p>
+              <p className="text-sm text-text-secondary">Ativos</p>
               <p className="mt-1 text-2xl font-bold text-green-400">{templates.filter((t) => t.is_active).length}</p>
             </div>
             <div className="rounded-lg bg-green-500/20 p-2.5 text-green-400">
@@ -188,11 +188,11 @@ export default function ReportsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Gerados</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{logs.length}</p>
+              <p className="text-sm text-text-secondary">Gerados</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{logs.length}</p>
             </div>
             <div className="rounded-lg bg-blue-500/20 p-2.5 text-blue-400">
               <Clock className="h-5 w-5" />
@@ -202,12 +202,12 @@ export default function ReportsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex gap-1 rounded-lg border border-gray-800 bg-gray-900 p-1 w-fit">
+      <div className="mb-4 flex gap-1 rounded-lg border border-border bg-background-secondary p-1 w-fit">
         <button
           onClick={() => setActiveTab("templates")}
           className={cn(
             "rounded-md px-4 py-2 text-sm font-medium transition",
-            activeTab === "templates" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-100"
+            activeTab === "templates" ? "bg-primary text-gray-900" : "text-text-secondary hover:text-text-primary"
           )}
         >
           Templates
@@ -216,7 +216,7 @@ export default function ReportsPage() {
           onClick={() => setActiveTab("history")}
           className={cn(
             "rounded-md px-4 py-2 text-sm font-medium transition",
-            activeTab === "history" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-100"
+            activeTab === "history" ? "bg-primary text-gray-900" : "text-text-secondary hover:text-text-primary"
           )}
         >
           Historico
@@ -225,11 +225,11 @@ export default function ReportsPage() {
 
       {/* Templates Tab */}
       {activeTab === "templates" && (
-        <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+        <div className="overflow-hidden rounded-xl border border-border bg-background-secondary">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-gray-400">
+                <tr className="border-b border-border text-text-secondary">
                   <th className="px-4 py-3 font-medium">Nome</th>
                   <th className="px-4 py-3 font-medium">Tipo</th>
                   <th className="px-4 py-3 font-medium">Status</th>
@@ -241,13 +241,13 @@ export default function ReportsPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                    <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
                       Carregando templates...
                     </td>
                   </tr>
                 ) : templates.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                    <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
                       Nenhum template encontrado.
                     </td>
                   </tr>
@@ -255,11 +255,11 @@ export default function ReportsPage() {
                   templates.map((template) => {
                     const typeCfg = TYPE_CONFIG[template.template_type] || TYPE_CONFIG.custom;
                     return (
-                      <tr key={template.id} className="border-b border-gray-800/50 transition hover:bg-gray-800/40">
+                      <tr key={template.id} className="border-b border-border/50 transition hover:bg-surface-hover/40">
                         <td className="px-4 py-3">
-                          <span className="font-medium text-gray-100">{template.name}</span>
+                          <span className="font-medium text-text-primary">{template.name}</span>
                           {template.description && (
-                            <p className="mt-0.5 text-xs text-gray-500 truncate max-w-xs">{template.description}</p>
+                            <p className="mt-0.5 text-xs text-text-muted truncate max-w-xs">{template.description}</p>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -268,31 +268,31 @@ export default function ReportsPage() {
                         <td className="px-4 py-3">
                           <Badge
                             text={template.is_active ? "Ativo" : "Inativo"}
-                            className={template.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}
+                            className={template.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-text-secondary"}
                           />
                         </td>
-                        <td className="px-4 py-3 text-gray-400">{template.created_by_name || "—"}</td>
-                        <td className="px-4 py-3 text-gray-500">{fmtDate(template.created_at)}</td>
+                        <td className="px-4 py-3 text-text-secondary">{template.created_by_name || "—"}</td>
+                        <td className="px-4 py-3 text-text-muted">{fmtDate(template.created_at)}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() => handleGenerate(template.id)}
                               disabled={generating === template.id}
-                              className="rounded p-1.5 text-gray-500 transition hover:bg-green-500/10 hover:text-green-400 disabled:opacity-50"
+                              className="rounded p-1.5 text-text-muted transition hover:bg-green-500/10 hover:text-green-400 disabled:opacity-50"
                               title="Gerar Relatorio"
                             >
                               <Play className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => openEditModal(template)}
-                              className="rounded p-1.5 text-gray-500 transition hover:bg-indigo-500/10 hover:text-indigo-400"
+                              className="rounded p-1.5 text-text-muted transition hover:bg-primary/10 hover:text-primary"
                               title="Editar"
                             >
                               <Edit2 className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(template.id)}
-                              className="rounded p-1.5 text-gray-500 transition hover:bg-red-500/10 hover:text-red-400"
+                              className="rounded p-1.5 text-text-muted transition hover:bg-red-500/10 hover:text-red-400"
                               title="Excluir"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -311,11 +311,11 @@ export default function ReportsPage() {
 
       {/* History Tab */}
       {activeTab === "history" && (
-        <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+        <div className="overflow-hidden rounded-xl border border-border bg-background-secondary">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-gray-400">
+                <tr className="border-b border-border text-text-secondary">
                   <th className="px-4 py-3 font-medium">Template</th>
                   <th className="px-4 py-3 font-medium">Gerado por</th>
                   <th className="px-4 py-3 font-medium">Data</th>
@@ -324,22 +324,22 @@ export default function ReportsPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-12 text-center text-gray-500">
+                    <td colSpan={3} className="px-4 py-12 text-center text-text-muted">
                       Carregando historico...
                     </td>
                   </tr>
                 ) : logs.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-12 text-center text-gray-500">
+                    <td colSpan={3} className="px-4 py-12 text-center text-text-muted">
                       Nenhum relatorio gerado ainda.
                     </td>
                   </tr>
                 ) : (
                   logs.map((log) => (
-                    <tr key={log.id} className="border-b border-gray-800/50 transition hover:bg-gray-800/40">
-                      <td className="px-4 py-3 font-medium text-gray-100">{log.template_name || log.template}</td>
-                      <td className="px-4 py-3 text-gray-400">{log.generated_by_name || "—"}</td>
-                      <td className="px-4 py-3 text-gray-500">{fmtDateTime(log.created_at)}</td>
+                    <tr key={log.id} className="border-b border-border/50 transition hover:bg-surface-hover/40">
+                      <td className="px-4 py-3 font-medium text-text-primary">{log.template_name || log.template}</td>
+                      <td className="px-4 py-3 text-text-secondary">{log.generated_by_name || "—"}</td>
+                      <td className="px-4 py-3 text-text-muted">{fmtDateTime(log.created_at)}</td>
                     </tr>
                   ))
                 )}
@@ -352,43 +352,43 @@ export default function ReportsPage() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-100">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-background-secondary shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-text-primary">
                 {editingTemplate ? "Editar Template" : "Novo Template"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-300">
+              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-primary">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Nome *</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Nome *</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Nome do template"
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-indigo-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Descricao</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Descricao</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={2}
                   placeholder="Descricao do template..."
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-indigo-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Tipo</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Tipo</label>
                   <select
                     value={form.template_type}
                     onChange={(e) => setForm({ ...form, template_type: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-indigo-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-primary"
                   >
                     {Object.entries(TYPE_CONFIG).map(([k, v]) => (
                       <option key={k} value={k}>{v.label}</option>
@@ -396,7 +396,7 @@ export default function ReportsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Status</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Status</label>
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, is_active: !form.is_active })}
@@ -404,7 +404,7 @@ export default function ReportsPage() {
                       "flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm transition",
                       form.is_active
                         ? "border-green-700/50 bg-green-950/20 text-green-400"
-                        : "border-gray-700 bg-gray-950 text-gray-400"
+                        : "border-border bg-background text-text-secondary"
                     )}
                   >
                     {form.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
@@ -413,17 +413,17 @@ export default function ReportsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">
+            <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition hover:bg-gray-800"
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary transition hover:bg-surface-hover"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.name.trim()}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-primary-hover disabled:opacity-50"
               >
                 {saving ? "Salvando..." : editingTemplate ? "Salvar" : "Criar Template"}
               </button>

@@ -35,7 +35,7 @@ export default function TokenUsageDisplay({
 
   if (compact) {
     return (
-      <div className={cn("flex items-center gap-2 text-xs text-gray-500", className)}>
+      <div className={cn("flex items-center gap-2 text-xs text-text-muted", className)}>
         <Zap className="h-3 w-3" />
         <span>{usage.total_tokens.toLocaleString()} tokens</span>
         {showCost && cost > 0 && (
@@ -50,13 +50,13 @@ export default function TokenUsageDisplay({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "rounded-lg border border-gray-200 bg-gray-50/50 p-3",
+        "rounded-lg border border-border bg-background-secondary/50 p-3",
         className
       )}
     >
       <div className="flex items-center gap-2 mb-2">
         <Activity className="h-4 w-4 text-purple-500" />
-        <span className="text-sm font-medium text-gray-700">Token Usage</span>
+        <span className="text-sm font-medium text-text-secondary">Token Usage</span>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -66,8 +66,8 @@ export default function TokenUsageDisplay({
             <ArrowDown className="h-3 w-3 text-blue-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Input</p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-xs text-text-muted">Input</p>
+            <p className="text-sm font-semibold text-text-primary">
               {usage.input_tokens.toLocaleString()}
             </p>
           </div>
@@ -79,8 +79,8 @@ export default function TokenUsageDisplay({
             <ArrowUp className="h-3 w-3 text-green-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Output</p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-xs text-text-muted">Output</p>
+            <p className="text-sm font-semibold text-text-primary">
               {usage.output_tokens.toLocaleString()}
             </p>
           </div>
@@ -92,8 +92,8 @@ export default function TokenUsageDisplay({
             <Zap className="h-3 w-3 text-purple-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Total</p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-xs text-text-muted">Total</p>
+            <p className="text-sm font-semibold text-text-primary">
               {usage.total_tokens.toLocaleString()}
             </p>
           </div>
@@ -102,8 +102,8 @@ export default function TokenUsageDisplay({
 
       {/* Thinking Tokens (if available) */}
       {usage.thinking_tokens && usage.thinking_tokens > 0 && (
-        <div className="mt-2 pt-2 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div className="mt-2 pt-2 border-t border-border">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
             <span className="text-purple-500">🧠</span>
             <span>Thinking: {usage.thinking_tokens.toLocaleString()} tokens</span>
           </div>
@@ -112,10 +112,10 @@ export default function TokenUsageDisplay({
 
       {/* Cost Display */}
       {showCost && cost > 0 && (
-        <div className="mt-2 pt-2 border-t border-gray-200">
+        <div className="mt-2 pt-2 border-t border-border">
           <div className="flex items-center gap-2">
             <DollarSign className="h-3 w-3 text-green-600" />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-text-muted">
               Estimated cost: <span className="font-semibold text-green-600">${cost.toFixed(4)}</span>
             </span>
           </div>

@@ -209,7 +209,7 @@ export default function TelegramPage() {
               type="button"
               onClick={createBot}
               disabled={!canCreate || creating}
-              className="mt-3 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors flex items-center gap-2"
+              className="mt-3 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors flex items-center gap-2"
             >
               {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Criar bot
@@ -270,7 +270,7 @@ export default function TelegramPage() {
                       <button
                         type="button"
                         onClick={() => setWebhook(b.id)}
-                        className="px-3 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2"
+                        className="px-3 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors flex items-center gap-2"
                       >
                         <LinkIcon className="w-4 h-4" />
                         Set webhook

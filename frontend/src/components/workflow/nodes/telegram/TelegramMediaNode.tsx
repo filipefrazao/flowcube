@@ -204,15 +204,15 @@ function TelegramMediaNodeComponent({ data, selected }: TelegramMediaNodeProps) 
 
   const defaultColors = {
     gradient: 'from-gray-50 to-gray-100',
-    border: 'border-gray-300',
+    border: 'border-border',
     borderSelected: 'border-gray-400',
     ring: 'ring-gray-500',
-    header: 'border-gray-300',
-    icon: 'bg-gray-100',
-    iconText: 'text-gray-600',
-    title: 'text-gray-700',
-    subtitle: 'text-gray-500',
-    badge: 'bg-gray-100 text-gray-700',
+    header: 'border-border',
+    icon: 'bg-surface-hover',
+    iconText: 'text-text-muted',
+    title: 'text-text-secondary',
+    subtitle: 'text-text-muted',
+    badge: 'bg-surface-hover text-text-secondary',
     handle: 'bg-gray-500',
   };
   const colors = colorClasses[mediaConfig.color as keyof typeof colorClasses] || colorClasses.blue || defaultColors;
@@ -244,18 +244,18 @@ function TelegramMediaNodeComponent({ data, selected }: TelegramMediaNodeProps) 
       </div>
 
       {/* Content */}
-      <div className="p-3 bg-white/50 dark:bg-gray-900/50 space-y-2">
+      <div className="p-3 bg-surface/50 dark:bg-background-secondary/50 space-y-2">
         {/* Target */}
         <div className="text-xs">
-          <span className="text-gray-500">To:</span>
-          <span className="ml-1 text-gray-700 dark:text-gray-300 font-mono">
+          <span className="text-text-muted">To:</span>
+          <span className="ml-1 text-text-secondary dark:text-text-primary font-mono">
             {chatTarget}
           </span>
         </div>
 
         {/* Media source */}
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-gray-500">Source:</span>
+          <span className="text-text-muted">Source:</span>
           <span className={cn('px-2 py-0.5 rounded-full flex items-center gap-1', colors.badge)}>
             {data.config?.media_source === 'url' && <LinkIcon className="w-3 h-3" />}
             {data.config?.media_source === 'variable' && <Variable className="w-3 h-3" />}
@@ -266,8 +266,8 @@ function TelegramMediaNodeComponent({ data, selected }: TelegramMediaNodeProps) 
 
         {/* Caption preview */}
         {data.config?.caption_template && (
-          <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+          <div className="p-2 bg-surface-hover dark:bg-surface rounded-lg">
+            <p className="text-xs text-text-muted dark:text-text-secondary truncate">
               {data.config.caption_template.substring(0, 50)}
               {data.config.caption_template.length > 50 ? '...' : ''}
             </p>
@@ -277,17 +277,17 @@ function TelegramMediaNodeComponent({ data, selected }: TelegramMediaNodeProps) 
         {/* Options badges */}
         <div className="flex items-center gap-2 flex-wrap">
           {data.config?.has_spoiler && (
-            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-surface-hover dark:bg-surface text-text-muted dark:text-text-secondary text-xs rounded-full">
               Spoiler
             </span>
           )}
           {data.config?.protect_content && (
-            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-surface-hover dark:bg-surface text-text-muted dark:text-text-secondary text-xs rounded-full">
               Protected
             </span>
           )}
           {data.config?.disable_notification && (
-            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-surface-hover dark:bg-surface text-text-muted dark:text-text-secondary text-xs rounded-full">
               Silent
             </span>
           )}
@@ -295,15 +295,15 @@ function TelegramMediaNodeComponent({ data, selected }: TelegramMediaNodeProps) 
 
         {/* Stats */}
         {data.stats && (
-          <div className="flex justify-between text-xs pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex justify-between text-xs pt-2 border-t border-border/50 dark:border-border/50">
             <div>
-              <span className="text-gray-500">Sent:</span>
-              <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-text-muted">Sent:</span>
+              <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
                 {data.stats.media_sent}
               </span>
             </div>
             <div>
-              <span className="text-gray-500">Success:</span>
+              <span className="text-text-muted">Success:</span>
               <span
                 className={cn(
                   'ml-1 font-mono font-medium',

@@ -67,7 +67,7 @@ const SalesCubeNode = ({ data, selected }: SalesCubeNodeProps) => {
   return (
     <div
       className={cn(
-        "relative rounded-lg shadow-md transition-all duration-200 min-w-[220px] bg-white",
+        "relative rounded-lg shadow-md transition-all duration-200 min-w-[220px] bg-surface",
         selected ? "ring-2 ring-blue-500" : "",
         "border-2 border-blue-400 hover:shadow-lg"
       )}
@@ -76,15 +76,15 @@ const SalesCubeNode = ({ data, selected }: SalesCubeNodeProps) => {
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 rounded-t-lg" />
 
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 pt-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div className="flex items-center gap-3 p-3 pt-4 border-b border-border bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="p-2 rounded-lg bg-blue-100">
           <ActionIcon className={cn("w-5 h-5", actionInfo.color)} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-800 truncate">
+          <div className="font-semibold text-sm text-text-primary truncate">
             {data.label || actionInfo.label}
           </div>
-          <div className="text-xs text-gray-500">SalesCube CRM</div>
+          <div className="text-xs text-text-muted">SalesCube CRM</div>
         </div>
         {StatusIcon}
       </div>
@@ -93,7 +93,7 @@ const SalesCubeNode = ({ data, selected }: SalesCubeNodeProps) => {
       <div className="p-3 space-y-2">
         {/* Action */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">Action</span>
+          <span className="text-xs text-text-muted">Action</span>
           <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
             {actionInfo.label}
           </span>
@@ -104,14 +104,14 @@ const SalesCubeNode = ({ data, selected }: SalesCubeNodeProps) => {
           <div className="grid grid-cols-2 gap-2 text-xs">
             {config.channel && (
               <div>
-                <span className="text-gray-400">Channel</span>
-                <span className="ml-1 font-mono text-gray-700">#{config.channel}</span>
+                <span className="text-text-secondary">Channel</span>
+                <span className="ml-1 font-mono text-text-secondary">#{config.channel}</span>
               </div>
             )}
             {config.column && (
               <div>
-                <span className="text-gray-400">Column</span>
-                <span className="ml-1 font-mono text-gray-700">#{config.column}</span>
+                <span className="text-text-secondary">Column</span>
+                <span className="ml-1 font-mono text-text-secondary">#{config.column}</span>
               </div>
             )}
           </div>
@@ -119,14 +119,14 @@ const SalesCubeNode = ({ data, selected }: SalesCubeNodeProps) => {
 
         {/* Mapping count */}
         {mappingCount > 0 && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-text-muted">
             <span className="font-medium">{mappingCount}</span> fields mapped
           </div>
         )}
 
         {/* Last Response */}
         {data.lastResponse && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
+          <div className="mt-2 pt-2 border-t border-border">
             {data.lastResponse.lead_id && (
               <div className="text-xs text-green-600">
                 Created: Lead <span className="font-mono font-bold">#{data.lastResponse.lead_id}</span>

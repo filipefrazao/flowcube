@@ -125,18 +125,18 @@ function TelegramSendNodeComponent({ data, selected }: TelegramSendNodeProps) {
       </div>
 
       {/* Content */}
-      <div className="p-3 bg-white/50 dark:bg-gray-900/50 space-y-2">
+      <div className="p-3 bg-surface/50 dark:bg-background-secondary/50 space-y-2">
         {/* Target */}
         <div className="text-xs">
-          <span className="text-gray-500">To:</span>
-          <span className="ml-1 text-gray-700 dark:text-gray-300 font-mono">
+          <span className="text-text-muted">To:</span>
+          <span className="ml-1 text-text-secondary dark:text-text-primary font-mono">
             {chatTarget}
           </span>
         </div>
 
         {/* Message preview */}
-        <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+        <div className="p-2 bg-surface-hover dark:bg-surface rounded-lg">
+          <p className="text-xs text-text-muted dark:text-text-secondary truncate">
             {previewText}
           </p>
         </div>
@@ -163,15 +163,15 @@ function TelegramSendNodeComponent({ data, selected }: TelegramSendNodeProps) {
 
         {/* Stats */}
         {data.stats && (
-          <div className="flex justify-between text-xs pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex justify-between text-xs pt-2 border-t border-border/50 dark:border-border/50">
             <div>
-              <span className="text-gray-500">Sent:</span>
-              <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-text-muted">Sent:</span>
+              <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
                 {data.stats.messages_sent}
               </span>
             </div>
             <div>
-              <span className="text-gray-500">Success:</span>
+              <span className="text-text-muted">Success:</span>
               <span
                 className={cn(
                   'ml-1 font-mono font-medium',

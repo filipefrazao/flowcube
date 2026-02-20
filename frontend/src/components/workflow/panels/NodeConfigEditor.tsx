@@ -90,7 +90,7 @@ export default function NodeConfigEditor({ className }: NodeConfigEditorProps) {
       break;
     default:
       configEditor = (
-        <div className={cn("text-sm text-gray-500 p-4", className)}>
+        <div className={cn("text-sm text-text-muted p-4", className)}>
           No configuration options for this node type.
         </div>
       );
@@ -126,7 +126,7 @@ function HttpConfigEditor({
     <div className={cn("space-y-4", className)}>
       {/* Method */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           <Globe className="w-4 h-4 inline mr-1" />
           Method
         </label>
@@ -139,7 +139,7 @@ function HttpConfigEditor({
                 "flex-1 px-2 py-1.5 text-xs font-mono rounded border transition-colors",
                 config.method === method
                   ? "bg-blue-100 border-blue-300 text-blue-700"
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-surface border-border text-text-muted hover:bg-background-secondary"
               )}
             >
               {method}
@@ -150,7 +150,7 @@ function HttpConfigEditor({
 
       {/* URL */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           URL
         </label>
         <input
@@ -158,16 +158,16 @@ function HttpConfigEditor({
           value={(config.url as string) || ""}
           onChange={(e) => updateConfig("url", e.target.value)}
           placeholder="https://api.example.com/endpoint"
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-text-secondary mt-1">
           Use {"{{variable}}"} for dynamic values
         </p>
       </div>
 
       {/* Headers */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Headers
         </label>
         <HeadersEditor
@@ -179,7 +179,7 @@ function HttpConfigEditor({
       {/* Body (for POST/PUT/PATCH) */}
       {["POST", "PUT", "PATCH"].includes(config.method as string) && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-text-secondary mb-2">
             Request Body (JSON)
           </label>
           <textarea
@@ -192,7 +192,7 @@ function HttpConfigEditor({
               }
             }}
             rows={4}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono"
+            className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono"
             placeholder='{"key": "value"}'
           />
         </div>
@@ -200,14 +200,14 @@ function HttpConfigEditor({
 
       {/* Timeout */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Timeout (ms)
         </label>
         <input
           type="number"
           value={(config.timeout as number) || 30000}
           onChange={(e) => updateConfig("timeout", parseInt(e.target.value))}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
     </div>
@@ -250,14 +250,14 @@ function HeadersEditor({
             value={key}
             onChange={(e) => updateHeader(key, e.target.value, value)}
             placeholder="Header name"
-            className="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500 font-mono"
+            className="flex-1 px-2 py-1.5 text-xs border border-border rounded focus:ring-1 focus:ring-blue-500 font-mono"
           />
           <input
             type="text"
             value={value}
             onChange={(e) => updateHeader(key, key, e.target.value)}
             placeholder="Value"
-            className="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500 font-mono"
+            className="flex-1 px-2 py-1.5 text-xs border border-border rounded focus:ring-1 focus:ring-blue-500 font-mono"
           />
           <button
             onClick={() => removeHeader(key)}
@@ -301,14 +301,14 @@ function AIConfigEditor({
     <div className={cn("space-y-4", className)}>
       {/* Model */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           <Bot className="w-4 h-4 inline mr-1" />
           Model
         </label>
         <select
           value={(config.model as string) || availableModels[0]}
           onChange={(e) => updateConfig("model", e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           {availableModels.map((model) => (
             <option key={model} value={model}>{model}</option>
@@ -318,21 +318,21 @@ function AIConfigEditor({
 
       {/* System Prompt */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           System Prompt
         </label>
         <textarea
           value={(config.system_prompt as string) || ""}
           onChange={(e) => updateConfig("system_prompt", e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
           placeholder="You are a helpful assistant..."
         />
       </div>
 
       {/* Temperature */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Temperature: {((config.temperature as number) || 0.7).toFixed(1)}
         </label>
         <input
@@ -344,7 +344,7 @@ function AIConfigEditor({
           onChange={(e) => updateConfig("temperature", parseFloat(e.target.value))}
           className="w-full"
         />
-        <div className="flex justify-between text-xs text-gray-400">
+        <div className="flex justify-between text-xs text-text-secondary">
           <span>Focused</span>
           <span>Creative</span>
         </div>
@@ -352,14 +352,14 @@ function AIConfigEditor({
 
       {/* Max Tokens */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Max Tokens
         </label>
         <input
           type="number"
           value={(config.max_tokens as number) || 2000}
           onChange={(e) => updateConfig("max_tokens", parseInt(e.target.value))}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
     </div>
@@ -382,13 +382,13 @@ function WebhookTriggerConfigEditor({
     <div className={cn("space-y-4", className)}>
       {/* Source */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Webhook Source
         </label>
         <select
           value={(config.source as string) || "evolution"}
           onChange={(e) => updateConfig("source", e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           {sources.map((source) => (
             <option key={source} value={source}>{source.charAt(0).toUpperCase() + source.slice(1)}</option>
@@ -398,7 +398,7 @@ function WebhookTriggerConfigEditor({
 
       {/* Webhook Path */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Webhook Path
         </label>
         <input
@@ -406,16 +406,16 @@ function WebhookTriggerConfigEditor({
           value={(config.webhook_path as string) || ""}
           onChange={(e) => updateConfig("webhook_path", e.target.value)}
           placeholder="my-workflow"
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-text-secondary mt-1">
           URL: /api/v1/webhooks/{(config.webhook_path as string) || "my-workflow"}
         </p>
       </div>
 
       {/* Secret */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Secret (optional)
         </label>
         <input
@@ -423,7 +423,7 @@ function WebhookTriggerConfigEditor({
           value={(config.secret as string) || ""}
           onChange={(e) => updateConfig("secret", e.target.value)}
           placeholder="Webhook secret for validation"
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
     </div>
@@ -446,14 +446,14 @@ function TextResponseConfigEditor({
     <div className={cn("space-y-4", className)}>
       {/* Channel */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           <MessageSquare className="w-4 h-4 inline mr-1" />
           Channel
         </label>
         <select
           value={(config.channel as string) || "whatsapp"}
           onChange={(e) => updateConfig("channel", e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           {channels.map((channel) => (
             <option key={channel} value={channel}>{channel.charAt(0).toUpperCase() + channel.slice(1)}</option>
@@ -463,31 +463,31 @@ function TextResponseConfigEditor({
 
       {/* Message Text */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Message
         </label>
         <textarea
           value={(config.text as string) || ""}
           onChange={(e) => updateConfig("text", e.target.value)}
           rows={5}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
           placeholder="Hello {{name}}! Your order is ready."
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-text-secondary mt-1">
           Use {"{{variable}}"} for dynamic content
         </p>
       </div>
 
       {/* Delay */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Delay (ms)
         </label>
         <input
           type="number"
           value={(config.delay_ms as number) || 0}
           onChange={(e) => updateConfig("delay_ms", parseInt(e.target.value))}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
           placeholder="0"
         />
       </div>
@@ -539,14 +539,14 @@ function ConditionConfigEditor({
   return (
     <div className={cn("space-y-4", className)}>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           <GitBranch className="w-4 h-4 inline mr-1" />
           Conditions
         </label>
 
         <div className="space-y-3">
           {conditions.map((condition, idx) => (
-            <div key={condition.id} className="p-3 bg-gray-50 rounded-lg space-y-2">
+            <div key={condition.id} className="p-3 bg-background-secondary rounded-lg space-y-2">
               <div className="flex items-center justify-between">
                 <input
                   type="text"
@@ -568,14 +568,14 @@ function ConditionConfigEditor({
                 value={condition.field}
                 onChange={(e) => updateCondition(idx, { field: e.target.value })}
                 placeholder="Field (e.g., intent, message)"
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
+                className="w-full px-2 py-1.5 text-xs border border-border rounded focus:ring-1 focus:ring-blue-500"
               />
 
               <div className="flex gap-2">
                 <select
                   value={condition.operator}
                   onChange={(e) => updateCondition(idx, { operator: e.target.value })}
-                  className="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
+                  className="flex-1 px-2 py-1.5 text-xs border border-border rounded focus:ring-1 focus:ring-blue-500"
                 >
                   {operators.map((op) => (
                     <option key={op.value} value={op.value}>{op.label}</option>
@@ -588,7 +588,7 @@ function ConditionConfigEditor({
                     value={condition.value}
                     onChange={(e) => updateCondition(idx, { value: e.target.value })}
                     placeholder="Value"
-                    className="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
+                    className="flex-1 px-2 py-1.5 text-xs border border-border rounded focus:ring-1 focus:ring-blue-500"
                   />
                 )}
               </div>
@@ -606,14 +606,14 @@ function ConditionConfigEditor({
 
       {/* Default Output */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Default Branch (else)
         </label>
         <input
           type="text"
           value={(config.default_output as string) || "else"}
           onChange={(e) => updateConfig("default_output", e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
     </div>
@@ -634,14 +634,14 @@ function SalesCubeConfigEditor({
     <div className={cn("space-y-4", className)}>
       {/* Action */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           <Users className="w-4 h-4 inline mr-1" />
           Action
         </label>
         <select
           value={(config.action as string) || "create_lead"}
           onChange={(e) => updateConfig("action", e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           <option value="create_lead">Create Lead</option>
           <option value="update_lead">Update Lead</option>
@@ -651,7 +651,7 @@ function SalesCubeConfigEditor({
 
       {/* Channel */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Channel ID
         </label>
         <input
@@ -659,13 +659,13 @@ function SalesCubeConfigEditor({
           value={(config.channel as number) || ""}
           onChange={(e) => updateConfig("channel", parseInt(e.target.value))}
           placeholder="78"
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {/* Column */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Column ID
         </label>
         <input
@@ -673,13 +673,13 @@ function SalesCubeConfigEditor({
           value={(config.column as number) || ""}
           onChange={(e) => updateConfig("column", parseInt(e.target.value))}
           placeholder="48"
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {/* Origin */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Origin ID
         </label>
         <input
@@ -687,32 +687,32 @@ function SalesCubeConfigEditor({
           value={(config.origin as number) || ""}
           onChange={(e) => updateConfig("origin", parseInt(e.target.value))}
           placeholder="11"
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {/* Field Mapping */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Field Mapping
         </label>
         <div className="space-y-2 text-xs">
           <div className="flex gap-2">
-            <span className="w-20 text-gray-500">name →</span>
+            <span className="w-20 text-text-muted">name →</span>
             <input
               type="text"
               value={((config.mapping as Record<string, string>) || {}).name || "{{contact_name}}"}
               onChange={(e) => updateConfig("mapping", { ...((config.mapping as Record<string, string>) || {}), name: e.target.value })}
-              className="flex-1 px-2 py-1 border border-gray-200 rounded font-mono"
+              className="flex-1 px-2 py-1 border border-border rounded font-mono"
             />
           </div>
           <div className="flex gap-2">
-            <span className="w-20 text-gray-500">phone →</span>
+            <span className="w-20 text-text-muted">phone →</span>
             <input
               type="text"
               value={((config.mapping as Record<string, string>) || {}).phone || "{{phone}}"}
               onChange={(e) => updateConfig("mapping", { ...((config.mapping as Record<string, string>) || {}), phone: e.target.value })}
-              className="flex-1 px-2 py-1 border border-gray-200 rounded font-mono"
+              className="flex-1 px-2 py-1 border border-border rounded font-mono"
             />
           </div>
         </div>
@@ -742,10 +742,10 @@ function ErrorHandlingSection({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border-t border-gray-200 mt-4 pt-4">
+    <div className="border-t border-border mt-4 pt-4">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-800 w-full"
+        className="flex items-center gap-2 text-sm font-medium text-text-muted hover:text-text-primary w-full"
       >
         {expanded ? (
           <ChevronDown className="w-4 h-4" />
@@ -754,7 +754,7 @@ function ErrorHandlingSection({
         )}
         <ShieldAlert className="w-4 h-4" />
         Error Handling
-        <span className="ml-auto text-xs text-gray-400 capitalize">
+        <span className="ml-auto text-xs text-text-secondary capitalize">
           {errorHandling}
         </span>
       </button>
@@ -770,7 +770,7 @@ function ErrorHandlingSection({
                   "flex items-start gap-2 p-2 rounded-lg cursor-pointer border transition-colors",
                   errorHandling === type.value
                     ? "border-blue-300 bg-blue-50"
-                    : "border-transparent hover:bg-gray-50"
+                    : "border-transparent hover:bg-background-secondary"
                 )}
               >
                 <input
@@ -782,8 +782,8 @@ function ErrorHandlingSection({
                   className="mt-0.5"
                 />
                 <div>
-                  <div className="text-xs font-medium text-gray-700">{type.label}</div>
-                  <div className="text-[10px] text-gray-500">{type.description}</div>
+                  <div className="text-xs font-medium text-text-secondary">{type.label}</div>
+                  <div className="text-[10px] text-text-muted">{type.description}</div>
                 </div>
               </label>
             ))}
@@ -792,7 +792,7 @@ function ErrorHandlingSection({
           {/* Fallback Output (only for resume) */}
           {errorHandling === "resume" && (
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-text-muted mb-1">
                 Fallback Output (JSON)
               </label>
               <textarea
@@ -805,7 +805,7 @@ function ErrorHandlingSection({
                   }
                 }}
                 rows={3}
-                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono"
+                className="w-full px-3 py-2 text-xs border border-border rounded-lg focus:ring-2 focus:ring-blue-500 font-mono"
                 placeholder='{"default": "value"}'
               />
             </div>

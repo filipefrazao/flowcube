@@ -149,9 +149,9 @@ function statusBadge(status: string) {
       return "bg-yellow-500/15 text-yellow-400 border-yellow-500/30";
     case "archived":
     case "inactive":
-      return "bg-gray-500/15 text-gray-400 border-gray-500/30";
+      return "bg-gray-500/15 text-text-secondary border-gray-500/30";
     default:
-      return "bg-gray-500/15 text-gray-300 border-gray-500/30";
+      return "bg-gray-500/15 text-text-primary border-gray-500/30";
   }
 }
 
@@ -200,15 +200,15 @@ function categoryColor(category: string) {
     case "app":
       return "bg-purple-500/15 text-purple-400 border-purple-500/30";
     case "checkout":
-      return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+      return "bg-emerald-500/15 text-primary border-primary/30";
     case "education":
       return "bg-amber-500/15 text-amber-400 border-amber-500/30";
     case "forms":
       return "bg-cyan-500/15 text-cyan-400 border-cyan-500/30";
     case "infra":
-      return "bg-gray-500/15 text-gray-400 border-gray-500/30";
+      return "bg-gray-500/15 text-text-secondary border-gray-500/30";
     default:
-      return "bg-gray-500/15 text-gray-300 border-gray-500/30";
+      return "bg-gray-500/15 text-text-primary border-gray-500/30";
   }
 }
 
@@ -308,7 +308,7 @@ export default function PageCubePage() {
               type="button"
               onClick={handleCreate}
               disabled={creating}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-white font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-text-primary font-medium transition-colors"
             >
               {creating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -385,7 +385,7 @@ export default function PageCubePage() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
                 activeTab === "sites"
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-gray-900"
                   : "text-text-muted hover:text-text-secondary"
               )}
             >
@@ -398,7 +398,7 @@ export default function PageCubePage() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
                 activeTab === "pages"
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-gray-900"
                   : "text-text-muted hover:text-text-secondary"
               )}
             >
@@ -510,7 +510,7 @@ export default function PageCubePage() {
                             href={site.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors"
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                             Visitar
@@ -572,7 +572,7 @@ export default function PageCubePage() {
                     type="button"
                     onClick={handleCreate}
                     disabled={creating}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Criar Pagina

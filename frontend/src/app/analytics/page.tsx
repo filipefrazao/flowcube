@@ -51,19 +51,19 @@ function MetricCard({ title, value, change, icon, color, loading }: MetricCardPr
       <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", colorClasses[color])} />
       <div className="relative">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-400 font-medium">{title}</span>
-          <div className={cn("p-2 rounded-lg bg-gray-800/50", colorClasses[color].split(" ")[2])}>
+          <span className="text-sm text-text-secondary font-medium">{title}</span>
+          <div className={cn("p-2 rounded-lg bg-surface/50", colorClasses[color].split(" ")[2])}>
             {icon}
           </div>
         </div>
         {loading ? (
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
         ) : (
           <>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-bold text-white"
+              className="text-3xl font-bold text-text-primary"
             >
               {value}
             </motion.div>
@@ -74,7 +74,7 @@ function MetricCard({ title, value, change, icon, color, loading }: MetricCardPr
               )}>
                 {change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                 <span>{Math.abs(change).toFixed(1)}%</span>
-                <span className="text-gray-500">vs periodo anterior</span>
+                <span className="text-text-muted">vs periodo anterior</span>
               </div>
             )}
           </>
@@ -154,16 +154,16 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-text-primary flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-purple-400" />
               Analytics
             </h1>
-            <p className="text-sm text-gray-400">Insights e metricas em tempo real</p>
+            <p className="text-sm text-text-secondary">Insights e metricas em tempo real</p>
           </motion.div>
 
           <div className="flex items-center gap-3">
             {/* Period Selector */}
-            <div className="flex bg-gray-800/50 rounded-lg p-1">
+            <div className="flex bg-surface/50 rounded-lg p-1">
               {(["7d", "30d", "90d"] as const).map((p) => (
                 <button
                   key={p}
@@ -172,7 +172,7 @@ export default function AnalyticsPage() {
                     "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
                     period === p
                       ? "bg-purple-500/20 text-purple-400"
-                      : "text-gray-400 hover:text-white"
+                      : "text-text-secondary hover:text-text-primary"
                   )}
                 >
                   {p === "7d" ? "7 dias" : p === "30d" ? "30 dias" : "90 dias"}
@@ -182,7 +182,7 @@ export default function AnalyticsPage() {
 
             <button
               onClick={handleRefresh}
-              className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
+              className="p-2 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-hover/50"
             >
               <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
             </button>
@@ -256,7 +256,7 @@ export default function AnalyticsPage() {
                 >
                   <GlassCard className="h-full">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                         <Activity className="w-5 h-5 text-purple-400" />
                         Atividade Diaria
                       </h3>
@@ -269,8 +269,8 @@ export default function AnalyticsPage() {
                     ) : dailyCounts.length === 0 ? (
                       <div className="h-48 flex items-center justify-center">
                         <div className="text-center">
-                          <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-                          <p className="text-gray-500">Nenhuma execucao registrada</p>
+                          <BarChart3 className="w-12 h-12 text-text-muted mx-auto mb-2" />
+                          <p className="text-text-muted">Nenhuma execucao registrada</p>
                         </div>
                       </div>
                     ) : (
@@ -293,7 +293,7 @@ export default function AnalyticsPage() {
                                 )}
                                 title={`${day.count} execucoes`}
                               />
-                              <span className="text-xs text-gray-500">{dayLabel}</span>
+                              <span className="text-xs text-text-muted">{dayLabel}</span>
                             </div>
                           );
                         })}
@@ -309,7 +309,7 @@ export default function AnalyticsPage() {
                   transition={{ delay: 0.3 }}
                 >
                   <GlassCard className="h-full">
-                    <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-text-primary mb-6 flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-400" />
                       Status das Conversas
                     </h3>
@@ -359,7 +359,7 @@ export default function AnalyticsPage() {
                   transition={{ delay: 0.4 }}
                 >
                   <GlassCard>
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                       <Zap className="w-5 h-5 text-yellow-400" />
                       Workflows Ativos
                     </h3>
@@ -370,8 +370,8 @@ export default function AnalyticsPage() {
                       </div>
                     ) : workflows.length === 0 ? (
                       <div className="text-center py-8">
-                        <Zap className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-                        <p className="text-gray-500">Nenhum workflow criado</p>
+                        <Zap className="w-12 h-12 text-text-muted mx-auto mb-2" />
+                        <p className="text-text-muted">Nenhum workflow criado</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -381,20 +381,20 @@ export default function AnalyticsPage() {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.5 + idx * 0.05 }}
-                            className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
+                            className="flex items-center justify-between p-3 rounded-lg bg-surface/30 hover:bg-surface-hover/50 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <div className={cn(
                                 "w-2 h-2 rounded-full",
                                 workflow.is_published ? "bg-green-400" : "bg-gray-500"
                               )} />
-                              <span className="font-medium text-white">{workflow.name}</span>
+                              <span className="font-medium text-text-primary">{workflow.name}</span>
                             </div>
                             <span className={cn(
                               "text-xs px-2 py-1 rounded",
                               workflow.is_published 
                                 ? "bg-green-500/20 text-green-400" 
-                                : "bg-gray-500/20 text-gray-400"
+                                : "bg-gray-500/20 text-text-secondary"
                             )}>
                               {workflow.is_published ? "Publicado" : "Rascunho"}
                             </span>
@@ -412,7 +412,7 @@ export default function AnalyticsPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <GlassCard>
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                       <Activity className="w-5 h-5 text-cyan-400" />
                       Execucoes por Status
                     </h3>
@@ -431,10 +431,10 @@ export default function AnalyticsPage() {
                     )}
 
                     {executionStats && (executionStats.avg_duration_ms ?? 0) > 0 && (
-                      <div className="mt-4 pt-4 border-t border-gray-700/50">
+                      <div className="mt-4 pt-4 border-t border-border/50">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-400">Tempo medio de execucao</span>
-                          <span className="text-lg font-semibold text-white">
+                          <span className="text-sm text-text-secondary">Tempo medio de execucao</span>
+                          <span className="text-lg font-semibold text-text-primary">
                             {((executionStats.avg_duration_ms ?? 1) / 1000).toFixed(2)}s
                           </span>
                         </div>
@@ -457,10 +457,10 @@ function StatusBar({ label, value, total, color }: { label: string; value: numbe
   return (
     <div>
       <div className="flex items-center justify-between text-sm mb-1">
-        <span className="text-gray-400">{label}</span>
-        <span className="text-white font-medium">{value}</span>
+        <span className="text-text-secondary">{label}</span>
+        <span className="text-text-primary font-medium">{value}</span>
       </div>
-      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-surface rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
@@ -474,8 +474,8 @@ function StatusBar({ label, value, total, color }: { label: string; value: numbe
 
 function StatBox({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="p-4 rounded-lg bg-gray-800/30">
-      <p className="text-sm text-gray-400 mb-1">{label}</p>
+    <div className="p-4 rounded-lg bg-surface/30">
+      <p className="text-sm text-text-secondary mb-1">{label}</p>
       <p className={cn("text-2xl font-bold", color)}>{value.toLocaleString()}</p>
     </div>
   );

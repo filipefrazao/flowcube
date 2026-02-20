@@ -114,7 +114,7 @@ export default function CampaignsPage() {
             <Megaphone className="w-5 h-5 text-primary" />
             <h1 className="text-lg font-semibold text-text-primary">Campanhas</h1>
           </div>
-          <button onClick={() => setShowWizard(true)} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={() => setShowWizard(true)} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium transition-colors">
             <Plus className="w-4 h-4" /> Nova Campanha
           </button>
         </header>
@@ -186,7 +186,7 @@ export default function CampaignsPage() {
                 {WIZARD_STEPS.map((step, i) => (
                   <div key={i} className="flex items-center gap-1">
                     <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium",
-                      i <= wizardStep ? "bg-primary text-white" : "bg-surface-hover text-text-muted"
+                      i <= wizardStep ? "bg-primary text-gray-900" : "bg-surface-hover text-text-muted"
                     )}>{i + 1}</div>
                     <span className={cn("text-xs whitespace-nowrap", i <= wizardStep ? "text-text-primary" : "text-text-muted")}>{step}</span>
                     {i < WIZARD_STEPS.length - 1 && <div className="w-4 h-px bg-border mx-1" />}
@@ -243,12 +243,12 @@ export default function CampaignsPage() {
                 </button>
                 {wizardStep < WIZARD_STEPS.length - 1 ? (
                   <button onClick={() => setWizardStep(wizardStep + 1)}
-                    className="flex items-center gap-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors">
+                    className="flex items-center gap-1 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium transition-colors">
                     Proximo <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
                   <button onClick={handleCreateCampaign} disabled={!wizardData.name.trim()}
-                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors">
+                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 transition-colors">
                     Criar Campanha
                   </button>
                 )}

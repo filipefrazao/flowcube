@@ -49,7 +49,7 @@ function SortableLeadCard({
       style={style}
       {...attributes}
       className={cn(
-        "bg-gray-800 border border-gray-700 rounded-lg p-3 hover:border-gray-600 transition-colors cursor-pointer group",
+        "bg-surface border border-border rounded-lg p-3 hover:border-border transition-colors cursor-pointer group",
         isDragging && "opacity-30"
       )}
       onClick={onClick}
@@ -59,31 +59,31 @@ function SortableLeadCard({
           {...listeners}
           className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
         >
-          <GripVertical className="w-3.5 h-3.5 text-gray-600" />
+          <GripVertical className="w-3.5 h-3.5 text-text-muted" />
         </div>
         <div className="flex-1 min-w-0">
           {/* Name + relative time (PROD style) */}
           <div className="flex items-center justify-between mb-1">
-            <h4 className="text-sm font-semibold text-gray-100 truncate flex-1">{lead.name}</h4>
-            <span className="text-[10px] text-gray-500 ml-1 flex-shrink-0 whitespace-nowrap">{timeAgo(lead.created_at)}</span>
+            <h4 className="text-sm font-semibold text-text-primary truncate flex-1">{lead.name}</h4>
+            <span className="text-[10px] text-text-muted ml-1 flex-shrink-0 whitespace-nowrap">{timeAgo(lead.created_at)}</span>
           </div>
           {/* Phone */}
           {lead.phone && (
             <div className="flex items-center gap-1.5 mb-0.5">
-              <Phone className="w-3 h-3 text-gray-600" />
-              <span className="text-xs text-gray-300 truncate">{lead.phone}</span>
+              <Phone className="w-3 h-3 text-text-muted" />
+              <span className="text-xs text-text-primary truncate">{lead.phone}</span>
             </div>
           )}
           {/* Email */}
           {lead.email && (
-            <p className="text-xs text-gray-500 truncate mb-1">{lead.email}</p>
+            <p className="text-xs text-text-muted truncate mb-1">{lead.email}</p>
           )}
           {/* Origin chip + date (PROD style) */}
           <div className="flex items-center justify-between mt-1.5">
-            <span className="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded-lg truncate max-w-[60%]">
+            <span className="text-[10px] text-text-secondary bg-background-secondary px-2 py-0.5 rounded-lg truncate max-w-[60%]">
               {lead.origin_name || "Origem desconhecida"}
             </span>
-            <div className="flex items-center gap-1 text-[10px] text-gray-600">
+            <div className="flex items-center gap-1 text-[10px] text-text-muted">
               <Calendar className="w-3 h-3" />
               <span>{new Date(lead.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}</span>
             </div>
@@ -122,15 +122,15 @@ function KanbanColumn({
       <div className="flex items-center justify-between mb-2 px-1">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: stage.color || "#6366f1" }} />
-          <h3 className="text-sm font-semibold text-gray-100 truncate">{stage.name}</h3>
-          <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">{leads.length}</span>
+          <h3 className="text-sm font-semibold text-text-primary truncate">{stage.name}</h3>
+          <span className="text-xs bg-surface text-text-secondary px-2 py-0.5 rounded-full flex-shrink-0">{leads.length}</span>
         </div>
-        <button onClick={onAddLead} className="p-1 text-gray-500 hover:text-indigo-400 transition-colors">
+        <button onClick={onAddLead} className="p-1 text-text-muted hover:text-primary transition-colors">
           <Plus className="w-4 h-4" />
         </button>
       </div>
       <div className="px-1 mb-2">
-        <span className="text-xs text-gray-500">{formatCurrency(totalValue.toString())}</span>
+        <span className="text-xs text-text-muted">{formatCurrency(totalValue.toString())}</span>
       </div>
 
       {/* Cards */}
@@ -138,7 +138,7 @@ function KanbanColumn({
         ref={setNodeRef}
         className={cn(
           "flex-1 space-y-2 overflow-y-auto rounded-lg p-1 transition-colors min-h-[100px]",
-          isOver && "bg-indigo-500/5 ring-1 ring-indigo-500/20"
+          isOver && "bg-primary/5 ring-1 ring-primary/20"
         )}
       >
         <SortableContext items={leads.map((l) => l.id)} strategy={verticalListSortingStrategy}>
@@ -147,7 +147,7 @@ function KanbanColumn({
           ))}
         </SortableContext>
         {leads.length === 0 && (
-          <div className="text-center py-8 text-xs text-gray-600">Arraste leads aqui</div>
+          <div className="text-center py-8 text-xs text-text-muted">Arraste leads aqui</div>
         )}
       </div>
     </div>
@@ -160,18 +160,18 @@ function KanbanColumn({
 
 function DragOverlayCard({ lead }: { lead: Lead }) {
   return (
-    <div className="bg-gray-800 border-2 border-indigo-500 rounded-lg p-3 w-72 shadow-2xl shadow-indigo-500/20 rotate-2">
+    <div className="bg-surface border-2 border-primary rounded-lg p-3 w-72 shadow-2xl shadow-primary/20 rotate-2">
       <div className="flex items-center justify-between mb-1">
-        <h4 className="text-sm font-semibold text-gray-100 truncate flex-1">{lead.name}</h4>
-        <span className="text-[10px] text-gray-500 ml-1">{timeAgo(lead.created_at)}</span>
+        <h4 className="text-sm font-semibold text-text-primary truncate flex-1">{lead.name}</h4>
+        <span className="text-[10px] text-text-muted ml-1">{timeAgo(lead.created_at)}</span>
       </div>
       {lead.phone && (
         <div className="flex items-center gap-1.5 mb-0.5">
-          <Phone className="w-3 h-3 text-gray-600" />
-          <span className="text-xs text-gray-300">{lead.phone}</span>
+          <Phone className="w-3 h-3 text-text-muted" />
+          <span className="text-xs text-text-primary">{lead.phone}</span>
         </div>
       )}
-      <span className="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded-lg">
+      <span className="text-[10px] text-text-secondary bg-background-secondary px-2 py-0.5 rounded-lg">
         {lead.origin_name || "Origem desconhecida"}
       </span>
     </div>
@@ -423,7 +423,7 @@ export default function SalesCubeKanban() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -437,7 +437,7 @@ export default function SalesCubeKanban() {
             {/* Add Board Button */}
             <button
               onClick={() => setShowPipelineManager(true)}
-              className="p-1.5 rounded bg-indigo-600 hover:bg-indigo-700 text-white flex-shrink-0 transition-colors"
+              className="p-1.5 rounded bg-primary hover:bg-primary-hover text-gray-900 flex-shrink-0 transition-colors"
               title="Adicionar Quadro"
             >
               <Plus className="w-4 h-4" />
@@ -445,7 +445,7 @@ export default function SalesCubeKanban() {
 
             {/* Board Tabs with scroll */}
             <div className="flex items-center flex-1 min-w-0 overflow-hidden">
-              <div className="flex overflow-x-auto scrollbar-hide border-t-2 border-l-2 border-r-2 border-gray-700 rounded-t-lg">
+              <div className="flex overflow-x-auto scrollbar-hide border-t-2 border-l-2 border-r-2 border-border rounded-t-lg">
                 {pipelines.map((p) => {
                   const isSelected = activePipeline === p.id;
                   return (
@@ -457,8 +457,8 @@ export default function SalesCubeKanban() {
                       className={cn(
                         "flex items-center gap-1 px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors rounded-t-lg",
                         isSelected
-                          ? "bg-gray-800/60 text-white"
-                          : "text-gray-400 hover:bg-gray-800/30 hover:text-gray-200"
+                          ? "bg-surface/60 text-text-primary"
+                          : "text-text-secondary hover:bg-surface-hover/30 hover:text-text-primary"
                       )}
                     >
                       {p.name}
@@ -468,7 +468,7 @@ export default function SalesCubeKanban() {
                             e.stopPropagation();
                             setShowPipelineManager(true);
                           }}
-                          className="ml-1 p-0.5 text-gray-500 hover:text-gray-300"
+                          className="ml-1 p-0.5 text-text-muted hover:text-text-primary"
                         >
                           <Settings className="w-3.5 h-3.5" />
                         </button>
@@ -481,17 +481,17 @@ export default function SalesCubeKanban() {
 
             {/* Search */}
             <div className="relative flex-shrink-0">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input
                 type="text"
                 placeholder="Pesquisar"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-gray-800 border border-gray-700 rounded-lg pl-8 pr-8 py-1.5 text-sm text-gray-100 placeholder-gray-500 w-52"
+                className="bg-surface border border-border rounded-lg pl-8 pr-8 py-1.5 text-sm text-text-primary placeholder-text-muted w-52"
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <X className="w-3.5 h-3.5 text-gray-500 hover:text-gray-300" />
+                  <X className="w-3.5 h-3.5 text-text-muted hover:text-text-primary" />
                 </button>
               )}
             </div>
@@ -512,7 +512,7 @@ export default function SalesCubeKanban() {
                 <Users className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">Total Leads</p>
+                <p className="text-xs text-text-secondary">Total Leads</p>
                 <p className="text-lg font-bold text-blue-400">{totalLeads.toLocaleString("pt-BR")}</p>
               </div>
             </div>
@@ -521,7 +521,7 @@ export default function SalesCubeKanban() {
                 <DollarSign className="w-5 h-5 text-green-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">Valor Total</p>
+                <p className="text-xs text-text-secondary">Valor Total</p>
                 <p className="text-lg font-bold text-green-400">{formatCurrency(totalValue)}</p>
               </div>
             </div>
@@ -530,7 +530,7 @@ export default function SalesCubeKanban() {
                 <BarChart3 className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">Etapas</p>
+                <p className="text-xs text-text-secondary">Etapas</p>
                 <p className="text-lg font-bold text-purple-400">{stages.length}</p>
               </div>
             </div>
@@ -539,7 +539,7 @@ export default function SalesCubeKanban() {
                 <TrendingUp className="w-5 h-5 text-amber-400" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">Ticket Médio</p>
+                <p className="text-xs text-text-secondary">Ticket Médio</p>
                 <p className="text-lg font-bold text-amber-400">{formatCurrency(avgTicket)}</p>
               </div>
             </div>
@@ -581,16 +581,16 @@ export default function SalesCubeKanban() {
       {/* Quick Add Lead Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowAddModal(false)}>
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-white mb-4">Novo Lead</h2>
+          <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-text-primary mb-4">Novo Lead</h2>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <input type="text" placeholder="Nome *" value={newLead.name} onChange={(e) => setNewLead({ ...newLead, name: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" autoFocus />
-                <input type="tel" placeholder="Telefone *" value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
+                <input type="text" placeholder="Nome *" value={newLead.name} onChange={(e) => setNewLead({ ...newLead, name: e.target.value })} className="bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted" autoFocus />
+                <input type="tel" placeholder="Telefone *" value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} className="bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <input type="email" placeholder="Email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" />
-                <select value={newLead.origin} onChange={(e) => setNewLead({ ...newLead, origin: e.target.value })} className="bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
+                <input type="email" placeholder="Email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} className="bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted" />
+                <select value={newLead.origin} onChange={(e) => setNewLead({ ...newLead, origin: e.target.value })} className="bg-background-secondary border border-border text-text-primary rounded-lg px-3 py-2 text-sm">
                   <option value="">Origem *</option>
                   {origins.map((o) => (
                     <option key={o.id} value={o.id}>{o.name}</option>
@@ -599,8 +599,8 @@ export default function SalesCubeKanban() {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowAddModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100 transition-colors">Cancelar</button>
-              <button onClick={handleAddLead} disabled={!newLead.name} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50">Salvar</button>
+              <button onClick={() => setShowAddModal(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancelar</button>
+              <button onClick={handleAddLead} disabled={!newLead.name} className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm transition-colors disabled:opacity-50">Salvar</button>
             </div>
           </div>
         </div>

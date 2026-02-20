@@ -119,7 +119,7 @@ export default function AIPage() {
                 type="button"
                 onClick={runHealth}
                 disabled={healthLoading || !workflowId.trim()}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors flex items-center justify-center gap-2"
+                className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors flex items-center justify-center gap-2"
               >
                 {healthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 Analisar
@@ -150,7 +150,7 @@ export default function AIPage() {
                 type="button"
                 onClick={runDebug}
                 disabled={debugLoading || !executionId.trim()}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors flex items-center justify-center gap-2"
+                className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors flex items-center justify-center gap-2"
               >
                 {debugLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 Analisar

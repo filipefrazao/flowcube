@@ -55,7 +55,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-gray-950 relative overflow-hidden">
+    <main className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-background relative overflow-hidden">
       {/* Background Effects */}
       <AuroraBackground className="opacity-40" />
       <GradientBlobs className="opacity-60" />
@@ -93,12 +93,12 @@ export default function LoginPage() {
               whileHover={{ scale: 1.05, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
             >
-              <LayoutDashboard className="w-10 h-10 text-white" />
+              <LayoutDashboard className="w-10 h-10 text-text-primary" />
             </motion.div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
               FRZ Platform
             </h1>
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-text-secondary">
               Bem-vindo! Faca login para continuar.
             </p>
           </motion.div>
@@ -126,12 +126,12 @@ export default function LoginPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
                 Usuario ou Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className={`w-5 h-5 transition-colors ${focused === 'email' ? 'text-purple-400' : 'text-gray-500'}`} />
+                  <User className={`w-5 h-5 transition-colors ${focused === 'email' ? 'text-purple-400' : 'text-text-muted'}`} />
                 </div>
                 <input
                   id="email"
@@ -141,7 +141,7 @@ export default function LoginPage() {
                   onFocus={() => setFocused('email')}
                   onBlur={() => setFocused(null)}
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-surface/50 border border-border/50 rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
                   placeholder="admin"
                 />
               </div>
@@ -153,12 +153,12 @@ export default function LoginPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
                 Senha
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className={`w-5 h-5 transition-colors ${focused === 'password' ? 'text-purple-400' : 'text-gray-500'}`} />
+                  <Lock className={`w-5 h-5 transition-colors ${focused === 'password' ? 'text-purple-400' : 'text-text-muted'}`} />
                 </div>
                 <input
                   id="password"
@@ -168,7 +168,7 @@ export default function LoginPage() {
                   onFocus={() => setFocused('password')}
                   onBlur={() => setFocused(null)}
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-surface/50 border border-border/50 rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
                   placeholder="••••••••"
                 />
               </div>
@@ -199,12 +199,12 @@ export default function LoginPage() {
 
           {/* Footer */}
           <motion.div 
-            className="mt-8 pt-6 border-t border-gray-800/50 text-center"
+            className="mt-8 pt-6 border-t border-border/50 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Nao tem uma conta?{" "}
               <span className="text-purple-400 hover:text-purple-300 cursor-pointer transition-colors">
                 Contate o administrador
@@ -215,7 +215,7 @@ export default function LoginPage() {
 
         {/* Brand footer */}
         <motion.p 
-          className="text-center text-xs text-gray-600 mt-6"
+          className="text-center text-xs text-text-muted mt-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}

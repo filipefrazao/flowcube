@@ -131,7 +131,7 @@ export default function VoicemailPage() {
             </select>
             <button
               onClick={loadVoicemails}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors"
             >
               <Filter className="w-4 h-4" /> Filtrar
             </button>

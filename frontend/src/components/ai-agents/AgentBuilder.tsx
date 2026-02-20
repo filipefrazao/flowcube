@@ -281,7 +281,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
           <div className="space-y-6">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Agent Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -290,9 +290,9 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 onChange={(e) => updateFormData("name", e.target.value)}
                 placeholder="e.g., Customer Support Agent"
                 className={cn(
-                  "w-full px-4 py-3 rounded-lg border bg-white",
+                  "w-full px-4 py-3 rounded-lg border bg-surface",
                   "focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                  errors.name ? "border-red-300" : "border-gray-200"
+                  errors.name ? "border-red-300" : "border-border"
                 )}
               />
               {errors.name && (
@@ -305,7 +305,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Description
               </label>
               <textarea
@@ -313,13 +313,13 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 onChange={(e) => updateFormData("description", e.target.value)}
                 placeholder="Describe what this agent does..."
                 rows={3}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
 
             {/* Avatar URL */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Avatar URL
               </label>
               <div className="flex gap-3">
@@ -328,10 +328,10 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                   value={formData.avatar_url}
                   onChange={(e) => updateFormData("avatar_url", e.target.value)}
                   placeholder="https://example.com/avatar.png"
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 />
                 {formData.avatar_url && (
-                  <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200">
+                  <div className="w-12 h-12 rounded-lg overflow-hidden border border-border">
                     <img
                       src={formData.avatar_url}
                       alt="Avatar preview"
@@ -347,7 +347,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Tags
               </label>
               <div className="flex flex-wrap gap-2 mb-2">
@@ -373,11 +373,11 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
                   placeholder="Add a tag..."
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 />
                 <button
                   onClick={addTag}
-                  className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  className="px-4 py-2 rounded-lg bg-surface-hover hover:bg-surface text-text-secondary"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -391,7 +391,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
           <div className="space-y-6">
             {/* Provider Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 LLM Provider <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -403,11 +403,11 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                       "p-4 rounded-lg border-2 text-left transition-all",
                       formData.model_config.provider_id === provider.id
                         ? "border-pink-500 bg-pink-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-border hover:border-border"
                     )}
                   >
-                    <div className="font-medium text-gray-900">{provider.name}</div>
-                    <div className="text-xs text-gray-500 capitalize">{provider.type}</div>
+                    <div className="font-medium text-text-primary">{provider.name}</div>
+                    <div className="text-xs text-text-muted capitalize">{provider.type}</div>
                     {provider.is_default && (
                       <span className="mt-1 inline-block px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
                         Default
@@ -427,16 +427,16 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
             {/* Model Selection */}
             {formData.model_config.provider_id && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Model <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.model_config.model}
                   onChange={(e) => updateFormData("model_config.model", e.target.value)}
                   className={cn(
-                    "w-full px-4 py-3 rounded-lg border bg-white",
+                    "w-full px-4 py-3 rounded-lg border bg-surface",
                     "focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                    errors["model_config.model"] ? "border-red-300" : "border-gray-200"
+                    errors["model_config.model"] ? "border-red-300" : "border-border"
                   )}
                 >
                   <option value="">Select a model...</option>
@@ -457,7 +457,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
 
             {/* Temperature */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 <span className="flex items-center gap-2">
                   <Thermometer className="w-4 h-4" />
                   Temperature: {formData.model_config.temperature}
@@ -470,9 +470,9 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 step="0.1"
                 value={formData.model_config.temperature}
                 onChange={(e) => updateFormData("model_config.temperature", parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                className="w-full h-2 bg-surface-hover rounded-lg appearance-none cursor-pointer accent-pink-500"
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-text-muted mt-1">
                 <span>Precise (0)</span>
                 <span>Balanced (1)</span>
                 <span>Creative (2)</span>
@@ -481,7 +481,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
 
             {/* Max Tokens */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 <span className="flex items-center gap-2">
                   <Hash className="w-4 h-4" />
                   Max Output Tokens
@@ -493,7 +493,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 max="128000"
                 value={formData.model_config.max_tokens}
                 onChange={(e) => updateFormData("model_config.max_tokens", parseInt(e.target.value))}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -504,7 +504,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
           <div className="space-y-6">
             {/* System Prompt */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 System Prompt <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -513,9 +513,9 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 placeholder="You are a helpful assistant..."
                 rows={10}
                 className={cn(
-                  "w-full px-4 py-3 rounded-lg border bg-white font-mono text-sm",
+                  "w-full px-4 py-3 rounded-lg border bg-surface font-mono text-sm",
                   "focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                  errors.system_prompt ? "border-red-300" : "border-gray-200"
+                  errors.system_prompt ? "border-red-300" : "border-border"
                 )}
               />
               {errors.system_prompt && (
@@ -524,14 +524,14 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                   {errors.system_prompt}
                 </p>
               )}
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-text-muted">
                 {formData.system_prompt.length} characters
               </p>
             </div>
 
             {/* Personality Tone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Personality Tone
               </label>
               <div className="flex flex-wrap gap-2">
@@ -543,7 +543,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                       "px-4 py-2 rounded-lg border-2 transition-all",
                       formData.personality.tone === tone.value
                         ? "border-pink-500 bg-pink-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-border hover:border-border"
                     )}
                   >
                     <span className="mr-2">{tone.emoji}</span>
@@ -555,7 +555,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
 
             {/* Response Style */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Response Style
               </label>
               <div className="space-y-2">
@@ -567,11 +567,11 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                       "w-full p-4 rounded-lg border-2 text-left transition-all",
                       formData.personality.response_style === style.value
                         ? "border-pink-500 bg-pink-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-border hover:border-border"
                     )}
                   >
-                    <div className="font-medium text-gray-900">{style.label}</div>
-                    <div className="text-sm text-gray-500">{style.description}</div>
+                    <div className="font-medium text-text-primary">{style.label}</div>
+                    <div className="text-sm text-text-muted">{style.description}</div>
                   </button>
                 ))}
               </div>
@@ -579,7 +579,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
 
             {/* Fallback Response */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Fallback Response
               </label>
               <textarea
@@ -587,7 +587,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 onChange={(e) => updateFormData("fallback_response", e.target.value)}
                 placeholder="Response when the agent cannot help..."
                 rows={2}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -596,7 +596,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
       case 3: // Tools
         return (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-text-muted mb-4">
               Select the tools this agent can use to accomplish tasks.
             </p>
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -608,43 +608,43 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                     "w-full p-4 rounded-lg border-2 text-left transition-all",
                     formData.tool_ids.includes(tool.id)
                       ? "border-pink-500 bg-pink-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-border hover:border-border"
                   )}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <Wrench className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium text-gray-900">{tool.name}</span>
+                        <Wrench className="w-4 h-4 text-text-muted" />
+                        <span className="font-medium text-text-primary">{tool.name}</span>
                         {tool.is_builtin && (
                           <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
                             Built-in
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">{tool.description}</p>
+                      <p className="text-sm text-text-muted mt-1">{tool.description}</p>
                     </div>
                     <div className={cn(
                       "w-5 h-5 rounded border-2 flex items-center justify-center",
                       formData.tool_ids.includes(tool.id)
                         ? "border-pink-500 bg-pink-500"
-                        : "border-gray-300"
+                        : "border-border"
                     )}>
                       {formData.tool_ids.includes(tool.id) && (
-                        <Check className="w-3 h-3 text-white" />
+                        <Check className="w-3 h-3 text-text-primary" />
                       )}
                     </div>
                   </div>
                 </button>
               ))}
               {tools.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-text-muted">
                   <Wrench className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No tools available. Create one in the Tools section.</p>
                 </div>
               )}
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               {formData.tool_ids.length} tool(s) selected
             </p>
           </div>
@@ -653,7 +653,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
       case 4: // Knowledge
         return (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-text-muted mb-4">
               Connect knowledge bases to give your agent access to custom information.
             </p>
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -665,19 +665,19 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                     "w-full p-4 rounded-lg border-2 text-left transition-all",
                     formData.knowledge_base_ids.includes(kb.id)
                       ? "border-pink-500 bg-pink-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-border hover:border-border"
                   )}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <Database className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium text-gray-900">{kb.name}</span>
+                        <Database className="w-4 h-4 text-text-muted" />
+                        <span className="font-medium text-text-primary">{kb.name}</span>
                       </div>
                       {kb.description && (
-                        <p className="text-sm text-gray-500 mt-1">{kb.description}</p>
+                        <p className="text-sm text-text-muted mt-1">{kb.description}</p>
                       )}
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                      <div className="flex items-center gap-4 mt-2 text-xs text-text-secondary">
                         <span>{kb.document_count} documents</span>
                         <span>{kb.total_chunks.toLocaleString()} chunks</span>
                       </div>
@@ -686,23 +686,23 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                       "w-5 h-5 rounded border-2 flex items-center justify-center",
                       formData.knowledge_base_ids.includes(kb.id)
                         ? "border-pink-500 bg-pink-500"
-                        : "border-gray-300"
+                        : "border-border"
                     )}>
                       {formData.knowledge_base_ids.includes(kb.id) && (
-                        <Check className="w-3 h-3 text-white" />
+                        <Check className="w-3 h-3 text-text-primary" />
                       )}
                     </div>
                   </div>
                 </button>
               ))}
               {knowledgeBases.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-text-muted">
                   <Database className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No knowledge bases available. Create one first.</p>
                 </div>
               )}
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               {formData.knowledge_base_ids.length} knowledge base(s) selected
             </p>
           </div>
@@ -713,7 +713,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
           <div className="space-y-6">
             {/* Max Conversation Turns */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Max Conversation Turns
               </label>
               <input
@@ -722,16 +722,16 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 max="1000"
                 value={formData.guardrails.max_conversation_turns || 50}
                 onChange={(e) => updateFormData("guardrails.max_conversation_turns", parseInt(e.target.value))}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-text-muted">
                 Maximum number of back-and-forth messages in a conversation
               </p>
             </div>
 
             {/* Max Tokens Per Response */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Max Tokens Per Response
               </label>
               <input
@@ -740,26 +740,26 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                 max="128000"
                 value={formData.guardrails.max_tokens_per_response || 4096}
                 onChange={(e) => updateFormData("guardrails.max_tokens_per_response", parseInt(e.target.value))}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
 
             {/* Content Moderation */}
-            <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border">
               <div>
-                <div className="font-medium text-gray-900">Content Moderation</div>
-                <div className="text-sm text-gray-500">Filter inappropriate content</div>
+                <div className="font-medium text-text-primary">Content Moderation</div>
+                <div className="text-sm text-text-muted">Filter inappropriate content</div>
               </div>
               <button
                 onClick={() => updateFormData("guardrails.content_moderation", !formData.guardrails.content_moderation)}
                 className={cn(
                   "relative w-12 h-6 rounded-full transition-colors",
-                  formData.guardrails.content_moderation ? "bg-pink-500" : "bg-gray-300"
+                  formData.guardrails.content_moderation ? "bg-pink-500" : "bg-surface-hover"
                 )}
               >
                 <span
                   className={cn(
-                    "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                    "absolute top-1 w-4 h-4 rounded-full bg-surface transition-transform",
                     formData.guardrails.content_moderation ? "left-7" : "left-1"
                   )}
                 />
@@ -767,21 +767,21 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
             </div>
 
             {/* PII Redaction */}
-            <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border">
               <div>
-                <div className="font-medium text-gray-900">PII Redaction</div>
-                <div className="text-sm text-gray-500">Automatically redact personal information</div>
+                <div className="font-medium text-text-primary">PII Redaction</div>
+                <div className="text-sm text-text-muted">Automatically redact personal information</div>
               </div>
               <button
                 onClick={() => updateFormData("guardrails.pii_redaction", !formData.guardrails.pii_redaction)}
                 className={cn(
                   "relative w-12 h-6 rounded-full transition-colors",
-                  formData.guardrails.pii_redaction ? "bg-pink-500" : "bg-gray-300"
+                  formData.guardrails.pii_redaction ? "bg-pink-500" : "bg-surface-hover"
                 )}
               >
                 <span
                   className={cn(
-                    "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                    "absolute top-1 w-4 h-4 rounded-full bg-surface transition-transform",
                     formData.guardrails.pii_redaction ? "left-7" : "left-1"
                   )}
                 />
@@ -789,21 +789,21 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
             </div>
 
             {/* Require Tool Confirmation */}
-            <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border">
               <div>
-                <div className="font-medium text-gray-900">Require Tool Confirmation</div>
-                <div className="text-sm text-gray-500">Ask before executing tools</div>
+                <div className="font-medium text-text-primary">Require Tool Confirmation</div>
+                <div className="text-sm text-text-muted">Ask before executing tools</div>
               </div>
               <button
                 onClick={() => updateFormData("guardrails.require_tool_confirmation", !formData.guardrails.require_tool_confirmation)}
                 className={cn(
                   "relative w-12 h-6 rounded-full transition-colors",
-                  formData.guardrails.require_tool_confirmation ? "bg-pink-500" : "bg-gray-300"
+                  formData.guardrails.require_tool_confirmation ? "bg-pink-500" : "bg-surface-hover"
                 )}
               >
                 <span
                   className={cn(
-                    "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                    "absolute top-1 w-4 h-4 rounded-full bg-surface transition-transform",
                     formData.guardrails.require_tool_confirmation ? "left-7" : "left-1"
                   )}
                 />
@@ -823,33 +823,33 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-surface rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600">
-              <Bot className="w-6 h-6 text-white" />
+              <Bot className="w-6 h-6 text-text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-text-primary">
                 {agent ? "Edit Agent" : "Create New Agent"}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-muted">
                 {STEPS[currentStep].description}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+            className="p-2 rounded-lg hover:bg-surface-hover text-text-muted"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress Steps */}
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <div className="px-6 py-4 border-b border-border bg-background-secondary">
           <div className="flex items-center justify-between">
             {STEPS.map((step, index) => {
               const Icon = step.icon;
@@ -869,10 +869,10 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                     className={cn(
                       "w-10 h-10 rounded-full flex items-center justify-center transition-all",
                       isActive
-                        ? "bg-pink-500 text-white"
+                        ? "bg-pink-500 text-text-primary"
                         : isCompleted
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-500"
+                        ? "bg-green-500 text-text-primary"
+                        : "bg-surface-hover text-text-muted"
                     )}
                   >
                     {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
@@ -880,7 +880,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      isActive ? "text-pink-600" : "text-gray-500"
+                      isActive ? "text-pink-600" : "text-text-muted"
                     )}
                   >
                     {step.label}
@@ -914,15 +914,15 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-100 bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t border-border bg-background-secondary">
           <button
             onClick={handleBack}
             disabled={currentStep === 0}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
               currentStep === 0
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-gray-700 hover:bg-gray-200"
+                ? "text-text-secondary cursor-not-allowed"
+                : "text-text-secondary hover:bg-surface-hover"
             )}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -933,7 +933,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
             {currentStep < STEPS.length - 1 ? (
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 px-6 py-2 rounded-lg bg-pink-500 text-white font-medium hover:bg-pink-600 transition-all"
+                className="flex items-center gap-2 px-6 py-2 rounded-lg bg-pink-500 text-text-primary font-medium hover:bg-pink-600 transition-all"
               >
                 Next
                 <ChevronRight className="w-5 h-5" />
@@ -942,7 +942,7 @@ export default function AgentBuilder({ agent, onClose, onSave }: AgentBuilderPro
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium hover:from-pink-600 hover:to-purple-700 transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-text-primary font-medium hover:from-pink-600 hover:to-purple-700 transition-all disabled:opacity-50"
               >
                 {isSaving ? (
                   <>

@@ -352,17 +352,17 @@ export function EmailProviderSetup({
               <Mail className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-text-primary">
                 Email Provider Setup
               </h2>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-text-secondary">
                 {STEPS[step].description}
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-surface/5 text-text-secondary hover:text-text-primary transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -380,7 +380,7 @@ export function EmailProviderSetup({
                       ? "bg-green-500/20 text-green-400"
                       : step === i
                       ? "bg-blue-500/20 text-blue-400 ring-2 ring-blue-500/50"
-                      : "bg-white/5 text-gray-500"
+                      : "bg-surface/5 text-text-muted"
                   )}
                 >
                   {step > i ? (
@@ -393,7 +393,7 @@ export function EmailProviderSetup({
                   <div
                     className={cn(
                       "w-16 h-0.5 mx-2 transition-colors",
-                      step > i ? "bg-green-500/50" : "bg-white/10"
+                      step > i ? "bg-green-500/50" : "bg-surface/10"
                     )}
                   />
                 )}
@@ -415,7 +415,7 @@ export function EmailProviderSetup({
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
                     Provider Name
                   </label>
                   <input
@@ -423,12 +423,12 @@ export function EmailProviderSetup({
                     value={providerName}
                     onChange={(e) => setProviderName(e.target.value)}
                     placeholder="My Email Provider"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-text-primary mb-3">
                     Select Provider
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -440,7 +440,7 @@ export function EmailProviderSetup({
                           "flex items-start gap-3 p-4 rounded-xl border transition-all text-left",
                           selectedProvider === provider.type
                             ? "bg-blue-500/10 border-blue-500/50 ring-2 ring-blue-500/30"
-                            : "bg-white/5 border-white/10 hover:bg-white/10"
+                            : "bg-surface/5 border-white/10 hover:bg-surface/10"
                         )}
                       >
                         <div
@@ -457,10 +457,10 @@ export function EmailProviderSetup({
                           />
                         </div>
                         <div>
-                          <div className="font-medium text-white">
+                          <div className="font-medium text-text-primary">
                             {provider.name}
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-text-secondary">
                             {provider.description}
                           </div>
                         </div>
@@ -484,7 +484,7 @@ export function EmailProviderSetup({
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-text-primary mb-2">
                           SMTP Host
                         </label>
                         <input
@@ -492,18 +492,18 @@ export function EmailProviderSetup({
                           value={smtpHost}
                           onChange={(e) => setSmtpHost(e.target.value)}
                           placeholder="smtp.example.com"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                          className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-text-primary mb-2">
                           Port
                         </label>
                         <input
                           type="number"
                           value={smtpPort}
                           onChange={(e) => setSmtpPort(parseInt(e.target.value) || 587)}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                          className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                     </div>
@@ -513,32 +513,32 @@ export function EmailProviderSetup({
                         id="smtpSecure"
                         checked={smtpSecure}
                         onChange={(e) => setSmtpSecure(e.target.checked)}
-                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50"
+                        className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring"
                       />
-                      <label htmlFor="smtpSecure" className="text-sm text-gray-300">
+                      <label htmlFor="smtpSecure" className="text-sm text-text-primary">
                         Use SSL/TLS
                       </label>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Username
                       </label>
                       <input
                         type="text"
                         value={smtpUsername}
                         onChange={(e) => setSmtpUsername(e.target.value)}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Password
                       </label>
                       <input
                         type="password"
                         value={smtpPassword}
                         onChange={(e) => setSmtpPassword(e.target.value)}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                   </>
@@ -547,7 +547,7 @@ export function EmailProviderSetup({
                 {(selectedProvider === ProviderType.SENDGRID ||
                   selectedProvider === ProviderType.POSTMARK) && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-text-primary mb-2">
                       API Key
                     </label>
                     <input
@@ -555,9 +555,9 @@ export function EmailProviderSetup({
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
                       placeholder="Enter your API key"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                     />
-                    <p className="mt-2 text-xs text-gray-500">
+                    <p className="mt-2 text-xs text-text-muted">
                       Get your API key from the{" "}
                       {selectedProvider === ProviderType.SENDGRID
                         ? "SendGrid"
@@ -570,7 +570,7 @@ export function EmailProviderSetup({
                 {selectedProvider === ProviderType.MAILGUN && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         API Key
                       </label>
                       <input
@@ -578,11 +578,11 @@ export function EmailProviderSetup({
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
                         placeholder="Enter your Mailgun API key"
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Domain
                       </label>
                       <input
@@ -590,11 +590,11 @@ export function EmailProviderSetup({
                         value={mailgunDomain}
                         onChange={(e) => setMailgunDomain(e.target.value)}
                         placeholder="mg.yourdomain.com"
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Region
                       </label>
                       <select
@@ -602,7 +602,7 @@ export function EmailProviderSetup({
                         onChange={(e) =>
                           setMailgunRegion(e.target.value as "us" | "eu")
                         }
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                       >
                         <option value="us">US</option>
                         <option value="eu">EU</option>
@@ -614,35 +614,35 @@ export function EmailProviderSetup({
                 {selectedProvider === ProviderType.SES && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Access Key ID
                       </label>
                       <input
                         type="text"
                         value={sesAccessKeyId}
                         onChange={(e) => setSesAccessKeyId(e.target.value)}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Secret Access Key
                       </label>
                       <input
                         type="password"
                         value={sesSecretKey}
                         onChange={(e) => setSesSecretKey(e.target.value)}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-primary mb-2">
                         Region
                       </label>
                       <select
                         value={sesRegion}
                         onChange={(e) => setSesRegion(e.target.value)}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                       >
                         <option value="us-east-1">US East (N. Virginia)</option>
                         <option value="us-west-2">US West (Oregon)</option>
@@ -667,7 +667,7 @@ export function EmailProviderSetup({
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
                     From Email *
                   </label>
                   <input
@@ -675,11 +675,11 @@ export function EmailProviderSetup({
                     value={fromEmail}
                     onChange={(e) => setFromEmail(e.target.value)}
                     placeholder="noreply@yourdomain.com"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
                     From Name *
                   </label>
                   <input
@@ -687,11 +687,11 @@ export function EmailProviderSetup({
                     value={fromName}
                     onChange={(e) => setFromName(e.target.value)}
                     placeholder="Your Company"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-primary mb-2">
                     Reply-To Email (optional)
                   </label>
                   <input
@@ -699,17 +699,17 @@ export function EmailProviderSetup({
                     value={replyTo}
                     onChange={(e) => setReplyTo(e.target.value)}
                     placeholder="support@yourdomain.com"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
 
                 <div className="pt-4 border-t border-white/10">
-                  <h4 className="text-sm font-medium text-gray-300 mb-3">
+                  <h4 className="text-sm font-medium text-text-primary mb-3">
                     Rate Limits (optional)
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">
+                      <label className="block text-xs text-text-secondary mb-1">
                         Daily Limit
                       </label>
                       <input
@@ -721,11 +721,11 @@ export function EmailProviderSetup({
                           )
                         }
                         placeholder="Unlimited"
-                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">
+                      <label className="block text-xs text-text-secondary mb-1">
                         Hourly Limit
                       </label>
                       <input
@@ -737,7 +737,7 @@ export function EmailProviderSetup({
                           )
                         }
                         placeholder="Unlimited"
-                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                   </div>
@@ -749,9 +749,9 @@ export function EmailProviderSetup({
                     id="isDefault"
                     checked={isDefault}
                     onChange={(e) => setIsDefault(e.target.checked)}
-                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50"
+                    className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring"
                   />
-                  <label htmlFor="isDefault" className="text-sm text-gray-300">
+                  <label htmlFor="isDefault" className="text-sm text-text-primary">
                     Set as default provider
                   </label>
                 </div>
@@ -772,7 +772,7 @@ export function EmailProviderSetup({
                     <button
                       onClick={handleCreateAndTest}
                       disabled={isSubmitting}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50"
                     >
                       {isSubmitting ? (
                         <>
@@ -814,7 +814,7 @@ export function EmailProviderSetup({
                               ? "Connection Successful"
                               : "Connection Failed"}
                           </div>
-                          <div className="text-sm text-gray-400 mt-1">
+                          <div className="text-sm text-text-secondary mt-1">
                             {testResult.message}
                           </div>
                         </div>
@@ -822,7 +822,7 @@ export function EmailProviderSetup({
                     )}
 
                     <div className="pt-4 border-t border-white/10">
-                      <h4 className="text-sm font-medium text-gray-300 mb-3">
+                      <h4 className="text-sm font-medium text-text-primary mb-3">
                         Send Test Email
                       </h4>
                       <div className="flex gap-3">
@@ -831,7 +831,7 @@ export function EmailProviderSetup({
                           value={testEmail}
                           onChange={(e) => setTestEmail(e.target.value)}
                           placeholder="test@example.com"
-                          className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                          className="flex-1 px-4 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                         <button
                           onClick={handleSendTestEmail}
@@ -865,7 +865,7 @@ export function EmailProviderSetup({
         <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between">
           <button
             onClick={step === 0 ? handleClose : handleBack}
-            className="px-4 py-2 text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors flex items-center gap-2"
           >
             <ChevronLeft className="w-4 h-4" />
             {step === 0 ? "Cancel" : "Back"}
@@ -875,7 +875,7 @@ export function EmailProviderSetup({
             <button
               onClick={handleNext}
               disabled={!canProceedFromStep(step)}
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               Next
               <ChevronRight className="w-4 h-4" />
@@ -884,7 +884,7 @@ export function EmailProviderSetup({
             <button
               onClick={handleComplete}
               disabled={!createdProviderId || !testResult?.success}
-              className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-green-500 hover:bg-green-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <Check className="w-4 h-4" />
               Complete Setup

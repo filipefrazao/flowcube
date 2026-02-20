@@ -64,27 +64,27 @@ const HttpRequestNode = ({ data, selected }: HttpRequestNodeProps) => {
       case "error":
         return <XCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <Clock className="w-4 h-4 text-gray-400" />;
+        return <Clock className="w-4 h-4 text-text-secondary" />;
     }
   }, [data.status]);
 
   return (
     <div
       className={cn(
-        "relative rounded-lg shadow-md transition-all duration-200 min-w-[220px] bg-white",
-        selected ? "ring-2 ring-blue-500 border-blue-300" : "border-gray-200",
+        "relative rounded-lg shadow-md transition-all duration-200 min-w-[220px] bg-surface",
+        selected ? "ring-2 ring-blue-500 border-blue-300" : "border-border",
         "border-2 hover:shadow-lg"
       )}
     >
-      <div className="flex items-center gap-3 p-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
+      <div className="flex items-center gap-3 p-3 border-b border-border bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="p-2 rounded-lg bg-blue-100">
           <Globe className="w-5 h-5 text-blue-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-800 truncate">
+          <div className="font-semibold text-sm text-text-primary truncate">
             {data.label || "HTTP Request"}
           </div>
-          <div className="text-xs text-gray-500">HTTP Request</div>
+          <div className="text-xs text-text-muted">HTTP Request</div>
         </div>
         {StatusIcon}
       </div>
@@ -97,20 +97,20 @@ const HttpRequestNode = ({ data, selected }: HttpRequestNodeProps) => {
           )}>
             {method}
           </span>
-          <ArrowRight className="w-3 h-3 text-gray-400" />
-          <span className="text-xs text-gray-600 font-mono truncate flex-1">
+          <ArrowRight className="w-3 h-3 text-text-secondary" />
+          <span className="text-xs text-text-muted font-mono truncate flex-1">
             {displayUrl}
           </span>
         </div>
 
         {config.headers && Object.keys(config.headers).length > 0 && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-text-muted">
             <span className="font-medium">{Object.keys(config.headers).length}</span> headers
           </div>
         )}
 
         {data.lastResponse && (
-          <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border">
             <span className={cn(
               "font-mono font-bold",
               data.lastResponse.statusCode && data.lastResponse.statusCode < 400 
@@ -119,7 +119,7 @@ const HttpRequestNode = ({ data, selected }: HttpRequestNodeProps) => {
               {data.lastResponse.statusCode || "Error"}
             </span>
             {data.lastResponse.duration && (
-              <span className="text-gray-400">{data.lastResponse.duration}ms</span>
+              <span className="text-text-secondary">{data.lastResponse.duration}ms</span>
             )}
           </div>
         )}

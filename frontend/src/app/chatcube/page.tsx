@@ -80,7 +80,7 @@ export default function ChatCubeDashboard() {
           </div>
           <Link
             href="/chatcube/instances/new"
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Instance
@@ -135,7 +135,7 @@ export default function ChatCubeDashboard() {
               </p>
               <Link
                 href="/chatcube/instances/new"
-                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Create your first instance

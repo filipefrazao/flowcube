@@ -150,7 +150,7 @@ export default function NewPostPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="E.g. Product launch announcement"
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary focus:ring-2 focus:ring-primary focus:outline-none"
               />
             </div>
 
@@ -172,7 +172,7 @@ export default function NewPostPage() {
                 onChange={(e) => setCaption(e.target.value)}
                 rows={6}
                 placeholder="Write your caption..."
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary focus:ring-2 focus:ring-primary focus:outline-none resize-none"
               />
               <p className="text-xs text-text-tertiary mt-1">{caption.length} characters</p>
             </div>
@@ -192,9 +192,9 @@ export default function NewPostPage() {
                   onChange={(e) => setHashtagInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addHashtag())}
                   placeholder="Add hashtag..."
-                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 />
-                <button onClick={addHashtag} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">Add</button>
+                <button onClick={addHashtag} className="px-3 py-2 bg-blue-600 text-text-primary rounded-lg text-sm">Add</button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {hashtags.map((tag) => (
@@ -254,7 +254,7 @@ export default function NewPostPage() {
                 value={firstComment}
                 onChange={(e) => setFirstComment(e.target.value)}
                 placeholder="Add a first comment after publishing..."
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary focus:outline-none"
               />
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function NewPostPage() {
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:ring-2 focus:ring-primary focus:outline-none"
               />
               <p className="text-xs text-text-tertiary mt-1">Leave empty to save as draft</p>
             </div>
@@ -324,7 +324,7 @@ export default function NewPostPage() {
               <button
                 onClick={() => handleSave(true)}
                 disabled={saving || selectedAccountIds.length === 0}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-xl transition-colors disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
                 {saving ? "Publishing..." : "Publish Now"}

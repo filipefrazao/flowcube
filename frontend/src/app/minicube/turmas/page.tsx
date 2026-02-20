@@ -15,7 +15,7 @@ const PAGE_SIZE = 20;
 const STATUS_OPTIONS = [
   { value: "proxima", label: "Proxima", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
   { value: "em_andamento", label: "Em Andamento", color: "bg-green-500/20 text-green-400 border-green-500/30" },
-  { value: "finalizada", label: "Finalizada", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
+  { value: "finalizada", label: "Finalizada", color: "bg-gray-500/20 text-text-secondary border-gray-500/30" },
   { value: "cancelada", label: "Cancelada", color: "bg-red-500/20 text-red-400 border-red-500/30" },
 ];
 
@@ -130,7 +130,7 @@ export default function TurmasPage() {
   function getStatusBadge(status: string) {
     const opt = STATUS_OPTIONS.find((s) => s.value === status);
     return (
-      <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", opt?.color || "bg-gray-500/20 text-gray-400 border-gray-500/30")}>
+      <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", opt?.color || "bg-gray-500/20 text-text-secondary border-gray-500/30")}>
         {opt?.label || status}
       </span>
     );
@@ -146,54 +146,54 @@ export default function TurmasPage() {
   const hasActiveFilters = filterStatus || filterLocation || filterPole || search;
 
   return (
-    <div className="flex h-screen bg-gray-950">
+    <div className="flex h-screen bg-background">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-14 border-b border-gray-800 bg-gray-950 flex items-center justify-between px-6 shrink-0">
+        <header className="h-14 border-b border-border bg-background flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
-            <GraduationCap className="w-5 h-5 text-indigo-400" />
-            <h1 className="text-lg font-semibold text-gray-100">Turmas</h1>
-            <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">{totalCount}</span>
+            <GraduationCap className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-text-primary">Turmas</h1>
+            <span className="text-xs text-text-muted bg-surface px-2 py-0.5 rounded-full">{totalCount}</span>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium transition-colors">
             <Plus className="w-4 h-4" /> Nova Turma
           </button>
         </header>
 
         {/* Filters Bar */}
-        <div className="border-b border-gray-800 bg-gray-950/50 px-6 py-3 shrink-0">
+        <div className="border-b border-border bg-background/50 px-6 py-3 shrink-0">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" placeholder="Buscar turma..." value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-indigo-500 transition-colors" />
+                className="w-full pl-10 pr-4 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors" />
             </div>
             <button onClick={() => setShowFilters(!showFilters)}
               className={cn("flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors",
-                showFilters ? "border-indigo-500 text-indigo-400 bg-indigo-500/10" : "border-gray-800 text-gray-400 hover:border-gray-600")}>
+                showFilters ? "border-primary text-primary bg-primary/10" : "border-border text-text-secondary hover:border-border")}>
               <Filter className="w-4 h-4" /> Filtros
-              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-indigo-400" />}
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
             </button>
             {hasActiveFilters && (
-              <button onClick={clearFilters} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Limpar filtros</button>
+              <button onClick={clearFilters} className="text-xs text-text-muted hover:text-text-primary transition-colors">Limpar filtros</button>
             )}
           </div>
           {showFilters && (
             <div className="mt-3 flex items-center gap-3 flex-wrap">
               <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-                className="px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500">
+                className="px-3 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary">
                 <option value="">Todos Status</option>
                 {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
               <select value={filterPole} onChange={(e) => { setFilterPole(e.target.value); setPage(1); }}
-                className="px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500">
+                className="px-3 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary">
                 <option value="">Todos Polos</option>
                 {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
               <select value={filterLocation} onChange={(e) => { setFilterLocation(e.target.value); setPage(1); }}
-                className="px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500">
+                className="px-3 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary">
                 <option value="">Todas Unidades</option>
                 {locations.map((l) => <option key={l.id} value={l.id}>{l.name} - {l.city}/{l.state}</option>)}
               </select>
@@ -204,64 +204,64 @@ export default function TurmasPage() {
         {/* Table */}
         <div className="flex-1 overflow-auto p-6">
           {loading ? (
-            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
           ) : classes.length === 0 ? (
-            <div className="text-center py-20 text-gray-500">
+            <div className="text-center py-20 text-text-muted">
               <GraduationCap className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p className="text-lg font-medium text-gray-400">Nenhuma turma encontrada</p>
+              <p className="text-lg font-medium text-text-secondary">Nenhuma turma encontrada</p>
               <p className="text-sm mt-1">Crie uma nova turma para comecar.</p>
             </div>
           ) : (
             <>
-              <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+              <div className="bg-background-secondary rounded-xl border border-border overflow-hidden">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-800">
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Unidade</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Polo</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Alunos</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Inicio</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Termino</th>
-                      <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acoes</th>
+                    <tr className="border-b border-border">
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Nome</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Produto</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Unidade</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Polo</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
+                      <th className="text-center px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Alunos</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Inicio</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Termino</th>
+                      <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Acoes</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800/50">
+                  <tbody className="divide-y divide-border/50">
                     {classes.map((c) => (
-                      <tr key={c.id} className="hover:bg-gray-800/40 transition-colors cursor-pointer" onClick={() => router.push(`/minicube/turmas/${c.id}`)}>
+                      <tr key={c.id} className="hover:bg-surface-hover/40 transition-colors cursor-pointer" onClick={() => router.push(`/minicube/turmas/${c.id}`)}>
                         <td className="px-4 py-3">
-                          <span className="text-sm font-medium text-gray-100">{c.name}</span>
-                          {c.description && <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[200px]">{c.description}</p>}
+                          <span className="text-sm font-medium text-text-primary">{c.name}</span>
+                          {c.description && <p className="text-xs text-text-muted mt-0.5 truncate max-w-[200px]">{c.description}</p>}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{c.product_name || "-"}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{c.location_name || "-"}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{c.pole_name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-text-primary">{c.product_name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-text-primary">{c.location_name || "-"}</td>
+                        <td className="px-4 py-3 text-sm text-text-primary">{c.pole_name || "-"}</td>
                         <td className="px-4 py-3">{getStatusBadge(c.status)}</td>
                         <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-1 text-sm text-gray-300">
-                            <Users className="w-3.5 h-3.5 text-gray-500" /> {c.enrollments_count || c.students_count || 0}/{c.capacity}
+                          <span className="inline-flex items-center gap-1 text-sm text-text-primary">
+                            <Users className="w-3.5 h-3.5 text-text-muted" /> {c.enrollments_count || c.students_count || 0}/{c.capacity}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-400">{c.start_date ? new Date(c.start_date).toLocaleDateString("pt-BR") : "-"}</td>
-                        <td className="px-4 py-3 text-sm text-gray-400">{c.end_date ? new Date(c.end_date).toLocaleDateString("pt-BR") : "-"}</td>
+                        <td className="px-4 py-3 text-sm text-text-secondary">{c.start_date ? new Date(c.start_date).toLocaleDateString("pt-BR") : "-"}</td>
+                        <td className="px-4 py-3 text-sm text-text-secondary">{c.end_date ? new Date(c.end_date).toLocaleDateString("pt-BR") : "-"}</td>
                         <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1">
                             <button onClick={() => router.push(`/minicube/turmas/${c.id}`)} title="Ver Detalhes"
-                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-gray-200 transition-colors">
+                              className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-text-primary transition-colors">
                               <Eye className="w-4 h-4" />
                             </button>
                             <button onClick={() => router.push(`/minicube/turmas/${c.id}/presenca`)} title="Presenca"
-                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-green-400 transition-colors">
+                              className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-green-400 transition-colors">
                               <ClipboardCheck className="w-4 h-4" />
                             </button>
                             <button onClick={() => openEdit(c)} title="Editar"
-                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-indigo-400 transition-colors">
+                              className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-primary transition-colors">
                               <Pencil className="w-4 h-4" />
                             </button>
                             <button onClick={() => handleDelete(c.id)} title="Excluir"
-                              className="p-1.5 rounded-md hover:bg-gray-700 text-gray-400 hover:text-red-400 transition-colors">
+                              className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-red-400 transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -274,16 +274,16 @@ export default function TurmasPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+                <div className="flex items-center justify-between mt-4 text-sm text-text-secondary">
                   <span>{totalCount} turma{totalCount !== 1 ? "s" : ""} encontrada{totalCount !== 1 ? "s" : ""}</span>
                   <div className="flex items-center gap-2">
                     <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}
-                      className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                      className="p-2 rounded-lg border border-border hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="px-3 py-1 text-gray-300">Pagina {page} de {totalPages}</span>
+                    <span className="px-3 py-1 text-text-primary">Pagina {page} de {totalPages}</span>
                     <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages}
-                      className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                      className="p-2 rounded-lg border border-border hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -296,74 +296,74 @@ export default function TurmasPage() {
         {/* Create/Edit Dialog */}
         {showForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 w-full max-w-lg shadow-2xl">
+            <div className="bg-background-secondary rounded-xl border border-border p-6 w-full max-w-lg shadow-2xl">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Turma" : "Nova Turma"}</h2>
-                <button onClick={() => setShowForm(false)} className="p-1 rounded-md hover:bg-gray-800 transition-colors">
-                  <X className="w-5 h-5 text-gray-400" />
+                <h2 className="text-lg font-semibold text-text-primary">{editingId ? "Editar Turma" : "Nova Turma"}</h2>
+                <button onClick={() => setShowForm(false)} className="p-1 rounded-md hover:bg-surface-hover transition-colors">
+                  <X className="w-5 h-5 text-text-secondary" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Nome *</label>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">Nome *</label>
                   <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Nome da turma"
-                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500 transition-colors" />
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Polo</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">Polo</label>
                     <select value={formData.pole} onChange={(e) => setFormData({ ...formData, pole: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary transition-colors">
                       <option value="">Selecione...</option>
                       {poles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Unidade *</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">Unidade *</label>
                     <select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary transition-colors">
                       <option value="">Selecione...</option>
                       {locations.map((l) => <option key={l.id} value={l.id}>{l.name} - {l.city}/{l.state}</option>)}
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Descricao</label>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">Descricao</label>
                   <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Descricao da turma"
-                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500 transition-colors" rows={2} />
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors" rows={2} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Capacidade</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">Capacidade</label>
                     <input type="number" value={formData.capacity} onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 30 })}
-                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Status</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">Status</label>
                     <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary transition-colors">
                       {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Data Inicio</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">Data Inicio</label>
                     <input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Data Termino</label>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">Data Termino</label>
                     <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary transition-colors" />
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
-                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-400 hover:text-gray-200 text-sm transition-colors">Cancelar</button>
+                <div className="flex justify-end gap-3 pt-3 border-t border-border">
+                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-text-secondary hover:text-text-primary text-sm transition-colors">Cancelar</button>
                   <button onClick={handleSave} disabled={saving || !formData.name || !formData.location}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                     {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Turma"}
                   </button>
                 </div>

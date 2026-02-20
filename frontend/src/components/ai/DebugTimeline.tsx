@@ -39,7 +39,7 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
       case 'error':
         return <XCircle className="w-5 h-5 text-red-400" />;
       default:
-        return <Clock className="w-5 h-5 text-gray-400" />;
+        return <Clock className="w-5 h-5 text-text-secondary" />;
     }
   };
 
@@ -62,7 +62,7 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
 
   return (
     <div className="glass-card p-6">
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
         <Clock className="w-5 h-5 text-blue-400" />
         Execution Timeline
       </h3>
@@ -77,7 +77,7 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
             <div key={execution.id} className="relative">
               {/* Timeline line */}
               {!isLast && (
-                <div className="absolute left-[21px] top-10 w-0.5 h-full bg-gray-700"></div>
+                <div className="absolute left-[21px] top-10 w-0.5 h-full bg-surface-hover"></div>
               )}
 
               {/* Node card */}
@@ -100,17 +100,17 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="text-white font-medium truncate">
+                      <h4 className="text-text-primary font-medium truncate">
                         {execution.name || execution.id}
                       </h4>
                       {isFailed && (
-                        <span className="px-2 py-0.5 bg-red-600 text-white text-xs rounded-full">
+                        <span className="px-2 py-0.5 bg-red-600 text-text-primary text-xs rounded-full">
                           Failed Here
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span className="px-2 py-0.5 bg-gray-700 rounded text-xs">
+                    <div className="flex items-center gap-3 text-sm text-text-secondary">
+                      <span className="px-2 py-0.5 bg-surface-hover rounded text-xs">
                         {execution.type}
                       </span>
                       <span className="flex items-center gap-1">
@@ -122,20 +122,20 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
 
                   <div className="flex-shrink-0">
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-text-secondary" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-text-secondary" />
                     )}
                   </div>
                 </div>
 
                 {/* Expanded details */}
                 {isExpanded && (
-                  <div className="mt-4 space-y-3 border-t border-gray-700 pt-4">
+                  <div className="mt-4 space-y-3 border-t border-border pt-4">
                     {/* Timestamp */}
                     <div>
-                      <span className="text-xs text-gray-400">Timestamp:</span>
-                      <p className="text-sm text-gray-300 font-mono">
+                      <span className="text-xs text-text-secondary">Timestamp:</span>
+                      <p className="text-sm text-text-primary font-mono">
                         {new Date(execution.timestamp).toLocaleString()}
                       </p>
                     </div>
@@ -145,9 +145,9 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Code className="w-4 h-4 text-blue-400" />
-                          <span className="text-xs text-gray-400">Input Data:</span>
+                          <span className="text-xs text-text-secondary">Input Data:</span>
                         </div>
-                        <pre className="text-xs text-gray-300 bg-black/30 p-3 rounded border border-gray-700 overflow-x-auto max-h-40">
+                        <pre className="text-xs text-text-primary bg-black/30 p-3 rounded border border-border overflow-x-auto max-h-40">
                           {JSON.stringify(execution.input, null, 2)}
                         </pre>
                       </div>
@@ -158,9 +158,9 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <Code className="w-4 h-4 text-green-400" />
-                          <span className="text-xs text-gray-400">Output Data:</span>
+                          <span className="text-xs text-text-secondary">Output Data:</span>
                         </div>
-                        <pre className="text-xs text-gray-300 bg-black/30 p-3 rounded border border-gray-700 overflow-x-auto max-h-40">
+                        <pre className="text-xs text-text-primary bg-black/30 p-3 rounded border border-border overflow-x-auto max-h-40">
                           {JSON.stringify(execution.output, null, 2)}
                         </pre>
                       </div>
@@ -171,7 +171,7 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <XCircle className="w-4 h-4 text-red-400" />
-                          <span className="text-xs text-gray-400">Error:</span>
+                          <span className="text-xs text-text-secondary">Error:</span>
                         </div>
                         <div className="text-sm text-red-300 bg-red-500/10 p-3 rounded border border-red-500/30">
                           {execution.error}
@@ -187,24 +187,24 @@ export function DebugTimeline({ executions, failedNodeId, onNodeClick }: DebugTi
       </div>
 
       {/* Summary */}
-      <div className="mt-6 pt-4 border-t border-gray-700 flex items-center justify-between text-sm">
+      <div className="mt-6 pt-4 border-t border-border flex items-center justify-between text-sm">
         <div className="flex items-center gap-4">
-          <span className="text-gray-400">
-            Total: <span className="text-white font-medium">{executions.length}</span> nodes
+          <span className="text-text-secondary">
+            Total: <span className="text-text-primary font-medium">{executions.length}</span> nodes
           </span>
-          <span className="text-gray-400">
+          <span className="text-text-secondary">
             Success: <span className="text-green-400 font-medium">
               {executions.filter(e => e.status === 'success').length}
             </span>
           </span>
-          <span className="text-gray-400">
+          <span className="text-text-secondary">
             Failed: <span className="text-red-400 font-medium">
               {executions.filter(e => e.status === 'error').length}
             </span>
           </span>
         </div>
-        <span className="text-gray-400">
-          Total time: <span className="text-white font-medium">
+        <span className="text-text-secondary">
+          Total time: <span className="text-text-primary font-medium">
             {formatDuration(executions.reduce((sum, e) => sum + (e.duration || 0), 0))}
           </span>
         </span>

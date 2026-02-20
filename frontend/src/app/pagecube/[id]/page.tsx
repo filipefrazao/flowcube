@@ -176,7 +176,7 @@ export default function PageEditorPage() {
                 formData.status === "published"
                   ? "bg-green-500/15 text-green-400 border-green-500/30"
                   : formData.status === "archived"
-                  ? "bg-gray-500/15 text-gray-400 border-gray-500/30"
+                  ? "bg-gray-500/15 text-text-secondary border-gray-500/30"
                   : "bg-yellow-500/15 text-yellow-400 border-yellow-500/30"
               }`}
             >
@@ -209,7 +209,7 @@ export default function PageEditorPage() {
                 type="button"
                 onClick={handlePublish}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors disabled:opacity-50"
               >
                 <Globe className="w-4 h-4" />
                 Publicar

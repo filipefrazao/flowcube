@@ -81,8 +81,8 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
 
   if (!selectedNode) {
     return (
-      <div className={cn("w-80 bg-white border-l border-gray-200 flex flex-col h-full", className)}>
-        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm p-4">
+      <div className={cn("w-80 bg-surface border-l border-border flex flex-col h-full", className)}>
+        <div className="flex-1 flex items-center justify-center text-text-secondary text-sm p-4">
           Select a node to view properties
         </div>
       </div>
@@ -100,27 +100,27 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
   ];
 
   return (
-    <div className={cn("w-80 bg-white border-l border-gray-200 flex flex-col h-full", className)}>
+    <div className={cn("w-80 bg-surface border-l border-border flex flex-col h-full", className)}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900 truncate">
             {nodeData.label || "Untitled Node"}
           </h2>
           <button
             onClick={handleClose}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1 hover:bg-surface-hover rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-text-muted">
           {getLabelForType(nodeType)} • {category}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-border">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -131,7 +131,7 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
                 "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
                 activeTab === tab.id
                   ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  : "text-text-muted hover:text-text-secondary"
               )}
             >
               <Icon className="w-4 h-4" />
@@ -147,30 +147,30 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
           <div className="space-y-6">
             {/* Element Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Element Name
               </label>
               <input
                 type="text"
                 value={nodeData.label || ""}
                 onChange={handleLabelChange}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Type (read-only) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Type
               </label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
+              <div className="px-3 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-muted">
                 {getLabelForType(nodeType)}
               </div>
             </div>
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Status
               </label>
               <div className="flex gap-2">
@@ -185,8 +185,8 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
                           ? "bg-green-50 border-green-200 text-green-700"
                           : status === "paused"
                           ? "bg-yellow-50 border-yellow-200 text-yellow-700"
-                          : "bg-gray-50 border-gray-200 text-gray-700"
-                        : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                          : "bg-background-secondary border-border text-text-secondary"
+                        : "bg-surface border-border text-text-muted hover:bg-background-secondary"
                     )}
                   >
                     {status}
@@ -197,7 +197,7 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
 
             {/* Position Lock */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Position
               </label>
               <div className="flex items-center gap-4">
@@ -207,13 +207,13 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
                     "flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors",
                     isLocked
                       ? "bg-orange-50 border-orange-200 text-orange-700"
-                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                      : "bg-surface border-border text-text-muted hover:bg-background-secondary"
                   )}
                 >
                   {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                   {isLocked ? "Locked" : "Unlocked"}
                 </button>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-text-muted">
                   X: {Math.round(selectedNode.position.x)}, Y: {Math.round(selectedNode.position.y)}
                 </div>
               </div>
@@ -245,11 +245,11 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="text-xl font-bold text-gray-700">
+                  <div className="bg-background-secondary rounded-lg p-3">
+                    <div className="text-xl font-bold text-text-secondary">
                       {nodeData.stats.conversionRate.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-gray-500">Conv. Rate</div>
+                    <div className="text-xs text-text-muted">Conv. Rate</div>
                   </div>
                   <div className="bg-red-50 rounded-lg p-3">
                     <div className="text-xl font-bold text-red-700">
@@ -270,25 +270,25 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
 
                 {nodeData.stats.avgTimeMs !== undefined && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       Avg. Time on Step
                     </label>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-text-muted">
                       {(nodeData.stats.avgTimeMs / 1000).toFixed(1)} seconds
                     </div>
                   </div>
                 )}
 
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-text-primary rounded-lg hover:bg-blue-700 transition-colors">
                   <ExternalLink className="w-4 h-4" />
                   View Full Report
                 </button>
               </>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <div className="text-center py-8 text-text-muted">
+                <BarChart3 className="w-12 h-12 mx-auto mb-3 text-text-primary" />
                 <p className="text-sm">No analytics data yet</p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-text-secondary mt-1">
                   Data will appear after the workflow is published and running
                 </p>
               </div>
@@ -298,10 +298,10 @@ export default function PropertiesPanel({ className, onClose }: PropertiesPanelP
       </div>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50 flex gap-2">
+      <div className="p-4 border-t border-border bg-background-secondary flex gap-2">
         <button
           onClick={handleDuplicate}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-surface-hover rounded-lg transition-colors"
         >
           <Copy className="w-4 h-4" />
           Duplicate

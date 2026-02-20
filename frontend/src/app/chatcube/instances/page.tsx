@@ -48,7 +48,7 @@ export default function InstancesPage() {
               <CardContent>
                 <p className="text-sm">{inst.phone_number || 'Sem numero'}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className={"inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium " + (inst.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}>
+                  <span className={"inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium " + (inst.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-surface-hover text-text-primary')}>
                     {inst.status}
                   </span>
                   <span className="text-xs text-muted-foreground">{inst.provider}</span>

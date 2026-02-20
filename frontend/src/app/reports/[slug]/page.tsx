@@ -122,38 +122,38 @@ export default function ReportExecutionPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gray-900">
+      <div className="flex h-screen bg-background-secondary">
         <AppSidebar />
-        <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+        <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
       </div>
     );
   }
 
   if (!report) {
     return (
-      <div className="flex h-screen bg-gray-900">
+      <div className="flex h-screen bg-background-secondary">
         <AppSidebar />
-        <div className="flex-1 flex items-center justify-center text-gray-400">Relatorio nao encontrado</div>
+        <div className="flex-1 flex items-center justify-center text-text-secondary">Relatorio nao encontrado</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-background-secondary">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-gray-700 bg-gray-900 flex items-center justify-between px-6">
+        <header className="h-14 border-b border-border bg-background-secondary flex items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <Link href="/reports" className="text-gray-400 hover:text-gray-200"><ArrowLeft className="w-5 h-5" /></Link>
-            <BarChart3 className="w-5 h-5 text-indigo-400" />
-            <h1 className="text-lg font-semibold text-gray-100">{report.name}</h1>
+            <Link href="/reports" className="text-text-secondary hover:text-text-primary"><ArrowLeft className="w-5 h-5" /></Link>
+            <BarChart3 className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-text-primary">{report.name}</h1>
           </div>
           {result && result.execution_id && (
             <div className="flex items-center gap-2">
-              <button onClick={() => handleExport("csv")} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-xs">
+              <button onClick={() => handleExport("csv")} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover hover:bg-surface-hover text-text-primary rounded-lg text-xs">
                 <Download className="w-3 h-3" /> CSV
               </button>
-              <button onClick={() => handleExport("xlsx")} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg text-xs">
+              <button onClick={() => handleExport("xlsx")} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover hover:bg-surface-hover text-text-primary rounded-lg text-xs">
                 <Download className="w-3 h-3" /> XLSX
               </button>
             </div>
@@ -161,18 +161,18 @@ export default function ReportExecutionPage() {
         </header>
 
         <div className="p-6 flex-1 overflow-auto">
-          <p className="text-sm text-gray-400 mb-6">{report.description}</p>
+          <p className="text-sm text-text-secondary mb-6">{report.description}</p>
 
           {report.parameters.length > 0 && (
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-6">
-              <h3 className="text-sm font-medium text-gray-200 mb-3">Parametros</h3>
+            <div className="bg-surface rounded-lg border border-border p-4 mb-6">
+              <h3 className="text-sm font-medium text-text-primary mb-3">Parametros</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {report.parameters.map((p) => (
                   <div key={p.name}>
-                    <label className="block text-xs text-gray-400 mb-1">{p.label}</label>
+                    <label className="block text-xs text-text-secondary mb-1">{p.label}</label>
                     <input type={p.type === "date" ? "date" : p.type === "number" ? "number" : "text"}
                       value={paramValues[p.name] || ""} onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 text-sm focus:outline-none focus:border-indigo-500" />
+                      className="w-full px-3 py-2 bg-background-secondary border border-border rounded-lg text-text-primary text-sm focus:outline-none focus:border-primary" />
                   </div>
                 ))}
               </div>
@@ -180,7 +180,7 @@ export default function ReportExecutionPage() {
           )}
 
           <button onClick={handleExecute} disabled={executing}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium mb-6 disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium mb-6 disabled:opacity-50">
             {executing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
             Executar Relatorio
           </button>
@@ -188,30 +188,30 @@ export default function ReportExecutionPage() {
           {result && (
             <>
               {report.chart_type !== "table" && (
-                <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-6">
+                <div className="bg-surface rounded-lg border border-border p-4 mb-6">
                   {renderChart()}
                 </div>
               )}
 
-              <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-                <div className="p-3 border-b border-gray-700 flex items-center justify-between">
-                  <span className="text-xs text-gray-400">{result.total_rows} resultado(s)</span>
-                  <span className="text-xs text-gray-500">Executado em {new Date(result.executed_at).toLocaleString("pt-BR")}</span>
+              <div className="bg-surface rounded-lg border border-border overflow-hidden">
+                <div className="p-3 border-b border-border flex items-center justify-between">
+                  <span className="text-xs text-text-secondary">{result.total_rows} resultado(s)</span>
+                  <span className="text-xs text-text-muted">Executado em {new Date(result.executed_at).toLocaleString("pt-BR")}</span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-700">
+                      <tr className="border-b border-border">
                         {result.columns.map((col) => (
-                          <th key={col} className="text-left px-4 py-2 text-xs font-medium text-gray-400 uppercase">{col}</th>
+                          <th key={col} className="text-left px-4 py-2 text-xs font-medium text-text-secondary uppercase">{col}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {result.rows.map((row, i) => (
-                        <tr key={i} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                        <tr key={i} className="border-b border-border/50 hover:bg-surface-hover/30">
                           {result.columns.map((col) => (
-                            <td key={col} className="px-4 py-2 text-sm text-gray-300">{String(row[col] ?? "-")}</td>
+                            <td key={col} className="px-4 py-2 text-sm text-text-primary">{String(row[col] ?? "-")}</td>
                           ))}
                         </tr>
                       ))}

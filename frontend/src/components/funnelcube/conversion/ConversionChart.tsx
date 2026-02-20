@@ -74,18 +74,18 @@ export function ConversionChart({ projectId, days }: Props) {
     <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-4">
         <Target className="w-4 h-4 text-amber-400" />
-        <h3 className="text-sm font-medium text-white">Conversion Analysis</h3>
+        <h3 className="text-sm font-medium text-text-primary">Conversion Analysis</h3>
       </div>
 
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Target event:</span>
+          <span className="text-xs text-text-muted">Target event:</span>
           <div className="relative">
             <select
               value={showCustomInput ? '__custom__' : event}
               onChange={(e) => handleEventChange(e.target.value)}
-              className="appearance-none bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 pr-7 text-sm text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+              className="appearance-none bg-surface border border-border rounded-lg px-3 py-1.5 pr-7 text-sm text-text-primary focus:outline-none focus:border-purple-500 cursor-pointer"
             >
               {DEFAULT_EVENTS.map((e) => (
                 <option key={e} value={e}>
@@ -97,7 +97,7 @@ export function ConversionChart({ projectId, days }: Props) {
               )}
               <option value="__custom__">Custom...</option>
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-text-muted absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
 
@@ -109,12 +109,12 @@ export function ConversionChart({ projectId, days }: Props) {
               onChange={(e) => setCustomEvent(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applyCustomEvent()}
               placeholder="Event name..."
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500"
               autoFocus
             />
             <button
               onClick={applyCustomEvent}
-              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors"
+              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-text-primary text-sm rounded-lg transition-colors"
             >
               Apply
             </button>
@@ -122,12 +122,12 @@ export function ConversionChart({ projectId, days }: Props) {
         )}
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Breakdown:</span>
+          <span className="text-xs text-text-muted">Breakdown:</span>
           <div className="relative">
             <select
               value={breakdown}
               onChange={(e) => setBreakdown(e.target.value)}
-              className="appearance-none bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 pr-7 text-sm text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+              className="appearance-none bg-surface border border-border rounded-lg px-3 py-1.5 pr-7 text-sm text-text-primary focus:outline-none focus:border-purple-500 cursor-pointer"
             >
               {BREAKDOWN_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -135,7 +135,7 @@ export function ConversionChart({ projectId, days }: Props) {
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-text-muted absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
       </div>
@@ -143,10 +143,10 @@ export function ConversionChart({ projectId, days }: Props) {
       {/* Results */}
       {loading ? (
         <div className="h-48 flex items-center justify-center">
-          <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+          <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>
       ) : !data ? (
-        <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
+        <div className="h-48 flex items-center justify-center text-text-muted text-sm">
           No conversion data available
         </div>
       ) : (
@@ -154,37 +154,37 @@ export function ConversionChart({ projectId, days }: Props) {
           {/* Main metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Conversion Rate */}
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-              <div className="text-xs text-gray-500 mb-1">Conversion Rate</div>
+            <div className="bg-surface/50 rounded-xl p-4 border border-border/50">
+              <div className="text-xs text-text-muted mb-1">Conversion Rate</div>
               <div className="text-3xl font-bold text-amber-400">
                 {data.conversion_rate.toFixed(2)}%
               </div>
             </div>
 
             {/* Conversions */}
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-              <div className="text-xs text-gray-500 mb-1">Conversions</div>
-              <div className="text-3xl font-bold text-white">
+            <div className="bg-surface/50 rounded-xl p-4 border border-border/50">
+              <div className="text-xs text-text-muted mb-1">Conversions</div>
+              <div className="text-3xl font-bold text-text-primary">
                 {data.conversions.toLocaleString()}
               </div>
             </div>
 
             {/* Total Visitors */}
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-              <div className="text-xs text-gray-500 mb-1">Total Visitors</div>
-              <div className="text-3xl font-bold text-white">
+            <div className="bg-surface/50 rounded-xl p-4 border border-border/50">
+              <div className="text-xs text-text-muted mb-1">Total Visitors</div>
+              <div className="text-3xl font-bold text-text-primary">
                 {data.total_visitors.toLocaleString()}
               </div>
             </div>
 
             {/* Confidence Interval */}
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-              <div className="text-xs text-gray-500 mb-1">95% Confidence</div>
-              <div className="text-lg font-bold text-gray-300">
+            <div className="bg-surface/50 rounded-xl p-4 border border-border/50">
+              <div className="text-xs text-text-muted mb-1">95% Confidence</div>
+              <div className="text-lg font-bold text-text-primary">
                 {data.confidence_interval.lower.toFixed(2)}% &ndash;{' '}
                 {data.confidence_interval.upper.toFixed(2)}%
               </div>
-              <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden relative">
+              <div className="mt-2 h-1.5 bg-surface-hover rounded-full overflow-hidden relative">
                 <div
                   className="absolute h-full bg-amber-500/40 rounded-full"
                   style={{
@@ -205,14 +205,14 @@ export function ConversionChart({ projectId, days }: Props) {
           {/* Conversion visual bar */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-text-secondary">
                 {data.conversions} of {data.total_visitors} visitors converted
               </span>
               <span className="text-xs text-amber-400 font-medium">
                 {data.conversion_rate.toFixed(2)}%
               </span>
             </div>
-            <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-3 bg-surface rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all"
                 style={{ width: `${Math.min(100, data.conversion_rate)}%` }}
@@ -223,23 +223,23 @@ export function ConversionChart({ projectId, days }: Props) {
           {/* Breakdown table */}
           {data.breakdown && Array.isArray(data.breakdown) && data.breakdown.length > 0 && (
             <div>
-              <h4 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+              <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-3">
                 Breakdown by {breakdown}
               </h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-800">
-                      <th className="text-left text-gray-500 py-2 px-3 font-medium text-xs">
+                    <tr className="border-b border-border">
+                      <th className="text-left text-text-muted py-2 px-3 font-medium text-xs">
                         {breakdown.charAt(0).toUpperCase() + breakdown.slice(1)}
                       </th>
-                      <th className="text-right text-gray-500 py-2 px-3 font-medium text-xs">
+                      <th className="text-right text-text-muted py-2 px-3 font-medium text-xs">
                         Conversions
                       </th>
-                      <th className="text-right text-gray-500 py-2 px-3 font-medium text-xs">
+                      <th className="text-right text-text-muted py-2 px-3 font-medium text-xs">
                         Visitors
                       </th>
-                      <th className="text-right text-gray-500 py-2 px-3 font-medium text-xs">
+                      <th className="text-right text-text-muted py-2 px-3 font-medium text-xs">
                         Rate
                       </th>
                       <th className="w-32 py-2 px-3"></th>
@@ -254,22 +254,22 @@ export function ConversionChart({ projectId, days }: Props) {
                       return (
                         <tr
                           key={i}
-                          className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/30 transition-colors"
+                          className="border-b border-border/50 last:border-0 hover:bg-surface-hover/30 transition-colors"
                         >
-                          <td className="text-gray-300 py-2 px-3">
+                          <td className="text-text-primary py-2 px-3">
                             {row.value || row.name || 'Unknown'}
                           </td>
-                          <td className="text-right text-white py-2 px-3 font-medium">
+                          <td className="text-right text-text-primary py-2 px-3 font-medium">
                             {(row.conversions ?? 0).toLocaleString()}
                           </td>
-                          <td className="text-right text-gray-400 py-2 px-3">
+                          <td className="text-right text-text-secondary py-2 px-3">
                             {(row.total_visitors ?? 0).toLocaleString()}
                           </td>
                           <td className="text-right text-amber-400 py-2 px-3 font-medium">
                             {rate.toFixed(2)}%
                           </td>
                           <td className="py-2 px-3">
-                            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-surface rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all"
                                 style={{

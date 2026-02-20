@@ -189,7 +189,7 @@ export default function LeadAdsDashboard() {
             </button>
             <button
               onClick={handleShowPagePicker}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg transition-colors"
             >
               <Plus className="w-4 h-4" />
               Connect Page
@@ -243,7 +243,7 @@ export default function LeadAdsDashboard() {
           <button
             onClick={() => setActiveTab("forms")}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === "forms" ? "bg-blue-600 text-white" : "text-text-secondary hover:text-text-primary"
+              activeTab === "forms" ? "bg-blue-600 text-text-primary" : "text-text-secondary hover:text-text-primary"
             }`}
           >
             Workflows ({forms.length})
@@ -251,7 +251,7 @@ export default function LeadAdsDashboard() {
           <button
             onClick={() => setActiveTab("connections")}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === "connections" ? "bg-blue-600 text-white" : "text-text-secondary hover:text-text-primary"
+              activeTab === "connections" ? "bg-blue-600 text-text-primary" : "text-text-secondary hover:text-text-primary"
             }`}
           >
             Connected Pages ({connections.length})
@@ -443,7 +443,7 @@ export default function LeadAdsDashboard() {
                 <button
                   onClick={handleSaveDistribution}
                   disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg transition-colors disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? "Saving..." : "Save"}

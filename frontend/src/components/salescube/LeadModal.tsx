@@ -33,7 +33,7 @@ const NOTE_TYPE_OPTIONS = [
 ];
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: "Baixa", color: "bg-gray-500/20 text-gray-400" },
+  low: { label: "Baixa", color: "bg-gray-500/20 text-text-secondary" },
   medium: { label: "Media", color: "bg-yellow-500/20 text-yellow-400" },
   high: { label: "Alta", color: "bg-orange-500/20 text-orange-400" },
   urgent: { label: "Urgente", color: "bg-red-500/20 text-red-400" },
@@ -218,8 +218,8 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-        <div className="bg-gray-800 rounded-xl p-8">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="bg-surface rounded-xl p-8">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
       </div>
     );
@@ -238,18 +238,18 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-background-secondary border border-border rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-gray-900 font-semibold text-sm">
               {lead.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">{lead.name}</h2>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <h2 className="text-lg font-semibold text-text-primary">{lead.name}</h2>
+              <div className="flex items-center gap-2 text-xs text-text-muted">
                 {lead.origin_name && (
-                  <span className="bg-gray-800 px-2 py-0.5 rounded text-gray-400">{lead.origin_name}</span>
+                  <span className="bg-surface px-2 py-0.5 rounded text-text-secondary">{lead.origin_name}</span>
                 )}
                 {lead.company && <span>{lead.company}</span>}
                 <span>Criado {timeAgo(lead.created_at)}</span>
@@ -257,24 +257,23 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Stage selector */}
             <select
               value={formData.stage}
               onChange={(e) => handleMoveLead(e.target.value)}
-              className="bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-1.5 text-sm"
+              className="bg-surface border border-border text-text-primary rounded-lg px-3 py-1.5 text-sm"
             >
               {stages.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
-            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-100 transition-colors">
+            <button onClick={onClose} className="p-2 text-text-secondary hover:text-text-primary transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-800 px-4">
+        <div className="flex border-b border-border px-4">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -282,13 +281,13 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
               className={cn(
                 "px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
                 activeTab === tab.id
-                  ? "text-indigo-400 border-indigo-400"
-                  : "text-gray-500 border-transparent hover:text-gray-300"
+                  ? "text-primary border-primary"
+                  : "text-text-muted border-transparent hover:text-text-secondary"
               )}
             >
               {tab.label}
               {tab.count !== undefined && tab.count > 0 && (
-                <span className="ml-1.5 text-[10px] bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">
+                <span className="ml-1.5 text-[10px] bg-surface text-text-secondary px-1.5 py-0.5 rounded-full">
                   {tab.count}
                 </span>
               )}
@@ -298,39 +297,37 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
 
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto p-4">
-          {/* ============================================================ */}
           {/* TAB: Dados */}
-          {/* ============================================================ */}
           {activeTab === "dados" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Nome *</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
+                  <label className="text-xs text-text-muted mb-1 block">Nome *</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Empresa</label>
-                  <input type="text" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
+                  <label className="text-xs text-text-muted mb-1 block">Empresa</label>
+                  <input type="text" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Email</label>
-                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
+                  <label className="text-xs text-text-muted mb-1 block">Email</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Telefone</label>
-                  <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
+                  <label className="text-xs text-text-muted mb-1 block">Telefone</label>
+                  <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Valor (R$)</label>
-                  <input type="number" value={formData.value} onChange={(e) => setFormData({ ...formData, value: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
+                  <label className="text-xs text-text-muted mb-1 block">Valor (R$)</label>
+                  <input type="number" value={formData.value} onChange={(e) => setFormData({ ...formData, value: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Score</label>
-                  <input type="number" min={0} max={100} value={formData.score} onChange={(e) => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
+                  <label className="text-xs text-text-muted mb-1 block">Score</label>
+                  <input type="number" min={0} max={100} value={formData.score} onChange={(e) => setFormData({ ...formData, score: parseInt(e.target.value) || 0 })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Origem</label>
-                  <select value={formData.origin || ""} onChange={(e) => setFormData({ ...formData, origin: e.target.value || null })} className="w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
+                  <label className="text-xs text-text-muted mb-1 block">Origem</label>
+                  <select value={formData.origin || ""} onChange={(e) => setFormData({ ...formData, origin: e.target.value || null })} className="w-full bg-input border border-input-border text-text-primary rounded-lg px-3 py-2 text-sm">
                     <option value="">Selecionar origem...</option>
                     {origins.map((o) => (
                       <option key={o.id} value={o.id}>{o.name}</option>
@@ -338,24 +335,21 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Motivo de perda</label>
-                  <input type="text" value={formData.lost_reason} onChange={(e) => setFormData({ ...formData, lost_reason: e.target.value })} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" placeholder="Se perdido..." />
+                  <label className="text-xs text-text-muted mb-1 block">Motivo de perda</label>
+                  <input type="text" value={formData.lost_reason} onChange={(e) => setFormData({ ...formData, lost_reason: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" placeholder="Se perdido..." />
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Observacoes</label>
-                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 resize-none" />
+                <label className="text-xs text-text-muted mb-1 block">Observacoes</label>
+                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary resize-none" />
               </div>
             </div>
           )}
 
-          {/* ============================================================ */}
           {/* TAB: Notas */}
-          {/* ============================================================ */}
           {activeTab === "notas" && (
             <div className="space-y-4">
-              {/* Add Note */}
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+              <div className="bg-surface border border-border rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   {NOTE_TYPE_OPTIONS.map((opt) => (
                     <button
@@ -364,8 +358,8 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                       className={cn(
                         "flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors",
                         newNote.note_type === opt.value
-                          ? "bg-indigo-600 text-white"
-                          : "text-gray-400 hover:text-gray-200"
+                          ? "bg-primary text-gray-900"
+                          : "text-text-secondary hover:text-text-primary"
                       )}
                     >
                       <opt.icon className="w-3 h-3" />
@@ -378,97 +372,92 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                   onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
                   placeholder="Escreva uma nota..."
                   rows={2}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 resize-none mb-2"
+                  className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted resize-none mb-2"
                 />
                 <div className="flex justify-end">
                   <button
                     onClick={handleAddNote}
                     disabled={!newNote.content.trim() || addingNote}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-xs transition-colors disabled:opacity-50"
                   >
                     {addingNote ? "Salvando..." : "Adicionar"}
                   </button>
                 </div>
               </div>
 
-              {/* Notes List */}
               {(lead.lead_notes || []).map((note) => {
                 const TypeIcon = NOTE_TYPE_OPTIONS.find((o) => o.value === note.note_type)?.icon || FileText;
                 return (
                   <div key={note.id} className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
-                      <TypeIcon className="w-4 h-4 text-gray-400" />
+                    <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center flex-shrink-0">
+                      <TypeIcon className="w-4 h-4 text-text-secondary" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-gray-200">{note.user_name || "Sistema"}</span>
-                        <span className="text-xs text-gray-600">{timeAgo(note.created_at)}</span>
+                        <span className="text-sm font-medium text-text-primary">{note.user_name || "Sistema"}</span>
+                        <span className="text-xs text-text-muted">{timeAgo(note.created_at)}</span>
                       </div>
-                      <p className="text-sm text-gray-400 whitespace-pre-wrap">{note.content}</p>
+                      <p className="text-sm text-text-secondary whitespace-pre-wrap">{note.content}</p>
                     </div>
                   </div>
                 );
               })}
               {(!lead.lead_notes || lead.lead_notes.length === 0) && (
-                <p className="text-center text-sm text-gray-600 py-8">Nenhuma nota ainda</p>
+                <p className="text-center text-sm text-text-muted py-8">Nenhuma nota ainda</p>
               )}
             </div>
           )}
 
-          {/* ============================================================ */}
-          {/* TAB: Comentarios (PROD comments) */}
-          {/* ============================================================ */}
+          {/* TAB: Comentarios */}
           {activeTab === "comentarios" && (
             <div className="space-y-3">
               {(lead.comments || []).map((comment: any) => (
                 <div key={comment.id} className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
-                    <MessageSquare className="w-4 h-4 text-gray-400" />
+                  <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-4 h-4 text-text-secondary" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-gray-200">{comment.author_name || "Sistema"}</span>
-                      <span className="text-xs text-gray-600">{timeAgo(comment.created_at)}</span>
+                      <span className="text-sm font-medium text-text-primary">{comment.author_name || "Sistema"}</span>
+                      <span className="text-xs text-text-muted">{timeAgo(comment.created_at)}</span>
                     </div>
-                    <p className="text-sm text-gray-400 whitespace-pre-wrap">{comment.text}</p>
+                    <p className="text-sm text-text-secondary whitespace-pre-wrap">{comment.text}</p>
                   </div>
                 </div>
               ))}
               {(!lead.comments || lead.comments.length === 0) && (
-                <p className="text-center text-sm text-gray-600 py-8">Nenhum comentario</p>
+                <p className="text-center text-sm text-text-muted py-8">Nenhum comentario</p>
               )}
             </div>
           )}
 
-          {/* ============================================================ */}
           {/* TAB: Historico */}
-          {/* ============================================================ */}
           {activeTab === "historico" && (
             <div className="space-y-1">
               {(lead.activities || []).map((activity, i) => (
                 <div key={activity.id} className="flex gap-3 py-2">
                   <div className="flex flex-col items-center">
-                    <div className="w-2 h-2 rounded-full bg-gray-600 mt-2" />
-                    {i < (lead.activities?.length || 0) - 1 && <div className="w-px flex-1 bg-gray-800 mt-1" />}
+                    <div className="w-2 h-2 rounded-full bg-text-muted mt-2" />
+                    {i < (lead.activities?.length || 0) - 1 && <div className="w-px flex-1 bg-border mt-1" />}
                   </div>
                   <div className="flex-1 pb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-300">
+                      <span className="text-sm text-text-secondary">
                         {activity.action === "lead_created" && "Lead criado"}
                         {activity.action === "stage_changed" && (
-                          <>Movido de <span className="text-gray-100">{activity.old_value}</span> para <span className="text-indigo-400">{activity.new_value}</span></>
+                          <>Movido de <span className="text-text-primary">{activity.old_value}</span> para <span className="text-primary">{activity.new_value}</span></>
                         )}
                         {activity.action === "assigned_changed" && (
-                          <>Responsavel alterado para <span className="text-indigo-400">{activity.new_value || "ninguem"}</span></>
+                          <>Responsavel alterado para <span className="text-primary">{activity.new_value || "ninguem"}</span></>
                         )}
                         {activity.action === "score_changed" && (
-                          <>Score alterado de {activity.old_value} para <span className="text-indigo-400">{activity.new_value}</span></>
+                          <>Score alterado de {activity.old_value} para <span className="text-primary">{activity.new_value}</span></>
                         )}
                         {activity.action === "note_added" && "Nota adicionada"}
                         {!["lead_created", "stage_changed", "assigned_changed", "score_changed", "note_added"].includes(activity.action) && activity.action}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600 mt-0.5">
+                    <div className="text-xs text-text-muted mt-0.5">
                       {activity.user_name && <span>{activity.user_name} - </span>}
                       {timeAgo(activity.created_at)}
                     </div>
@@ -476,31 +465,28 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                 </div>
               ))}
               {(!lead.activities || lead.activities.length === 0) && (
-                <p className="text-center text-sm text-gray-600 py-8">Nenhuma atividade registrada</p>
+                <p className="text-center text-sm text-text-muted py-8">Nenhuma atividade registrada</p>
               )}
             </div>
           )}
 
-          {/* ============================================================ */}
           {/* TAB: Tarefas */}
-          {/* ============================================================ */}
           {activeTab === "tarefas" && (
             <div className="space-y-3">
-              {/* Add Task Button */}
               {!showTaskForm ? (
                 <button
                   onClick={() => setShowTaskForm(true)}
-                  className="w-full flex items-center justify-center gap-2 py-2 border border-dashed border-gray-700 rounded-lg text-sm text-gray-500 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2 border border-dashed border-border rounded-lg text-sm text-text-muted hover:text-primary hover:border-primary/30 transition-colors"
                 >
                   <Plus className="w-4 h-4" /> Nova Tarefa
                 </button>
               ) : (
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 space-y-2">
-                  <input type="text" placeholder="Titulo *" value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500" autoFocus />
-                  <textarea placeholder="Descricao" value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} rows={2} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 resize-none" />
+                <div className="bg-surface border border-border rounded-lg p-3 space-y-2">
+                  <input type="text" placeholder="Titulo *" value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted" autoFocus />
+                  <textarea placeholder="Descricao" value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} rows={2} className="w-full bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted resize-none" />
                   <div className="flex gap-2">
-                    <input type="date" value={newTask.due_date} onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })} className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100" />
-                    <select value={newTask.priority} onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })} className="bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm">
+                    <input type="date" value={newTask.due_date} onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })} className="flex-1 bg-input border border-input-border rounded-lg px-3 py-2 text-sm text-text-primary" />
+                    <select value={newTask.priority} onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })} className="bg-input border border-input-border text-text-primary rounded-lg px-3 py-2 text-sm">
                       <option value="low">Baixa</option>
                       <option value="medium">Media</option>
                       <option value="high">Alta</option>
@@ -508,32 +494,31 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                     </select>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => setShowTaskForm(false)} className="px-3 py-1.5 text-xs text-gray-400">Cancelar</button>
-                    <button onClick={handleAddTask} disabled={!newTask.title.trim()} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs disabled:opacity-50">Criar</button>
+                    <button onClick={() => setShowTaskForm(false)} className="px-3 py-1.5 text-xs text-text-secondary">Cancelar</button>
+                    <button onClick={handleAddTask} disabled={!newTask.title.trim()} className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-xs disabled:opacity-50">Criar</button>
                   </div>
                 </div>
               )}
 
-              {/* Task List */}
               {(lead.tasks || []).map((task) => {
                 const priorityConfig = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
                 const isCompleted = task.status === "completed";
                 return (
-                  <div key={task.id} className="flex items-start gap-3 bg-gray-800 border border-gray-700 rounded-lg p-3">
+                  <div key={task.id} className="flex items-start gap-3 bg-surface border border-border rounded-lg p-3">
                     <button
                       onClick={() => handleToggleTaskStatus(task.id, task.status)}
-                      className={cn("mt-0.5", isCompleted ? "text-green-400" : "text-gray-500 hover:text-indigo-400")}
+                      className={cn("mt-0.5", isCompleted ? "text-green-400" : "text-text-muted hover:text-primary")}
                     >
                       {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                     </button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={cn("text-sm font-medium", isCompleted ? "text-gray-500 line-through" : "text-gray-100")}>{task.title}</span>
+                        <span className={cn("text-sm font-medium", isCompleted ? "text-text-muted line-through" : "text-text-primary")}>{task.title}</span>
                         <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full", priorityConfig.color)}>{priorityConfig.label}</span>
                       </div>
-                      {task.description && <p className="text-xs text-gray-500 mt-0.5">{task.description}</p>}
+                      {task.description && <p className="text-xs text-text-muted mt-0.5">{task.description}</p>}
                       {task.due_date && (
-                        <span className="text-xs text-gray-600 mt-1 flex items-center gap-1">
+                        <span className="text-xs text-text-muted mt-1 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {new Date(task.due_date).toLocaleDateString("pt-BR")}
                         </span>
@@ -543,20 +528,18 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                 );
               })}
               {(!lead.tasks || lead.tasks.length === 0) && !showTaskForm && (
-                <p className="text-center text-sm text-gray-600 py-8">Nenhuma tarefa vinculada</p>
+                <p className="text-center text-sm text-text-muted py-8">Nenhuma tarefa vinculada</p>
               )}
             </div>
           )}
 
-          {/* ============================================================ */}
           {/* TAB: Vendas */}
-          {/* ============================================================ */}
           {activeTab === "vendas" && (
             <div className="space-y-3">
               {(lead.sales || []).map((sale) => (
-                <div key={sale.id} className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                <div key={sale.id} className="bg-surface border border-border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-indigo-400">{formatCurrency(sale.total_value)}</span>
+                    <span className="text-sm font-semibold text-primary">{formatCurrency(sale.total_value)}</span>
                     <span className={cn(
                       "text-xs px-2 py-0.5 rounded-full",
                       sale.stage === "won" ? "bg-green-500/20 text-green-400" :
@@ -569,27 +552,27 @@ export default function LeadModal({ leadId, stages, onClose, onUpdated }: LeadMo
                        sale.stage === "won" ? "Ganha" : "Perdida"}
                     </span>
                   </div>
-                  {sale.notes && <p className="text-xs text-gray-500">{sale.notes}</p>}
-                  <div className="text-xs text-gray-600 mt-1">
+                  {sale.notes && <p className="text-xs text-text-muted">{sale.notes}</p>}
+                  <div className="text-xs text-text-muted mt-1">
                     {new Date(sale.created_at).toLocaleDateString("pt-BR")}
                   </div>
                 </div>
               ))}
               {(!lead.sales || lead.sales.length === 0) && (
-                <p className="text-center text-sm text-gray-600 py-8">Nenhuma venda vinculada</p>
+                <p className="text-center text-sm text-text-muted py-8">Nenhuma venda vinculada</p>
               )}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-800">
+        <div className="flex items-center justify-between p-4 border-t border-border">
           <button onClick={handleDelete} className="flex items-center gap-1 px-3 py-2 text-red-400 hover:text-red-300 text-sm transition-colors">
             <Trash2 className="w-4 h-4" /> Excluir
           </button>
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100 transition-colors">Cancelar</button>
-            <button onClick={handleSave} disabled={saving || !formData.name} className="flex items-center gap-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancelar</button>
+            <button onClick={handleSave} disabled={saving || !formData.name} className="flex items-center gap-1 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm transition-colors disabled:opacity-50">
               <Save className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar"}
             </button>
           </div>

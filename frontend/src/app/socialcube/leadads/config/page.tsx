@@ -189,7 +189,7 @@ export default function LeadAdsConfigPage() {
           <button
             onClick={handleSave}
             disabled={saving || !appId || !verifyToken}
-            className="flex items-center justify-center gap-2 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-2 w-full py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg transition-colors disabled:opacity-50"
           >
             {saved ? (
               <><Check className="w-4 h-4" /> Saved!</>

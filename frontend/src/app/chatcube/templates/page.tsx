@@ -111,7 +111,7 @@ export default function TemplatesPage() {
             <FileText className="w-5 h-5 text-primary" />
             <h1 className="text-lg font-semibold text-text-primary">Templates de Mensagem</h1>
           </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium transition-colors">
             <Plus className="w-4 h-4" /> Novo Template
           </button>
         </header>
@@ -181,7 +181,7 @@ export default function TemplatesPage() {
                 <div className="flex justify-end gap-3 pt-2">
                   <button onClick={() => setShowForm(false)} className="px-4 py-2 text-text-secondary hover:text-text-primary">Cancelar</button>
                   <button onClick={handleCreate} disabled={saving || !formData.name.trim() || !formData.content.trim()}
-                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                     {saving && <Loader2 className="w-4 h-4 animate-spin" />} Criar Template
                   </button>
                 </div>

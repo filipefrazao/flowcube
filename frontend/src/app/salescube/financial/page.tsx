@@ -75,9 +75,9 @@ const STAGE_CONFIG: Record<string, { label: string; color: string; bg: string; b
   won: {
     label: "Aprovada",
     color: "bg-emerald-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    text: "text-emerald-400",
+    bg: "bg-primary/10",
+    border: "border-primary/30",
+    text: "text-primary",
   },
   lost: {
     label: "Cancelada",
@@ -100,12 +100,12 @@ const PIPELINE_MAP = {
 // ============================================================================
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded bg-gray-700/50", className)} />;
+  return <div className={cn("animate-pulse rounded bg-surface-hover/50", className)} />;
 }
 
 function PipelineCardSkeleton() {
   return (
-    <div className="border border-gray-700 rounded-xl p-5 space-y-3">
+    <div className="border border-border rounded-xl p-5 space-y-3">
       <Skeleton className="h-5 w-40" />
       <Skeleton className="h-8 w-32" />
       <Skeleton className="h-4 w-24" />
@@ -133,7 +133,7 @@ function TableSkeleton() {
 // ============================================================================
 
 function StageBadge({ stage }: { stage: string }) {
-  const cfg = STAGE_CONFIG[stage] || { label: stage, bg: "bg-gray-500/10", border: "border-gray-500/30", text: "text-gray-400" };
+  const cfg = STAGE_CONFIG[stage] || { label: stage, bg: "bg-gray-500/10", border: "border-gray-500/30", text: "text-text-secondary" };
   return (
     <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border", cfg.bg, cfg.border, cfg.text)}>
       <span className={cn("w-1.5 h-1.5 rounded-full", cfg.color)} />
@@ -383,11 +383,11 @@ export default function FinancialPage() {
       {/* ================================================================== */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <DollarSign className="w-7 h-7 text-emerald-400" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <DollarSign className="w-7 h-7 text-primary" />
             Financeiro
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-text-secondary mt-1">
             Pipeline financeira e gestao de vendas
           </p>
         </div>
@@ -398,7 +398,7 @@ export default function FinancialPage() {
               fetchPipelineSales();
               fetchSales();
             }}
-            className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-gray-300 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-surface hover:bg-surface-hover border border-border rounded-lg text-text-primary transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Atualizar
@@ -409,23 +409,23 @@ export default function FinancialPage() {
       {/* ================================================================== */}
       {/* Pipeline Total Header                                              */}
       {/* ================================================================== */}
-      <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 border border-gray-700 rounded-xl p-5">
+      <div className="bg-gradient-to-r from-surface/80 to-background-secondary/80 border border-border rounded-xl p-5">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <LayoutGrid className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-lg font-semibold text-white">Pipeline Total</h2>
+            <LayoutGrid className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold text-text-primary">Pipeline Total</h2>
           </div>
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Vendas Ativas</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-xs text-text-muted uppercase tracking-wider">Vendas Ativas</p>
+              <p className="text-2xl font-bold text-text-primary">
                 {(pipelineTotals.backlog.count + pipelineTotals.done.count).toLocaleString("pt-BR")}
               </p>
             </div>
-            <div className="w-px h-10 bg-gray-700" />
+            <div className="w-px h-10 bg-surface-hover" />
             <div className="text-right">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Valor Total</p>
-              <p className="text-2xl font-bold text-emerald-400">
+              <p className="text-xs text-text-muted uppercase tracking-wider">Valor Total</p>
+              <p className="text-2xl font-bold text-primary">
                 {formatBRL(pipelineTotals.grand)}
               </p>
             </div>
@@ -453,16 +453,16 @@ export default function FinancialPage() {
           </div>
           <div className="divide-y divide-amber-500/10 max-h-[320px] overflow-y-auto">
             {negotiationSales.length === 0 ? (
-              <div className="p-4 text-center text-gray-500 text-sm">Nenhuma venda em negociacao</div>
+              <div className="p-4 text-center text-text-muted text-sm">Nenhuma venda em negociacao</div>
             ) : (
               negotiationSales.map((sale) => (
                 <div key={sale.id} className="p-3 hover:bg-amber-500/5 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-200 truncate">
+                      <p className="text-sm font-medium text-text-primary truncate">
                         {sale.lead_name || "Sem cliente"}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-text-muted mt-0.5">
                         {sale.line_items?.map((li) => li.product_name).join(", ") || "Sem produto"}
                       </p>
                     </div>
@@ -491,42 +491,42 @@ export default function FinancialPage() {
             <p className="text-xl font-bold text-blue-400 mt-2">{formatBRL(pipelineTotals.doing.total)}</p>
           </div>
           <div className="divide-y divide-blue-500/10 max-h-[320px] overflow-y-auto">
-            <div className="p-4 text-center text-gray-500 text-sm">
+            <div className="p-4 text-center text-text-muted text-sm">
               Nenhuma venda aguardando aprovacao
             </div>
           </div>
         </div>
 
         {/* Done / Aprovadas */}
-        <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-emerald-500/20 bg-emerald-500/10">
+        <div className="border border-primary/30 bg-emerald-500/5 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-primary/20 bg-primary/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <h3 className="font-semibold text-emerald-300">Done / Aprovadas</h3>
+                <h3 className="font-semibold text-primary">Done / Aprovadas</h3>
               </div>
-              <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
                 {pipelineTotals.done.count}
               </span>
             </div>
-            <p className="text-xl font-bold text-emerald-400 mt-2">{formatBRL(pipelineTotals.done.total)}</p>
+            <p className="text-xl font-bold text-primary mt-2">{formatBRL(pipelineTotals.done.total)}</p>
           </div>
           <div className="divide-y divide-emerald-500/10 max-h-[320px] overflow-y-auto">
             {wonSales.length === 0 ? (
-              <div className="p-4 text-center text-gray-500 text-sm">Nenhuma venda aprovada</div>
+              <div className="p-4 text-center text-text-muted text-sm">Nenhuma venda aprovada</div>
             ) : (
               wonSales.map((sale) => (
                 <div key={sale.id} className="p-3 hover:bg-emerald-500/5 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-200 truncate">
+                      <p className="text-sm font-medium text-text-primary truncate">
                         {sale.lead_name || "Sem cliente"}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-text-muted mt-0.5">
                         {sale.line_items?.map((li) => li.product_name).join(", ") || "Sem produto"}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-emerald-400 whitespace-nowrap ml-3">
+                    <p className="text-sm font-semibold text-primary whitespace-nowrap ml-3">
                       {formatBRL(parseFloat(sale.total_value))}
                     </p>
                   </div>
@@ -542,32 +542,32 @@ export default function FinancialPage() {
       {/* ================================================================== */}
       {kpis && overview && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-xl p-4">
+          <div className="border border-primary/20 bg-emerald-500/5 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400 uppercase tracking-wider">Receita Total</span>
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs text-text-secondary uppercase tracking-wider">Receita Total</span>
+              <TrendingUp className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-xl font-bold text-emerald-400">{formatBRL(overview.total_revenue)}</p>
+            <p className="text-xl font-bold text-primary">{formatBRL(overview.total_revenue)}</p>
           </div>
           <div className="border border-red-500/20 bg-red-500/5 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400 uppercase tracking-wider">Perdas / Canceladas</span>
+              <span className="text-xs text-text-secondary uppercase tracking-wider">Perdas / Canceladas</span>
               <TrendingDown className="w-4 h-4 text-red-400" />
             </div>
             <p className="text-xl font-bold text-red-400">{formatBRL(overview.total_refunds)}</p>
           </div>
-          <div className="border border-indigo-500/20 bg-indigo-500/5 rounded-xl p-4">
+          <div className="border border-primary/20 bg-primary/5 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400 uppercase tracking-wider">Receita Liquida</span>
-              <DollarSign className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs text-text-secondary uppercase tracking-wider">Receita Liquida</span>
+              <DollarSign className="w-4 h-4 text-primary" />
             </div>
-            <p className={cn("text-xl font-bold", overview.net >= 0 ? "text-indigo-400" : "text-red-400")}>
+            <p className={cn("text-xl font-bold", overview.net >= 0 ? "text-primary" : "text-red-400")}>
               {formatBRL(overview.net)}
             </p>
           </div>
           <div className="border border-violet-500/20 bg-violet-500/5 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400 uppercase tracking-wider">Ticket Medio</span>
+              <span className="text-xs text-text-secondary uppercase tracking-wider">Ticket Medio</span>
               <ShoppingCart className="w-4 h-4 text-violet-400" />
             </div>
             <p className="text-xl font-bold text-violet-400">{formatBRL(kpis.summary.average_ticket)}</p>
@@ -578,51 +578,51 @@ export default function FinancialPage() {
       {/* ================================================================== */}
       {/* Filters Bar (Collapsible)                                          */}
       {/* ================================================================== */}
-      <div className="border border-gray-700 rounded-xl bg-gray-800/50 overflow-hidden">
+      <div className="border border-border rounded-xl bg-surface/50 overflow-hidden">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-700/30 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-3 hover:bg-surface-hover/30 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-300">Filtros</span>
+            <Filter className="w-4 h-4 text-text-secondary" />
+            <span className="text-sm font-medium text-text-primary">Filtros</span>
             {hasActiveFilters && (
-              <span className="w-2 h-2 rounded-full bg-indigo-500" />
+              <span className="w-2 h-2 rounded-full bg-primary" />
             )}
           </div>
           {showFilters ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
+            <ChevronUp className="w-4 h-4 text-text-secondary" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-text-secondary" />
           )}
         </button>
 
         {showFilters && (
-          <div className="px-5 pb-5 pt-2 border-t border-gray-700 space-y-4">
+          <div className="px-5 pb-5 pt-2 border-t border-border space-y-4">
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Busca Geral */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Busca Geral</label>
+                <label className="text-xs text-text-muted mb-1 block">Busca Geral</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                   <input
                     type="text"
                     placeholder="Pesquisar vendas..."
                     value={search}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className="w-full bg-background-secondary border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
 
               {/* Status da Venda */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Status da Venda</label>
+                <label className="text-xs text-text-muted mb-1 block">Status da Venda</label>
                 <select
                   value={filterStage}
                   onChange={(e) => { setFilterStage(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 >
                   <option value="">Todos</option>
                   <option value="negotiation">Em Negociacao</option>
@@ -634,11 +634,11 @@ export default function FinancialPage() {
 
               {/* Pipeline Financeira */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Pipeline Financeira</label>
+                <label className="text-xs text-text-muted mb-1 block">Pipeline Financeira</label>
                 <select
                   value={filterPipeline}
                   onChange={(e) => { setFilterPipeline(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 >
                   <option value="">Todas</option>
                   <option value="backlog">Backlog (Negociacao)</option>
@@ -649,11 +649,11 @@ export default function FinancialPage() {
 
               {/* Produto */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Produto</label>
+                <label className="text-xs text-text-muted mb-1 block">Produto</label>
                 <select
                   value={filterProduct}
                   onChange={(e) => { setFilterProduct(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 >
                   <option value="">Todos</option>
                   {products.map((p) => (
@@ -669,45 +669,45 @@ export default function FinancialPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Cliente */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Cliente</label>
+                <label className="text-xs text-text-muted mb-1 block">Cliente</label>
                 <input
                   type="text"
                   placeholder="Nome do cliente..."
                   value={filterClient}
                   onChange={(e) => { setFilterClient(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Data de Criacao */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Data de Criacao (De)</label>
+                <label className="text-xs text-text-muted mb-1 block">Data de Criacao (De)</label>
                 <input
                   type="date"
                   value={filterDateFrom}
                   onChange={(e) => { setFilterDateFrom(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Data de Criacao (Ate)</label>
+                <label className="text-xs text-text-muted mb-1 block">Data de Criacao (Ate)</label>
                 <input
                   type="date"
                   value={filterDateTo}
                   onChange={(e) => { setFilterDateTo(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Faixa de Preco Min */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Preco Minimo (R$)</label>
+                <label className="text-xs text-text-muted mb-1 block">Preco Minimo (R$)</label>
                 <input
                   type="number"
                   placeholder="0,00"
                   value={filterPriceMin}
                   onChange={(e) => { setFilterPriceMin(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -716,43 +716,43 @@ export default function FinancialPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Data de Fechamento */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Data de Fechamento (De)</label>
+                <label className="text-xs text-text-muted mb-1 block">Data de Fechamento (De)</label>
                 <input
                   type="date"
                   value={filterClosedFrom}
                   onChange={(e) => { setFilterClosedFrom(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Data de Fechamento (Ate)</label>
+                <label className="text-xs text-text-muted mb-1 block">Data de Fechamento (Ate)</label>
                 <input
                   type="date"
                   value={filterClosedTo}
                   onChange={(e) => { setFilterClosedTo(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Faixa de Preco Max */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Preco Maximo (R$)</label>
+                <label className="text-xs text-text-muted mb-1 block">Preco Maximo (R$)</label>
                 <input
                   type="number"
                   placeholder="999.999"
                   value={filterPriceMax}
                   onChange={(e) => { setFilterPriceMax(e.target.value); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary"
                 />
               </div>
 
               {/* Linhas por pagina */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Linhas por Pagina</label>
+                <label className="text-xs text-text-muted mb-1 block">Linhas por Pagina</label>
                 <select
                   value={pageSize}
                   onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
@@ -781,12 +781,12 @@ export default function FinancialPage() {
       {/* ================================================================== */}
       {/* Data Table                                                         */}
       {/* ================================================================== */}
-      <div className="border border-gray-700 rounded-xl bg-gray-800/30 overflow-hidden">
+      <div className="border border-border rounded-xl bg-surface/30 overflow-hidden">
         {/* Table Header */}
-        <div className="px-5 py-3 border-b border-gray-700 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white">
+        <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-text-primary">
             Todas as Vendas
-            <span className="text-gray-500 font-normal ml-2">
+            <span className="text-text-muted font-normal ml-2">
               ({totalSales.toLocaleString("pt-BR")} resultados)
             </span>
           </h2>
@@ -796,19 +796,19 @@ export default function FinancialPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-700 bg-gray-800/50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Lead / Cliente</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Produto(s)</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Valor Total</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Pipeline</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Data Criacao</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Data Fechamento</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Acoes</th>
+              <tr className="border-b border-border bg-surface/50">
+                <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">ID</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Lead / Cliente</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Produto(s)</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Valor Total</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Pipeline</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Data Criacao</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Data Fechamento</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Acoes</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700/50">
+            <tbody className="divide-y divide-border/50">
               {tableLoading ? (
                 Array.from({ length: pageSize > 10 ? 10 : pageSize }).map((_, i) => (
                   <tr key={i}>
@@ -821,7 +821,7 @@ export default function FinancialPage() {
                 ))
               ) : sales.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={9} className="px-4 py-12 text-center text-text-muted">
                     Nenhuma venda encontrada com os filtros aplicados.
                   </td>
                 </tr>
@@ -834,18 +834,18 @@ export default function FinancialPage() {
                     sale.stage === "lost" ? "Cancelada" :
                     sale.stage === "negotiation" || sale.stage === "proposal" ? "Backlog" : "—";
                   const pipelineColor =
-                    sale.stage === "won" ? "text-emerald-400" :
+                    sale.stage === "won" ? "text-primary" :
                     sale.stage === "lost" ? "text-red-400" :
                     "text-amber-400";
 
                   return (
                     <tr
                       key={sale.id}
-                      className="hover:bg-gray-700/20 transition-colors"
+                      className="hover:bg-surface-hover/20 transition-colors"
                     >
                       {/* ID */}
                       <td className="px-4 py-3">
-                        <span className="text-xs font-mono text-gray-500">
+                        <span className="text-xs font-mono text-text-muted">
                           {shortId(sale.id)}
                         </span>
                       </td>
@@ -855,26 +855,26 @@ export default function FinancialPage() {
                         {sale.lead ? (
                           <Link
                             href={`/salescube/leads?id=${sale.lead}`}
-                            className="text-sm text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 transition-colors"
+                            className="text-sm text-primary hover:text-primary hover:underline flex items-center gap-1 transition-colors"
                           >
                             {sale.lead_name || "Sem nome"}
                             <ExternalLink className="w-3 h-3" />
                           </Link>
                         ) : (
-                          <span className="text-sm text-gray-500">Sem cliente</span>
+                          <span className="text-sm text-text-muted">Sem cliente</span>
                         )}
                       </td>
 
                       {/* Produto(s) */}
                       <td className="px-4 py-3 max-w-[200px]">
-                        <span className="text-sm text-gray-300 truncate block" title={productNames}>
+                        <span className="text-sm text-text-primary truncate block" title={productNames}>
                           {productNames}
                         </span>
                       </td>
 
                       {/* Valor Total */}
                       <td className="px-4 py-3 text-right">
-                        <span className={cn("text-sm font-semibold", value > 0 ? "text-emerald-400" : "text-gray-400")}>
+                        <span className={cn("text-sm font-semibold", value > 0 ? "text-primary" : "text-text-secondary")}>
                           {formatBRL(value)}
                         </span>
                       </td>
@@ -886,7 +886,7 @@ export default function FinancialPage() {
                             <select
                               value={editStage}
                               onChange={(e) => setEditStage(e.target.value)}
-                              className="bg-gray-900 border border-indigo-500 rounded px-2 py-1 text-xs text-gray-200 focus:outline-none"
+                              className="bg-background-secondary border border-primary rounded px-2 py-1 text-xs text-text-primary focus:outline-none"
                               autoFocus
                             >
                               <option value="negotiation">Em Negociacao</option>
@@ -896,13 +896,13 @@ export default function FinancialPage() {
                             </select>
                             <button
                               onClick={() => handleInlineEdit(sale.id)}
-                              className="text-emerald-400 hover:text-emerald-300 text-xs px-1"
+                              className="text-primary hover:text-primary text-xs px-1"
                             >
                               OK
                             </button>
                             <button
                               onClick={() => { setEditingSale(null); setEditStage(""); }}
-                              className="text-gray-500 hover:text-gray-400 text-xs px-1"
+                              className="text-text-muted hover:text-text-secondary text-xs px-1"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -927,12 +927,12 @@ export default function FinancialPage() {
 
                       {/* Data Criacao */}
                       <td className="px-4 py-3 text-center">
-                        <span className="text-xs text-gray-400">{formatDate(sale.created_at)}</span>
+                        <span className="text-xs text-text-secondary">{formatDate(sale.created_at)}</span>
                       </td>
 
                       {/* Data Fechamento */}
                       <td className="px-4 py-3 text-center">
-                        <span className="text-xs text-gray-400">{formatDate(sale.closed_at)}</span>
+                        <span className="text-xs text-text-secondary">{formatDate(sale.closed_at)}</span>
                       </td>
 
                       {/* Acoes */}
@@ -941,7 +941,7 @@ export default function FinancialPage() {
                           {sale.lead && (
                             <Link
                               href={`/salescube/leads?id=${sale.lead}`}
-                              className="text-xs text-indigo-400 hover:text-indigo-300 px-1.5 py-0.5 rounded hover:bg-indigo-500/10 transition-colors"
+                              className="text-xs text-primary hover:text-primary px-1.5 py-0.5 rounded hover:bg-primary/10 transition-colors"
                               title="Ver cliente"
                             >
                               <Users className="w-3.5 h-3.5" />
@@ -967,18 +967,18 @@ export default function FinancialPage() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="px-5 py-3 border-t border-gray-700 flex items-center justify-between flex-wrap gap-3">
-          <div className="text-xs text-gray-500">
+        <div className="px-5 py-3 border-t border-border flex items-center justify-between flex-wrap gap-3">
+          <div className="text-xs text-text-muted">
             Mostrando{" "}
-            <span className="text-gray-300 font-medium">
+            <span className="text-text-primary font-medium">
               {totalSales > 0 ? (page - 1) * pageSize + 1 : 0}
             </span>
             {" "}-{" "}
-            <span className="text-gray-300 font-medium">
+            <span className="text-text-primary font-medium">
               {Math.min(page * pageSize, totalSales)}
             </span>
             {" "}de{" "}
-            <span className="text-gray-300 font-medium">
+            <span className="text-text-primary font-medium">
               {totalSales.toLocaleString("pt-BR")}
             </span>
           </div>
@@ -987,7 +987,7 @@ export default function FinancialPage() {
             <button
               onClick={() => setPage(1)}
               disabled={page <= 1}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-400"
+              className="p-1.5 rounded hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-text-secondary"
               title="Primeira pagina"
             >
               <ChevronsLeft className="w-4 h-4" />
@@ -995,7 +995,7 @@ export default function FinancialPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-400"
+              className="p-1.5 rounded hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-text-secondary"
               title="Pagina anterior"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -1020,8 +1020,8 @@ export default function FinancialPage() {
                   className={cn(
                     "w-8 h-8 rounded text-xs font-medium transition-colors",
                     page === pageNum
-                      ? "bg-indigo-600 text-white"
-                      : "text-gray-400 hover:bg-gray-700"
+                      ? "bg-primary text-gray-900"
+                      : "text-text-secondary hover:bg-surface-hover"
                   )}
                 >
                   {pageNum}
@@ -1032,7 +1032,7 @@ export default function FinancialPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-400"
+              className="p-1.5 rounded hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-text-secondary"
               title="Proxima pagina"
             >
               <ChevronRight className="w-4 h-4" />
@@ -1040,7 +1040,7 @@ export default function FinancialPage() {
             <button
               onClick={() => setPage(totalPages)}
               disabled={page >= totalPages}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-400"
+              className="p-1.5 rounded hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-text-secondary"
               title="Ultima pagina"
             >
               <ChevronsRight className="w-4 h-4" />

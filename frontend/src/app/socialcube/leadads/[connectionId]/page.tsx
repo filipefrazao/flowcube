@@ -114,7 +114,7 @@ export default function ConnectionDetailPage() {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
             Sync Forms
@@ -240,7 +240,7 @@ export default function ConnectionDetailPage() {
                 <button
                   onClick={handleSaveDistribution}
                   disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg transition-colors disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? "Saving..." : "Save"}

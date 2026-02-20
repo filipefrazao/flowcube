@@ -48,7 +48,7 @@ export default function AIAgentsPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">{agent.description || 'Sem descricao'}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className={"inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium " + (agent.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}>
+                  <span className={"inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium " + (agent.is_active ? 'bg-green-100 text-green-800' : 'bg-surface-hover text-text-primary')}>
                     {agent.is_active ? 'Ativo' : 'Inativo'}
                   </span>
                   <span className="text-xs text-muted-foreground">{agent.model}</span>

@@ -62,7 +62,7 @@ export default function CalendarPage() {
           <button onClick={() => router.push("/socialcube")} className="p-2 hover:bg-card rounded-lg"><ArrowLeft className="w-5 h-5 text-text-secondary" /></button>
           <h1 className="text-2xl font-bold text-text-primary">Content Calendar</h1>
           <div className="flex-1" />
-          <button onClick={() => router.push("/socialcube/posts/new")} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+          <button onClick={() => router.push("/socialcube/posts/new")} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg text-sm">
             <Plus className="w-4 h-4" /> New Post
           </button>
         </div>
@@ -87,12 +87,12 @@ export default function CalendarPage() {
                 <div key={i} className={`min-h-[100px] p-2 border-b border-r border-border ${!day ? "bg-background/50" : "hover:bg-background/30 cursor-pointer"}`}>
                   {day && (
                     <>
-                      <span className={`text-sm ${isToday ? "bg-blue-500 text-white rounded-full w-7 h-7 flex items-center justify-center" : "text-text-secondary"}`}>
+                      <span className={`text-sm ${isToday ? "bg-blue-500 text-text-primary rounded-full w-7 h-7 flex items-center justify-center" : "text-text-secondary"}`}>
                         {day}
                       </span>
                       <div className="mt-1 space-y-1">
                         {dayEvents.slice(0, 3).map((e) => (
-                          <div key={e.id} className={`text-xs px-1.5 py-0.5 rounded truncate text-white ${statusColor[e.status] || "bg-gray-500"}`}>
+                          <div key={e.id} className={`text-xs px-1.5 py-0.5 rounded truncate text-text-primary ${statusColor[e.status] || "bg-gray-500"}`}>
                             {e.title || e.caption?.slice(0, 20) || "Post"}
                           </div>
                         ))}

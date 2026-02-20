@@ -110,7 +110,7 @@ export function AppUpdateNotifier() {
       <div className={'mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2 text-sm'}>
         <div className={'font-medium'}>Nova versao disponivel. Recarregue para evitar bugs de bundle/cache.</div>
         <div className={'flex items-center gap-2'}>
-          <button className={'rounded bg-black px-3 py-1 text-white hover:opacity-90'} onClick={handleReload}>
+          <button className={'rounded bg-black px-3 py-1 text-text-primary hover:opacity-90'} onClick={handleReload}>
             Recarregar
           </button>
           <button className={'rounded border border-black/20 px-3 py-1 hover:bg-black/10'} onClick={handleDismiss}>

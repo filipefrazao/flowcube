@@ -172,11 +172,11 @@ export function QRCodeDisplay({ instanceId, onConnected }: QRCodeDisplayProps) {
         <>
           {/* QR Code Display */}
           <div className="flex flex-col items-center">
-            <div className="w-64 h-64 bg-white rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+            <div className="w-64 h-64 bg-surface rounded-lg flex items-center justify-center mb-4 overflow-hidden">
               {loading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                  <span className="text-xs text-gray-400">Loading QR...</span>
+                  <Loader2 className="w-8 h-8 text-text-secondary animate-spin" />
+                  <span className="text-xs text-text-secondary">Loading QR...</span>
                 </div>
               ) : error ? (
                 <div className="text-center p-4">
@@ -196,8 +196,8 @@ export function QRCodeDisplay({ instanceId, onConnected }: QRCodeDisplayProps) {
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                  <span className="text-xs text-gray-400">Generating QR code...</span>
+                  <Loader2 className="w-8 h-8 text-text-secondary animate-spin" />
+                  <span className="text-xs text-text-secondary">Generating QR code...</span>
                 </div>
               )}
             </div>
@@ -248,7 +248,7 @@ export function QRCodeDisplay({ instanceId, onConnected }: QRCodeDisplayProps) {
                 <button
                   onClick={handleGetPairingCode}
                   disabled={pairingLoading || !phoneNumber.trim()}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors"
                 >
                   {pairingLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

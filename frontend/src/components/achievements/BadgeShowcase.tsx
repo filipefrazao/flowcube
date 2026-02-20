@@ -21,7 +21,7 @@ interface BadgeShowcaseProps {
 }
 
 const rarityColors = {
-  common: 'from-gray-500 to-gray-700',
+  common: 'from-gray-500 to-surface-hover',
   rare: 'from-blue-500 to-blue-700',
   epic: 'from-purple-500 to-pink-500',
   legendary: 'from-yellow-500 to-orange-500'
@@ -32,9 +32,9 @@ export function BadgeShowcase({ badges, maxDisplay = 6, onViewAll }: BadgeShowca
   const remainingCount = Math.max(0, badges.length - maxDisplay);
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700">
+    <div className="bg-gradient-to-br from-gray-900 to-surface rounded-xl p-6 border border-border">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+        <h3 className="text-xl font-bold text-text-primary flex items-center gap-2">
           <Trophy className="w-6 h-6 text-yellow-500" />
           Badges Showcase
         </h3>
@@ -46,7 +46,7 @@ export function BadgeShowcase({ badges, maxDisplay = 6, onViewAll }: BadgeShowca
       </div>
 
       {displayedBadges.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-text-muted">
           <Award className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p>No badges earned yet</p>
         </div>
@@ -64,7 +64,7 @@ export function BadgeShowcase({ badges, maxDisplay = 6, onViewAll }: BadgeShowca
                 className={`aspect-square rounded-xl bg-gradient-to-br ${rarityColors[badge.rarity]} shadow-lg p-4 flex items-center justify-center cursor-pointer`}
                 whileHover={{ scale: 1.1, rotate: 5 }}
               >
-                <Trophy className="w-full h-full text-white" />
+                <Trophy className="w-full h-full text-text-primary" />
               </motion.div>
               <div className="absolute top-1 right-1">
                 <Star className="w-4 h-4 text-yellow-400" />

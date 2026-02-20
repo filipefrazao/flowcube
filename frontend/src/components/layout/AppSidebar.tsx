@@ -43,6 +43,7 @@ interface SidebarSection {
   icon: React.ComponentType<{ className?: string }>;
   href?: string;
   children?: SubItem[];
+  groupLabel?: string; // Displays a section separator above this item
 }
 
 // ============================================================================
@@ -55,11 +56,13 @@ const sections: SidebarSection[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
     href: "/",
+    groupLabel: "Aplicação",
   },
   {
     id: "chatcube",
     label: "ChatCube",
     icon: MessageSquare,
+    groupLabel: "Atendimento",
     children: [
       { label: "Instancias", href: "/chatcube" },
       { label: "Conversas", href: "/chatcube/conversations" },
@@ -74,6 +77,7 @@ const sections: SidebarSection[] = [
     id: "salescube",
     label: "SalesCube",
     icon: Kanban,
+    groupLabel: "CRM",
     children: [
       { label: "Quadro", href: "/salescube" },
       { label: "Leads", href: "/salescube/leads" },
@@ -88,6 +92,7 @@ const sections: SidebarSection[] = [
     id: "minicube",
     label: "MiniCube",
     icon: GraduationCap,
+    groupLabel: "Educação",
     children: [
       { label: "Turmas", href: "/minicube/turmas" },
       { label: "Clientes", href: "/minicube/clientes" },
@@ -100,6 +105,7 @@ const sections: SidebarSection[] = [
     id: "cubeai",
     label: "Cube AI",
     icon: Brain,
+    groupLabel: "Inteligência Artificial",
     children: [
       { label: "Agentes", href: "/cubeai/agents" },
       { label: "Conhecimentos", href: "/cubeai/knowledge" },
@@ -109,6 +115,7 @@ const sections: SidebarSection[] = [
     id: "flowcube",
     label: "FlowCube",
     icon: GitBranch,
+    groupLabel: "Automação",
     children: [
       { label: "Workflows", href: "/workflows" },
       { label: "Credenciais", href: "/credentials" },
@@ -119,6 +126,7 @@ const sections: SidebarSection[] = [
     id: "pagecube",
     label: "PageCube",
     icon: Layout,
+    groupLabel: "Conteúdo",
     children: [
       { label: "Páginas", href: "/pagecube" },
       { label: "Templates", href: "/pagecube/templates" },
@@ -151,6 +159,7 @@ const sections: SidebarSection[] = [
     id: "reports",
     label: "Relatorios",
     icon: FileText,
+    groupLabel: "Analytics",
     children: [
       { label: "Lead Febracis", href: "/reports/lead-febracis" },
       { label: "Lead Fit", href: "/reports/lead-fit" },
@@ -163,6 +172,7 @@ const sections: SidebarSection[] = [
     label: "Conquistas",
     icon: Trophy,
     href: "/achievements",
+    groupLabel: "Sistema",
   },
   {
     id: "settings",
@@ -194,7 +204,9 @@ export function AppSidebar() {
   useEffect(() => {
     for (const section of sections) {
       if (section.children) {
-        const isActive = section.children.some((child) => pathname === child.href || pathname.startsWith(child.href + "/"));
+        const isActive = section.children.some(
+          (child) => pathname === child.href || pathname.startsWith(child.href + "/")
+        );
         if (isActive) {
           setExpandedSections((prev) => {
             const next = new Set(prev);
@@ -209,11 +221,8 @@ export function AppSidebar() {
   const toggleSection = (id: string) => {
     setExpandedSections((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -237,18 +246,19 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "bg-gray-900 border-r border-gray-800 flex flex-col h-screen transition-all duration-200 ease-in-out overflow-hidden flex-shrink-0",
-        collapsed ? "w-16" : "w-64"
+        "flex flex-col h-screen transition-all duration-200 ease-in-out overflow-hidden flex-shrink-0",
+        "bg-background-secondary border-r border-border",
+        collapsed ? "w-[60px]" : "w-[240px]"
       )}
     >
       {/* Header */}
-      <div className="h-14 flex items-center justify-between border-b border-gray-800 px-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">FP</span>
+      <div className="h-14 flex items-center justify-between border-b border-border px-3 flex-shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary">
+            <span className="text-text-primary font-bold text-xs">FP</span>
           </div>
           {!collapsed && (
-            <span className="text-sm font-semibold text-gray-100 whitespace-nowrap">
+            <span className="text-sm font-semibold text-text-primary whitespace-nowrap truncate">
               FRZ Platform
             </span>
           )}
@@ -256,7 +266,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-400 hover:text-gray-100 transition-colors p-1"
+          className="text-text-muted hover:text-text-primary transition-colors p-1 flex-shrink-0"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
@@ -268,25 +278,28 @@ export function AppSidebar() {
       </div>
 
       {/* Search */}
-      <div className="p-2 border-b border-gray-800">
+      <div className="px-2 py-2 border-b border-border flex-shrink-0">
         <button
           type="button"
           onClick={() => query.toggle()}
           className={cn(
-            "flex items-center h-9 rounded-lg hover:bg-gray-800 transition-colors w-full text-gray-400 hover:text-gray-100",
-            collapsed ? "justify-center" : "px-3 gap-3"
+            "flex items-center h-8 rounded-md hover:bg-surface-hover transition-colors w-full text-text-muted hover:text-text-secondary",
+            collapsed ? "justify-center" : "px-2.5 gap-2"
           )}
           aria-label="Search"
         >
-          <Search className="w-4 h-4 flex-shrink-0" />
+          <Search className="w-3.5 h-3.5 flex-shrink-0" />
           {!collapsed && (
-            <span className="text-sm whitespace-nowrap">Buscar... <kbd className="ml-auto text-[10px] bg-gray-800 px-1.5 py-0.5 rounded border border-gray-700">⌘K</kbd></span>
+            <span className="text-xs whitespace-nowrap flex-1 text-left">
+              Pesquisar menu...{" "}
+              <kbd className="ml-1 text-[9px] bg-surface px-1 py-0.5 rounded border border-border">⌘K</kbd>
+            </span>
           )}
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-2 px-2 space-y-0.5 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 py-1 px-2 overflow-y-auto overflow-x-hidden">
         {sections.map((section) => {
           const Icon = section.icon;
           const active = isSectionActive(section);
@@ -295,6 +308,15 @@ export function AppSidebar() {
 
           return (
             <div key={section.id}>
+              {/* Group label separator */}
+              {!collapsed && section.groupLabel && (
+                <div className="mt-4 mb-1 px-2 first:mt-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted select-none">
+                    {section.groupLabel}
+                  </span>
+                </div>
+              )}
+
               {/* Section header */}
               {hasChildren ? (
                 <button
@@ -312,21 +334,23 @@ export function AppSidebar() {
                     }
                   }}
                   className={cn(
-                    "flex items-center w-full h-9 rounded-lg transition-colors",
-                    collapsed ? "justify-center" : "px-3 gap-3",
+                    "flex items-center w-full h-8 rounded-md transition-colors",
+                    collapsed ? "justify-center" : "px-2.5 gap-2.5",
                     active
-                      ? "bg-indigo-600/20 text-indigo-400"
-                      : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
+                      ? "text-primary"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
                   )}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   {!collapsed && (
                     <>
-                      <span className="text-sm whitespace-nowrap flex-1 text-left">{section.label}</span>
+                      <span className="text-sm whitespace-nowrap flex-1 text-left font-medium">
+                        {section.label}
+                      </span>
                       {expanded ? (
-                        <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                        <ChevronDown className="w-3.5 h-3.5 flex-shrink-0 text-text-muted" />
                       ) : (
-                        <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 text-text-muted" />
                       )}
                     </>
                   )}
@@ -335,32 +359,32 @@ export function AppSidebar() {
                 <Link
                   href={section.href || "/"}
                   className={cn(
-                    "flex items-center h-9 rounded-lg transition-colors",
-                    collapsed ? "justify-center" : "px-3 gap-3",
+                    "flex items-center h-8 rounded-md transition-colors",
+                    collapsed ? "justify-center" : "px-2.5 gap-2.5",
                     active
-                      ? "bg-indigo-600/20 text-indigo-400"
-                      : "text-gray-400 hover:text-gray-100 hover:bg-gray-800"
+                      ? "text-primary bg-primary/10"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
                   )}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   {!collapsed && (
-                    <span className="text-sm whitespace-nowrap">{section.label}</span>
+                    <span className="text-sm whitespace-nowrap font-medium">{section.label}</span>
                   )}
                 </Link>
               )}
 
               {/* Children */}
               {hasChildren && expanded && !collapsed && (
-                <div className="ml-4 mt-0.5 space-y-0.5 border-l border-gray-800 pl-3">
+                <div className="ml-3 mt-0.5 mb-1 border-l border-border pl-3 space-y-0.5">
                   {section.children!.map((child) => (
                     <Link
                       key={child.href}
                       href={child.href}
                       className={cn(
-                        "flex items-center h-8 rounded-lg px-3 text-sm transition-colors",
+                        "flex items-center h-7 rounded-md px-2 text-sm transition-colors",
                         isActive(child.href)
-                          ? "text-indigo-400 bg-indigo-600/10"
-                          : "text-gray-500 hover:text-gray-100 hover:bg-gray-800"
+                          ? "text-primary bg-primary/10 font-medium"
+                          : "text-text-muted hover:text-text-primary hover:bg-surface-hover"
                       )}
                     >
                       {child.label}
@@ -373,38 +397,39 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className="px-2 py-2 border-t border-gray-800 space-y-1">
+      {/* Footer */}
+      <div className="px-2 py-2 border-t border-border space-y-0.5 flex-shrink-0">
         {/* Logout */}
         <button
           type="button"
           onClick={handleLogout}
           className={cn(
-            "flex items-center h-9 rounded-lg transition-colors w-full text-red-500 hover:text-red-400 hover:bg-red-500/10",
-            collapsed ? "justify-center" : "px-3 gap-3"
+            "flex items-center h-8 rounded-md transition-colors w-full text-red-500 hover:text-red-400 hover:bg-red-500/10",
+            collapsed ? "justify-center" : "px-2.5 gap-2.5"
           )}
           aria-label="Logout"
         >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          {!collapsed && <span className="text-sm whitespace-nowrap">Sair</span>}
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          {!collapsed && <span className="text-sm">Sair</span>}
         </button>
 
         {/* Profile */}
         <Link
           href="/profile"
           className={cn(
-            "flex items-center h-10 rounded-lg transition-colors",
-            collapsed ? "justify-center" : "px-2 gap-3",
-            isActive("/profile")
-              ? "bg-indigo-600/20 text-indigo-400"
-              : "text-gray-400 hover:text-gray-100"
+            "flex items-center rounded-md transition-colors",
+            collapsed ? "h-10 justify-center" : "h-12 px-2 gap-2.5",
+            isActive("/profile") ? "bg-primary/10" : "hover:bg-surface-hover"
           )}
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <User className="w-4 h-4 text-white" />
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-amber-600 flex items-center justify-center flex-shrink-0">
+            <User className="w-3.5 h-3.5 text-text-primary" />
           </div>
           {!collapsed && (
-            <span className="text-sm text-gray-300 whitespace-nowrap">Perfil</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-text-primary truncate">Filipe Frazão</div>
+              <div className="text-[10px] text-text-muted truncate">filipefrazao@frzgroup.com.br</div>
+            </div>
           )}
         </Link>
       </div>

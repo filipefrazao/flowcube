@@ -148,16 +148,16 @@ export default function RemindersPage() {
   const pendingCount = totalReminders - completedCount;
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Bell className="h-7 w-7 text-amber-400" />
-          <h1 className="text-2xl font-bold text-gray-100">Lembretes</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Lembretes</h1>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-amber-700"
+          className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-amber-700"
         >
           <Plus className="h-4 w-4" />
           Novo Lembrete
@@ -166,32 +166,32 @@ export default function RemindersPage() {
 
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Total</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{totalReminders}</p>
+              <p className="text-sm text-text-secondary">Total</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{totalReminders}</p>
             </div>
             <div className="rounded-lg bg-amber-500/20 p-2.5 text-amber-400">
               <Bell className="h-5 w-5" />
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Pendentes</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{pendingCount}</p>
+              <p className="text-sm text-text-secondary">Pendentes</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{pendingCount}</p>
             </div>
             <div className="rounded-lg bg-blue-500/20 p-2.5 text-blue-400">
               <Clock className="h-5 w-5" />
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Atrasados</p>
+              <p className="text-sm text-text-secondary">Atrasados</p>
               <p className="mt-1 text-2xl font-bold text-red-400">{overdue.length}</p>
             </div>
             <div className="rounded-lg bg-red-500/20 p-2.5 text-red-400">
@@ -199,10 +199,10 @@ export default function RemindersPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Concluidos</p>
+              <p className="text-sm text-text-secondary">Concluidos</p>
               <p className="mt-1 text-2xl font-bold text-green-400">{completedCount}</p>
             </div>
             <div className="rounded-lg bg-green-500/20 p-2.5 text-green-400">
@@ -213,55 +213,55 @@ export default function RemindersPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+      <div className="bg-surface/80 border border-border/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <input type="text" placeholder="Buscar lembretes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-900/80 py-2 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all" />
+              className="w-full rounded-lg border border-border bg-background-secondary/80 py-2 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
           </div>
           <select value={filterCompleted} onChange={(e) => setFilterCompleted(e.target.value)}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
             <option value="">Todos</option>
             <option value="false">Pendentes</option>
             <option value="true">Concluidos</option>
           </select>
           <select value={filterLead} onChange={(e) => setFilterLead(e.target.value)}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
             <option value="">Todos os Leads</option>
             {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}</option>))}
           </select>
           <button onClick={() => setShowFilters(!showFilters)}
             className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
-              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
-            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+              showFilters ? "bg-primary/20 border-primary/50 text-primary" : "bg-background-secondary/80 border-border text-text-secondary hover:text-text-primary")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-primary rounded-full" />}
           </button>
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors">
               <RotateCcw className="w-3.5 h-3.5" /> Limpar
             </button>
           )}
         </div>
         {showFilters && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border/50">
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data De</label>
-              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Data De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Ate</label>
-              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Data Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
           </div>
         )}
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+      <div className="overflow-hidden rounded-xl border border-border bg-background-secondary">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-gray-400">
+              <tr className="border-b border-border text-text-secondary">
                 <th className="px-4 py-3 font-medium">Titulo</th>
                 <th className="px-4 py-3 font-medium">Data/Hora</th>
                 <th className="px-4 py-3 font-medium">Lead</th>
@@ -273,13 +273,13 @@ export default function RemindersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
                     Carregando lembretes...
                   </td>
                 </tr>
               ) : filteredReminders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
                     Nenhum lembrete encontrado.
                   </td>
                 </tr>
@@ -290,25 +290,25 @@ export default function RemindersPage() {
                     <tr
                       key={reminder.id}
                       className={cn(
-                        "border-b border-gray-800/50 transition hover:bg-gray-800/40",
+                        "border-b border-border/50 transition hover:bg-surface-hover/40",
                         reminder.is_completed && "opacity-60"
                       )}
                     >
                       <td className="px-4 py-3">
-                        <span className={cn("font-medium", reminder.is_completed ? "text-gray-500 line-through" : "text-gray-100")}>
+                        <span className={cn("font-medium", reminder.is_completed ? "text-text-muted line-through" : "text-text-primary")}>
                           {reminder.title}
                         </span>
                         {reminder.description && (
-                          <p className="mt-0.5 text-xs text-gray-500 truncate max-w-xs">{reminder.description}</p>
+                          <p className="mt-0.5 text-xs text-text-muted truncate max-w-xs">{reminder.description}</p>
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn("text-sm", isOverdue ? "text-red-400" : "text-gray-300")}>
+                        <span className={cn("text-sm", isOverdue ? "text-red-400" : "text-text-primary")}>
                           {fmtDateTime(reminder.remind_at)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-400">{reminder.lead_name || "—"}</td>
-                      <td className="px-4 py-3 text-gray-400">{reminder.assigned_to_name || "—"}</td>
+                      <td className="px-4 py-3 text-text-secondary">{reminder.lead_name || "—"}</td>
+                      <td className="px-4 py-3 text-text-secondary">{reminder.assigned_to_name || "—"}</td>
                       <td className="px-4 py-3">
                         {reminder.is_completed ? (
                           <Badge text="Concluido" className="bg-green-500/20 text-green-400" />
@@ -323,7 +323,7 @@ export default function RemindersPage() {
                           {!reminder.is_completed && (
                             <button
                               onClick={() => handleComplete(reminder.id)}
-                              className="rounded p-1.5 text-gray-500 transition hover:bg-green-500/10 hover:text-green-400"
+                              className="rounded p-1.5 text-text-muted transition hover:bg-green-500/10 hover:text-green-400"
                               title="Marcar como concluido"
                             >
                               <CheckCircle className="h-4 w-4" />
@@ -331,7 +331,7 @@ export default function RemindersPage() {
                           )}
                           <button
                             onClick={() => handleDelete(reminder.id)}
-                            className="rounded p-1.5 text-gray-500 transition hover:bg-red-500/10 hover:text-red-400"
+                            className="rounded p-1.5 text-text-muted transition hover:bg-red-500/10 hover:text-red-400"
                             title="Excluir"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -350,50 +350,50 @@ export default function RemindersPage() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-100">Novo Lembrete</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-500 hover:text-gray-300">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-background-secondary shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-text-primary">Novo Lembrete</h2>
+              <button onClick={() => setShowCreateModal(false)} className="text-text-muted hover:text-text-primary">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Titulo *</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Titulo *</label>
                 <input
                   type="text"
                   value={createForm.title}
                   onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
                   placeholder="Titulo do lembrete"
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-amber-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-amber-600"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Descricao</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Descricao</label>
                 <textarea
                   value={createForm.description}
                   onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
                   rows={2}
                   placeholder="Detalhes adicionais..."
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-amber-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-amber-600"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Data/Hora *</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Data/Hora *</label>
                   <input
                     type="datetime-local"
                     value={createForm.remind_at}
                     onChange={(e) => setCreateForm({ ...createForm, remind_at: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-amber-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-amber-600"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Lead</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Lead</label>
                   <select
                     value={createForm.lead}
                     onChange={(e) => setCreateForm({ ...createForm, lead: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-amber-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-amber-600"
                   >
                     <option value="">Nenhum</option>
                     {leads.map((l) => (
@@ -403,17 +403,17 @@ export default function RemindersPage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">
+            <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition hover:bg-gray-800"
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary transition hover:bg-surface-hover"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleCreate}
                 disabled={saving || !createForm.title.trim() || !createForm.remind_at}
-                className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-amber-700 disabled:opacity-50"
               >
                 {saving ? "Salvando..." : "Criar Lembrete"}
               </button>

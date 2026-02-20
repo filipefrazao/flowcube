@@ -45,7 +45,7 @@ export function OverviewChart({ projectId, days }: OverviewChartProps) {
   return (
     <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-white">Events Over Time</h3>
+        <h3 className="text-sm font-medium text-text-primary">Events Over Time</h3>
         <IntervalPicker value={interval} onChange={setInterval} />
       </div>
 
@@ -54,7 +54,7 @@ export function OverviewChart({ projectId, days }: OverviewChartProps) {
           <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
         </div>
       ) : merged.length === 0 ? (
-        <div className="h-64 flex items-center justify-center text-gray-500 text-sm">
+        <div className="h-64 flex items-center justify-center text-text-muted text-sm">
           No data for this period
         </div>
       ) : (

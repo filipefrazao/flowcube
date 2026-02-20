@@ -132,13 +132,13 @@ export function EmailStepEditor({
               <Mail className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Edit Step</h2>
-              <p className="text-sm text-gray-400">Configure email step settings</p>
+              <h2 className="text-lg font-semibold text-text-primary">Edit Step</h2>
+              <p className="text-sm text-text-secondary">Configure email step settings</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-surface/5 text-text-secondary hover:text-text-primary transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -155,23 +155,23 @@ export function EmailStepEditor({
 
           {/* Step Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Step Name *</label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Step Name *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Welcome Email"
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
           {/* Template Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email Template *</label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Email Template *</label>
             <select
               value={templateId}
               onChange={(e) => setTemplateId(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">Select a template</option>
               {templates.map((t) => (
@@ -179,15 +179,15 @@ export function EmailStepEditor({
               ))}
             </select>
             {selectedTemplate && (
-              <div className="mt-2 p-3 bg-white/5 rounded-lg">
-                <div className="text-sm text-gray-400">Subject: {selectedTemplate.subject}</div>
+              <div className="mt-2 p-3 bg-surface/5 rounded-lg">
+                <div className="text-sm text-text-secondary">Subject: {selectedTemplate.subject}</div>
               </div>
             )}
           </div>
 
           {/* Delay */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               <Clock className="w-4 h-4 inline mr-2" />
               Delay after previous step
             </label>
@@ -197,12 +197,12 @@ export function EmailStepEditor({
                 value={delayValue}
                 onChange={(e) => setDelayValue(parseInt(e.target.value) || 0)}
                 min={0}
-                className="w-24 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-24 px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <select
                 value={delayUnit}
                 onChange={(e) => setDelayUnit(e.target.value as DelayUnit)}
-                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="flex-1 px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {DELAY_UNITS.map((u) => (
                   <option key={u.value} value={u.value}>{u.label}</option>
@@ -213,23 +213,23 @@ export function EmailStepEditor({
 
           {/* Send at specific time */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Send at specific time (optional)
             </label>
             <input
               type="time"
               value={sendAtTime}
               onChange={(e) => setSendAtTime(e.target.value)}
-              className="w-48 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-48 px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-text-muted">
               If set, email will be sent at this time after the delay
             </p>
           </div>
 
           {/* Condition */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-text-primary mb-3">
               <Filter className="w-4 h-4 inline mr-2" />
               Send Condition
             </label>
@@ -242,15 +242,15 @@ export function EmailStepEditor({
                     "w-full flex items-center gap-4 p-4 rounded-lg border text-left transition-all",
                     condition === c.value
                       ? "bg-blue-500/10 border-blue-500/50"
-                      : "bg-white/5 border-white/10 hover:bg-white/10"
+                      : "bg-surface/5 border-white/10 hover:bg-surface/10"
                   )}
                 >
-                  <c.icon className={cn("w-5 h-5", condition === c.value ? "text-blue-400" : "text-gray-400")} />
+                  <c.icon className={cn("w-5 h-5", condition === c.value ? "text-blue-400" : "text-text-secondary")} />
                   <div>
-                    <div className={cn("font-medium", condition === c.value ? "text-blue-400" : "text-white")}>
+                    <div className={cn("font-medium", condition === c.value ? "text-blue-400" : "text-text-primary")}>
                       {c.label}
                     </div>
-                    <div className="text-sm text-gray-500">{c.description}</div>
+                    <div className="text-sm text-text-muted">{c.description}</div>
                   </div>
                 </button>
               ))}
@@ -258,21 +258,21 @@ export function EmailStepEditor({
           </div>
 
           {/* Active Toggle */}
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-surface/5 rounded-lg">
             <div>
-              <div className="font-medium text-white">Step Active</div>
-              <div className="text-sm text-gray-400">Inactive steps will be skipped</div>
+              <div className="font-medium text-text-primary">Step Active</div>
+              <div className="text-sm text-text-secondary">Inactive steps will be skipped</div>
             </div>
             <button
               onClick={() => setIsActive(!isActive)}
               className={cn(
                 "w-12 h-6 rounded-full transition-colors relative",
-                isActive ? "bg-green-500" : "bg-gray-600"
+                isActive ? "bg-green-500" : "bg-text-muted"
               )}
             >
               <div
                 className={cn(
-                  "w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform",
+                  "w-5 h-5 bg-surface rounded-full absolute top-0.5 transition-transform",
                   isActive ? "translate-x-6" : "translate-x-0.5"
                 )}
               />
@@ -281,24 +281,24 @@ export function EmailStepEditor({
 
           {/* Stats */}
           {step.stats && (
-            <div className="p-4 bg-white/5 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-300 mb-3">Step Statistics</h4>
+            <div className="p-4 bg-surface/5 rounded-lg">
+              <h4 className="text-sm font-medium text-text-primary mb-3">Step Statistics</h4>
               <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
-                  <div className="text-lg font-semibold text-white">{step.stats.total_sent}</div>
-                  <div className="text-xs text-gray-500">Sent</div>
+                  <div className="text-lg font-semibold text-text-primary">{step.stats.total_sent}</div>
+                  <div className="text-xs text-text-muted">Sent</div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-green-400">{(step.stats.open_rate * 100).toFixed(1)}%</div>
-                  <div className="text-xs text-gray-500">Open Rate</div>
+                  <div className="text-xs text-text-muted">Open Rate</div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-blue-400">{(step.stats.click_rate * 100).toFixed(1)}%</div>
-                  <div className="text-xs text-gray-500">Click Rate</div>
+                  <div className="text-xs text-text-muted">Click Rate</div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-red-400">{step.stats.total_bounced}</div>
-                  <div className="text-xs text-gray-500">Bounced</div>
+                  <div className="text-xs text-text-muted">Bounced</div>
                 </div>
               </div>
             </div>
@@ -309,14 +309,14 @@ export function EmailStepEditor({
         <div className="px-6 py-4 border-t border-white/10 flex items-center justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+            className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save Changes

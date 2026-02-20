@@ -138,7 +138,7 @@ export default function FormsPage() {
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </button>
             <button type="button" onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors">
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors">
               <Plus className="w-4 h-4" /> Novo Formulario
             </button>
           </div>
@@ -195,7 +195,7 @@ export default function FormsPage() {
               </div>
               <div className="flex gap-2 mt-4">
                 <button type="button" onClick={handleSave} disabled={saving || !formData.name || !formData.page}
-                  className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-white font-medium transition-colors">
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-text-primary font-medium transition-colors">
                   {saving ? "Salvando..." : editingId ? "Atualizar" : "Criar"}
                 </button>
                 <button type="button" onClick={resetForm}
@@ -218,7 +218,7 @@ export default function FormsPage() {
               <h3 className="text-text-secondary font-medium mb-1">Nenhum formulario criado</h3>
               <p className="text-text-muted text-sm mb-6 max-w-sm">Crie formularios para capturar leads nas suas landing pages.</p>
               <button type="button" onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors">
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors">
                 <Plus className="w-4 h-4" /> Criar Formulario
               </button>
             </div>
@@ -244,7 +244,7 @@ export default function FormsPage() {
                       <td className="px-4 py-3 text-sm">
                         {(form as any).is_active !== false
                           ? <span className="flex items-center gap-1 text-green-400"><CheckCircle className="w-3.5 h-3.5" /> Ativo</span>
-                          : <span className="flex items-center gap-1 text-gray-400"><XCircle className="w-3.5 h-3.5" /> Inativo</span>}
+                          : <span className="flex items-center gap-1 text-text-secondary"><XCircle className="w-3.5 h-3.5" /> Inativo</span>}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <Link href={`/pagecube/submissions?form_id=${form.id}`}
@@ -334,7 +334,7 @@ export default function FormsPage() {
             </div>
             <div className="flex gap-2 mt-5">
               <button type="button" onClick={() => saveSheets()} disabled={sheetsSaving || !sheetsUrl}
-                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-white font-medium transition-colors text-sm">
+                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-text-primary font-medium transition-colors text-sm">
                 {sheetsSaving ? "Salvando..." : "Salvar e Conectar"}
               </button>
               {sheetsModal.current && (

@@ -12,16 +12,16 @@ import { cn } from "@/lib/utils";
 
 /* ── Status Config ──────────────────────────────────────────────────── */
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
-  pending:     { label: "A Fazer",    color: "text-gray-400",    bg: "bg-gray-500/20 text-gray-400 border-gray-500/30",    icon: Circle },
+  pending:     { label: "A Fazer",    color: "text-text-secondary",    bg: "bg-gray-500/20 text-text-secondary border-gray-500/30",    icon: Circle },
   in_progress: { label: "Fazendo",    color: "text-blue-400",    bg: "bg-blue-500/20 text-blue-400 border-blue-500/30",    icon: Clock },
-  completed:   { label: "Feita",      color: "text-emerald-400", bg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", icon: CheckCircle2 },
+  completed:   { label: "Feita",      color: "text-primary", bg: "bg-primary/20 text-primary border-primary/30", icon: CheckCircle2 },
   blocked:     { label: "Bloqueada",  color: "text-orange-400",  bg: "bg-orange-500/20 text-orange-400 border-orange-500/30",  icon: Ban },
   cancelled:   { label: "Cancelada",  color: "text-red-400",     bg: "bg-red-500/20 text-red-400 border-red-500/30",     icon: AlertCircle },
 };
 
 /* ── Priority Config ────────────────────────────────────────────────── */
 const PRIORITY_CONFIG: Record<string, { label: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
-  lowest:  { label: "Baixissima", bg: "bg-gray-500/15 text-gray-400 border-gray-500/30",    icon: Minus },
+  lowest:  { label: "Baixissima", bg: "bg-gray-500/15 text-text-secondary border-gray-500/30",    icon: Minus },
   low:     { label: "Baixa",     bg: "bg-slate-500/15 text-slate-400 border-slate-500/30",  icon: ArrowDown },
   medium:  { label: "Media",     bg: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30", icon: Minus },
   high:    { label: "Alta",      bg: "bg-orange-500/15 text-orange-400 border-orange-500/30", icon: ArrowUp },
@@ -210,13 +210,13 @@ export default function TasksPage() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ListTodo className="w-7 h-7 text-indigo-400" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <ListTodo className="w-7 h-7 text-primary" />
             Tarefas
           </h1>
-          <p className="text-sm text-gray-400 mt-1">{totalCount} tarefas registradas</p>
+          <p className="text-sm text-text-secondary mt-1">{totalCount} tarefas registradas</p>
         </div>
-        <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-indigo-500/20">
+        <button onClick={openCreateModal} className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-primary/20">
           <Plus className="w-4 h-4" /> Nova Tarefa
         </button>
       </div>
@@ -224,90 +224,90 @@ export default function TasksPage() {
       {/* ── Stats ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: "Total", value: stats.total, color: "text-gray-300", bg: "bg-gray-500/10" },
-          { label: "A Fazer", value: stats.pending, color: "text-gray-400", bg: "bg-gray-500/10" },
+          { label: "Total", value: stats.total, color: "text-text-primary", bg: "bg-gray-500/10" },
+          { label: "A Fazer", value: stats.pending, color: "text-text-secondary", bg: "bg-gray-500/10" },
           { label: "Fazendo", value: stats.inProgress, color: "text-blue-400", bg: "bg-blue-500/10" },
-          { label: "Feitas", value: stats.completed, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+          { label: "Feitas", value: stats.completed, color: "text-primary", bg: "bg-primary/10" },
           { label: "Atrasadas", value: stats.overdue, color: "text-red-400", bg: "bg-red-500/10" },
         ].map((s, i) => (
-          <div key={i} className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-[10px] text-gray-500 uppercase tracking-wide block">{s.label}</span>
+          <div key={i} className="bg-surface/80 border border-border/50 rounded-xl p-3 backdrop-blur-sm">
+            <span className="text-[10px] text-text-muted uppercase tracking-wide block">{s.label}</span>
             <span className={cn("text-xl font-bold", s.color)}>{s.value}</span>
           </div>
         ))}
       </div>
 
       {/* ── Filters ─────────────────────────────────────────────── */}
-      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+      <div className="bg-surface/80 border border-border/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input type="text" placeholder="Buscar tarefas..." value={filterSearch} onChange={(e) => { setFilterSearch(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-gray-900/80 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all" />
+              className="w-full bg-background-secondary/80 border border-border rounded-lg pl-10 pr-3 py-2 text-sm text-text-primary placeholder-text-muted focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
           </div>
           <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
             <option value="">Todos os Status</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
           </select>
           <select value={filterPriority} onChange={(e) => { setFilterPriority(e.target.value); setCurrentPage(1); }}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
             <option value="">Todas as Prioridades</option>
             {Object.entries(PRIORITY_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
           </select>
           <select value={filterTaskType} onChange={(e) => { setFilterTaskType(e.target.value); setCurrentPage(1); }}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
             <option value="">Todos os Tipos</option>
             {taskTypes.map((tt) => (<option key={tt.id} value={tt.id}>{tt.name}</option>))}
           </select>
 
           {/* View toggle */}
-          <div className="flex bg-gray-900/80 border border-gray-700 rounded-lg p-0.5">
-            <button onClick={() => setViewMode("list")} className={cn("p-2 rounded-md transition-all", viewMode === "list" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-100")}>
+          <div className="flex bg-background-secondary/80 border border-border rounded-lg p-0.5">
+            <button onClick={() => setViewMode("list")} className={cn("p-2 rounded-md transition-all", viewMode === "list" ? "bg-primary text-gray-900" : "text-text-secondary hover:text-text-primary")}>
               <List className="w-4 h-4" />
             </button>
-            <button onClick={() => setViewMode("card")} className={cn("p-2 rounded-md transition-all", viewMode === "card" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-100")}>
+            <button onClick={() => setViewMode("card")} className={cn("p-2 rounded-md transition-all", viewMode === "card" ? "bg-primary text-gray-900" : "text-text-secondary hover:text-text-primary")}>
               <LayoutGrid className="w-4 h-4" />
             </button>
           </div>
 
           <button onClick={() => setShowFilters(!showFilters)}
             className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
-              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
-            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+              showFilters ? "bg-primary/20 border-primary/50 text-primary" : "bg-background-secondary/80 border-border text-text-secondary hover:text-text-primary")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-primary rounded-full" />}
           </button>
 
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors">
               <RotateCcw className="w-3.5 h-3.5" /> Limpar
             </button>
           )}
         </div>
 
         {showFilters && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border/50">
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Lead Associado</label>
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Lead Associado</label>
               <select value={filterLead} onChange={(e) => setFilterLead(e.target.value)}
-                className="w-full bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+                className="w-full bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
                 <option value="">Todos os Leads</option>
                 {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}</option>))}
               </select>
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Criada De</label>
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Criada De</label>
               <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)}
-                className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+                className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Prazo De</label>
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Prazo De</label>
               <input type="date" value={filterDueDateFrom} onChange={(e) => setFilterDueDateFrom(e.target.value)}
-                className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+                className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Prazo Ate</label>
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Prazo Ate</label>
               <input type="date" value={filterDueDateTo} onChange={(e) => setFilterDueDateTo(e.target.value)}
-                className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+                className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
           </div>
         )}
@@ -316,26 +316,26 @@ export default function TasksPage() {
       {/* ── Content ─────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : viewMode === "list" ? (
         /* ── TABLE VIEW ─────────────────────────────────────────── */
-        <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl overflow-hidden backdrop-blur-sm">
+        <div className="bg-surface/80 border border-border/50 rounded-xl overflow-hidden backdrop-blur-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-700 text-left bg-gray-900/50">
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide w-8"></th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Titulo</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Descricao</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Prioridade</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Lead</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Tipo</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Responsavel</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Prazo</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide">Criada em</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wide w-20">Acoes</th>
+                <tr className="border-b border-border text-left bg-background-secondary/50">
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide w-8"></th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Titulo</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Descricao</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Status</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Prioridade</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Lead</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Tipo</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Responsavel</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Prazo</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide">Criada em</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium text-xs uppercase tracking-wide w-20">Acoes</th>
                 </tr>
               </thead>
               <tbody>
@@ -345,21 +345,21 @@ export default function TasksPage() {
                   const StatusIcon = statusCfg.icon;
                   const overdue = isOverdue(task.due_date, task.status);
                   return (
-                    <tr key={task.id} className={cn("border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors", overdue && "bg-red-500/5")}>
+                    <tr key={task.id} className={cn("border-b border-border/30 hover:bg-surface-hover/20 transition-colors", overdue && "bg-red-500/5")}>
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleStatusChange(task.id, task.status === "completed" ? "pending" : "completed")}
-                          className={cn("transition-colors", task.status === "completed" ? "text-emerald-400" : "text-gray-500 hover:text-indigo-400")}
+                          className={cn("transition-colors", task.status === "completed" ? "text-primary" : "text-text-muted hover:text-primary")}
                         >
                           <StatusIcon className="w-5 h-5" />
                         </button>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn("text-gray-100 font-medium", task.status === "completed" && "line-through text-gray-500")}>
+                        <span className={cn("text-text-primary font-medium", task.status === "completed" && "line-through text-text-muted")}>
                           {task.title}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-400 max-w-[180px] truncate text-xs">
+                      <td className="px-4 py-3 text-text-secondary max-w-[180px] truncate text-xs">
                         {task.description || "-"}
                       </td>
                       <td className="px-4 py-3">
@@ -372,33 +372,33 @@ export default function TasksPage() {
                           {priorityCfg.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-300 text-xs">
+                      <td className="px-4 py-3 text-text-primary text-xs">
                         {task.lead_name || "-"}
                       </td>
-                      <td className="px-4 py-3 text-gray-300 text-xs">
+                      <td className="px-4 py-3 text-text-primary text-xs">
                         {task.task_type_name || "-"}
                       </td>
-                      <td className="px-4 py-3 text-gray-300 text-xs">
+                      <td className="px-4 py-3 text-text-primary text-xs">
                         {task.assigned_to_name || "-"}
                       </td>
                       <td className="px-4 py-3">
                         {task.due_date ? (
-                          <span className={cn("text-xs flex items-center gap-1", overdue ? "text-red-400 font-medium" : "text-gray-400")}>
+                          <span className={cn("text-xs flex items-center gap-1", overdue ? "text-red-400 font-medium" : "text-text-secondary")}>
                             <Calendar className="w-3 h-3" />
                             {formatDate(task.due_date)}
                             {overdue && <AlertTriangle className="w-3 h-3" />}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-600">-</span>
+                          <span className="text-xs text-text-muted">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(task.created_at)}</td>
+                      <td className="px-4 py-3 text-text-muted text-xs">{formatDate(task.created_at)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={() => openEditModal(task)} className="p-1.5 text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded transition-all" title="Editar">
+                          <button onClick={() => openEditModal(task)} className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded transition-all" title="Editar">
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button onClick={() => handleDelete(task.id)} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-all" title="Excluir">
+                          <button onClick={() => handleDelete(task.id)} className="p-1.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-all" title="Excluir">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -409,8 +409,8 @@ export default function TasksPage() {
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={11} className="px-4 py-16 text-center">
-                      <ListTodo className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-                      <p className="text-gray-500">Nenhuma tarefa encontrada</p>
+                      <ListTodo className="w-10 h-10 text-text-secondary mx-auto mb-3" />
+                      <p className="text-text-muted">Nenhuma tarefa encontrada</p>
                     </td>
                   </tr>
                 )}
@@ -420,13 +420,13 @@ export default function TasksPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-700/50">
-              <span className="text-xs text-gray-500">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border/50">
+              <span className="text-xs text-text-muted">
                 Mostrando {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, totalCount)} de {totalCount}
               </span>
               <div className="flex items-center gap-1">
                 <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage <= 1}
-                  className="p-1.5 text-gray-400 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gray-700/50 transition-all">
+                  className="p-1.5 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-surface-hover/50 transition-all">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -437,13 +437,13 @@ export default function TasksPage() {
                   else pn = currentPage - 2 + i;
                   return (
                     <button key={pn} onClick={() => setCurrentPage(pn)}
-                      className={cn("w-8 h-8 rounded text-xs font-medium transition-all", currentPage === pn ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-100 hover:bg-gray-700/50")}>
+                      className={cn("w-8 h-8 rounded text-xs font-medium transition-all", currentPage === pn ? "bg-primary text-gray-900" : "text-text-secondary hover:text-text-primary hover:bg-surface-hover/50")}>
                       {pn}
                     </button>
                   );
                 })}
                 <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}
-                  className="p-1.5 text-gray-400 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gray-700/50 transition-all">
+                  className="p-1.5 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-surface-hover/50 transition-all">
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -462,20 +462,20 @@ export default function TasksPage() {
 
             return (
               <div key={task.id} className={cn(
-                "bg-gray-800/80 border rounded-xl p-4 hover:border-gray-600 transition-all group backdrop-blur-sm",
-                overdue ? "border-red-500/40" : "border-gray-700/50"
+                "bg-surface/80 border rounded-xl p-4 hover:border-border transition-all group backdrop-blur-sm",
+                overdue ? "border-red-500/40" : "border-border/50"
               )}>
                 <div className="flex items-start gap-3">
                   <button
                     onClick={() => handleStatusChange(task.id, task.status === "completed" ? "pending" : "completed")}
-                    className={cn("mt-0.5 transition-colors flex-shrink-0", task.status === "completed" ? "text-emerald-400" : "text-gray-500 hover:text-indigo-400")}
+                    className={cn("mt-0.5 transition-colors flex-shrink-0", task.status === "completed" ? "text-primary" : "text-text-muted hover:text-primary")}
                   >
                     <StatusIcon className="w-5 h-5" />
                   </button>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <h3 className={cn("text-sm font-medium", task.status === "completed" ? "text-gray-500 line-through" : "text-gray-100")}>
+                      <h3 className={cn("text-sm font-medium", task.status === "completed" ? "text-text-muted line-through" : "text-text-primary")}>
                         {task.title}
                       </h3>
                       <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border inline-flex items-center gap-1", statusCfg.bg)}>
@@ -488,10 +488,10 @@ export default function TasksPage() {
                     </div>
 
                     {task.description && (
-                      <p className="text-xs text-gray-500 mb-2 line-clamp-2">{task.description}</p>
+                      <p className="text-xs text-text-muted mb-2 line-clamp-2">{task.description}</p>
                     )}
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+                    <div className="flex items-center gap-4 text-xs text-text-muted flex-wrap">
                       {task.due_date && (
                         <span className={cn("flex items-center gap-1", overdue && "text-red-400 font-medium")}>
                           <Calendar className="w-3 h-3" />
@@ -517,17 +517,17 @@ export default function TasksPage() {
                           {task.assigned_to_name}
                         </span>
                       )}
-                      <span className="flex items-center gap-1 text-gray-600">
+                      <span className="flex items-center gap-1 text-text-muted">
                         Criada em {formatDate(task.created_at)}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                    <button onClick={() => openEditModal(task)} className="p-1.5 text-gray-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded transition-all">
+                    <button onClick={() => openEditModal(task)} className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded transition-all">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(task.id)} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-all">
+                    <button onClick={() => handleDelete(task.id)} className="p-1.5 text-text-muted hover:text-red-400 hover:bg-red-500/10 rounded transition-all">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -536,9 +536,9 @@ export default function TasksPage() {
             );
           })}
           {filtered.length === 0 && (
-            <div className="text-center py-16 bg-gray-800/80 border border-gray-700/50 rounded-xl backdrop-blur-sm">
-              <ListTodo className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-500">Nenhuma tarefa encontrada</p>
+            <div className="text-center py-16 bg-surface/80 border border-border/50 rounded-xl backdrop-blur-sm">
+              <ListTodo className="w-10 h-10 text-text-secondary mx-auto mb-3" />
+              <p className="text-text-muted">Nenhuma tarefa encontrada</p>
             </div>
           )}
 
@@ -546,12 +546,12 @@ export default function TasksPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-4">
               <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage <= 1}
-                className="px-3 py-2 text-sm text-gray-400 hover:text-gray-100 disabled:opacity-30 rounded-lg hover:bg-gray-700/50 transition-all">
+                className="px-3 py-2 text-sm text-text-secondary hover:text-text-primary disabled:opacity-30 rounded-lg hover:bg-surface-hover/50 transition-all">
                 Anterior
               </button>
-              <span className="text-sm text-gray-500">Pagina {currentPage} de {totalPages}</span>
+              <span className="text-sm text-text-muted">Pagina {currentPage} de {totalPages}</span>
               <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}
-                className="px-3 py-2 text-sm text-gray-400 hover:text-gray-100 disabled:opacity-30 rounded-lg hover:bg-gray-700/50 transition-all">
+                className="px-3 py-2 text-sm text-text-secondary hover:text-text-primary disabled:opacity-30 rounded-lg hover:bg-surface-hover/50 transition-all">
                 Proxima
               </button>
             </div>
@@ -562,13 +562,13 @@ export default function TasksPage() {
       {/* ── Create/Edit Modal ─────────────────────────────────────── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)}>
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                {editingTask ? <Edit2 className="w-5 h-5 text-indigo-400" /> : <Plus className="w-5 h-5 text-indigo-400" />}
+              <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+                {editingTask ? <Edit2 className="w-5 h-5 text-primary" /> : <Plus className="w-5 h-5 text-primary" />}
                 {editingTask ? "Editar Tarefa" : "Nova Tarefa"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-100 p-1 rounded hover:bg-gray-700/50 transition-all">
+              <button onClick={() => setShowModal(false)} className="text-text-secondary hover:text-text-primary p-1 rounded hover:bg-surface-hover/50 transition-all">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -576,30 +576,30 @@ export default function TasksPage() {
             <div className="space-y-4">
               {/* Title */}
               <div>
-                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Titulo *</label>
+                <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Titulo *</label>
                 <input type="text" placeholder="Ex: Ligar para cliente" value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" autoFocus />
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:border-primary transition-all" autoFocus />
               </div>
 
               {/* Description */}
               <div>
-                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Descricao</label>
+                <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Descricao</label>
                 <textarea placeholder="Detalhes da tarefa..." value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 resize-none focus:border-indigo-500 transition-all" />
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted resize-none focus:border-primary transition-all" />
               </div>
 
               {/* Status selector */}
               <div>
-                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Status</label>
+                <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Status</label>
                 <div className="grid grid-cols-5 gap-1.5">
                   {Object.entries(STATUS_CONFIG).map(([k, v]) => {
                     const Icon = v.icon;
                     return (
                       <button key={k} onClick={() => setForm({ ...form, status: k })}
                         className={cn("text-[10px] py-2 px-1 rounded-lg border font-medium transition-all text-center flex flex-col items-center gap-1",
-                          form.status === k ? v.bg : "bg-gray-900 border-gray-700 text-gray-500 hover:border-gray-600")}>
+                          form.status === k ? v.bg : "bg-background-secondary border-border text-text-muted hover:border-border")}>
                         <Icon className="w-3.5 h-3.5" />
                         {v.label}
                       </button>
@@ -610,14 +610,14 @@ export default function TasksPage() {
 
               {/* Priority selector */}
               <div>
-                <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Prioridade</label>
+                <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Prioridade</label>
                 <div className="grid grid-cols-5 gap-1.5">
                   {Object.entries(PRIORITY_CONFIG).map(([k, v]) => {
                     const Icon = v.icon;
                     return (
                       <button key={k} onClick={() => setForm({ ...form, priority: k })}
                         className={cn("text-[10px] py-2 px-1 rounded-lg border font-medium transition-all text-center flex flex-col items-center gap-1",
-                          form.priority === k ? v.bg : "bg-gray-900 border-gray-700 text-gray-500 hover:border-gray-600")}>
+                          form.priority === k ? v.bg : "bg-background-secondary border-border text-text-muted hover:border-border")}>
                         <Icon className="w-3.5 h-3.5" />
                         {v.label}
                       </button>
@@ -629,22 +629,22 @@ export default function TasksPage() {
               {/* Due date, Lead, Task Type */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Prazo</label>
+                  <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Prazo</label>
                   <input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                    className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+                    className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-primary transition-all" />
                 </div>
                 <div>
-                  <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Tipo de Tarefa</label>
+                  <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Tipo de Tarefa</label>
                   <select value={form.task_type} onChange={(e) => setForm({ ...form, task_type: e.target.value })}
-                    className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 transition-all">
+                    className="w-full bg-background-secondary border border-border text-text-primary rounded-lg px-3 py-2.5 text-sm focus:border-primary transition-all">
                     <option value="">Nenhum</option>
                     {taskTypes.map((tt) => (<option key={tt.id} value={tt.id}>{tt.name}</option>))}
                   </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="text-[11px] text-gray-400 mb-1.5 block font-medium uppercase tracking-wide">Lead Vinculado</label>
+                  <label className="text-[11px] text-text-secondary mb-1.5 block font-medium uppercase tracking-wide">Lead Vinculado</label>
                   <select value={form.lead} onChange={(e) => setForm({ ...form, lead: e.target.value })}
-                    className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2.5 text-sm focus:border-indigo-500 transition-all">
+                    className="w-full bg-background-secondary border border-border text-text-primary rounded-lg px-3 py-2.5 text-sm focus:border-primary transition-all">
                     <option value="">Nenhum</option>
                     {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}</option>))}
                   </select>
@@ -652,12 +652,12 @@ export default function TasksPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-700/50">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2.5 text-sm text-gray-400 hover:text-gray-100 rounded-lg hover:bg-gray-700/50 transition-all">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border/50">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-hover/50 transition-all">
                 Cancelar
               </button>
               <button onClick={handleSave} disabled={!form.title || saving}
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-all shadow-lg shadow-indigo-500/20">
+                className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 transition-all shadow-lg shadow-primary/20">
                 {saving ? "Salvando..." : "Salvar Tarefa"}
               </button>
             </div>

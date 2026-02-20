@@ -104,7 +104,7 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
       case 'low':
         return 'text-blue-400 border-blue-500/30 bg-blue-500/10';
       default:
-        return 'text-gray-400 border-gray-500/30 bg-gray-500/10';
+        return 'text-text-secondary border-gray-500/30 bg-gray-500/10';
     }
   };
 
@@ -126,12 +126,12 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <Bug className="w-6 h-6 text-red-400" />
-              <h3 className="text-xl font-semibold text-white">AI Debugging Assistant</h3>
+              <h3 className="text-xl font-semibold text-text-primary">AI Debugging Assistant</h3>
             </div>
             {onClose && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-text-secondary hover:text-text-primary transition-colors"
               >
                 ✕
               </button>
@@ -144,9 +144,9 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
               <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
               <div>
                 <h4 className="text-red-400 font-medium mb-1">Error Message</h4>
-                <p className="text-gray-300">{execution.error_message}</p>
+                <p className="text-text-primary">{execution.error_message}</p>
                 {execution.failed_node_id && (
-                  <p className="text-sm text-gray-400 mt-2">
+                  <p className="text-sm text-text-secondary mt-2">
                     Failed at node: <code className="text-red-400">{execution.failed_node_id}</code>
                   </p>
                 )}
@@ -159,7 +159,7 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
             <button
               onClick={handleAnalyze}
               disabled={loading}
-              className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-text-primary rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -180,7 +180,7 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
             <div className="space-y-6">
               {/* Severity Badge */}
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-400">Severity:</span>
+                <span className="text-sm text-text-secondary">Severity:</span>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getSeverityColor(analysis.severity)}`}>
                   {analysis.severity.toUpperCase()}
                 </span>
@@ -188,16 +188,16 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
 
               {/* Root Cause */}
               <div className="glass-card p-4">
-                <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-orange-400" />
                   Root Cause
                 </h4>
-                <p className="text-gray-300 leading-relaxed">{analysis.root_cause}</p>
+                <p className="text-text-primary leading-relaxed">{analysis.root_cause}</p>
               </div>
 
               {/* Suggested Fixes */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-400" />
                   Suggested Fixes
                 </h4>
@@ -211,13 +211,13 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
                               {fix.confidence} confidence
                             </span>
                           </div>
-                          <p className="text-gray-300">{fix.description}</p>
+                          <p className="text-text-primary">{fix.description}</p>
                         </div>
                         {fix.code_changes && (
                           <button
                             onClick={() => handleApplyFix(fix, index)}
                             disabled={applyingFix !== null}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-text-primary rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
                           >
                             {applyingFix === index ? (
                               <>
@@ -234,12 +234,12 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
                         )}
                       </div>
                       {fix.code_changes && (
-                        <div className="mt-3 p-3 bg-black/30 rounded border border-gray-700">
+                        <div className="mt-3 p-3 bg-black/30 rounded border border-border">
                           <div className="flex items-center gap-2 mb-2">
                             <Code className="w-4 h-4 text-blue-400" />
-                            <span className="text-sm text-gray-400">Configuration Changes</span>
+                            <span className="text-sm text-text-secondary">Configuration Changes</span>
                           </div>
-                          <pre className="text-xs text-gray-300 overflow-x-auto">
+                          <pre className="text-xs text-text-primary overflow-x-auto">
                             {JSON.stringify(fix.code_changes, null, 2)}
                           </pre>
                         </div>
@@ -252,13 +252,13 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
               {/* Prevention Tips */}
               {analysis.prevention_tips.length > 0 && (
                 <div className="glass-card p-4">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                     <Lightbulb className="w-5 h-5 text-yellow-400" />
                     Prevention Tips
                   </h4>
                   <ul className="space-y-2">
                     {analysis.prevention_tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-3 text-gray-300">
+                      <li key={index} className="flex items-start gap-3 text-text-primary">
                         <span className="text-yellow-400 mt-1">•</span>
                         <span>{tip}</span>
                       </li>
@@ -271,7 +271,7 @@ export function AIDebugPanel({ execution, workflowId, onFixApplied, onClose }: A
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 bg-surface-hover hover:bg-surface-hover text-text-primary rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>

@@ -42,19 +42,19 @@ export function AINodeBuilder({ onNodeGenerated, workflowContext }: AINodeBuilde
     <div className="glass-card p-6 max-w-2xl">
       <div className="flex items-center gap-3 mb-4">
         <Brain className="w-6 h-6 text-purple-400" />
-        <h3 className="text-xl font-semibold text-white">AI Node Builder</h3>
+        <h3 className="text-xl font-semibold text-text-primary">AI Node Builder</h3>
       </div>
 
       {/* Input */}
       <div className="mb-4">
-        <label className="block text-sm text-gray-400 mb-2">
+        <label className="block text-sm text-text-secondary mb-2">
           Describe the node you want to create:
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="E.g., Send a WhatsApp message when a form is submitted..."
-          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:border-purple-500 outline-none"
+          className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:border-purple-500 outline-none"
           rows={3}
         />
       </div>
@@ -90,13 +90,13 @@ export function AINodeBuilder({ onNodeGenerated, workflowContext }: AINodeBuilde
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-white/5 border border-purple-500/30 rounded-lg"
+          className="p-4 bg-surface/5 border border-purple-500/30 rounded-lg"
         >
           <h4 className="text-sm font-semibold text-purple-400 mb-2">Preview:</h4>
           <div className="mb-3">
-            <p className="text-white font-medium">{preview.label}</p>
-            <p className="text-sm text-gray-400">{preview.description}</p>
-            <p className="text-xs text-gray-500 mt-1">Type: {preview.type}</p>
+            <p className="text-text-primary font-medium">{preview.label}</p>
+            <p className="text-sm text-text-secondary">{preview.description}</p>
+            <p className="text-xs text-text-muted mt-1">Type: {preview.type}</p>
           </div>
 
           <div className="flex gap-2">

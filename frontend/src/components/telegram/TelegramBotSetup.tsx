@@ -236,27 +236,27 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-2xl bg-background-secondary rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-text-primary">
                   Add Telegram Bot
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-text-muted dark:text-text-secondary">
                   {STEPS[setupStep].description}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 text-text-secondary hover:text-text-muted dark:hover:text-text-primary rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -270,10 +270,10 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                   className={cn(
                     'flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors',
                     index < setupStep
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-green-500 text-text-primary'
                       : index === setupStep
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                      ? 'bg-blue-500 text-text-primary'
+                      : 'bg-surface-hover text-text-muted dark:text-text-secondary'
                   )}
                 >
                   {index < setupStep ? (
@@ -288,7 +288,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                       'w-12 h-1 mx-2 rounded-full transition-colors',
                       index < setupStep
                         ? 'bg-green-500'
-                        : 'bg-gray-200 dark:bg-gray-700'
+                        : 'bg-surface-hover'
                     )}
                   />
                 )}
@@ -310,7 +310,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-2">
                     Bot Token
                   </label>
                   <div className="flex gap-2">
@@ -323,12 +323,12 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                         setTokenError('');
                       }}
                       placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-4 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                     <button
                       onClick={handleVerifyToken}
                       disabled={isVerifying || !token.trim()}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-surface-hover text-text-primary rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
                       {isVerifying ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -377,7 +377,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                 {verificationResult?.valid && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-2">
                         Bot Name
                       </label>
                       <input
@@ -385,12 +385,12 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                         value={botName}
                         onChange={(e) => setBotName(e.target.value)}
                         placeholder="My Awesome Bot"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-2">
                         Description (optional)
                       </label>
                       <textarea
@@ -398,7 +398,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="What does this bot do?"
                         rows={2}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                       />
                     </div>
                   </>
@@ -416,13 +416,13 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-2">
                     Default Parse Mode
                   </label>
                   <select
                     value={parseMode}
                     onChange={(e) => setParseMode(e.target.value as ParseMode)}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="HTML">HTML</option>
                     <option value="Markdown">Markdown</option>
@@ -436,9 +436,9 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                       type="checkbox"
                       checked={disableWebPagePreview}
                       onChange={(e) => setDisableWebPagePreview(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-text-secondary dark:text-text-primary">
                       Disable web page previews
                     </span>
                   </label>
@@ -448,9 +448,9 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                       type="checkbox"
                       checked={disableNotification}
                       onChange={(e) => setDisableNotification(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-text-secondary dark:text-text-primary">
                       Send messages silently (no notification)
                     </span>
                   </label>
@@ -460,9 +460,9 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                       type="checkbox"
                       checked={protectContent}
                       onChange={(e) => setProtectContent(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-text-secondary dark:text-text-primary">
                       Protect content from forwarding and saving
                     </span>
                   </label>
@@ -470,7 +470,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-primary">
                       Bot Commands
                     </label>
                     <button
@@ -488,19 +488,19 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                           value={cmd.command}
                           onChange={(e) => updateCommand(index, 'command', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                           placeholder="command"
-                          className="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-32 px-3 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
                         />
                         <input
                           type="text"
                           value={cmd.description}
                           onChange={(e) => updateCommand(index, 'description', e.target.value)}
                           placeholder="Description"
-                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="flex-1 px-3 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
                         />
                         {commands.length > 1 && (
                           <button
                             onClick={() => removeCommand(index)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                            className="p-2 text-text-secondary hover:text-red-500 transition-colors"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -526,15 +526,15 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                     type="checkbox"
                     checked={useAutoWebhook}
                     onChange={(e) => setUseAutoWebhook(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-text-secondary dark:text-text-primary">
                     Use automatic FlowCube webhook
                   </span>
                 </label>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-2">
                     Webhook URL
                   </label>
                   <div className="flex gap-2">
@@ -544,11 +544,11 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                       onChange={(e) => setWebhookUrl(e.target.value)}
                       disabled={useAutoWebhook}
                       placeholder="https://your-domain.com/webhook"
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                      className="flex-1 px-4 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
                     />
                     <button
                       onClick={() => navigator.clipboard.writeText(webhookUrl)}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      className="p-2 text-text-secondary hover:text-text-muted dark:hover:text-text-primary"
                       title="Copy URL"
                     >
                       <Copy className="w-5 h-5" />
@@ -557,7 +557,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-2">
                     Webhook Secret (optional but recommended)
                   </label>
                   <div className="flex gap-2">
@@ -566,7 +566,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
                       value={webhookSecret}
                       onChange={(e) => setWebhookSecret(e.target.value)}
                       placeholder="Random secret for validation"
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                      className="flex-1 px-4 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
                     />
                     <button
                       onClick={generateSecret}
@@ -599,11 +599,11 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between">
           <button
             onClick={handleBack}
             disabled={setupStep === 0}
-            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+            className="px-4 py-2 text-text-muted dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             Back
@@ -612,7 +612,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
           <div className="flex items-center gap-2">
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="px-4 py-2 text-text-muted dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary transition-colors"
             >
               Cancel
             </button>
@@ -621,7 +621,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
               <button
                 onClick={handleNext}
                 disabled={!canProceedFromStep(setupStep)}
-                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-surface-hover text-text-primary rounded-lg font-medium transition-colors flex items-center gap-2"
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
@@ -630,7 +630,7 @@ export function TelegramBotSetup({ isOpen, onClose, onSuccess }: TelegramBotSetu
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !canProceedFromStep(setupStep)}
-                className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-surface-hover text-text-primary rounded-lg font-medium transition-colors flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <>

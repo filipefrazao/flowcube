@@ -120,28 +120,28 @@ export default function FunnelCubePage() {
             >
               <GlassCard hover={false} padding="sm">
                 <div className="p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-white">Create New Project</h3>
+                  <h3 className="text-sm font-medium text-text-primary">Create New Project</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <input
                       type="text"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       placeholder="Project name"
-                      className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      className="bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500"
                     />
                     <input
                       type="text"
                       value={newDomain}
                       onChange={(e) => setNewDomain(e.target.value)}
                       placeholder="Domain (optional, e.g. myapp.com)"
-                      className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                      className="bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={createProject}
                       disabled={creating || !newName.trim()}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors"
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-text-primary text-sm rounded-lg disabled:opacity-50 transition-colors"
                     >
                       {creating ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -151,7 +151,7 @@ export default function FunnelCubePage() {
                     </button>
                     <button
                       onClick={() => setShowCreate(false)}
-                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors"
+                      className="px-4 py-2 bg-surface-hover hover:bg-surface-hover text-text-primary text-sm rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -168,9 +168,9 @@ export default function FunnelCubePage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-20"
             >
-              <BarChart3 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h2 className="text-lg font-medium text-white mb-2">No projects yet</h2>
-              <p className="text-gray-500 text-sm mb-6">
+              <BarChart3 className="w-16 h-16 text-text-muted mx-auto mb-4" />
+              <h2 className="text-lg font-medium text-text-primary mb-2">No projects yet</h2>
+              <p className="text-text-muted text-sm mb-6">
                 Create your first analytics project to start tracking events
               </p>
               <PremiumButton
@@ -217,35 +217,35 @@ function ProjectCard({ project, delay }: { project: FunnelProject; delay: number
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-white" />
+              <BarChart3 className="w-5 h-5 text-text-primary" />
             </div>
             <div
               className={`px-2 py-0.5 rounded text-xs font-medium ${
                 project.is_active
                   ? 'bg-green-500/20 text-green-400'
-                  : 'bg-gray-700/50 text-gray-400'
+                  : 'bg-surface-hover/50 text-text-secondary'
               }`}
             >
               {project.is_active ? 'Active' : 'Paused'}
             </div>
           </div>
 
-          <h3 className="text-white font-medium mb-1">{project.name}</h3>
+          <h3 className="text-text-primary font-medium mb-1">{project.name}</h3>
 
           {project.domain && (
-            <div className="flex items-center gap-1.5 text-gray-500 text-xs mb-3">
+            <div className="flex items-center gap-1.5 text-text-muted text-xs mb-3">
               <Globe className="w-3 h-3" />
               {project.domain}
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-700/50">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 copyId();
               }}
-              className="text-gray-500 hover:text-gray-300 text-xs flex items-center gap-1 transition-colors"
+              className="text-text-muted hover:text-text-primary text-xs flex items-center gap-1 transition-colors"
             >
               {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
               {copied ? 'Copied!' : 'Copy ID'}

@@ -55,7 +55,7 @@ export default function SmartLinksPage() {
           <button onClick={() => router.push("/socialcube")} className="p-2 hover:bg-card rounded-lg"><ArrowLeft className="w-5 h-5 text-text-secondary" /></button>
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2"><Link2 className="w-6 h-6" /> SmartLinks</h1>
           <div className="flex-1" />
-          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg text-sm">
             <Plus className="w-4 h-4" /> Create Page
           </button>
         </div>
@@ -67,7 +67,7 @@ export default function SmartLinksPage() {
               <span className="text-sm text-text-tertiary">/s/</span>
               <input type="text" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="my-page" className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm" />
             </div>
-            <button onClick={handleCreate} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Create</button>
+            <button onClick={handleCreate} className="px-4 py-2 bg-blue-600 text-text-primary rounded-lg text-sm">Create</button>
           </div>
         )}
 
@@ -83,7 +83,7 @@ export default function SmartLinksPage() {
           <div className="space-y-3">
             {links.map((link) => (
               <div key={link.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-text-primary font-bold text-lg">
                   {link.title[0]?.toUpperCase() || "S"}
                 </div>
                 <div className="flex-1">

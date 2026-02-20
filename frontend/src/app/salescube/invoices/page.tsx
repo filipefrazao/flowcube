@@ -6,11 +6,11 @@ import { invoiceApi, leadApi, productApi, type Invoice, type InvoiceItemType, ty
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; strikethrough?: boolean }> = {
-  draft: { label: "Rascunho", color: "bg-gray-500/20 text-gray-400" },
+  draft: { label: "Rascunho", color: "bg-gray-500/20 text-text-secondary" },
   sent: { label: "Enviada", color: "bg-blue-500/20 text-blue-400" },
   paid: { label: "Paga", color: "bg-green-500/20 text-green-400" },
   overdue: { label: "Vencida", color: "bg-red-500/20 text-red-400" },
-  cancelled: { label: "Cancelada", color: "bg-gray-500/20 text-gray-500", strikethrough: true },
+  cancelled: { label: "Cancelada", color: "bg-gray-500/20 text-text-muted", strikethrough: true },
 };
 
 function formatCurrency(v: string | number) {
@@ -177,101 +177,101 @@ export default function InvoicesPage() {
   });
 
   return (
-    <div className="p-6 space-y-6 bg-gray-950 min-h-screen">
+    <div className="p-6 space-y-6 bg-background min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
-            <Receipt className="w-6 h-6 text-indigo-400" /> Faturas
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <Receipt className="w-6 h-6 text-primary" /> Faturas
           </h1>
-          <p className="text-sm text-gray-400 mt-1">{filteredInvoices.length} faturas encontradas</p>
+          <p className="text-sm text-text-secondary mt-1">{filteredInvoices.length} faturas encontradas</p>
         </div>
-        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors">
+        <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm transition-colors">
           <Plus className="w-4 h-4" /> Nova Fatura
         </button>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-background-secondary border border-border rounded-xl p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/20 rounded-lg"><Receipt className="w-5 h-5 text-indigo-400" /></div>
+            <div className="p-2 bg-primary/20 rounded-lg"><Receipt className="w-5 h-5 text-primary" /></div>
             <div>
-              <p className="text-xs text-gray-400">Total Faturas</p>
-              <p className="text-xl font-bold text-gray-100">{summary?.total_invoices ?? 0}</p>
+              <p className="text-xs text-text-secondary">Total Faturas</p>
+              <p className="text-xl font-bold text-text-primary">{summary?.total_invoices ?? 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-background-secondary border border-border rounded-xl p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-500/20 rounded-lg"><DollarSign className="w-5 h-5 text-emerald-400" /></div>
+            <div className="p-2 bg-primary/20 rounded-lg"><DollarSign className="w-5 h-5 text-primary" /></div>
             <div>
-              <p className="text-xs text-gray-400">Total Valor</p>
-              <p className="text-xl font-bold text-gray-100">{formatCurrency(summary?.total_value ?? 0)}</p>
+              <p className="text-xs text-text-secondary">Total Valor</p>
+              <p className="text-xl font-bold text-text-primary">{formatCurrency(summary?.total_value ?? 0)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-background-secondary border border-border rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-500/20 rounded-lg"><CheckCircle className="w-5 h-5 text-green-400" /></div>
             <div>
-              <p className="text-xs text-gray-400">Pagas</p>
-              <p className="text-xl font-bold text-gray-100">{statusCount("paid")} <span className="text-sm font-normal text-gray-500">({formatCurrency(statusTotal("paid"))})</span></p>
+              <p className="text-xs text-text-secondary">Pagas</p>
+              <p className="text-xl font-bold text-text-primary">{statusCount("paid")} <span className="text-sm font-normal text-text-muted">({formatCurrency(statusTotal("paid"))})</span></p>
             </div>
           </div>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-background-secondary border border-border rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-500/20 rounded-lg"><AlertTriangle className="w-5 h-5 text-red-400" /></div>
             <div>
-              <p className="text-xs text-gray-400">Vencidas</p>
-              <p className="text-xl font-bold text-gray-100">{summary?.overdue_count ?? 0}</p>
+              <p className="text-xs text-text-secondary">Vencidas</p>
+              <p className="text-xl font-bold text-text-primary">{summary?.overdue_count ?? 0}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+      <div className="bg-surface/80 border border-border/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input type="text" placeholder="Buscar por numero..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-gray-900/80 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all" />
+              className="w-full bg-background-secondary/80 border border-border rounded-lg pl-10 pr-3 py-2 text-sm text-text-primary placeholder-text-muted focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
           </div>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all">
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all">
             <option value="">Todos os status</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
           </select>
           <button onClick={() => setShowFilters(!showFilters)}
             className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
-              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
-            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+              showFilters ? "bg-primary/20 border-primary/50 text-primary" : "bg-background-secondary/80 border-border text-text-secondary hover:text-text-primary")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-primary rounded-full" />}
           </button>
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors">
               <RotateCcw className="w-3.5 h-3.5" /> Limpar
             </button>
           )}
         </div>
         {showFilters && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border/50">
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Emissao De</label>
-              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Emissao De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Vencimento Ate</label>
-              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Vencimento Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Min (R$)</label>
-              <input type="number" placeholder="0,00" value={filterValueMin} onChange={(e) => setFilterValueMin(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Valor Min (R$)</label>
+              <input type="number" placeholder="0,00" value={filterValueMin} onChange={(e) => setFilterValueMin(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Valor Max (R$)</label>
-              <input type="number" placeholder="0,00" value={filterValueMax} onChange={(e) => setFilterValueMax(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Valor Max (R$)</label>
+              <input type="number" placeholder="0,00" value={filterValueMax} onChange={(e) => setFilterValueMax(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:border-primary transition-all" />
             </div>
           </div>
         )}
@@ -280,52 +280,52 @@ export default function InvoicesPage() {
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-background-secondary border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-left">
-                  <th className="px-4 py-3 text-gray-400 font-medium">Numero</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Lead / Contato</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Status</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Emissao</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Vencimento</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium">Total</th>
-                  <th className="px-4 py-3 text-gray-400 font-medium w-24">Acoes</th>
+                <tr className="border-b border-border text-left">
+                  <th className="px-4 py-3 text-text-secondary font-medium">Numero</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium">Lead / Contato</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium">Status</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium">Emissao</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium">Vencimento</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium">Total</th>
+                  <th className="px-4 py-3 text-text-secondary font-medium w-24">Acoes</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredInvoices.map((inv) => {
                   const sc = STATUS_CONFIG[inv.status] || STATUS_CONFIG.draft;
                   return (
-                    <tr key={inv.id} className="border-b border-gray-800/50 hover:bg-gray-800/40 transition-colors">
-                      <td className="px-4 py-3 text-gray-100 font-mono font-medium">#{inv.number}</td>
-                      <td className="px-4 py-3 text-gray-300">{inv.lead_name || inv.contact_name || "-"}</td>
+                    <tr key={inv.id} className="border-b border-border/50 hover:bg-surface-hover/40 transition-colors">
+                      <td className="px-4 py-3 text-text-primary font-mono font-medium">#{inv.number}</td>
+                      <td className="px-4 py-3 text-text-primary">{inv.lead_name || inv.contact_name || "-"}</td>
                       <td className="px-4 py-3">
                         <span className={cn("text-xs px-2.5 py-0.5 rounded-full font-medium", sc.color, sc.strikethrough && "line-through")}>{sc.label}</span>
                       </td>
-                      <td className="px-4 py-3 text-gray-400">{formatDate(inv.issue_date)}</td>
+                      <td className="px-4 py-3 text-text-secondary">{formatDate(inv.issue_date)}</td>
                       <td className="px-4 py-3">
-                        <span className={cn("text-gray-400", inv.status === "overdue" && "text-red-400 font-medium")}>{formatDate(inv.due_date)}</span>
+                        <span className={cn("text-text-secondary", inv.status === "overdue" && "text-red-400 font-medium")}>{formatDate(inv.due_date)}</span>
                       </td>
-                      <td className="px-4 py-3 text-indigo-400 font-semibold">{formatCurrency(inv.total)}</td>
+                      <td className="px-4 py-3 text-primary font-semibold">{formatCurrency(inv.total)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={() => openDetail(inv)} title="Ver detalhes" className="p-1.5 text-gray-500 hover:text-indigo-400 transition-colors"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => openDetail(inv)} title="Ver detalhes" className="p-1.5 text-text-muted hover:text-primary transition-colors"><Eye className="w-4 h-4" /></button>
                           {inv.status !== "paid" && inv.status !== "cancelled" && (
-                            <button onClick={async () => { await invoiceApi.markPaid(inv.id); fetchData(); }} title="Marcar como paga" className="p-1.5 text-gray-500 hover:text-green-400 transition-colors"><CheckCircle className="w-4 h-4" /></button>
+                            <button onClick={async () => { await invoiceApi.markPaid(inv.id); fetchData(); }} title="Marcar como paga" className="p-1.5 text-text-muted hover:text-green-400 transition-colors"><CheckCircle className="w-4 h-4" /></button>
                           )}
-                          <button onClick={() => handleDelete(inv.id)} title="Excluir" className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => handleDelete(inv.id)} title="Excluir" className="p-1.5 text-text-muted hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
                   );
                 })}
                 {filteredInvoices.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-16 text-center text-gray-500">Nenhuma fatura encontrada</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-16 text-center text-text-muted">Nenhuma fatura encontrada</td></tr>
                 )}
               </tbody>
             </table>
@@ -336,37 +336,37 @@ export default function InvoicesPage() {
       {/* Create Invoice Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowCreateModal(false)}>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background-secondary border border-border rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-gray-100">Nova Fatura</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-100"><X className="w-5 h-5" /></button>
+              <h2 className="text-lg font-semibold text-text-primary">Nova Fatura</h2>
+              <button onClick={() => setShowCreateModal(false)} className="text-text-secondary hover:text-text-primary"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Lead</label>
-                <select value={createForm.lead} onChange={(e) => setCreateForm({ ...createForm, lead: e.target.value })} className="w-full bg-gray-950 border border-gray-800 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <label className="text-xs text-text-secondary mb-1 block">Lead</label>
+                <select value={createForm.lead} onChange={(e) => setCreateForm({ ...createForm, lead: e.target.value })} className="w-full bg-background border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none">
                   <option value="">Selecionar lead (opcional)</option>
                   {leads.map((l) => (<option key={l.id} value={l.id}>{l.name}{l.company ? ` - ${l.company}` : ""}</option>))}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Data de Emissao</label>
-                  <input type="date" value={createForm.issue_date} onChange={(e) => setCreateForm({ ...createForm, issue_date: e.target.value })} className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 focus:outline-none" />
+                  <label className="text-xs text-text-secondary mb-1 block">Data de Emissao</label>
+                  <input type="date" value={createForm.issue_date} onChange={(e) => setCreateForm({ ...createForm, issue_date: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none" />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Vencimento *</label>
-                  <input type="date" value={createForm.due_date} onChange={(e) => setCreateForm({ ...createForm, due_date: e.target.value })} className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 focus:outline-none" />
+                  <label className="text-xs text-text-secondary mb-1 block">Vencimento *</label>
+                  <input type="date" value={createForm.due_date} onChange={(e) => setCreateForm({ ...createForm, due_date: e.target.value })} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none" />
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Observacoes</label>
-                <textarea value={createForm.notes} onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} rows={3} placeholder="Notas ou observacoes..." className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 resize-none focus:border-indigo-500 focus:outline-none" />
+                <label className="text-xs text-text-secondary mb-1 block">Observacoes</label>
+                <textarea value={createForm.notes} onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} rows={3} placeholder="Notas ou observacoes..." className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted resize-none focus:border-primary focus:outline-none" />
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100 transition-colors">Cancelar</button>
-              <button onClick={handleCreate} disabled={!createForm.due_date || saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-sm transition-colors">{saving ? "Salvando..." : "Criar Fatura"}</button>
+              <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancelar</button>
+              <button onClick={handleCreate} disabled={!createForm.due_date || saving} className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-text-primary rounded-lg text-sm transition-colors">{saving ? "Salvando..." : "Criar Fatura"}</button>
             </div>
           </div>
         </div>
@@ -375,75 +375,75 @@ export default function InvoicesPage() {
       {/* Invoice Detail Modal */}
       {showDetailModal && selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowDetailModal(false)}>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background-secondary border border-border rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-lg font-semibold text-gray-100">Fatura #{selectedInvoice.number}</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{selectedInvoice.lead_name || selectedInvoice.contact_name || "Sem lead vinculado"}</p>
+                <h2 className="text-lg font-semibold text-text-primary">Fatura #{selectedInvoice.number}</h2>
+                <p className="text-xs text-text-secondary mt-0.5">{selectedInvoice.lead_name || selectedInvoice.contact_name || "Sem lead vinculado"}</p>
               </div>
               <div className="flex items-center gap-2">
                 {selectedInvoice.status !== "paid" && selectedInvoice.status !== "cancelled" && (
-                  <button onClick={handleMarkPaid} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors">
+                  <button onClick={handleMarkPaid} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-text-primary rounded-lg text-xs font-medium transition-colors">
                     <CheckCircle className="w-3.5 h-3.5" /> Marcar como Paga
                   </button>
                 )}
-                <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-100"><X className="w-5 h-5" /></button>
+                <button onClick={() => setShowDetailModal(false)} className="text-text-secondary hover:text-text-primary"><X className="w-5 h-5" /></button>
               </div>
             </div>
 
             {/* Info grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <div className="bg-gray-950 border border-gray-800 rounded-lg p-3">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Status</p>
+              <div className="bg-background border border-border rounded-lg p-3">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider">Status</p>
                 <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block", STATUS_CONFIG[selectedInvoice.status]?.color)}>{STATUS_CONFIG[selectedInvoice.status]?.label}</span>
               </div>
-              <div className="bg-gray-950 border border-gray-800 rounded-lg p-3">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Emissao</p>
-                <p className="text-sm text-gray-100 mt-1">{formatDate(selectedInvoice.issue_date)}</p>
+              <div className="bg-background border border-border rounded-lg p-3">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider">Emissao</p>
+                <p className="text-sm text-text-primary mt-1">{formatDate(selectedInvoice.issue_date)}</p>
               </div>
-              <div className="bg-gray-950 border border-gray-800 rounded-lg p-3">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Vencimento</p>
-                <p className={cn("text-sm mt-1", selectedInvoice.status === "overdue" ? "text-red-400 font-medium" : "text-gray-100")}>{formatDate(selectedInvoice.due_date)}</p>
+              <div className="bg-background border border-border rounded-lg p-3">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider">Vencimento</p>
+                <p className={cn("text-sm mt-1", selectedInvoice.status === "overdue" ? "text-red-400 font-medium" : "text-text-primary")}>{formatDate(selectedInvoice.due_date)}</p>
               </div>
-              <div className="bg-gray-950 border border-gray-800 rounded-lg p-3">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider">Total</p>
-                <p className="text-sm text-indigo-400 font-bold mt-1">{formatCurrency(selectedInvoice.total)}</p>
+              <div className="bg-background border border-border rounded-lg p-3">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider">Total</p>
+                <p className="text-sm text-primary font-bold mt-1">{formatCurrency(selectedInvoice.total)}</p>
               </div>
             </div>
 
             {/* Line Items */}
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gray-500" /> Itens da Fatura
+              <h3 className="text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-text-muted" /> Itens da Fatura
               </h3>
-              <div className="bg-gray-950 border border-gray-800 rounded-lg overflow-hidden">
+              <div className="bg-background border border-border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-800 text-left">
-                      <th className="px-3 py-2 text-gray-500 font-medium text-xs">Descricao</th>
-                      <th className="px-3 py-2 text-gray-500 font-medium text-xs text-center">Qtd</th>
-                      <th className="px-3 py-2 text-gray-500 font-medium text-xs text-right">Preco Unit.</th>
-                      <th className="px-3 py-2 text-gray-500 font-medium text-xs text-right">Subtotal</th>
+                    <tr className="border-b border-border text-left">
+                      <th className="px-3 py-2 text-text-muted font-medium text-xs">Descricao</th>
+                      <th className="px-3 py-2 text-text-muted font-medium text-xs text-center">Qtd</th>
+                      <th className="px-3 py-2 text-text-muted font-medium text-xs text-right">Preco Unit.</th>
+                      <th className="px-3 py-2 text-text-muted font-medium text-xs text-right">Subtotal</th>
                       <th className="px-3 py-2 w-10"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedInvoice.items.map((item) => (
-                      <tr key={item.id} className="border-b border-gray-800/50">
-                        <td className="px-3 py-2 text-gray-200">{item.product_name || item.description}</td>
-                        <td className="px-3 py-2 text-gray-400 text-center">{item.quantity}</td>
-                        <td className="px-3 py-2 text-gray-400 text-right">{formatCurrency(item.unit_price)}</td>
-                        <td className="px-3 py-2 text-indigo-400 text-right font-medium">{formatCurrency(item.subtotal)}</td>
+                      <tr key={item.id} className="border-b border-border/50">
+                        <td className="px-3 py-2 text-text-primary">{item.product_name || item.description}</td>
+                        <td className="px-3 py-2 text-text-secondary text-center">{item.quantity}</td>
+                        <td className="px-3 py-2 text-text-secondary text-right">{formatCurrency(item.unit_price)}</td>
+                        <td className="px-3 py-2 text-primary text-right font-medium">{formatCurrency(item.subtotal)}</td>
                         <td className="px-3 py-2">
                           {selectedInvoice.status === "draft" && (
-                            <button onClick={() => handleRemoveItem(item.id)} className="p-1 text-gray-600 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleRemoveItem(item.id)} className="p-1 text-text-muted hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                           )}
                         </td>
                       </tr>
                     ))}
                     {selectedInvoice.items.length === 0 && (
-                      <tr><td colSpan={5} className="px-3 py-6 text-center text-gray-600 text-xs">Nenhum item adicionado</td></tr>
+                      <tr><td colSpan={5} className="px-3 py-6 text-center text-text-muted text-xs">Nenhum item adicionado</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -453,37 +453,37 @@ export default function InvoicesPage() {
             {/* Totals */}
             <div className="flex justify-end mb-6">
               <div className="w-64 space-y-1 text-sm">
-                <div className="flex justify-between text-gray-400"><span>Subtotal</span><span>{formatCurrency(selectedInvoice.subtotal)}</span></div>
-                {parseFloat(selectedInvoice.discount) > 0 && <div className="flex justify-between text-gray-400"><span>Desconto</span><span className="text-red-400">-{formatCurrency(selectedInvoice.discount)}</span></div>}
-                {parseFloat(selectedInvoice.tax) > 0 && <div className="flex justify-between text-gray-400"><span>Impostos</span><span>+{formatCurrency(selectedInvoice.tax)}</span></div>}
-                <div className="flex justify-between text-gray-100 font-bold border-t border-gray-800 pt-1"><span>Total</span><span className="text-indigo-400">{formatCurrency(selectedInvoice.total)}</span></div>
+                <div className="flex justify-between text-text-secondary"><span>Subtotal</span><span>{formatCurrency(selectedInvoice.subtotal)}</span></div>
+                {parseFloat(selectedInvoice.discount) > 0 && <div className="flex justify-between text-text-secondary"><span>Desconto</span><span className="text-red-400">-{formatCurrency(selectedInvoice.discount)}</span></div>}
+                {parseFloat(selectedInvoice.tax) > 0 && <div className="flex justify-between text-text-secondary"><span>Impostos</span><span>+{formatCurrency(selectedInvoice.tax)}</span></div>}
+                <div className="flex justify-between text-text-primary font-bold border-t border-border pt-1"><span>Total</span><span className="text-primary">{formatCurrency(selectedInvoice.total)}</span></div>
               </div>
             </div>
 
             {/* Add Item (only for draft) */}
             {selectedInvoice.status === "draft" && (
-              <div className="bg-gray-950 border border-gray-800 rounded-lg p-4">
-                <h4 className="text-xs text-gray-400 font-medium mb-3">Adicionar Item</h4>
+              <div className="bg-background border border-border rounded-lg p-4">
+                <h4 className="text-xs text-text-secondary font-medium mb-3">Adicionar Item</h4>
                 <div className="flex items-end gap-2 flex-wrap">
                   <div className="flex-1 min-w-[180px]">
-                    <label className="text-[10px] text-gray-500 mb-1 block">Produto</label>
+                    <label className="text-[10px] text-text-muted mb-1 block">Produto</label>
                     <select value={newItem.product} onChange={(e) => {
                       const p = products.find((pr) => pr.id === e.target.value);
                       setNewItem({ ...newItem, product: e.target.value, description: p?.name || "", unit_price: p?.price || "0" });
-                    }} className="w-full bg-gray-900 border border-gray-800 text-gray-100 rounded-lg px-2 py-1.5 text-xs focus:border-indigo-500 focus:outline-none">
+                    }} className="w-full bg-background-secondary border border-border text-text-primary rounded-lg px-2 py-1.5 text-xs focus:border-primary focus:outline-none">
                       <option value="">Selecionar produto</option>
                       {products.filter((p) => p.active).map((p) => (<option key={p.id} value={p.id}>{p.name} - {formatCurrency(p.price)}</option>))}
                     </select>
                   </div>
                   <div className="w-20">
-                    <label className="text-[10px] text-gray-500 mb-1 block">Qtd</label>
-                    <input type="number" min={1} value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })} className="w-full bg-gray-900 border border-gray-800 rounded-lg px-2 py-1.5 text-xs text-gray-100 text-center focus:border-indigo-500 focus:outline-none" />
+                    <label className="text-[10px] text-text-muted mb-1 block">Qtd</label>
+                    <input type="number" min={1} value={newItem.quantity} onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })} className="w-full bg-background-secondary border border-border rounded-lg px-2 py-1.5 text-xs text-text-primary text-center focus:border-primary focus:outline-none" />
                   </div>
                   <div className="w-28">
-                    <label className="text-[10px] text-gray-500 mb-1 block">Preco</label>
-                    <input type="number" step="0.01" value={newItem.unit_price} onChange={(e) => setNewItem({ ...newItem, unit_price: e.target.value })} className="w-full bg-gray-900 border border-gray-800 rounded-lg px-2 py-1.5 text-xs text-gray-100 focus:border-indigo-500 focus:outline-none" />
+                    <label className="text-[10px] text-text-muted mb-1 block">Preco</label>
+                    <input type="number" step="0.01" value={newItem.unit_price} onChange={(e) => setNewItem({ ...newItem, unit_price: e.target.value })} className="w-full bg-background-secondary border border-border rounded-lg px-2 py-1.5 text-xs text-text-primary focus:border-primary focus:outline-none" />
                   </div>
-                  <button onClick={handleAddItem} disabled={!newItem.product && !newItem.description} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-xs font-medium transition-colors">
+                  <button onClick={handleAddItem} disabled={!newItem.product && !newItem.description} className="px-3 py-1.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-text-primary rounded-lg text-xs font-medium transition-colors">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -492,9 +492,9 @@ export default function InvoicesPage() {
 
             {/* Notes */}
             {selectedInvoice.notes && (
-              <div className="mt-4 bg-gray-950 border border-gray-800 rounded-lg p-3">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Observacoes</p>
-                <p className="text-sm text-gray-300">{selectedInvoice.notes}</p>
+              <div className="mt-4 bg-background border border-border rounded-lg p-3">
+                <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Observacoes</p>
+                <p className="text-sm text-text-primary">{selectedInvoice.notes}</p>
               </div>
             )}
           </div>

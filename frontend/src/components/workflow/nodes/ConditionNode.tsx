@@ -62,7 +62,7 @@ const ConditionNode = ({ data, selected }: ConditionNodeProps) => {
   return (
     <div
       className={cn(
-        "relative rounded-lg shadow-md transition-all duration-200 min-w-[200px] bg-white",
+        "relative rounded-lg shadow-md transition-all duration-200 min-w-[200px] bg-surface",
         selected ? "ring-2 ring-red-500" : "",
         "border-2 border-red-300 hover:shadow-lg"
       )}
@@ -71,22 +71,22 @@ const ConditionNode = ({ data, selected }: ConditionNodeProps) => {
       <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 rotate-45 w-4 h-4 bg-red-400 border-2 border-white" />
 
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 pt-4 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
+      <div className="flex items-center gap-3 p-3 pt-4 border-b border-border bg-gradient-to-r from-red-50 to-orange-50">
         <div className="p-2 rounded-lg bg-red-100">
           <GitBranch className="w-5 h-5 text-red-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-800 truncate">
+          <div className="font-semibold text-sm text-text-primary truncate">
             {data.label || "Condition"}
           </div>
-          <div className="text-xs text-gray-500">Branch Logic</div>
+          <div className="text-xs text-text-muted">Branch Logic</div>
         </div>
       </div>
 
       {/* Conditions Preview */}
       <div className="p-3 space-y-2">
         {/* Summary */}
-        <div className="text-xs text-gray-600 font-mono bg-gray-50 px-2 py-1 rounded">
+        <div className="text-xs text-text-muted font-mono bg-background-secondary px-2 py-1 rounded">
           {conditionsSummary}
         </div>
 
@@ -95,19 +95,19 @@ const ConditionNode = ({ data, selected }: ConditionNodeProps) => {
           <div className="space-y-1 mt-2">
             {conditions.slice(0, 3).map((condition, idx) => (
               <div key={condition.id || idx} className="flex items-center gap-2 text-xs">
-                <ArrowRight className="w-3 h-3 text-gray-400" />
-                <span className="text-gray-600 truncate flex-1">
+                <ArrowRight className="w-3 h-3 text-text-secondary" />
+                <span className="text-text-muted truncate flex-1">
                   {condition.label || `Branch ${idx + 1}`}
                 </span>
                 {data.stats?.branches && (
-                  <span className="text-gray-400 font-mono">
+                  <span className="text-text-secondary font-mono">
                     {data.stats.branches[condition.id] || 0}
                   </span>
                 )}
               </div>
             ))}
             {conditions.length > 3 && (
-              <div className="text-xs text-gray-400 pl-5">
+              <div className="text-xs text-text-secondary pl-5">
                 +{conditions.length - 3} more
               </div>
             )}
@@ -115,14 +115,14 @@ const ConditionNode = ({ data, selected }: ConditionNodeProps) => {
         )}
 
         {/* Default branch */}
-        <div className="flex items-center gap-2 text-xs mt-2 pt-2 border-t border-gray-100">
-          <ArrowRight className="w-3 h-3 text-gray-300" />
-          <span className="text-gray-400 italic">else (default)</span>
+        <div className="flex items-center gap-2 text-xs mt-2 pt-2 border-t border-border">
+          <ArrowRight className="w-3 h-3 text-text-primary" />
+          <span className="text-text-secondary italic">else (default)</span>
         </div>
 
         {/* Stats */}
         {data.stats && (
-          <div className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+          <div className="text-xs text-text-muted mt-2 pt-2 border-t border-border">
             <span className="font-medium">{data.stats.evaluations}</span> evaluations
           </div>
         )}

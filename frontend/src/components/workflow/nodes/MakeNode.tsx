@@ -162,13 +162,13 @@ function MakeNode({
       {/* Labels below the bubble */}
       <div className="mt-2 text-center w-full max-w-[128px]">
         <div
-          className="text-[11px] font-medium text-gray-200 truncate leading-tight px-1"
+          className="text-[11px] font-medium text-text-primary truncate leading-tight px-1"
           title={label}
         >
           {label}
         </div>
         <div
-          className="text-[9px] text-gray-500 truncate leading-tight mt-0.5 px-1"
+          className="text-[9px] text-text-muted truncate leading-tight mt-0.5 px-1"
           title={subtitle}
         >
           {subtitle}

@@ -172,7 +172,7 @@ export default function ConversationsPage() {
         return "text-red-400 bg-red-500/20";
       case "completed":
       case "expired":
-        return "text-gray-400 bg-gray-500/20";
+        return "text-text-secondary bg-gray-500/20";
       default:
         return "text-yellow-400 bg-yellow-500/20";
     }
@@ -224,7 +224,7 @@ export default function ConversationsPage() {
           {/* Header */}
           <div className="p-4 border-b border-border/50">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h1 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-purple-400" />
                 Conversas
                 {stats && (stats.total || 0) > 0 && (
@@ -235,7 +235,7 @@ export default function ConversationsPage() {
               </h1>
               <button
                 onClick={() => { loadSessions(); loadStats(); }}
-                className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50"
+                className="p-2 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-hover/50"
               >
                 <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
               </button>
@@ -243,13 +243,13 @@ export default function ConversationsPage() {
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar conversas..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
+                className="w-full pl-10 pr-4 py-2 bg-surface/50 border border-border/50 rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500/50"
               />
             </div>
 
@@ -263,7 +263,7 @@ export default function ConversationsPage() {
                     "flex-1 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors",
                     filter === f
                       ? "bg-purple-500/20 text-purple-400"
-                      : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-hover/50"
                   )}
                 >
                   {f === "all" ? "Todas" : f === "active" ? "Ativas" : f === "handoff" ? "Handoff" : "Finalizadas"}
@@ -282,7 +282,7 @@ export default function ConversationsPage() {
             {isLoading ? (
               <div className="p-8 text-center">
                 <Loader2 className="w-8 h-8 text-purple-400 mx-auto animate-spin" />
-                <p className="text-gray-500 text-sm mt-2">Carregando...</p>
+                <p className="text-text-muted text-sm mt-2">Carregando...</p>
               </div>
             ) : error ? (
               <div className="p-8 text-center">
@@ -297,9 +297,9 @@ export default function ConversationsPage() {
               </div>
             ) : sessions.length === 0 ? (
               <div className="p-8 text-center">
-                <Inbox className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">Nenhuma conversa encontrada</p>
-                <p className="text-gray-600 text-xs mt-1">
+                <Inbox className="w-10 h-10 text-text-muted mx-auto mb-3" />
+                <p className="text-text-muted text-sm">Nenhuma conversa encontrada</p>
+                <p className="text-text-muted text-xs mt-1">
                   As conversas aparecerao aqui quando usuarios iniciarem chats via WhatsApp
                 </p>
               </div>
@@ -313,31 +313,31 @@ export default function ConversationsPage() {
                     transition={{ delay: idx * 0.03 }}
                     onClick={() => handleSelectSession(session)}
                     className={cn(
-                      "p-4 border-b border-gray-800/50 cursor-pointer transition-colors",
+                      "p-4 border-b border-border/50 cursor-pointer transition-colors",
                       selectedSession?.id === session.id
                         ? "bg-purple-500/10 border-l-2 border-l-purple-500"
-                        : "hover:bg-gray-800/30"
+                        : "hover:bg-surface-hover/30"
                     )}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white font-medium text-sm">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-text-primary font-medium text-sm">
                         {(session.contact_name || session.contact_phone).charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-white text-sm truncate">
+                          <span className="font-medium text-text-primary text-sm truncate">
                             {session.contact_name || session.contact_phone}
                           </span>
-                          <span className="text-xs text-gray-500">{formatTime(session.last_message_at)}</span>
+                          <span className="text-xs text-text-muted">{formatTime(session.last_message_at)}</span>
                         </div>
-                        <p className="text-xs text-gray-400 truncate mt-0.5">
+                        <p className="text-xs text-text-secondary truncate mt-0.5">
                           {session.contact_phone}
                         </p>
                         <div className="flex items-center justify-between mt-1.5">
                           <span className={cn("text-xs px-1.5 py-0.5 rounded", getStatusColor(session.status))}>
                             {getStatusLabel(session.status)}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-text-muted">
                             {session.message_count} msgs
                           </span>
                         </div>
@@ -358,9 +358,9 @@ export default function ConversationsPage() {
           {!selectedSession ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <MessageSquare className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">Selecione uma conversa para comecar</p>
-                <p className="text-gray-500 text-sm mt-1">ou aguarde novas mensagens</p>
+                <MessageSquare className="w-16 h-16 text-text-muted mx-auto mb-4" />
+                <p className="text-text-secondary">Selecione uma conversa para comecar</p>
+                <p className="text-text-muted text-sm mt-1">ou aguarde novas mensagens</p>
               </div>
             </div>
           ) : (
@@ -370,16 +370,16 @@ export default function ConversationsPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSelectedSession(null)}
-                    className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+                    className="md:hidden p-2 text-text-secondary hover:text-text-primary transition-colors"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white font-medium">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-text-primary font-medium">
                     {(selectedSession.contact_name || selectedSession.contact_phone).charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="font-medium text-white">{selectedSession.contact_name || "Contato"}</h2>
-                    <p className="text-xs text-gray-400">{selectedSession.contact_phone}</p>
+                    <h2 className="font-medium text-text-primary">{selectedSession.contact_name || "Contato"}</h2>
+                    <p className="text-xs text-text-secondary">{selectedSession.contact_phone}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -399,13 +399,13 @@ export default function ConversationsPage() {
                   {selectedSession.status !== "completed" && (
                     <button
                       onClick={handleCloseSession}
-                      className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-800/50"
+                      className="p-2 text-text-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-surface-hover/50"
                       title="Encerrar conversa"
                     >
                       <XCircle className="w-4 h-4" />
                     </button>
                   )}
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50">
+                  <button className="p-2 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-hover/50">
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 </div>
@@ -420,8 +420,8 @@ export default function ConversationsPage() {
                 ) : selectedSession.messages?.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                      <MessageSquare className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500">Nenhuma mensagem ainda</p>
+                      <MessageSquare className="w-12 h-12 text-text-muted mx-auto mb-3" />
+                      <p className="text-text-muted">Nenhuma mensagem ainda</p>
                     </div>
                   </div>
                 ) : (
@@ -441,9 +441,9 @@ export default function ConversationsPage() {
                           "max-w-[70%] rounded-2xl px-4 py-2.5",
                           message.direction === "outbound"
                             ? message.is_ai_generated
-                              ? "bg-gradient-to-br from-purple-600 to-purple-700 text-white"
-                              : "bg-gray-700 text-white"
-                            : "bg-gray-800 text-gray-100"
+                              ? "bg-gradient-to-br from-purple-600 to-purple-700 text-text-primary"
+                              : "bg-surface-hover text-text-primary"
+                            : "bg-surface text-text-primary"
                         )}
                       >
                         {message.is_ai_generated && (
@@ -454,12 +454,12 @@ export default function ConversationsPage() {
                         )}
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                         <div className="flex items-center justify-end gap-1 mt-1">
-                          <span className="text-xs text-gray-400">{formatMessageTime(message.created_at)}</span>
+                          <span className="text-xs text-text-secondary">{formatMessageTime(message.created_at)}</span>
                           {message.direction === "outbound" && (
                             <CheckCheck
                               className={cn(
                                 "w-3.5 h-3.5",
-                                message.read_at ? "text-blue-400" : message.delivered_at ? "text-gray-400" : "text-gray-600"
+                                message.read_at ? "text-blue-400" : message.delivered_at ? "text-text-secondary" : "text-text-muted"
                               )}
                             />
                           )}
@@ -475,7 +475,7 @@ export default function ConversationsPage() {
               {selectedSession.status !== "completed" && selectedSession.status !== "expired" && (
                 <div className="p-4 border-t border-border/50 bg-background/80 backdrop-blur-sm">
                   <div className="flex items-end gap-3">
-                    <button className="p-2.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50">
+                    <button className="p-2.5 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-hover/50">
                       <Paperclip className="w-5 h-5" />
                     </button>
                     <div className="flex-1 relative">
@@ -490,10 +490,10 @@ export default function ConversationsPage() {
                         }}
                         placeholder="Digite sua mensagem..."
                         rows={1}
-                        className="w-full px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 resize-none"
+                        className="w-full px-4 py-2.5 bg-surface/50 border border-border/50 rounded-xl text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500/50 resize-none"
                       />
                     </div>
-                    <button className="p-2.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800/50">
+                    <button className="p-2.5 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-hover/50">
                       <Smile className="w-5 h-5" />
                     </button>
                     <PremiumButton

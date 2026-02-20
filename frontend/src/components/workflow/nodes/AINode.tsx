@@ -31,7 +31,7 @@ const providerConfig: Record<string, {
   },
   deepseek: {
     icon: Sparkles,
-    color: "text-indigo-600",
+    color: "text-primary",
     bgColor: "bg-indigo-100",
     borderColor: "border-indigo-300",
     models: ["deepseek-r1", "deepseek-r1-70b", "deepseek-coder"],
@@ -92,7 +92,7 @@ const AINode = ({ data, selected }: AINodeProps) => {
   return (
     <div
       className={cn(
-        "relative rounded-lg shadow-md transition-all duration-200 min-w-[220px] bg-white",
+        "relative rounded-lg shadow-md transition-all duration-200 min-w-[220px] bg-surface",
         selected ? "ring-2 ring-pink-500" : "",
         providerInfo.borderColor,
         "border-2 hover:shadow-lg"
@@ -100,17 +100,17 @@ const AINode = ({ data, selected }: AINodeProps) => {
     >
       {/* Header */}
       <div className={cn(
-        "flex items-center gap-3 p-3 border-b border-gray-100",
+        "flex items-center gap-3 p-3 border-b border-border",
         "bg-gradient-to-r from-pink-50 to-purple-50"
       )}>
         <div className={cn("p-2 rounded-lg", providerInfo.bgColor)}>
           <Icon className={cn("w-5 h-5", providerInfo.color)} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-800 truncate">
+          <div className="font-semibold text-sm text-text-primary truncate">
             {data.label || provider.charAt(0).toUpperCase() + provider.slice(1)}
           </div>
-          <div className="text-xs text-gray-500 capitalize">{provider} AI</div>
+          <div className="text-xs text-text-muted capitalize">{provider} AI</div>
         </div>
         {StatusIndicator}
       </div>
@@ -119,7 +119,7 @@ const AINode = ({ data, selected }: AINodeProps) => {
       <div className="p-3 space-y-2">
         {/* Model */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">Model</span>
+          <span className="text-xs text-text-muted">Model</span>
           <span className={cn(
             "px-2 py-0.5 rounded text-xs font-mono font-medium",
             providerInfo.bgColor, providerInfo.color
@@ -130,7 +130,7 @@ const AINode = ({ data, selected }: AINodeProps) => {
 
         {/* Temperature */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 flex items-center gap-1">
+          <span className="text-xs text-text-muted flex items-center gap-1">
             <Thermometer className="w-3 h-3" />
             Temp
           </span>
@@ -141,15 +141,15 @@ const AINode = ({ data, selected }: AINodeProps) => {
                 style={{ width: `${temperature * 100}%` }}
               />
             </div>
-            <span className="text-xs font-mono text-gray-600">{temperature}</span>
+            <span className="text-xs font-mono text-text-muted">{temperature}</span>
           </div>
         </div>
 
         {/* System Prompt Preview */}
         {config.system_prompt && (
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <span className="text-xs text-gray-400 block mb-1">System Prompt</span>
-            <p className="text-xs text-gray-600 italic line-clamp-2">
+          <div className="mt-2 pt-2 border-t border-border">
+            <span className="text-xs text-text-secondary block mb-1">System Prompt</span>
+            <p className="text-xs text-text-muted italic line-clamp-2">
               "{systemPromptPreview}"
             </p>
           </div>
@@ -157,14 +157,14 @@ const AINode = ({ data, selected }: AINodeProps) => {
 
         {/* Last Response Stats */}
         {data.lastResponse && (
-          <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border">
             {data.lastResponse.tokens && (
-              <span className="text-gray-500">
+              <span className="text-text-muted">
                 <span className="font-medium">{data.lastResponse.tokens}</span> tokens
               </span>
             )}
             {data.lastResponse.duration && (
-              <span className="text-gray-400">{data.lastResponse.duration}ms</span>
+              <span className="text-text-secondary">{data.lastResponse.duration}ms</span>
             )}
           </div>
         )}

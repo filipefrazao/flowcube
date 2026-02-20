@@ -65,9 +65,9 @@ export function ProgressRing({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {showPercentage && (
-          <div className="text-2xl font-bold text-white">{Math.round(percentage)}%</div>
+          <div className="text-2xl font-bold text-text-primary">{Math.round(percentage)}%</div>
         )}
-        {label && <div className="text-xs text-gray-400 mt-1">{label}</div>}
+        {label && <div className="text-xs text-text-secondary mt-1">{label}</div>}
       </div>
     </div>
   );

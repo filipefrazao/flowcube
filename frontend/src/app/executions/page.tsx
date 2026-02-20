@@ -344,7 +344,7 @@ function ExecutionDetailPanel({ execution, loading, onClose, onRetry, retrying }
           <button
             onClick={onRetry}
             disabled={retrying}
-            className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary-hover rounded text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary-hover rounded text-text-primary text-sm font-medium transition-colors disabled:opacity-50"
           >
             {retrying ? (
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -49,7 +49,7 @@ export default function CompetitorsPage() {
           <button onClick={() => router.push("/socialcube")} className="p-2 hover:bg-card rounded-lg"><ArrowLeft className="w-5 h-5 text-text-secondary" /></button>
           <h1 className="text-2xl font-bold text-text-primary">Competitor Analysis</h1>
           <div className="flex-1" />
-          <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+          <button onClick={() => setShowAdd(!showAdd)} className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg text-sm">
             <Plus className="w-4 h-4" /> Add Competitor
           </button>
         </div>
@@ -68,7 +68,7 @@ export default function CompetitorsPage() {
               className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-text-primary text-sm"
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
             />
-            <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Add</button>
+            <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-text-primary rounded-lg text-sm">Add</button>
           </div>
         )}
 

@@ -73,7 +73,7 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
   const defaultColorConfig = {
     border: 'border-gray-500',
     bg: 'from-gray-500/20',
-    text: 'text-gray-400',
+    text: 'text-text-secondary',
     glow: 'neon-glow-gray',
   };
 
@@ -82,11 +82,11 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
   // Status indicator colors
   const statusColor =
     {
-      idle: 'bg-gray-500',
+      idle: 'bg-text-muted',
       running: 'bg-yellow-500',
       success: 'bg-green-500',
       error: 'bg-red-500',
-    }[normalizedStatus] || 'bg-gray-500';
+    }[normalizedStatus] || 'bg-text-muted';
 
   const progressGradient = colorConfig.bg.replace('/20', '');
 
@@ -95,7 +95,7 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !bg-gray-700 !border-2 hover:!w-4 hover:!h-4 transition-all"
+        className="!w-3 !h-3 !bg-surface-hover !border-2 hover:!w-4 hover:!h-4 transition-all"
       />
 
       <motion.div
@@ -117,7 +117,7 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
             <IconComponent className={`w-5 h-5 ${colorConfig.text}`} />
           </motion.div>
           <div className="flex-1">
-            <span className="font-semibold text-white text-sm">{data.label}</span>
+            <span className="font-semibold text-text-primary text-sm">{data.label}</span>
           </div>
 
           {/* Status indicator */}
@@ -137,7 +137,7 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
         {/* Description */}
         {data.description && (
           <motion.p
-            className="text-xs text-gray-400 mt-2 leading-relaxed"
+            className="text-xs text-text-secondary mt-2 leading-relaxed"
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -187,7 +187,7 @@ export const PremiumNode = memo(({ data, selected }: NodeProps<PremiumNodeData>)
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-3 !h-3 !bg-gray-700 !border-2 hover:!w-4 hover:!h-4 transition-all"
+        className="!w-3 !h-3 !bg-surface-hover !border-2 hover:!w-4 hover:!h-4 transition-all"
       />
     </>
   );

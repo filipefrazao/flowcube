@@ -331,7 +331,7 @@ export default function CredentialsPage() {
           </div>
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Credential
@@ -351,7 +351,7 @@ export default function CredentialsPage() {
               </p>
               <button
                 onClick={openCreateModal}
-                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Add your first credential
@@ -625,7 +625,7 @@ export default function CredentialsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors"
               >
                 {saving ? (
                   <>

@@ -226,23 +226,23 @@ export default function ContactsPage() {
 
   // ── Render ───────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 p-6 space-y-6">
+    <div className="min-h-screen bg-background text-text-primary p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Users className="h-7 w-7 text-indigo-400" />
+          <Users className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold">Contatos</h1>
-          <span className="text-sm text-gray-400">({totalCount})</span>
+          <span className="text-sm text-text-secondary">({totalCount})</span>
         </div>
         <div className="flex items-center gap-2">
           <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportCsv} />
-          <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors">
+          <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-2 text-sm bg-surface hover:bg-surface-hover border border-border rounded-lg transition-colors">
             <Upload className="h-4 w-4" /> Importar CSV
           </button>
-          <button onClick={handleExportCsv} className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors">
+          <button onClick={handleExportCsv} className="flex items-center gap-1.5 px-3 py-2 text-sm bg-surface hover:bg-surface-hover border border-border rounded-lg transition-colors">
             <Download className="h-4 w-4" /> Exportar CSV
           </button>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 rounded-lg font-medium transition-colors">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-primary hover:bg-primary rounded-lg font-medium transition-colors">
             <Plus className="h-4 w-4" /> Novo Contato
           </button>
         </div>
@@ -251,14 +251,14 @@ export default function ContactsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total", value: String(totalCount), color: "text-gray-300", bg: "bg-gray-500/10", icon: Users },
-          { label: "Ativos", value: String(activeCount), color: "text-emerald-400", bg: "bg-emerald-500/10", icon: UserCheck },
+          { label: "Total", value: String(totalCount), color: "text-text-primary", bg: "bg-gray-500/10", icon: Users },
+          { label: "Ativos", value: String(activeCount), color: "text-primary", bg: "bg-primary/10", icon: UserCheck },
           { label: "Inativos", value: String(inactiveCount), color: "text-red-400", bg: "bg-red-500/10", icon: UserX },
           { label: "Favoritos", value: String(starredCount), color: "text-yellow-400", bg: "bg-yellow-500/10", icon: Star },
         ].map((s, i) => (
-          <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+          <div key={i} className="bg-background-secondary border border-border rounded-xl p-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] text-gray-500 uppercase tracking-wide">{s.label}</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wide">{s.label}</span>
               <div className={cn("p-1.5 rounded-lg", s.bg)}><s.icon className={cn("w-3.5 h-3.5", s.color)} /></div>
             </div>
             <span className={cn("text-lg font-bold capitalize", s.color)}>{s.value}</span>
@@ -268,7 +268,7 @@ export default function ContactsPage() {
 
       {/* Import status toast */}
       {importStatus && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-900/40 border border-indigo-700 rounded-lg text-sm text-indigo-200">
+        <div className="flex items-center gap-2 px-4 py-2 bg-primary/15 border border-primary/30 rounded-lg text-sm text-primary">
           <AlertCircle className="h-4 w-4" /> {importStatus}
         </div>
       )}
@@ -276,17 +276,17 @@ export default function ContactsPage() {
       {/* Search + Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[260px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
           <input
             type="text" placeholder="Buscar por nome, email, telefone ou empresa..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-900 border border-gray-800 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 bg-background-secondary border border-border rounded-lg text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
-        <button onClick={() => setShowFilters(!showFilters)} className={cn("flex items-center gap-1.5 px-3 py-2.5 text-sm border rounded-lg transition-colors", showFilters ? "bg-indigo-600 border-indigo-500 text-white" : "bg-gray-900 border-gray-800 hover:bg-gray-800 text-gray-300")}>
+        <button onClick={() => setShowFilters(!showFilters)} className={cn("flex items-center gap-1.5 px-3 py-2.5 text-sm border rounded-lg transition-colors", showFilters ? "bg-primary border-primary text-text-primary" : "bg-background-secondary border-border hover:bg-surface-hover text-text-primary")}>
           <Filter className="h-4 w-4" /> Filtros
         </button>
-        <button onClick={() => { setFilterStarred(!filterStarred); setPage(1); }} className={cn("flex items-center gap-1.5 px-3 py-2.5 text-sm border rounded-lg transition-colors", filterStarred ? "bg-yellow-600/20 border-yellow-600 text-yellow-400" : "bg-gray-900 border-gray-800 hover:bg-gray-800 text-gray-300")}>
+        <button onClick={() => { setFilterStarred(!filterStarred); setPage(1); }} className={cn("flex items-center gap-1.5 px-3 py-2.5 text-sm border rounded-lg transition-colors", filterStarred ? "bg-yellow-600/20 border-yellow-600 text-yellow-400" : "bg-background-secondary border-border hover:bg-surface-hover text-text-primary")}>
           <Star className={cn("h-4 w-4", filterStarred && "fill-yellow-400")} /> Favoritos
         </button>
 
@@ -304,90 +304,90 @@ export default function ContactsPage() {
 
       {/* Filter dropdowns */}
       {showFilters && (
-        <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-900 border border-gray-800 rounded-lg">
+        <div className="flex flex-wrap items-center gap-3 p-4 bg-background-secondary border border-border rounded-lg">
           <div className="space-y-1">
-            <label className="text-xs text-gray-400 uppercase tracking-wider">Fonte</label>
+            <label className="text-xs text-text-secondary uppercase tracking-wider">Fonte</label>
             <select value={filterSource} onChange={(e) => { setFilterSource(e.target.value); setPage(1); }}
-              className="block w-40 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              className="block w-40 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="">Todas</option>
               {SOURCES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-gray-400 uppercase tracking-wider">Status</label>
+            <label className="text-xs text-text-secondary uppercase tracking-wider">Status</label>
             <select value={filterActive} onChange={(e) => { setFilterActive(e.target.value); setPage(1); }}
-              className="block w-40 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              className="block w-40 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="">Todos</option>
               <option value="true">Ativo</option>
               <option value="false">Inativo</option>
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-gray-400 uppercase tracking-wider">Estado</label>
+            <label className="text-xs text-text-secondary uppercase tracking-wider">Estado</label>
             <select value={filterState} onChange={(e) => { setFilterState(e.target.value); setPage(1); }}
-              className="block w-40 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              className="block w-40 px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="">Todos</option>
               {STATES_BR.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <button onClick={() => { setFilterSource(""); setFilterActive(""); setFilterState(""); setPage(1); }}
-            className="self-end px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">Limpar filtros</button>
+            className="self-end px-3 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Limpar filtros</button>
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-background-secondary border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 bg-gray-900/80">
+              <tr className="border-b border-border bg-background-secondary/80">
                 <th className="w-10 px-4 py-3 text-left">
                   <input type="checkbox" checked={contacts.length > 0 && selectedIds.size === contacts.length}
-                    onChange={toggleSelectAll} className="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0" />
+                    onChange={toggleSelectAll} className="rounded border-border bg-surface text-primary focus:ring-primary focus:ring-offset-0" />
                 </th>
                 <th className="w-10 px-2 py-3"></th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">Nome</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">Email</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">Telefone</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">Empresa</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">Cidade</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">UF</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-300">Fonte</th>
-                <th className="px-4 py-3 text-center font-semibold text-gray-300">Ativo</th>
-                <th className="px-4 py-3 text-right font-semibold text-gray-300">Acoes</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">Nome</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">Email</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">Telefone</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">Empresa</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">Cidade</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">UF</th>
+                <th className="px-4 py-3 text-left font-semibold text-text-primary">Fonte</th>
+                <th className="px-4 py-3 text-center font-semibold text-text-primary">Ativo</th>
+                <th className="px-4 py-3 text-right font-semibold text-text-primary">Acoes</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={11} className="px-4 py-12 text-center text-gray-500">Carregando...</td></tr>
+                <tr><td colSpan={11} className="px-4 py-12 text-center text-text-muted">Carregando...</td></tr>
               ) : contacts.length === 0 ? (
-                <tr><td colSpan={11} className="px-4 py-12 text-center text-gray-500">Nenhum contato encontrado.</td></tr>
+                <tr><td colSpan={11} className="px-4 py-12 text-center text-text-muted">Nenhum contato encontrado.</td></tr>
               ) : contacts.map((c) => (
-                <tr key={c.id} className={cn("border-b border-gray-800/50 hover:bg-gray-800/40 transition-colors", selectedIds.has(c.id) && "bg-indigo-900/20")}>
+                <tr key={c.id} className={cn("border-b border-border/50 hover:bg-surface-hover/40 transition-colors", selectedIds.has(c.id) && "bg-primary/10")}>
                   <td className="px-4 py-3">
                     <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => toggleSelect(c.id)}
-                      className="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0" />
+                      className="rounded border-border bg-surface text-primary focus:ring-primary focus:ring-offset-0" />
                   </td>
                   <td className="px-2 py-3">
                     <button onClick={(e) => { e.stopPropagation(); handleToggleStar(c); }}
-                      className="p-1 text-gray-500 hover:text-yellow-400 transition-colors">
+                      className="p-1 text-text-muted hover:text-yellow-400 transition-colors">
                       <Star className={cn("h-4 w-4", c.is_starred && "fill-yellow-400 text-yellow-400")} />
                     </button>
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-100">{c.name}</td>
-                  <td className="px-4 py-3 text-gray-300">{c.email || "-"}</td>
-                  <td className="px-4 py-3 text-gray-300">{c.phone || "-"}</td>
-                  <td className="px-4 py-3 text-gray-300">{c.company || "-"}</td>
-                  <td className="px-4 py-3 text-gray-300">{c.city || "-"}</td>
-                  <td className="px-4 py-3 text-gray-300">{c.state || "-"}</td>
+                  <td className="px-4 py-3 font-medium text-text-primary">{c.name}</td>
+                  <td className="px-4 py-3 text-text-primary">{c.email || "-"}</td>
+                  <td className="px-4 py-3 text-text-primary">{c.phone || "-"}</td>
+                  <td className="px-4 py-3 text-text-primary">{c.company || "-"}</td>
+                  <td className="px-4 py-3 text-text-primary">{c.city || "-"}</td>
+                  <td className="px-4 py-3 text-text-primary">{c.state || "-"}</td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 text-xs rounded-full bg-gray-800 text-gray-300 border border-gray-700">{c.source?.replace(/_/g, " ") || "-"}</span>
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-surface text-text-primary border border-border">{c.source?.replace(/_/g, " ") || "-"}</span>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className={cn("inline-block h-2.5 w-2.5 rounded-full", c.is_active ? "bg-emerald-500" : "bg-gray-600")} />
+                    <span className={cn("inline-block h-2.5 w-2.5 rounded-full", c.is_active ? "bg-emerald-500" : "bg-text-muted")} />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => openEdit(c)} className="p-1.5 text-gray-400 hover:text-indigo-400 hover:bg-gray-800 rounded-md transition-colors">
+                    <button onClick={() => openEdit(c)} className="p-1.5 text-text-secondary hover:text-primary hover:bg-surface-hover rounded-md transition-colors">
                       <Edit className="h-4 w-4" />
                     </button>
                   </td>
@@ -398,16 +398,16 @@ export default function ContactsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
-          <span className="text-sm text-gray-400">{totalCount} contato(s) encontrado(s)</span>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+          <span className="text-sm text-text-secondary">{totalCount} contato(s) encontrado(s)</span>
           <div className="flex items-center gap-2">
             <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}
-              className="p-2 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-gray-800 transition-colors">
+              className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-surface-hover transition-colors">
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-sm text-gray-300">Pagina {page} de {totalPages}</span>
+            <span className="text-sm text-text-primary">Pagina {page} de {totalPages}</span>
             <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
-              className="p-2 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-gray-800 transition-colors">
+              className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-surface-hover transition-colors">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -418,10 +418,10 @@ export default function ContactsPage() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-          <div className="relative w-full max-w-lg mx-4 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+          <div className="relative w-full max-w-lg mx-4 bg-background-secondary border border-border rounded-2xl shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="text-lg font-semibold">{editingContact ? "Editar Contato" : "Novo Contato"}</h2>
-              <button onClick={() => setModalOpen(false)} className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors">
+              <button onClick={() => setModalOpen(false)} className="p-1.5 text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-hover transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -429,41 +429,41 @@ export default function ContactsPage() {
               {formError && <p className="text-sm text-red-400 flex items-center gap-1.5"><AlertCircle className="h-4 w-4" />{formError}</p>}
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-400 mb-1">Nome *</label>
+                  <label className="block text-xs text-text-secondary mb-1">Nome *</label>
                   <input value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Email</label>
+                  <label className="block text-xs text-text-secondary mb-1">Email</label>
                   <input type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Telefone</label>
+                  <label className="block text-xs text-text-secondary mb-1">Telefone</label>
                   <input value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Empresa</label>
+                  <label className="block text-xs text-text-secondary mb-1">Empresa</label>
                   <input value={form.company || ""} onChange={(e) => setForm({ ...form, company: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Fonte</label>
+                  <label className="block text-xs text-text-secondary mb-1">Fonte</label>
                   <select value={form.source || "manual"} onChange={(e) => setForm({ ...form, source: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                     {SOURCES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Cidade</label>
+                  <label className="block text-xs text-text-secondary mb-1">Cidade</label>
                   <input value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Estado</label>
+                  <label className="block text-xs text-text-secondary mb-1">Estado</label>
                   <select value={form.state || ""} onChange={(e) => setForm({ ...form, state: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                     <option value="">Selecione</option>
                     {STATES_BR.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -471,20 +471,20 @@ export default function ContactsPage() {
                 <div className="col-span-2 flex items-center gap-2">
                   <input type="checkbox" id="is_active" checked={form.is_active ?? true}
                     onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                    className="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500" />
-                  <label htmlFor="is_active" className="text-sm text-gray-300">Contato ativo</label>
+                    className="rounded border-border bg-surface text-primary focus:ring-primary" />
+                  <label htmlFor="is_active" className="text-sm text-text-primary">Contato ativo</label>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-400 mb-1">Observacoes</label>
+                  <label className="block text-xs text-text-secondary mb-1">Observacoes</label>
                   <textarea rows={3} value={form.notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-800">
-              <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">Cancelar</button>
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-border">
+              <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary bg-surface hover:bg-surface-hover rounded-lg transition-colors">Cancelar</button>
               <button onClick={handleSave} disabled={saving}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-lg transition-colors">
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-primary hover:bg-primary disabled:opacity-50 rounded-lg transition-colors">
                 <Check className="h-4 w-4" /> {saving ? "Salvando..." : "Salvar"}
               </button>
             </div>
@@ -496,32 +496,32 @@ export default function ContactsPage() {
       {mergeOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMergeOpen(false)} />
-          <div className="relative w-full max-w-md mx-4 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+          <div className="relative w-full max-w-md mx-4 bg-background-secondary border border-border rounded-2xl shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="text-lg font-semibold flex items-center gap-2"><Merge className="h-5 w-5 text-amber-400" /> Mesclar Contatos</h2>
-              <button onClick={() => setMergeOpen(false)} className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors">
+              <button onClick={() => setMergeOpen(false)} className="p-1.5 text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-hover transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <p className="text-sm text-gray-400">Selecione o contato principal. Os demais serao mesclados nele e removidos.</p>
+              <p className="text-sm text-text-secondary">Selecione o contato principal. Os demais serao mesclados nele e removidos.</p>
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {contacts.filter((c) => selectedIds.has(c.id)).map((c) => (
                   <label key={c.id} className={cn("flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                    mergePrimaryId === c.id ? "border-indigo-500 bg-indigo-900/30" : "border-gray-800 bg-gray-800/50 hover:bg-gray-800")}>
+                    mergePrimaryId === c.id ? "border-primary bg-primary/15" : "border-border bg-surface/50 hover:bg-surface-hover")}>
                     <input type="radio" name="primary" value={c.id} checked={mergePrimaryId === c.id}
                       onChange={() => setMergePrimaryId(c.id)}
-                      className="text-indigo-500 focus:ring-indigo-500 bg-gray-800 border-gray-600" />
+                      className="text-primary focus:ring-primary bg-surface border-border" />
                     <div>
                       <span className="text-sm font-medium">{c.name}</span>
-                      <span className="text-xs text-gray-400 ml-2">{c.email || c.phone || ""}</span>
+                      <span className="text-xs text-text-secondary ml-2">{c.email || c.phone || ""}</span>
                     </div>
                   </label>
                 ))}
               </div>
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-800">
-              <button onClick={() => setMergeOpen(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">Cancelar</button>
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-border">
+              <button onClick={() => setMergeOpen(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary bg-surface hover:bg-surface-hover rounded-lg transition-colors">Cancelar</button>
               <button onClick={handleMerge}
                 className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-amber-600 hover:bg-amber-500 rounded-lg transition-colors">
                 <Merge className="h-4 w-4" /> Mesclar

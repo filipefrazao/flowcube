@@ -111,37 +111,37 @@ function getToday(): string {
 
 function SkeletonCard() {
   return (
-    <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-5 animate-pulse">
+    <div className="bg-surface/60 border border-border/50 rounded-2xl p-5 animate-pulse">
       <div className="flex items-center justify-between mb-4">
-        <div className="h-3 w-24 bg-gray-700 rounded" />
-        <div className="h-8 w-8 bg-gray-700 rounded-lg" />
+        <div className="h-3 w-24 bg-surface-hover rounded" />
+        <div className="h-8 w-8 bg-surface-hover rounded-lg" />
       </div>
-      <div className="h-6 w-16 bg-gray-700 rounded mb-2" />
-      <div className="h-4 w-32 bg-gray-700 rounded mb-3" />
-      <div className="h-2 w-full bg-gray-700 rounded-full" />
+      <div className="h-6 w-16 bg-surface-hover rounded mb-2" />
+      <div className="h-4 w-32 bg-surface-hover rounded mb-3" />
+      <div className="h-2 w-full bg-surface-hover rounded-full" />
     </div>
   );
 }
 
 function SkeletonPodium() {
   return (
-    <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 animate-pulse">
-      <div className="h-5 w-40 bg-gray-700 rounded mb-8 mx-auto" />
+    <div className="bg-surface/60 border border-border/50 rounded-2xl p-6 animate-pulse">
+      <div className="h-5 w-40 bg-surface-hover rounded mb-8 mx-auto" />
       <div className="flex items-end justify-center gap-4 h-64">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 bg-gray-700 rounded-full" />
-          <div className="h-3 w-20 bg-gray-700 rounded" />
-          <div className="w-24 h-32 bg-gray-700 rounded-t-lg" />
+          <div className="w-16 h-16 bg-surface-hover rounded-full" />
+          <div className="h-3 w-20 bg-surface-hover rounded" />
+          <div className="w-24 h-32 bg-surface-hover rounded-t-lg" />
         </div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-20 h-20 bg-gray-700 rounded-full" />
-          <div className="h-3 w-24 bg-gray-700 rounded" />
-          <div className="w-28 h-44 bg-gray-700 rounded-t-lg" />
+          <div className="w-20 h-20 bg-surface-hover rounded-full" />
+          <div className="h-3 w-24 bg-surface-hover rounded" />
+          <div className="w-28 h-44 bg-surface-hover rounded-t-lg" />
         </div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 bg-gray-700 rounded-full" />
-          <div className="h-3 w-18 bg-gray-700 rounded" />
-          <div className="w-22 h-24 bg-gray-700 rounded-t-lg" />
+          <div className="w-14 h-14 bg-surface-hover rounded-full" />
+          <div className="h-3 w-18 bg-surface-hover rounded" />
+          <div className="w-22 h-24 bg-surface-hover rounded-t-lg" />
         </div>
       </div>
     </div>
@@ -150,17 +150,17 @@ function SkeletonPodium() {
 
 function SkeletonTable() {
   return (
-    <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 animate-pulse">
-      <div className="h-5 w-36 bg-gray-700 rounded mb-6" />
+    <div className="bg-surface/60 border border-border/50 rounded-2xl p-6 animate-pulse">
+      <div className="h-5 w-36 bg-surface-hover rounded mb-6" />
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center gap-4 py-3 border-b border-gray-700/30">
-          <div className="h-4 w-6 bg-gray-700 rounded" />
-          <div className="h-10 w-10 bg-gray-700 rounded-full" />
+        <div key={i} className="flex items-center gap-4 py-3 border-b border-border/30">
+          <div className="h-4 w-6 bg-surface-hover rounded" />
+          <div className="h-10 w-10 bg-surface-hover rounded-full" />
           <div className="flex-1">
-            <div className="h-4 w-32 bg-gray-700 rounded" />
+            <div className="h-4 w-32 bg-surface-hover rounded" />
           </div>
-          <div className="h-4 w-12 bg-gray-700 rounded" />
-          <div className="h-4 w-24 bg-gray-700 rounded" />
+          <div className="h-4 w-12 bg-surface-hover rounded" />
+          <div className="h-4 w-24 bg-surface-hover rounded" />
         </div>
       ))}
     </div>
@@ -192,11 +192,11 @@ const colorMap = {
     glow: "shadow-amber-500/20",
   },
   green: {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    iconBg: "bg-emerald-500/20",
-    iconColor: "text-emerald-400",
-    text: "text-emerald-400",
+    bg: "bg-primary/10",
+    border: "border-primary/30",
+    iconBg: "bg-primary/20",
+    iconColor: "text-primary",
+    text: "text-primary",
     bar: "bg-emerald-500",
     glow: "shadow-emerald-500/20",
   },
@@ -210,13 +210,13 @@ const colorMap = {
     glow: "shadow-blue-500/20",
   },
   indigo: {
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/30",
-    iconBg: "bg-indigo-500/20",
-    iconColor: "text-indigo-400",
-    text: "text-indigo-400",
-    bar: "bg-indigo-500",
-    glow: "shadow-indigo-500/20",
+    bg: "bg-primary/10",
+    border: "border-primary/30",
+    iconBg: "bg-primary/20",
+    iconColor: "text-primary",
+    text: "text-primary",
+    bar: "bg-primary",
+    glow: "shadow-primary/20",
   },
   red: {
     bg: "bg-red-500/10",
@@ -245,7 +245,7 @@ function KPICard({ title, count, amount, percentage, icon, color, delay = 0 }: K
       }`}
     >
       <div className="flex items-center justify-between mb-4">
-        <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
+        <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">
           {title}
         </span>
         <div className={`${c.iconBg} p-2 rounded-lg`}>
@@ -255,22 +255,22 @@ function KPICard({ title, count, amount, percentage, icon, color, delay = 0 }: K
 
       <div className="mb-1">
         <span className={`text-2xl font-bold ${c.text}`}>{count}</span>
-        <span className="text-xs text-gray-500 ml-2">vendas</span>
+        <span className="text-xs text-text-muted ml-2">vendas</span>
       </div>
 
-      <div className="text-sm text-gray-300 font-medium mb-3">
+      <div className="text-sm text-text-primary font-medium mb-3">
         {formatBRL(amount)}
       </div>
 
       {percentage !== undefined && (
         <div className="relative">
-          <div className="w-full bg-gray-700/50 rounded-full h-1.5">
+          <div className="w-full bg-surface-hover/50 rounded-full h-1.5">
             <div
               className={`${c.bar} h-1.5 rounded-full transition-all duration-1000 ease-out`}
               style={{ width: visible ? `${Math.min(percentage, 100)}%` : "0%" }}
             />
           </div>
-          <span className="text-[10px] text-gray-500 mt-1 block text-right">
+          <span className="text-[10px] text-text-muted mt-1 block text-right">
             {percentage.toFixed(1)}%
           </span>
         </div>
@@ -305,7 +305,7 @@ function PodiumPosition({
 
   const podiumColors: Record<number, { bg: string; border: string; badge: string; text: string }> = {
     1: { bg: "bg-gradient-to-t from-yellow-600/30 to-yellow-500/10", border: "border-yellow-500/40", badge: "bg-yellow-500", text: "text-yellow-400" },
-    2: { bg: "bg-gradient-to-t from-gray-500/30 to-gray-400/10", border: "border-gray-400/40", badge: "bg-gray-400", text: "text-gray-300" },
+    2: { bg: "bg-gradient-to-t from-gray-500/30 to-gray-400/10", border: "border-gray-400/40", badge: "bg-gray-400", text: "text-text-primary" },
     3: { bg: "bg-gradient-to-t from-amber-700/30 to-amber-600/10", border: "border-amber-600/40", badge: "bg-amber-600", text: "text-amber-500" },
   };
 
@@ -314,15 +314,15 @@ function PodiumPosition({
   if (!seller) {
     return (
       <div className="flex flex-col items-center">
-        <div className={`${avatarSize} rounded-full bg-gray-700/50 border-2 border-gray-600 flex items-center justify-center`}>
-          <Users className="w-5 h-5 text-gray-600" />
+        <div className={`${avatarSize} rounded-full bg-surface-hover/50 border-2 border-border flex items-center justify-center`}>
+          <Users className="w-5 h-5 text-text-muted" />
         </div>
-        <p className="text-xs text-gray-600 mt-2">---</p>
+        <p className="text-xs text-text-muted mt-2">---</p>
         <div
           className={`w-24 sm:w-28 ${pc.bg} ${pc.border} border rounded-t-xl mt-3 flex items-center justify-center transition-all duration-700`}
           style={{ height: visible ? height : "0px" }}
         >
-          <span className="text-2xl font-bold text-gray-600">{position}</span>
+          <span className="text-2xl font-bold text-text-muted">{position}</span>
         </div>
       </div>
     );
@@ -337,7 +337,7 @@ function PodiumPosition({
       {/* Badge */}
       <div className="relative mb-2">
         <div
-          className={`${avatarSize} rounded-full bg-gray-700 border-3 ${pc.border} flex items-center justify-center text-white font-bold text-lg overflow-hidden`}
+          className={`${avatarSize} rounded-full bg-surface-hover border-3 ${pc.border} flex items-center justify-center text-text-primary font-bold text-lg overflow-hidden`}
           style={{ borderWidth: "3px" }}
         >
           {seller.photo ? (
@@ -347,7 +347,7 @@ function PodiumPosition({
           )}
         </div>
         <div
-          className={`absolute -top-1 -right-1 ${pc.badge} w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg`}
+          className={`absolute -top-1 -right-1 ${pc.badge} w-6 h-6 rounded-full flex items-center justify-center text-text-primary text-xs font-bold shadow-lg`}
         >
           {position}
         </div>
@@ -357,8 +357,8 @@ function PodiumPosition({
       <p className={`text-sm font-semibold ${pc.text} text-center max-w-[120px] truncate`}>
         {seller.name}
       </p>
-      <p className="text-xs text-gray-400 font-medium">{formatCompact(seller.total_amount)}</p>
-      <p className="text-[10px] text-gray-500">{seller.count} vendas</p>
+      <p className="text-xs text-text-secondary font-medium">{formatCompact(seller.total_amount)}</p>
+      <p className="text-[10px] text-text-muted">{seller.count} vendas</p>
 
       {/* Podium Bar */}
       <div
@@ -366,7 +366,7 @@ function PodiumPosition({
         style={{ height: visible ? height : "0px" }}
       >
         {position === 1 && <Trophy className="w-8 h-8 text-yellow-400 animate-pulse" />}
-        {position === 2 && <Medal className="w-7 h-7 text-gray-300" />}
+        {position === 2 && <Medal className="w-7 h-7 text-text-primary" />}
         {position === 3 && <Medal className="w-6 h-6 text-amber-500" />}
       </div>
     </div>
@@ -398,41 +398,41 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
   });
 
   return (
-    <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl overflow-hidden">
+    <div className="bg-surface/60 border border-border/50 rounded-2xl overflow-hidden">
       {/* Filter Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-700/20 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-surface-hover/20 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Filter className="w-4 h-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-300">Filtros</span>
+          <Filter className="w-4 h-4 text-text-secondary" />
+          <span className="text-sm font-medium text-text-primary">Filtros</span>
           {hasActiveFilters && (
-            <span className="bg-indigo-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="bg-primary text-text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">
               Ativos
             </span>
           )}
         </div>
         {expanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
+          <ChevronUp className="w-4 h-4 text-text-muted" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-text-muted" />
         )}
       </button>
 
       {/* Filter Body */}
       {expanded && (
-        <div className="px-5 pb-5 border-t border-gray-700/30 pt-4">
+        <div className="px-5 pb-5 border-t border-border/30 pt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Squad */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Squad
               </label>
               <select
                 value={filters.squad}
                 onChange={(e) => update("squad", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               >
                 <option value="">Todos</option>
                 {squads.map((s) => (
@@ -443,13 +443,13 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
 
             {/* Unidade Geradora */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Unidade Geradora
               </label>
               <select
                 value={filters.unidade_geradora}
                 onChange={(e) => update("unidade_geradora", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               >
                 <option value="">Todas</option>
                 {units.map((u) => (
@@ -460,13 +460,13 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
 
             {/* Unidade Realizadora */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Unidade Realizadora
               </label>
               <select
                 value={filters.unidade_realizadora}
                 onChange={(e) => update("unidade_realizadora", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               >
                 <option value="">Todas</option>
                 {units.map((u) => (
@@ -477,13 +477,13 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
 
             {/* Status Pagamento */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Status Pagamento
               </label>
               <select
                 value={filters.status_pagamento}
                 onChange={(e) => update("status_pagamento", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               >
                 <option value="">Todos</option>
                 <option value="sem_pagamento">Sem Pagamento</option>
@@ -494,13 +494,13 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
 
             {/* Status */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Status
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => update("status", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               >
                 <option value="">Todos</option>
                 <option value="fechado">Fechado</option>
@@ -512,40 +512,40 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
 
             {/* Data Criacao - Inicio */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Data Criacao (De)
               </label>
               <input
                 type="date"
                 value={filters.data_criacao_inicio}
                 onChange={(e) => update("data_criacao_inicio", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               />
             </div>
 
             {/* Data Criacao - Fim */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Data Criacao (Ate)
               </label>
               <input
                 type="date"
                 value={filters.data_criacao_fim}
                 onChange={(e) => update("data_criacao_fim", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               />
             </div>
 
             {/* Data Fechamento */}
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Data Fechamento (De)
               </label>
               <input
                 type="date"
                 value={filters.data_fechamento_inicio}
                 onChange={(e) => update("data_fechamento_inicio", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               />
             </div>
           </div>
@@ -553,21 +553,21 @@ function FilterBar({ filters, onChange, squads, units, onReset }: FilterBarProps
           {/* Second Row for remaining date + reset */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <div>
-              <label className="text-[11px] text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
+              <label className="text-[11px] text-text-muted uppercase tracking-wider font-medium mb-1.5 block">
                 Data Fechamento (Ate)
               </label>
               <input
                 type="date"
                 value={filters.data_fechamento_fim}
                 onChange={(e) => update("data_fechamento_fim", e.target.value)}
-                className="w-full bg-gray-900/60 border border-gray-700 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none"
+                className="w-full bg-background-secondary/60 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none"
               />
             </div>
 
             <div className="flex items-end">
               <button
                 onClick={onReset}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 rounded-lg text-sm transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-surface-hover/50 hover:bg-surface-hover text-text-primary rounded-lg text-sm transition-colors"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Limpar Filtros
@@ -710,20 +710,20 @@ export default function SalesCubeDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
+          <p className="text-sm text-text-secondary mt-1">
             Visao geral do desempenho comercial e leads
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-gray-800/60 border border-gray-700/50 rounded-lg p-1">
+        <div className="flex bg-surface/60 border border-border/50 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("vendas")}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               activeTab === "vendas"
-                ? "bg-indigo-600 text-white"
-                : "text-gray-400 hover:text-gray-200"
+                ? "bg-primary text-gray-900"
+                : "text-text-secondary hover:text-text-primary"
             }`}
           >
             <ShoppingCart className="w-3.5 h-3.5 inline-block mr-1.5" />
@@ -733,8 +733,8 @@ export default function SalesCubeDashboard() {
             onClick={() => setActiveTab("leads")}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               activeTab === "leads"
-                ? "bg-indigo-600 text-white"
-                : "text-gray-400 hover:text-gray-200"
+                ? "bg-primary text-gray-900"
+                : "text-text-secondary hover:text-text-primary"
             }`}
           >
             <Users className="w-3.5 h-3.5 inline-block mr-1.5" />
@@ -796,7 +796,7 @@ export default function SalesCubeDashboard() {
               count={dashboardData.fechadas.count}
               amount={dashboardData.fechadas.amount}
               percentage={dashboardData.fechadas.percentage}
-              icon={<CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+              icon={<CheckCircle2 className="w-4 h-4 text-primary" />}
               color="green"
               delay={100}
             />
@@ -813,7 +813,7 @@ export default function SalesCubeDashboard() {
               title="Total Vendas"
               count={dashboardData.totalVendas.count}
               amount={dashboardData.totalVendas.amount}
-              icon={<ShoppingCart className="w-4 h-4 text-indigo-400" />}
+              icon={<ShoppingCart className="w-4 h-4 text-primary" />}
               color="indigo"
               delay={300}
             />
@@ -830,26 +830,26 @@ export default function SalesCubeDashboard() {
 
           {/* Summary Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 text-center">
-              <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Total Geral</p>
-              <p className="text-lg font-bold text-white">{kpis?.summary.total_sales ?? 0}</p>
-              <p className="text-xs text-gray-400">{formatBRL(kpis?.summary.total_amount ?? 0)}</p>
+            <div className="bg-surface/40 border border-border/30 rounded-xl p-4 text-center">
+              <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Total Geral</p>
+              <p className="text-lg font-bold text-text-primary">{kpis?.summary.total_sales ?? 0}</p>
+              <p className="text-xs text-text-secondary">{formatBRL(kpis?.summary.total_amount ?? 0)}</p>
             </div>
-            <div className="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 text-center">
-              <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Ticket Medio</p>
-              <p className="text-lg font-bold text-white">{formatBRL(kpis?.summary.average_ticket ?? 0)}</p>
+            <div className="bg-surface/40 border border-border/30 rounded-xl p-4 text-center">
+              <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Ticket Medio</p>
+              <p className="text-lg font-bold text-text-primary">{formatBRL(kpis?.summary.average_ticket ?? 0)}</p>
             </div>
-            <div className="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 text-center">
+            <div className="bg-surface/40 border border-border/30 rounded-xl p-4 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider">Conversao</p>
+                <TrendingUp className="w-3.5 h-3.5 text-primary" />
+                <p className="text-[11px] text-text-muted uppercase tracking-wider">Conversao</p>
               </div>
-              <p className="text-lg font-bold text-emerald-400">{kpis?.summary.conversion_rate ?? 0}%</p>
+              <p className="text-lg font-bold text-primary">{kpis?.summary.conversion_rate ?? 0}%</p>
             </div>
-            <div className="bg-gray-800/40 border border-gray-700/30 rounded-xl p-4 text-center">
+            <div className="bg-surface/40 border border-border/30 rounded-xl p-4 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <TrendingDown className="w-3.5 h-3.5 text-red-400" />
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider">Perda</p>
+                <p className="text-[11px] text-text-muted uppercase tracking-wider">Perda</p>
               </div>
               <p className="text-lg font-bold text-red-400">{kpis?.summary.loss_rate ?? 0}%</p>
             </div>
@@ -858,12 +858,12 @@ export default function SalesCubeDashboard() {
           {/* Podium + Ranking Table */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Podium */}
-            <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6">
-              <h3 className="text-sm font-semibold text-gray-200 mb-2 text-center flex items-center justify-center gap-2">
+            <div className="bg-surface/60 border border-border/50 rounded-2xl p-6">
+              <h3 className="text-sm font-semibold text-text-primary mb-2 text-center flex items-center justify-center gap-2">
                 <Trophy className="w-4 h-4 text-yellow-400" />
                 Top 3 Vendedores
               </h3>
-              <p className="text-xs text-gray-500 text-center mb-8">Ranking por valor total de vendas</p>
+              <p className="text-xs text-text-muted text-center mb-8">Ranking por valor total de vendas</p>
 
               <div className="flex items-end justify-center gap-3 sm:gap-6 min-h-[320px]">
                 {/* 2nd Place */}
@@ -896,68 +896,68 @@ export default function SalesCubeDashboard() {
             </div>
 
             {/* Full Ranking Table */}
-            <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-700/50 flex items-center gap-2">
-                <Users className="w-4 h-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-200">Ranking Completo</h3>
-                <span className="text-xs text-gray-500 ml-auto">
+            <div className="bg-surface/60 border border-border/50 rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/50 flex items-center gap-2">
+                <Users className="w-4 h-4 text-text-secondary" />
+                <h3 className="text-sm font-semibold text-text-primary">Ranking Completo</h3>
+                <span className="text-xs text-text-muted ml-auto">
                   {dashboardData.sellers.length} vendedor{dashboardData.sellers.length !== 1 ? "es" : ""}
                 </span>
               </div>
 
               <div className="max-h-[380px] overflow-y-auto">
                 {dashboardData.sellers.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                  <div className="flex flex-col items-center justify-center py-16 text-text-muted">
                     <Users className="w-10 h-10 mb-3 opacity-30" />
                     <p className="text-sm">Nenhum vendedor encontrado</p>
                   </div>
                 ) : (
                   <table className="w-full">
-                    <thead className="sticky top-0 bg-gray-800">
-                      <tr className="text-[10px] text-gray-500 uppercase tracking-wider">
+                    <thead className="sticky top-0 bg-surface">
+                      <tr className="text-[10px] text-text-muted uppercase tracking-wider">
                         <th className="text-left pl-6 py-2.5 font-medium w-12">#</th>
                         <th className="text-left py-2.5 font-medium">Vendedor</th>
                         <th className="text-center py-2.5 font-medium w-20">Vendas</th>
                         <th className="text-right pr-6 py-2.5 font-medium w-32">Valor Total</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-700/30">
+                    <tbody className="divide-y divide-border/30">
                       {dashboardData.sellers.map((seller, index) => {
                         const position = index + 1;
                         const positionColor =
                           position === 1
                             ? "text-yellow-400 font-bold"
                             : position === 2
-                            ? "text-gray-300 font-bold"
+                            ? "text-text-primary font-bold"
                             : position === 3
                             ? "text-amber-500 font-bold"
-                            : "text-gray-500";
+                            : "text-text-muted";
 
                         return (
                           <tr
                             key={`${seller.name}-${index}`}
-                            className="hover:bg-gray-700/20 transition-colors group"
+                            className="hover:bg-surface-hover/20 transition-colors group"
                           >
                             <td className={`pl-6 py-3 text-sm ${positionColor}`}>
                               {position}
                             </td>
                             <td className="py-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-amber-600 flex items-center justify-center text-text-primary text-xs font-semibold flex-shrink-0">
                                   {getInitials(seller.name)}
                                 </div>
-                                <span className="text-sm text-gray-200 truncate max-w-[160px] group-hover:text-white transition-colors">
+                                <span className="text-sm text-text-primary truncate max-w-[160px] group-hover:text-text-primary transition-colors">
                                   {seller.name}
                                 </span>
                               </div>
                             </td>
                             <td className="py-3 text-center">
-                              <span className="text-sm text-gray-400 bg-gray-700/40 px-2 py-0.5 rounded-full">
+                              <span className="text-sm text-text-secondary bg-surface-hover/40 px-2 py-0.5 rounded-full">
                                 {seller.count}
                               </span>
                             </td>
                             <td className="pr-6 py-3 text-right">
-                              <span className="text-sm font-medium text-emerald-400">
+                              <span className="text-sm font-medium text-primary">
                                 {formatBRL(seller.total_amount)}
                               </span>
                             </td>
@@ -973,38 +973,38 @@ export default function SalesCubeDashboard() {
 
           {/* Top Products */}
           {kpis && kpis.top_products && kpis.top_products.length > 0 && (
-            <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-700/50 flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-200">Top Produtos</h3>
-                <span className="text-xs text-gray-500 ml-auto">
+            <div className="bg-surface/60 border border-border/50 rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/50 flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-text-secondary" />
+                <h3 className="text-sm font-semibold text-text-primary">Top Produtos</h3>
+                <span className="text-xs text-text-muted ml-auto">
                   {kpis.top_products.length} produtos
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-px bg-gray-700/30">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-px bg-surface-hover/30">
                 {kpis.top_products.slice(0, 10).map((product, i) => {
                   const maxRevenue = kpis.top_products[0]?.revenue || 1;
                   const pct = (product.revenue / maxRevenue) * 100;
                   return (
                     <div
                       key={product.name}
-                      className="bg-gray-800/80 p-4 hover:bg-gray-700/30 transition-colors relative overflow-hidden"
+                      className="bg-surface/80 p-4 hover:bg-surface-hover/30 transition-colors relative overflow-hidden"
                     >
                       {/* Background bar */}
                       <div
-                        className="absolute bottom-0 left-0 h-1 bg-indigo-500/40 transition-all duration-700"
+                        className="absolute bottom-0 left-0 h-1 bg-primary/40 transition-all duration-700"
                         style={{ width: `${pct}%` }}
                       />
 
                       <div className="flex items-start justify-between mb-2">
-                        <span className="text-xs text-gray-500 font-medium">#{i + 1}</span>
-                        <span className="text-[10px] text-gray-500">{product.quantity} un</span>
+                        <span className="text-xs text-text-muted font-medium">#{i + 1}</span>
+                        <span className="text-[10px] text-text-muted">{product.quantity} un</span>
                       </div>
-                      <p className="text-sm text-gray-200 font-medium truncate mb-1" title={product.name}>
+                      <p className="text-sm text-text-primary font-medium truncate mb-1" title={product.name}>
                         {product.name}
                       </p>
-                      <p className="text-sm font-semibold text-emerald-400">
+                      <p className="text-sm font-semibold text-primary">
                         {formatBRL(product.revenue)}
                       </p>
                     </div>
@@ -1025,66 +1025,66 @@ export default function SalesCubeDashboard() {
             <>
               {/* Lead Engagement KPI Cards (PROD TopCards equivalent) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5">
+                <div className="bg-primary/10 border border-primary/30 rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Total de Leads</span>
-                    <div className="bg-indigo-500/20 p-2 rounded-lg">
-                      <Users className="w-4 h-4 text-indigo-400" />
+                    <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Total de Leads</span>
+                    <div className="bg-primary/20 p-2 rounded-lg">
+                      <Users className="w-4 h-4 text-primary" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-indigo-400">{leadStats.total_leads}</p>
-                  <p className="text-xs text-gray-500 mt-1">Leads contactados no periodo</p>
+                  <p className="text-3xl font-bold text-primary">{leadStats.total_leads}</p>
+                  <p className="text-xs text-text-muted mt-1">Leads contactados no periodo</p>
                 </div>
 
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5">
+                <div className="bg-primary/10 border border-primary/30 rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Vendas Realizadas</span>
-                    <div className="bg-emerald-500/20 p-2 rounded-lg">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Vendas Realizadas</span>
+                    <div className="bg-primary/20 p-2 rounded-lg">
+                      <CheckCircle2 className="w-4 h-4 text-primary" />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-emerald-400">{leadStats.total_sales}</p>
-                  <p className="text-xs text-gray-500 mt-1">Leads convertidos em venda</p>
+                  <p className="text-3xl font-bold text-primary">{leadStats.total_sales}</p>
+                  <p className="text-xs text-text-muted mt-1">Leads convertidos em venda</p>
                 </div>
 
                 <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Taxa de Conversao</span>
+                    <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Taxa de Conversao</span>
                     <div className="bg-purple-500/20 p-2 rounded-lg">
                       <TrendingUp className="w-4 h-4 text-purple-400" />
                     </div>
                   </div>
                   <p className="text-3xl font-bold text-purple-400">{leadStats.conversion_rate.toFixed(1)}%</p>
-                  <p className="text-xs text-gray-500 mt-1">Percentual de respostas</p>
+                  <p className="text-xs text-text-muted mt-1">Percentual de respostas</p>
                 </div>
 
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Ticket Medio</span>
+                    <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Ticket Medio</span>
                     <div className="bg-amber-500/20 p-2 rounded-lg">
                       <ShoppingCart className="w-4 h-4 text-amber-400" />
                     </div>
                   </div>
                   <p className="text-3xl font-bold text-amber-400">{formatBRL(leadStats.avg_deal_size)}</p>
-                  <p className="text-xs text-gray-500 mt-1">Valor medio por negocio</p>
+                  <p className="text-xs text-text-muted mt-1">Valor medio por negocio</p>
                 </div>
               </div>
 
               {/* Revenue + Highlight Cards Row */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Total Revenue */}
-                <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-2xl p-5">
-                  <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Receita Total</span>
-                  <p className="text-2xl font-bold text-white mt-2">{formatBRL(leadStats.total_revenue)}</p>
-                  <p className="text-xs text-gray-400 mt-1">{leadStats.total_sales} vendas no periodo</p>
+                <div className="bg-gradient-to-br from-primary/20 to-amber-600/20 border border-primary/30 rounded-2xl p-5">
+                  <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Receita Total</span>
+                  <p className="text-2xl font-bold text-text-primary mt-2">{formatBRL(leadStats.total_revenue)}</p>
+                  <p className="text-xs text-text-secondary mt-1">{leadStats.total_sales} vendas no periodo</p>
                 </div>
 
                 {/* Pipeline Summary Cards */}
                 {leadStats.pipeline_summary.slice(0, 2).map((pipe) => (
-                  <div key={pipe.pipeline_id} className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-5">
-                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{pipe.name}</span>
-                    <p className="text-2xl font-bold text-white mt-2">{pipe.count}</p>
-                    <p className="text-xs text-emerald-400 mt-1">{formatBRL(pipe.total_value)}</p>
+                  <div key={pipe.pipeline_id} className="bg-surface/60 border border-border/50 rounded-2xl p-5">
+                    <span className="text-[11px] text-text-secondary font-semibold uppercase tracking-wider">{pipe.name}</span>
+                    <p className="text-2xl font-bold text-text-primary mt-2">{pipe.count}</p>
+                    <p className="text-xs text-primary mt-1">{formatBRL(pipe.total_value)}</p>
                   </div>
                 ))}
               </div>
@@ -1110,26 +1110,26 @@ export default function SalesCubeDashboard() {
 
               {/* Sales Pipeline */}
               {leadStats.sales_pipeline && leadStats.sales_pipeline.length > 0 && (
-                <div className="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6">
-                  <h3 className="text-sm font-semibold text-gray-200 mb-4">Funil de Vendas</h3>
+                <div className="bg-surface/60 border border-border/50 rounded-2xl p-6">
+                  <h3 className="text-sm font-semibold text-text-primary mb-4">Funil de Vendas</h3>
                   <div className="space-y-3">
                     {leadStats.sales_pipeline.map((stage, i) => {
                       const maxCount = leadStats.sales_pipeline[0]?.count || 1;
                       const pct = (stage.count / maxCount) * 100;
                       return (
                         <div key={stage.stage} className="flex items-center gap-4">
-                          <span className="text-sm text-gray-300 w-32 truncate">{stage.stage}</span>
+                          <span className="text-sm text-text-primary w-32 truncate">{stage.stage}</span>
                           <div className="flex-1 relative">
-                            <div className="w-full bg-gray-700/50 rounded-full h-6">
+                            <div className="w-full bg-surface-hover/50 rounded-full h-6">
                               <div
-                                className="h-6 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-end pr-3 transition-all duration-700"
+                                className="h-6 rounded-full bg-gradient-to-r from-primary to-amber-600 flex items-center justify-end pr-3 transition-all duration-700"
                                 style={{ width: `${Math.max(pct, 8)}%` }}
                               >
-                                <span className="text-[11px] font-semibold text-white">{stage.count}</span>
+                                <span className="text-[11px] font-semibold text-text-primary">{stage.count}</span>
                               </div>
                             </div>
                           </div>
-                          <span className="text-xs text-emerald-400 font-medium w-28 text-right">
+                          <span className="text-xs text-primary font-medium w-28 text-right">
                             {formatBRL(stage.total)}
                           </span>
                         </div>
@@ -1140,7 +1140,7 @@ export default function SalesCubeDashboard() {
               )}
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+            <div className="flex flex-col items-center justify-center py-20 text-text-muted">
               <Users className="w-16 h-16 mb-4 opacity-20" />
               <p className="text-lg font-medium">Nenhum dado de leads disponivel</p>
               <p className="text-sm">Ajuste os filtros ou aguarde novos leads.</p>
@@ -1151,7 +1151,7 @@ export default function SalesCubeDashboard() {
 
       {/* Empty State (vendas tab) */}
       {!loading && activeTab === "vendas" && !error && !kpis && (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+        <div className="flex flex-col items-center justify-center py-20 text-text-muted">
           <ShoppingCart className="w-16 h-16 mb-4 opacity-20" />
           <p className="text-lg font-medium">Nenhum dado disponivel</p>
           <p className="text-sm">Ajuste os filtros ou aguarde novas vendas.</p>

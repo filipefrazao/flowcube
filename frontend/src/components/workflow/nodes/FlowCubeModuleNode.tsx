@@ -17,11 +17,11 @@ import {
 
 const MODULE_CONFIG: Record<string, { color: string; bgColor: string; borderColor: string; icon: any; badge: string }> = {
   chatcube_send: {
-    color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/40',
+    color: 'text-primary', bgColor: 'bg-primary/10', borderColor: 'border-primary/40',
     icon: MessageCircle, badge: 'ChatCube',
   },
   whatsapp_send: {
-    color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/40',
+    color: 'text-primary', bgColor: 'bg-primary/10', borderColor: 'border-primary/40',
     icon: Phone, badge: 'ChatCube',
   },
   salescube_create_lead: {
@@ -70,7 +70,7 @@ function FlowCubeModuleNode({ data, selected }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        className="!bg-white/60 !border-white/30 !w-3 !h-3"
+        className="!bg-surface/60 !border-white/30 !w-3 !h-3"
       />
 
       {/* Module badge */}
@@ -92,7 +92,7 @@ function FlowCubeModuleNode({ data, selected }: NodeProps) {
       <Handle
         type="source"
         position={Position.Right}
-        className="!bg-white/60 !border-white/30 !w-3 !h-3"
+        className="!bg-surface/60 !border-white/30 !w-3 !h-3"
       />
     </div>
   );

@@ -229,7 +229,7 @@ function GroupSidebar({
               <div className="flex items-center gap-1.5">
                 <span className={cn(
                   "w-2 h-2 rounded-full flex-shrink-0",
-                  currentInstance.status === "connected" ? "bg-green-500" : "bg-gray-400"
+                  currentInstance.status === "connected" ? "bg-green-500" : "bg-text-muted"
                 )} />
                 <span className={cn(
                   "text-xs",
@@ -333,7 +333,7 @@ function GroupSidebar({
                 <button
                   onClick={handleAddNote}
                   disabled={!newNoteContent.trim() || addingNote}
-                  className="px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-md text-xs transition-colors disabled:opacity-50 flex items-center gap-1"
+                  className="px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-md text-xs transition-colors disabled:opacity-50 flex items-center gap-1"
                 >
                   {addingNote ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
                 </button>
@@ -407,7 +407,7 @@ function GroupSidebar({
                 <button
                   onClick={handleCreateTask}
                   disabled={!taskTitle.trim() || savingTask}
-                  className="px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-md text-xs transition-colors disabled:opacity-50 flex items-center gap-1"
+                  className="px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-md text-xs transition-colors disabled:opacity-50 flex items-center gap-1"
                 >
                   {savingTask ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
                 </button>
@@ -759,7 +759,7 @@ export default function GroupsPage() {
           )}>
             <div className="p-3 border-b border-border">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   type="text"
                   placeholder="Buscar grupos..."
@@ -797,7 +797,7 @@ export default function GroupsPage() {
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold",
-                          isActive ? "bg-primary text-white" : "bg-primary/15 text-primary"
+                          isActive ? "bg-primary text-gray-900" : "bg-primary/15 text-primary"
                         )}>
                           {getInitials(g.name)}
                         </div>
@@ -853,7 +853,7 @@ export default function GroupsPage() {
                       {selectedGroup.assigned_to_name && (
                         <>
                           <span className="text-text-muted text-xs">·</span>
-                          <span className="text-xs text-indigo-400">{selectedGroup.assigned_to_name}</span>
+                          <span className="text-xs text-primary">{selectedGroup.assigned_to_name}</span>
                         </>
                       )}
                     </div>
@@ -926,13 +926,13 @@ export default function GroupsPage() {
                               <div className={cn(
                                 "max-w-[65%] rounded-2xl px-3.5 py-2 shadow-sm",
                                 isOutbound
-                                  ? "bg-primary text-white rounded-br-md"
+                                  ? "bg-primary text-gray-900 rounded-br-md"
                                   : "bg-surface text-text-primary border border-border/50 rounded-bl-md"
                               )}>
                                 <p className="text-sm whitespace-pre-wrap leading-relaxed break-words">{msg.content}</p>
                                 <div className={cn(
                                   "flex items-center justify-end gap-1 mt-1",
-                                  isOutbound ? "text-white/60" : "text-text-muted"
+                                  isOutbound ? "text-text-primary/60" : "text-text-muted"
                                 )}>
                                   <span className="text-[10px]">{time}</span>
                                 </div>
@@ -968,7 +968,7 @@ export default function GroupsPage() {
                       className={cn(
                         "p-2.5 rounded-xl transition-all",
                         messageText.trim()
-                          ? "bg-primary hover:bg-primary-hover text-white shadow-sm"
+                          ? "bg-primary hover:bg-primary-hover text-gray-900 shadow-sm"
                           : "bg-surface text-text-muted"
                       )}
                     >

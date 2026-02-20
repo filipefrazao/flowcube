@@ -55,7 +55,7 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
     <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-4">
         <Filter className="w-4 h-4 text-purple-400" />
-        <h3 className="text-sm font-medium text-white">Funnel Analysis</h3>
+        <h3 className="text-sm font-medium text-text-primary">Funnel Analysis</h3>
       </div>
 
       {/* Step builder */}
@@ -65,9 +65,9 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
             <span className="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 text-xs flex items-center justify-center shrink-0">
               {i + 1}
             </span>
-            <span className="text-sm text-gray-300 flex-1">{step.replace(/_/g, ' ')}</span>
+            <span className="text-sm text-text-primary flex-1">{step.replace(/_/g, ' ')}</span>
             {steps.length > 2 && (
-              <button onClick={() => removeStep(i)} className="text-gray-600 hover:text-red-400">
+              <button onClick={() => removeStep(i)} className="text-text-muted hover:text-red-400">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
@@ -80,7 +80,7 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
             onChange={(e) => setNewStep(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addStep()}
             placeholder="Add event step..."
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+            className="flex-1 bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-purple-500"
           />
           <button
             onClick={addStep}
@@ -94,11 +94,11 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
       {/* Controls */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Window:</span>
+          <span className="text-xs text-text-muted">Window:</span>
           <select
             value={windowHours}
             onChange={(e) => setWindowHours(Number(e.target.value))}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-sm text-white"
+            className="bg-surface border border-border rounded-lg px-2 py-1 text-sm text-text-primary"
           >
             <option value={1}>1 hour</option>
             <option value={6}>6 hours</option>
@@ -110,7 +110,7 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
         <button
           onClick={runFunnel}
           disabled={loading || steps.length < 2}
-          className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors"
+          className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-text-primary text-sm rounded-lg disabled:opacity-50 transition-colors"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Calculate'}
         </button>
@@ -121,12 +121,12 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
         <>
           <div className="flex items-center gap-4 mb-4 text-sm">
             <div>
-              <span className="text-gray-500">Completion: </span>
-              <span className="text-white font-medium">{result.completion_rate}%</span>
+              <span className="text-text-muted">Completion: </span>
+              <span className="text-text-primary font-medium">{result.completion_rate}%</span>
             </div>
             {result.most_dropped_at && (
               <div>
-                <span className="text-gray-500">Most drop-off: </span>
+                <span className="text-text-muted">Most drop-off: </span>
                 <span className="text-red-400 font-medium">{result.most_dropped_at.replace(/_/g, ' ')}</span>
               </div>
             )}
@@ -170,18 +170,18 @@ export function FunnelChart({ projectId }: FunnelChartProps) {
             {result.steps.map((step, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between text-sm py-1.5 border-b border-gray-800/50 last:border-0"
+                className="flex items-center justify-between text-sm py-1.5 border-b border-border/50 last:border-0"
               >
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full text-xs flex items-center justify-center"
                     style={{ backgroundColor: STEP_COLORS[i % STEP_COLORS.length] + '30', color: STEP_COLORS[i % STEP_COLORS.length] }}>
                     {i + 1}
                   </span>
-                  <span className="text-gray-300">{step.name.replace(/_/g, ' ')}</span>
+                  <span className="text-text-primary">{step.name.replace(/_/g, ' ')}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-white font-medium">{step.count}</span>
-                  <span className="text-gray-500 w-14 text-right">{step.conversion}%</span>
+                  <span className="text-text-primary font-medium">{step.count}</span>
+                  <span className="text-text-muted w-14 text-right">{step.conversion}%</span>
                   {step.drop_off !== null && (
                     <span className="text-red-400 text-xs w-16 text-right">-{step.drop_off}%</span>
                   )}

@@ -83,12 +83,12 @@ export default function ProfilePage() {
             >
               <GlassCard hover={false} padding="lg">
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-text-primary text-3xl font-bold">
                     {user.username.substring(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">{user.username}</h2>
-                    <p className="text-gray-400">{user.email}</p>
+                    <h2 className="text-2xl font-bold text-text-primary">{user.username}</h2>
+                    <p className="text-text-secondary">{user.email}</p>
                   </div>
                 </div>
               </GlassCard>
@@ -104,42 +104,42 @@ export default function ProfilePage() {
               <GlassCard hover={false} glow="purple" padding="lg">
                 <div className="flex items-center gap-2 mb-6">
                   <User className="w-5 h-5 text-purple-400" />
-                  <h3 className="text-lg font-semibold text-white">Informações Básicas</h3>
+                  <h3 className="text-lg font-semibold text-text-primary">Informações Básicas</h3>
                 </div>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Nome</label>
+                      <label className="block text-sm font-medium text-text-secondary mb-2">Nome</label>
                       <input
                         type="text"
                         value={user.firstName}
                         onChange={(e) => setUser({ ...user, firstName: e.target.value })}
                         placeholder="Seu nome"
-                        className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+                        className="w-full px-4 py-2 bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:border-purple-500 transition-colors"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Sobrenome</label>
+                      <label className="block text-sm font-medium text-text-secondary mb-2">Sobrenome</label>
                       <input
                         type="text"
                         value={user.lastName}
                         onChange={(e) => setUser({ ...user, lastName: e.target.value })}
                         placeholder="Seu sobrenome"
-                        className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+                        className="w-full px-4 py-2 bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:border-purple-500 transition-colors"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Username</label>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Username</label>
                     <input
                       type="text"
                       value={user.username}
                       disabled
-                      className="w-full px-4 py-2 bg-gray-800/30 border border-gray-700/50 rounded-lg text-gray-500 cursor-not-allowed"
+                      className="w-full px-4 py-2 bg-surface/30 border border-border/50 rounded-lg text-text-muted cursor-not-allowed"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       <Mail className="w-4 h-4 inline mr-2" />
                       Email
                     </label>
@@ -148,7 +148,7 @@ export default function ProfilePage() {
                       value={user.email}
                       onChange={(e) => setUser({ ...user, email: e.target.value })}
                       placeholder="seu@email.com"
-                      className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+                      className="w-full px-4 py-2 bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:border-purple-500 transition-colors"
                     />
                   </div>
                 </div>
@@ -165,37 +165,37 @@ export default function ProfilePage() {
               <GlassCard hover={false} glow="cyan" padding="lg">
                 <div className="flex items-center gap-2 mb-6">
                   <Lock className="w-5 h-5 text-cyan-400" />
-                  <h3 className="text-lg font-semibold text-white">Segurança</h3>
+                  <h3 className="text-lg font-semibold text-text-primary">Segurança</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Senha Atual</label>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Senha Atual</label>
                     <input
                       type="password"
                       value={passwords.current}
                       onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full px-4 py-2 bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:border-cyan-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Nova Senha</label>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Nova Senha</label>
                     <input
                       type="password"
                       value={passwords.new}
                       onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full px-4 py-2 bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:border-cyan-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Confirmar Nova Senha</label>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Confirmar Nova Senha</label>
                     <input
                       type="password"
                       value={passwords.confirm}
                       onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full px-4 py-2 bg-surface/50 border border-border rounded-lg text-text-primary focus:outline-none focus:border-cyan-500 transition-colors"
                     />
                   </div>
                 </div>
@@ -212,40 +212,40 @@ export default function ProfilePage() {
               <GlassCard hover={false} glow="green" padding="lg">
                 <div className="flex items-center gap-2 mb-6">
                   <Bell className="w-5 h-5 text-green-400" />
-                  <h3 className="text-lg font-semibold text-white">Notificações</h3>
+                  <h3 className="text-lg font-semibold text-text-primary">Notificações</h3>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-surface/30 rounded-lg">
                     <div>
-                      <p className="font-medium text-white">Email sobre execuções</p>
-                      <p className="text-sm text-gray-400">Receba emails quando workflows falharem</p>
+                      <p className="font-medium text-text-primary">Email sobre execuções</p>
+                      <p className="text-sm text-text-secondary">Receba emails quando workflows falharem</p>
                     </div>
                     <button
                       onClick={() => setNotifications({ ...notifications, emailOnFailure: !notifications.emailOnFailure })}
                       className={`relative w-12 h-6 rounded-full transition-colors ${
-                        notifications.emailOnFailure ? "bg-green-500" : "bg-gray-700"
+                        notifications.emailOnFailure ? "bg-green-500" : "bg-surface-hover"
                       }`}
                     >
                       <span
-                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                        className={`absolute top-1 left-1 w-4 h-4 bg-surface rounded-full transition-transform ${
                           notifications.emailOnFailure ? "translate-x-6" : ""
                         }`}
                       />
                     </button>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-surface/30 rounded-lg">
                     <div>
-                      <p className="font-medium text-white">Notificações de achievements</p>
-                      <p className="text-sm text-gray-400">Seja notificado ao desbloquear conquistas</p>
+                      <p className="font-medium text-text-primary">Notificações de achievements</p>
+                      <p className="text-sm text-text-secondary">Seja notificado ao desbloquear conquistas</p>
                     </div>
                     <button
                       onClick={() => setNotifications({ ...notifications, achievements: !notifications.achievements })}
                       className={`relative w-12 h-6 rounded-full transition-colors ${
-                        notifications.achievements ? "bg-green-500" : "bg-gray-700"
+                        notifications.achievements ? "bg-green-500" : "bg-surface-hover"
                       }`}
                     >
                       <span
-                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                        className={`absolute top-1 left-1 w-4 h-4 bg-surface rounded-full transition-transform ${
                           notifications.achievements ? "translate-x-6" : ""
                         }`}
                       />
@@ -263,7 +263,7 @@ export default function ProfilePage() {
               className="flex justify-end gap-4"
             >
               <button
-                className="px-6 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-surface text-text-primary rounded-lg hover:bg-surface-hover transition-colors flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
                 Cancelar
@@ -271,7 +271,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg hover:from-purple-600 hover:to-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-text-primary rounded-lg hover:from-purple-600 hover:to-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 {loading ? "Salvando..." : "Salvar Alterações"}

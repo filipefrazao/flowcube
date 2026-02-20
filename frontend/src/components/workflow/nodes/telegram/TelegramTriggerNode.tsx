@@ -111,7 +111,7 @@ function TelegramTriggerNodeComponent({ data, selected }: TelegramTriggerNodePro
       </div>
 
       {/* Content */}
-      <div className="p-3 bg-white/50 dark:bg-gray-900/50 space-y-2">
+      <div className="p-3 bg-surface/50 dark:bg-background-secondary/50 space-y-2">
         {/* Trigger type badge */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs rounded-full font-medium">
@@ -120,7 +120,7 @@ function TelegramTriggerNodeComponent({ data, selected }: TelegramTriggerNodePro
           {data.config?.chat_types?.map((type) => (
             <span
               key={type}
-              className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-full"
+              className="px-2 py-0.5 bg-surface-hover dark:bg-surface text-text-muted dark:text-text-secondary text-xs rounded-full"
             >
               {type}
             </span>
@@ -133,36 +133,36 @@ function TelegramTriggerNodeComponent({ data, selected }: TelegramTriggerNodePro
             {data.config.commands.slice(0, 4).map((cmd) => (
               <code
                 key={cmd}
-                className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded font-mono"
+                className="px-1.5 py-0.5 bg-surface-hover dark:bg-surface text-text-secondary dark:text-text-primary text-xs rounded font-mono"
               >
                 /{cmd}
               </code>
             ))}
             {data.config.commands.length > 4 && (
-              <span className="text-xs text-gray-400">+{data.config.commands.length - 4} more</span>
+              <span className="text-xs text-text-secondary">+{data.config.commands.length - 4} more</span>
             )}
           </div>
         )}
 
         {/* Callback pattern (for callback trigger) */}
         {triggerType === 'callback' && data.config?.callback_data_pattern && (
-          <code className="block px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded font-mono truncate">
+          <code className="block px-2 py-1 bg-surface-hover dark:bg-surface text-text-secondary dark:text-text-primary text-xs rounded font-mono truncate">
             {data.config.callback_data_pattern}
           </code>
         )}
 
         {/* Stats */}
         {data.stats && (
-          <div className="flex justify-between text-xs pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex justify-between text-xs pt-2 border-t border-border/50 dark:border-border/50">
             <div>
-              <span className="text-gray-500">Today:</span>
-              <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-text-muted">Today:</span>
+              <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
                 {data.stats.triggers_today}
               </span>
             </div>
             <div>
-              <span className="text-gray-500">Total:</span>
-              <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-text-muted">Total:</span>
+              <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
                 {data.stats.triggers_total}
               </span>
             </div>

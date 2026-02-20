@@ -221,7 +221,7 @@ export default function TemplatesPage() {
                         type="button"
                         onClick={() => handleUseTemplate(tpl)}
                         disabled={creating === tpl.id}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-white font-medium transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 rounded-lg text-text-primary font-medium transition-colors"
                       >
                         <Copy className="w-4 h-4" />
                         {creating === tpl.id ? "Criando..." : "Usar Template"}

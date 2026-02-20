@@ -3,8 +3,8 @@ import { useState, useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Command } from 'cmdk';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, Zap, MessageSquare, GitBranch, Brain, 
+import {
+  Search, Zap, MessageSquare, GitBranch, Brain,
   Copy, Trash2, Play
 } from 'lucide-react';
 
@@ -25,51 +25,51 @@ export function CommandPalette({ onAddNode, onAction }: CommandPaletteProps) {
   useHotkeys('escape', () => setOpen(false), { enabled: open });
 
   const commands = [
-    { 
-      id: 'add-trigger', 
-      label: 'Add Trigger Node', 
+    {
+      id: 'add-trigger',
+      label: 'Add Trigger Node',
       icon: Zap,
       category: 'Nodes',
       action: () => onAddNode?.('trigger')
     },
-    { 
-      id: 'add-action', 
-      label: 'Add Action Node', 
+    {
+      id: 'add-action',
+      label: 'Add Action Node',
       icon: MessageSquare,
       category: 'Nodes',
       action: () => onAddNode?.('action')
     },
-    { 
-      id: 'add-condition', 
-      label: 'Add Condition Node', 
+    {
+      id: 'add-condition',
+      label: 'Add Condition Node',
       icon: GitBranch,
       category: 'Nodes',
       action: () => onAddNode?.('condition')
     },
-    { 
-      id: 'add-ai', 
-      label: 'Add AI Node', 
+    {
+      id: 'add-ai',
+      label: 'Add AI Node',
       icon: Brain,
       category: 'AI',
       action: () => onAddNode?.('ai')
     },
-    { 
-      id: 'duplicate', 
-      label: 'Duplicate Selected', 
+    {
+      id: 'duplicate',
+      label: 'Duplicate Selected',
       icon: Copy,
       category: 'Actions',
       action: () => onAction?.('duplicate')
     },
-    { 
-      id: 'delete', 
-      label: 'Delete Selected', 
+    {
+      id: 'delete',
+      label: 'Delete Selected',
       icon: Trash2,
       category: 'Actions',
       action: () => onAction?.('delete')
     },
-    { 
-      id: 'test', 
-      label: 'Test Workflow', 
+    {
+      id: 'test',
+      label: 'Test Workflow',
       icon: Play,
       category: 'Actions',
       action: () => onAction?.('test')
@@ -100,32 +100,32 @@ export function CommandPalette({ onAddNode, onAction }: CommandPaletteProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <Command 
-              className="glass-card border-2 border-purple-500/30 neon-glow-purple overflow-hidden"
+            <Command
+              className="rounded-xl bg-background-secondary border border-border shadow-2xl overflow-hidden"
               shouldFilter={false}
             >
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-                <Search className="w-5 h-5 text-purple-400" />
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+                <Search className="w-5 h-5 text-primary" />
                 <Command.Input
                   value={search}
                   onValueChange={setSearch}
                   placeholder="Search commands or add nodes..."
-                  className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-gray-500"
+                  className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted"
                   autoFocus
                 />
-                <kbd className="px-2 py-1 text-xs bg-white/10 rounded">Esc</kbd>
+                <kbd className="px-2 py-1 text-xs bg-surface rounded border border-border text-text-secondary">Esc</kbd>
               </div>
 
               <Command.List className="max-h-[400px] overflow-y-auto p-2">
-                <Command.Empty className="py-6 text-center text-sm text-gray-500">
+                <Command.Empty className="py-6 text-center text-sm text-text-muted">
                   No results found.
                 </Command.Empty>
 
                 {['Nodes', 'AI', 'Actions'].map(category => (
-                  <Command.Group 
+                  <Command.Group
                     key={category}
                     heading={category}
-                    className="text-xs text-purple-400 px-2 py-2 font-semibold"
+                    className="text-xs text-primary px-2 py-2 font-semibold"
                   >
                     {commands
                       .filter(cmd => cmd.category === category)
@@ -134,17 +134,17 @@ export function CommandPalette({ onAddNode, onAction }: CommandPaletteProps) {
                           key={command.id}
                           value={command.label}
                           onSelect={() => handleSelect(command)}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-white/10 data-[selected=true]:bg-purple-500/20 transition-colors"
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-hover data-[selected=true]:bg-primary/10 transition-colors"
                         >
-                          <command.icon className="w-4 h-4 text-purple-400" />
-                          <span className="flex-1 text-white">{command.label}</span>
+                          <command.icon className="w-4 h-4 text-primary" />
+                          <span className="flex-1 text-text-primary">{command.label}</span>
                         </Command.Item>
                       ))}
                   </Command.Group>
                 ))}
               </Command.List>
 
-              <div className="flex items-center justify-between px-4 py-2 border-t border-white/10 text-xs text-gray-500">
+              <div className="flex items-center justify-between px-4 py-2 border-t border-border text-xs text-text-muted">
                 <span>Navigate with ↑ ↓</span>
                 <span>Select with ↵</span>
               </div>

@@ -75,7 +75,7 @@ function AnimatedEdgeComponent({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: "all",
             }}
-            className="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 text-[10px] text-gray-400"
+            className="px-2 py-0.5 rounded bg-surface border border-border text-[10px] text-text-secondary"
           >
             {data.label}
           </div>

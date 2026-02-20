@@ -40,13 +40,13 @@ const STATUS_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: 
   },
   pending: {
     icon: <Clock className="w-3.5 h-3.5" />,
-    color: "text-gray-400",
-    bg: "bg-gray-800",
+    color: "text-text-secondary",
+    bg: "bg-surface",
   },
   cancelled: {
     icon: <XCircle className="w-3.5 h-3.5" />,
-    color: "text-gray-500",
-    bg: "bg-gray-800",
+    color: "text-text-muted",
+    bg: "bg-surface",
   },
 };
 
@@ -117,24 +117,24 @@ export default function ExecutionHistoryPanel({
   };
 
   return (
-    <div className={cn("w-80 bg-surface border-l border-gray-800 flex flex-col h-full", className)}>
+    <div className={cn("w-80 bg-surface border-l border-border flex flex-col h-full", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-gray-200">Execution History</h2>
+          <h2 className="text-sm font-semibold text-text-primary">Execution History</h2>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={loadExecutions}
-            className="p-1 hover:bg-gray-800 rounded"
+            className="p-1 hover:bg-surface-hover rounded"
             title="Refresh"
           >
-            <RefreshCw className={cn("w-4 h-4 text-gray-400", loading && "animate-spin")} />
+            <RefreshCw className={cn("w-4 h-4 text-text-secondary", loading && "animate-spin")} />
           </button>
           {onClose && (
-            <button onClick={onClose} className="p-1 hover:bg-gray-800 rounded">
-              <X className="w-4 h-4 text-gray-400" />
+            <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded">
+              <X className="w-4 h-4 text-text-secondary" />
             </button>
           )}
         </div>
@@ -143,11 +143,11 @@ export default function ExecutionHistoryPanel({
       {/* Execution List */}
       <div className="flex-1 overflow-y-auto">
         {executions.length === 0 && !loading ? (
-          <div className="p-4 text-center text-sm text-gray-500">
+          <div className="p-4 text-center text-sm text-text-muted">
             No executions yet
           </div>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-border">
             {executions.map((exec) => {
               const config = STATUS_CONFIG[exec.status] || STATUS_CONFIG.pending;
               const isActive = exec.id === activeExecutionId;
@@ -156,7 +156,7 @@ export default function ExecutionHistoryPanel({
                 <div
                   key={exec.id}
                   className={cn(
-                    "p-3 hover:bg-gray-800/50 cursor-pointer transition-colors",
+                    "p-3 hover:bg-surface-hover/50 cursor-pointer transition-colors",
                     isActive && "bg-primary/5 border-l-2 border-primary"
                   )}
                   onClick={() => onSelectExecution?.(exec.id)}
@@ -167,18 +167,18 @@ export default function ExecutionHistoryPanel({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-gray-200 capitalize">
+                        <span className="text-xs font-medium text-text-primary capitalize">
                           {exec.status}
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-text-muted">
                           {formatTimeAgo(exec.started_at)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between mt-0.5">
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-text-muted">
                           via {exec.triggered_by}
                         </span>
-                        <span className="text-[10px] text-gray-500">
+                        <span className="text-[10px] text-text-muted">
                           {formatDuration(exec.duration_ms)}
                         </span>
                       </div>
@@ -191,18 +191,18 @@ export default function ExecutionHistoryPanel({
                             handleRetry(exec.id);
                           }}
                           disabled={retrying === exec.id}
-                          className="p-1 hover:bg-gray-700 rounded"
+                          className="p-1 hover:bg-surface-hover rounded"
                           title="Retry"
                         >
                           <RotateCcw
                             className={cn(
-                              "w-3 h-3 text-gray-400",
+                              "w-3 h-3 text-text-secondary",
                               retrying === exec.id && "animate-spin"
                             )}
                           />
                         </button>
                       )}
-                      <ChevronRight className="w-3 h-3 text-gray-600" />
+                      <ChevronRight className="w-3 h-3 text-text-muted" />
                     </div>
                   </div>
                   {exec.error_message && (

@@ -37,10 +37,10 @@ export function RetentionTable({ projectId, days }: RetentionTableProps) {
       <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Users className="w-4 h-4 text-purple-400" />
-          <h3 className="text-sm font-medium text-white">Retention</h3>
+          <h3 className="text-sm font-medium text-text-primary">Retention</h3>
         </div>
         <div className="h-48 flex items-center justify-center">
-          <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+          <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>
       </div>
     );
@@ -51,9 +51,9 @@ export function RetentionTable({ projectId, days }: RetentionTableProps) {
       <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Users className="w-4 h-4 text-purple-400" />
-          <h3 className="text-sm font-medium text-white">Retention</h3>
+          <h3 className="text-sm font-medium text-text-primary">Retention</h3>
         </div>
-        <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
+        <div className="h-48 flex items-center justify-center text-text-muted text-sm">
           Not enough data for retention analysis
         </div>
       </div>
@@ -66,18 +66,18 @@ export function RetentionTable({ projectId, days }: RetentionTableProps) {
     <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-4">
         <Users className="w-4 h-4 text-purple-400" />
-        <h3 className="text-sm font-medium text-white">Retention Cohorts</h3>
-        <span className="text-xs text-gray-500 ml-auto">{data.total_cohorts} cohorts</span>
+        <h3 className="text-sm font-medium text-text-primary">Retention Cohorts</h3>
+        <span className="text-xs text-text-muted ml-auto">{data.total_cohorts} cohorts</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr>
-              <th className="text-left text-gray-500 py-1.5 px-2 font-medium">Cohort</th>
-              <th className="text-center text-gray-500 py-1.5 px-2 font-medium">Users</th>
+              <th className="text-left text-text-muted py-1.5 px-2 font-medium">Cohort</th>
+              <th className="text-center text-text-muted py-1.5 px-2 font-medium">Users</th>
               {Array.from({ length: maxPeriods }, (_, i) => (
-                <th key={i} className="text-center text-gray-500 py-1.5 px-1 font-medium">
+                <th key={i} className="text-center text-text-muted py-1.5 px-1 font-medium">
                   Day {i}
                 </th>
               ))}
@@ -86,12 +86,12 @@ export function RetentionTable({ projectId, days }: RetentionTableProps) {
           <tbody>
             {data.cohorts.map((cohort, rowIdx) => (
               <tr key={cohort}>
-                <td className="text-gray-400 py-1.5 px-2 whitespace-nowrap">{cohort}</td>
-                <td className="text-center text-gray-300 py-1.5 px-2">{data.sizes[rowIdx]}</td>
+                <td className="text-text-secondary py-1.5 px-2 whitespace-nowrap">{cohort}</td>
+                <td className="text-center text-text-primary py-1.5 px-2">{data.sizes[rowIdx]}</td>
                 {data.data[rowIdx].map((pct, colIdx) => (
                   <td
                     key={colIdx}
-                    className="text-center py-1.5 px-1 text-white font-medium"
+                    className="text-center py-1.5 px-1 text-text-primary font-medium"
                     style={{ backgroundColor: getColor(pct) }}
                   >
                     {pct !== null ? `${pct}%` : ''}

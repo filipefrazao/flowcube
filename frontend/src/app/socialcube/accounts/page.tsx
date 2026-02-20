@@ -8,7 +8,7 @@ import { getAccounts, getOAuthUrl, disconnectAccount, refreshAccount, type Socia
 const platformColors: Record<string, string> = {
   instagram: "bg-gradient-to-r from-purple-500 to-pink-500",
   facebook: "bg-blue-600",
-  threads: "bg-gray-800",
+  threads: "bg-surface",
   youtube: "bg-red-600",
   tiktok: "bg-black",
   linkedin: "bg-blue-700",
@@ -75,7 +75,7 @@ export default function AccountsPage() {
               <button
                 key={platform}
                 onClick={() => handleConnect(platform)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white font-medium transition-opacity hover:opacity-90 ${platformColors[platform] || "bg-gray-600"}`}
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl text-text-primary font-medium transition-opacity hover:opacity-90 ${platformColors[platform] || "bg-gray-600"}`}
               >
                 <Plus className="w-4 h-4" />
                 {label}
@@ -104,7 +104,7 @@ export default function AccountsPage() {
                 {acc.profile_image_url ? (
                   <img src={acc.profile_image_url} className="w-12 h-12 rounded-full" alt="" />
                 ) : (
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${platformColors[acc.platform] || "bg-gray-600"}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-text-primary font-bold ${platformColors[acc.platform] || "bg-gray-600"}`}>
                     {acc.platform[0].toUpperCase()}
                   </div>
                 )}

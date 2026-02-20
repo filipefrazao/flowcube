@@ -73,11 +73,11 @@ function formatDateSeparator(dateStr: string): string {
 function MessageStatusIcon({ status }: { status: TelegramMessage['status'] }) {
   switch (status) {
     case 'pending':
-      return <Clock className="w-3 h-3 text-gray-400" />;
+      return <Clock className="w-3 h-3 text-text-secondary" />;
     case 'sent':
-      return <Check className="w-3 h-3 text-gray-400" />;
+      return <Check className="w-3 h-3 text-text-secondary" />;
     case 'delivered':
-      return <CheckCheck className="w-3 h-3 text-gray-400" />;
+      return <CheckCheck className="w-3 h-3 text-text-secondary" />;
     case 'read':
       return <CheckCheck className="w-3 h-3 text-blue-500" />;
     case 'failed':
@@ -123,8 +123,8 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
         className={cn(
           'relative px-4 py-2 rounded-2xl shadow-sm',
           isOutbound
-            ? 'bg-blue-500 text-white rounded-br-sm'
-            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm border border-gray-200 dark:border-gray-700'
+            ? 'bg-blue-500 text-text-primary rounded-br-sm'
+            : 'bg-surface text-text-primary rounded-bl-sm border border-border'
         )}
       >
         {/* Reply preview if replying to a message */}
@@ -134,7 +134,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
               'mb-2 px-3 py-1.5 rounded border-l-2 text-xs',
               isOutbound
                 ? 'bg-blue-400/30 border-white/50'
-                : 'bg-gray-100 dark:bg-gray-700 border-blue-500'
+                : 'bg-surface-hover dark:bg-surface-hover border-blue-500'
             )}
           >
             <p className="font-medium truncate">
@@ -176,7 +176,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
             rel="noopener noreferrer"
             className={cn(
               'flex items-center gap-2 p-2 rounded-lg mb-2',
-              isOutbound ? 'bg-blue-400/30' : 'bg-gray-100 dark:bg-gray-700'
+              isOutbound ? 'bg-blue-400/30' : 'bg-surface-hover dark:bg-surface-hover'
             )}
           >
             <FileText className="w-8 h-8" />
@@ -208,7 +208,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
             rel="noopener noreferrer"
             className={cn(
               'flex items-center gap-2 p-2 rounded-lg mb-2',
-              isOutbound ? 'bg-blue-400/30' : 'bg-gray-100 dark:bg-gray-700'
+              isOutbound ? 'bg-blue-400/30' : 'bg-surface-hover dark:bg-surface-hover'
             )}
           >
             <MapPin className="w-5 h-5" />
@@ -220,7 +220,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
           <div
             className={cn(
               'flex items-center gap-2 p-2 rounded-lg mb-2',
-              isOutbound ? 'bg-blue-400/30' : 'bg-gray-100 dark:bg-gray-700'
+              isOutbound ? 'bg-blue-400/30' : 'bg-surface-hover dark:bg-surface-hover'
             )}
           >
             <Phone className="w-5 h-5" />
@@ -249,8 +249,8 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
                     className={cn(
                       'flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors',
                       isOutbound
-                        ? 'bg-white/20 hover:bg-white/30 text-white'
-                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        ? 'bg-surface/20 hover:bg-surface/30 text-text-primary'
+                        : 'bg-blue-500 hover:bg-blue-600 text-text-primary'
                     )}
                   >
                     {button.text}
@@ -268,12 +268,12 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
             isOutbound ? 'justify-end' : 'justify-start'
           )}
         >
-          <span className={cn('text-[10px]', isOutbound ? 'text-blue-100' : 'text-gray-400')}>
+          <span className={cn('text-[10px]', isOutbound ? 'text-blue-100' : 'text-text-secondary')}>
             {formatMessageTime(message.date)}
           </span>
           {isOutbound && <MessageStatusIcon status={message.status} />}
           {message.is_ai_generated && (
-            <Bot className={cn('w-3 h-3', isOutbound ? 'text-blue-100' : 'text-gray-400')}  />
+            <Bot className={cn('w-3 h-3', isOutbound ? 'text-blue-100' : 'text-text-secondary')}  />
           )}
         </div>
 
@@ -283,7 +283,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
             onClick={() => setShowMenu(!showMenu)}
             className={cn(
               'p-1 rounded-full transition-colors',
-              isOutbound ? 'hover:bg-blue-400' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+              isOutbound ? 'hover:bg-blue-400' : 'hover:bg-surface-hover'
             )}
           >
             <MoreVertical className="w-4 h-4" />
@@ -298,7 +298,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className={cn(
                   'absolute top-full right-0 mt-1 w-36 py-1 rounded-lg shadow-lg border z-10',
-                  'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                  'bg-surface border-border'
                 )}
               >
                 <button
@@ -306,7 +306,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
                     onReply();
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-secondary dark:text-text-primary hover:bg-surface-hover dark:hover:bg-surface-hover"
                 >
                   <Reply className="w-4 h-4" />
                   Reply
@@ -316,7 +316,7 @@ function MessageBubble({ message, onReply, onDelete }: MessageBubbleProps) {
                     navigator.clipboard.writeText(message.text || message.caption || '');
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-secondary dark:text-text-primary hover:bg-surface-hover dark:hover:bg-surface-hover"
                 >
                   <Copy className="w-4 h-4" />
                   Copy
@@ -402,12 +402,12 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
 
   if (!selectedChat) {
     return (
-      <div className={cn('flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50', className)}>
+      <div className={cn('flex flex-col items-center justify-center h-full text-text-muted dark:text-text-secondary bg-background-secondary dark:bg-background-secondary/50', className)}>
         <div className="p-8 text-center">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-            <Bot className="w-10 h-10 text-gray-400" />
+          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
+            <Bot className="w-10 h-10 text-text-secondary" />
           </div>
-          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <h3 className="text-lg font-medium text-text-secondary dark:text-text-primary mb-2">
             Select a chat
           </h3>
           <p className="text-sm">
@@ -419,9 +419,9 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
   }
 
   return (
-    <div className={cn('flex flex-col h-full bg-gray-100 dark:bg-gray-900/50', className)}>
+    <div className={cn('flex flex-col h-full bg-surface-hover dark:bg-background-secondary/50', className)}>
       {/* Chat Header */}
-      <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+      <div className="px-4 py-3 bg-surface dark:bg-background-secondary border-b border-border flex items-center gap-3">
         <div className={cn(
           'w-10 h-10 rounded-full flex items-center justify-center',
           selectedChat.type === 'private' ? 'bg-blue-100 dark:bg-blue-900/30' :
@@ -437,10 +437,10 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-gray-900 dark:text-white truncate">
+          <h3 className="font-medium text-text-primary truncate">
             {selectedChat.title || `${selectedChat.first_name || ''} ${selectedChat.last_name || ''}`.trim() || selectedChat.username}
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-text-muted dark:text-text-secondary">
             {selectedChat.type === 'private' ? (
               selectedChat.username ? `@${selectedChat.username}` : 'Private chat'
             ) : (
@@ -448,7 +448,7 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
             )}
           </p>
         </div>
-        <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+        <button className="p-2 text-text-secondary hover:text-text-muted dark:hover:text-text-primary rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover">
           <MoreVertical className="w-5 h-5" />
         </button>
       </div>
@@ -462,7 +462,7 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
         {/* Loading more indicator */}
         {messagesLoading && hasMoreMessages && (
           <div className="flex justify-center py-2">
-            <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+            <Loader2 className="w-5 h-5 text-text-secondary animate-spin" />
           </div>
         )}
 
@@ -487,7 +487,7 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
             <div key={date}>
               {/* Date separator */}
               <div className="flex items-center justify-center my-4">
-                <span className="px-3 py-1 bg-white dark:bg-gray-800 rounded-full text-xs text-gray-500 dark:text-gray-400 shadow-sm">
+                <span className="px-3 py-1 bg-surface rounded-full text-xs text-text-muted dark:text-text-secondary shadow-sm">
                   {formatDateSeparator(dateMessages[0].date)}
                 </span>
               </div>
@@ -510,7 +510,7 @@ export function TelegramChatWindow({ className }: TelegramChatWindowProps) {
 
         {/* Empty state */}
         {!messagesLoading && messages.length === 0 && !messagesError && (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col items-center justify-center h-full text-text-muted dark:text-text-secondary">
             <Bot className="w-12 h-12 mb-4 opacity-50" />
             <p className="text-sm">No messages yet</p>
             <p className="text-xs mt-1">Send a message to start the conversation</p>

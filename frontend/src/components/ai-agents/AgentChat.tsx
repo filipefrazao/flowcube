@@ -172,7 +172,7 @@ export default function AgentChat({
 
   const renderToolCall = (toolCall: MessageToolCall, isActive: boolean = false) => {
     const statusColors: Record<ToolExecutionStatus, string> = {
-      pending: "text-gray-500 bg-gray-100",
+      pending: "text-text-muted bg-surface-hover",
       running: "text-blue-500 bg-blue-100",
       success: "text-green-500 bg-green-100",
       error: "text-red-500 bg-red-100",
@@ -190,11 +190,11 @@ export default function AgentChat({
     return (
       <div
         key={toolCall.id}
-        className="mt-2 p-3 rounded-lg bg-gray-50 border border-gray-200"
+        className="mt-2 p-3 rounded-lg bg-background-secondary border border-border"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-gray-500" />
+            <Wrench className="w-4 h-4 text-text-muted" />
             <span className="font-mono text-sm font-medium">{toolCall.name}</span>
             <span className={cn(
               "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs",
@@ -207,8 +207,8 @@ export default function AgentChat({
         </div>
         {toolCall.arguments && (
           <div className="mt-2">
-            <div className="text-xs text-gray-500 mb-1">Arguments:</div>
-            <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+            <div className="text-xs text-text-muted mb-1">Arguments:</div>
+            <pre className="text-xs bg-surface-hover p-2 rounded overflow-x-auto">
               {typeof toolCall.arguments === "string" 
                 ? toolCall.arguments 
                 : JSON.stringify(JSON.parse(toolCall.arguments), null, 2)}
@@ -217,8 +217,8 @@ export default function AgentChat({
         )}
         {toolCall.result && (
           <div className="mt-2">
-            <div className="text-xs text-gray-500 mb-1">Result:</div>
-            <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto max-h-40">
+            <div className="text-xs text-text-muted mb-1">Result:</div>
+            <pre className="text-xs bg-surface-hover p-2 rounded overflow-x-auto max-h-40">
               {toolCall.result}
             </pre>
           </div>
@@ -248,7 +248,7 @@ export default function AgentChat({
         transition={{ duration: 0.2 }}
         className={cn(
           "flex gap-3 p-4",
-          isUser ? "bg-transparent" : "bg-gray-50"
+          isUser ? "bg-transparent" : "bg-background-secondary"
         )}
       >
         {/* Avatar */}
@@ -261,20 +261,20 @@ export default function AgentChat({
           )}
         >
           {isUser ? (
-            <User className="w-4 h-4 text-white" />
+            <User className="w-4 h-4 text-text-primary" />
           ) : (
-            <Bot className="w-4 h-4 text-white" />
+            <Bot className="w-4 h-4 text-text-primary" />
           )}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-medium text-sm text-gray-900">
+            <span className="font-medium text-sm text-text-primary">
               {isUser ? "You" : agent?.name || "Assistant"}
             </span>
             {message.latency_ms && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-text-secondary">
                 {message.latency_ms}ms
               </span>
             )}
@@ -319,9 +319,9 @@ export default function AgentChat({
           )}
 
           {/* Message content */}
-          <div className="prose prose-sm max-w-none text-gray-700">
+          <div className="prose prose-sm max-w-none text-text-secondary">
             {message.content || (isStreaming && streaming.accumulatedContent) || (
-              <span className="text-gray-400 italic">
+              <span className="text-text-secondary italic">
                 {isStreaming ? "Thinking..." : "No content"}
               </span>
             )}
@@ -335,7 +335,7 @@ export default function AgentChat({
             <div className="mt-3">
               <button
                 onClick={() => toggleToolCalls(message.id)}
-                className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-700"
+                className="flex items-center gap-2 text-xs text-text-muted hover:text-text-secondary"
               >
                 <Wrench className="w-4 h-4" />
                 <span>{message.tool_calls?.length} tool call(s)</span>
@@ -362,7 +362,7 @@ export default function AgentChat({
 
           {/* Usage stats */}
           {message.usage && (
-            <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+            <div className="mt-3 flex items-center gap-4 text-xs text-text-secondary">
               <span className="flex items-center gap-1">
                 <Zap className="w-3 h-3" />
                 {message.usage.total_tokens.toLocaleString()} tokens
@@ -381,7 +381,7 @@ export default function AgentChat({
             <div className="mt-2 flex items-center gap-2">
               <button
                 onClick={() => handleCopy(message.id, message.content)}
-                className="p-1.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1.5 rounded hover:bg-surface-hover text-text-secondary hover:text-text-muted transition-colors"
                 title="Copy to clipboard"
               >
                 {copiedMessageId === message.id ? (
@@ -402,8 +402,8 @@ export default function AgentChat({
     if (activeToolCalls.size === 0) return null;
 
     return (
-      <div className="p-4 border-t border-gray-100">
-        <div className="flex items-center gap-2 mb-2 text-sm text-gray-600">
+      <div className="p-4 border-t border-border">
+        <div className="flex items-center gap-2 mb-2 text-sm text-text-muted">
           <Wrench className="w-4 h-4" />
           <span>Executing tools...</span>
         </div>
@@ -422,10 +422,10 @@ export default function AgentChat({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-surface">
       {/* Header */}
       {showHeader && agent && (
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
               {agent.avatar_url ? (
@@ -435,19 +435,19 @@ export default function AgentChat({
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <Bot className="w-5 h-5 text-white" />
+                <Bot className="w-5 h-5 text-text-primary" />
               )}
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">{agent.name}</h3>
-              <p className="text-xs text-gray-500">{agent.model_config.model}</p>
+              <h3 className="font-semibold text-text-primary">{agent.name}</h3>
+              <p className="text-xs text-text-muted">{agent.model_config.model}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {selectedConversationId && (
               <button
                 onClick={clearMessages}
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+                className="p-2 rounded-lg hover:bg-surface-hover text-text-muted"
                 title="Clear conversation"
               >
                 <Trash2 className="w-4 h-4" />
@@ -462,12 +462,12 @@ export default function AgentChat({
         {messages.length === 0 && !streaming.isStreaming ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 text-white" />
+              <Sparkles className="w-8 h-8 text-text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">
               Start a conversation
             </h3>
-            <p className="text-gray-500 max-w-sm">
+            <p className="text-text-muted max-w-sm">
               Ask {agent?.name || "the assistant"} anything to begin.
             </p>
           </div>
@@ -481,7 +481,7 @@ export default function AgentChat({
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-100 p-4">
+      <div className="border-t border-border p-4">
         <div className="flex items-end gap-3">
           <div className="flex-1 relative">
             <textarea
@@ -493,9 +493,9 @@ export default function AgentChat({
               rows={1}
               disabled={streaming.isStreaming}
               className={cn(
-                "w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 bg-white resize-none",
+                "w-full px-4 py-3 pr-12 rounded-xl border border-border bg-surface resize-none",
                 "focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                "disabled:bg-gray-50 disabled:text-gray-500"
+                "disabled:bg-background-secondary disabled:text-text-muted"
               )}
               style={{ maxHeight: "200px" }}
             />
@@ -503,7 +503,7 @@ export default function AgentChat({
           {streaming.isStreaming ? (
             <button
               onClick={handleStop}
-              className="p-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors"
+              className="p-3 rounded-xl bg-red-500 text-text-primary hover:bg-red-600 transition-colors"
               title="Stop generating"
             >
               <StopCircle className="w-5 h-5" />
@@ -515,8 +515,8 @@ export default function AgentChat({
               className={cn(
                 "p-3 rounded-xl transition-colors",
                 chatInput.trim()
-                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  ? "bg-gradient-to-r from-pink-500 to-purple-600 text-text-primary hover:from-pink-600 hover:to-purple-700"
+                  : "bg-surface-hover text-text-secondary cursor-not-allowed"
               )}
               title="Send message"
             >
@@ -524,7 +524,7 @@ export default function AgentChat({
             </button>
           )}
         </div>
-        <p className="mt-2 text-xs text-gray-400 text-center">
+        <p className="mt-2 text-xs text-text-secondary text-center">
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>

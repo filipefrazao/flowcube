@@ -22,7 +22,7 @@ export default function HomePage() {
 
   if (isAuthenticated === null) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-950">
+      <main className="min-h-screen flex items-center justify-center bg-background">
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -54,7 +54,7 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 bg-gray-950 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 bg-background relative overflow-hidden">
       {/* Background Effects */}
       <AuroraBackground className="opacity-30" />
       <GradientBlobs className="opacity-50" />
@@ -83,7 +83,7 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <LayoutDashboard className="w-12 h-12 text-white" />
+                <LayoutDashboard className="w-12 h-12 text-text-primary" />
               </motion.div>
               <motion.div
                 className="absolute -top-2 -right-2"
@@ -109,7 +109,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <motion.p 
-            className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed"
+            className="text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -163,11 +163,11 @@ export default function HomePage() {
             >
               <GlassCard className="h-full text-center" padding="lg" glow="purple">
                 <div className="flex flex-col items-center gap-4">
-                  <div className={`p-4 rounded-2xl bg-gray-800/50 ${feature.color}`}>
+                  <div className={`p-4 rounded-2xl bg-surface/50 ${feature.color}`}>
                     <feature.icon className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white">{feature.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-semibold text-text-primary">{feature.title}</h3>
+                  <p className="text-text-secondary text-sm leading-relaxed">{feature.description}</p>
                 </div>
               </GlassCard>
             </motion.div>
@@ -176,7 +176,7 @@ export default function HomePage() {
 
         {/* Footer */}
         <motion.p 
-          className="text-center text-sm text-gray-600"
+          className="text-center text-sm text-text-muted"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}

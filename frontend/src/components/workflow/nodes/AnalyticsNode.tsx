@@ -195,10 +195,10 @@ const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
   
   // Defensive: Ensure colors is always defined with safe defaults
   const defaultColors = {
-    bg: 'bg-gray-50',
-    border: 'border-gray-300',
-    text: 'text-gray-700',
-    iconBg: 'bg-gray-100',
+    bg: 'bg-background-secondary',
+    border: 'border-border',
+    text: 'text-text-secondary',
+    iconBg: 'bg-surface-hover',
   };
   
   const colors = categoryColors[category] || categoryColors.tool || defaultColors;
@@ -244,7 +244,7 @@ const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
       {statusIndicator}
 
       {/* Header with icon and label */}
-      <div className="flex items-center gap-3 p-3 border-b border-gray-200/50">
+      <div className="flex items-center gap-3 p-3 border-b border-border/50">
         <div className={cn('p-2 rounded-lg', colors.iconBg)}>
           <Icon className={cn('w-5 h-5', colors.text)} />
         </div>
@@ -252,7 +252,7 @@ const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
           <div className={cn('font-semibold text-sm truncate', colors.text)}>
             {data.label || 'Untitled Node'}
           </div>
-          <div className="text-xs text-gray-500 capitalize">
+          <div className="text-xs text-text-muted capitalize">
             {nodeType.replace(/_/g, ' ')}
           </div>
         </div>
@@ -260,15 +260,15 @@ const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
 
       {/* Stats section (Funnellytics-style) */}
       {statsDisplay && (
-        <div className="p-3 bg-white/50 space-y-2">
+        <div className="p-3 bg-surface/50 space-y-2">
           {/* Views and Conversions */}
           <div className="flex justify-between text-xs">
             <div>
-              <span className="text-gray-500">Views:</span>
+              <span className="text-text-muted">Views:</span>
               <span className="ml-1 font-mono font-medium">{statsDisplay.views}</span>
             </div>
             <div>
-              <span className="text-gray-500">Conv:</span>
+              <span className="text-text-muted">Conv:</span>
               <span className="ml-1 font-mono font-medium">{statsDisplay.conversions}</span>
             </div>
           </div>
@@ -287,11 +287,11 @@ const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
 
           {/* Revenue if available */}
           {data.stats?.revenue !== undefined && data.stats.revenue > 0 && (
-            <div className="text-center text-xs text-gray-600">
+            <div className="text-center text-xs text-text-muted">
               <span className="text-green-600 font-medium">
                 ${formatNumber(data.stats.revenue)}
               </span>
-              <span className="text-gray-400"> revenue</span>
+              <span className="text-text-secondary"> revenue</span>
             </div>
           )}
         </div>
@@ -299,7 +299,7 @@ const AnalyticsNode = ({ data, selected, id }: AnalyticsNodeProps) => {
 
       {/* No stats placeholder */}
       {!statsDisplay && (
-        <div className="p-3 bg-white/50 text-center text-xs text-gray-400">
+        <div className="p-3 bg-surface/50 text-center text-xs text-text-secondary">
           No data yet
         </div>
       )}

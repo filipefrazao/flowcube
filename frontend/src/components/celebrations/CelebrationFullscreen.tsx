@@ -77,14 +77,14 @@ export function CelebrationFullscreen({
                 repeatDelay: 1
               }}
             >
-              <div className="p-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 neon-glow-purple">
-                <IconComponent className="w-24 h-24 text-white" />
+              <div className="p-8 rounded-full bg-gradient-to-br from-primary to-amber-400 shadow-glow">
+                <IconComponent className="w-24 h-24 text-text-primary" />
               </div>
             </motion.div>
 
             {/* Title */}
             <motion.h1
-              className="text-6xl font-bold text-white mb-4 bg-gradient-to-r from-purple-400 via-cyan-400 to-green-400 bg-clip-text text-transparent"
+              className="text-6xl font-bold text-text-primary mb-4 bg-gradient-to-r from-primary via-amber-400 to-yellow-300 bg-clip-text text-transparent"
               animate={{
                 scale: [1, 1.05, 1]
               }}
@@ -99,7 +99,7 @@ export function CelebrationFullscreen({
             {/* Message */}
             {message && (
               <motion.p
-                className="text-xl text-gray-300"
+                className="text-xl text-text-primary"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}

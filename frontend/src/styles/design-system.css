@@ -1,97 +1,51 @@
-/* FlowCube Nexus Design System */
+/* FRZ Platform Design System - v2.0 */
+
 :root {
-  /* Neon Colors */
+  /* Node Type Colors (semantic, used by workflow editor) */
   --neon-purple: #A855F7;
-  --neon-cyan: #00ffff;
-  --neon-green: #c8eb2d;
+  --neon-cyan: #06B6D4;
+  --neon-green: #22C55E;
   --neon-blue: #3B82F6;
   --neon-pink: #EC4899;
 
-  /* Base Colors */
-  --bg-dark: hsl(220, 20%, 8%);
-  --bg-darker: hsl(220, 20%, 4%);
-  --glass-bg: rgba(39, 39, 39, 0.1);
+  /* Base Colors (referenced by legacy classes) */
+  --bg-dark: var(--background);
+  --bg-darker: var(--background-secondary);
+  --glass-bg: rgba(22, 27, 34, 0.6);
 
   /* Shadows */
   --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.3),
                     0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-neon-purple: 0 0 20px rgba(168, 85, 247, 0.4),
-                        0 0 40px rgba(168, 85, 247, 0.2);
-  --shadow-neon-cyan: 0 0 20px rgba(0, 255, 255, 0.4),
-                      0 0 40px rgba(0, 255, 255, 0.2);
-  --shadow-neon-green: 0 0 20px rgba(200, 235, 45, 0.4),
-                       0 0 40px rgba(200, 235, 45, 0.2);
-  --shadow-neon-blue: 0 0 20px rgba(59, 130, 246, 0.4),
-                      0 0 40px rgba(59, 130, 246, 0.2);
 }
 
-/* Glassmorphism Base */
+/* Glass Card (used in workflow command palette) */
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-premium);
 }
 
-/* Neon Glow Effects */
-.neon-glow-purple {
-  box-shadow: var(--shadow-neon-purple);
-}
-
-.neon-glow-cyan {
-  box-shadow: var(--shadow-neon-cyan);
-}
-
-.neon-glow-green {
-  box-shadow: var(--shadow-neon-green);
-}
-
-.neon-glow-blue {
-  box-shadow: var(--shadow-neon-blue);
-}
-
-/* Premium Button */
-.button-premium {
-  background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-}
-
-.button-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
-}
-
-/* Node Type Specific Colors */
+/* Node Type Colors (workflow editor nodes) */
 .node-trigger {
   --node-color: var(--neon-purple);
-  --node-shadow: var(--shadow-neon-purple);
 }
 
 .node-action {
   --node-color: var(--neon-cyan);
-  --node-shadow: var(--shadow-neon-cyan);
 }
 
 .node-condition {
   --node-color: var(--neon-green);
-  --node-shadow: var(--shadow-neon-green);
 }
 
 .node-ai {
   --node-color: var(--neon-blue);
-  --node-shadow: var(--shadow-neon-blue);
 }
 
-/* Premium Node Base */
+/* Premium Node Base (workflow editor) */
 .premium-node {
   min-width: 200px;
   padding: 16px;
@@ -108,11 +62,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.03));
   pointer-events: none;
 }
 
-/* Handle Styles */
+/* Handle Styles (workflow editor) */
 .react-flow__handle {
   width: 12px;
   height: 12px;

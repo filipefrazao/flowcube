@@ -98,7 +98,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
 
   if (!selectedBotId) {
     return (
-      <div className={cn('flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400', className)}>
+      <div className={cn('flex flex-col items-center justify-center h-full text-text-muted dark:text-text-secondary', className)}>
         <MessageSquare className="w-12 h-12 mb-4 opacity-50" />
         <p className="text-sm">Select a bot to view chats</p>
       </div>
@@ -106,23 +106,23 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
   }
 
   return (
-    <div className={cn('flex flex-col h-full bg-white dark:bg-gray-900', className)}>
+    <div className={cn('flex flex-col h-full bg-surface dark:bg-background-secondary', className)}>
       {/* Search Bar */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-border">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
           <input
             type="text"
             value={chatSearchQuery}
             onChange={(e) => setChatSearchQuery(e.target.value)}
             placeholder="Search chats..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-surface text-text-primary placeholder-text-muted text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="px-2 py-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="px-2 py-2 border-b border-border overflow-x-auto">
         <div className="flex gap-1">
           {CHAT_FILTERS.map((filter) => {
             const Icon = filter.icon;
@@ -134,7 +134,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap',
                   chatFilter === filter.id
                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    : 'text-text-muted dark:text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
                 )}
               >
                 <Icon className="w-4 h-4" />
@@ -146,14 +146,14 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
       </div>
 
       {/* Refresh Button */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
-        <span className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="px-4 py-2 flex items-center justify-between border-b border-border">
+        <span className="text-xs text-text-muted dark:text-text-secondary">
           {sortedChats.length} chat{sortedChats.length !== 1 ? 's' : ''}
         </span>
         <button
           onClick={() => fetchChats()}
           disabled={chatsLoading}
-          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="p-1.5 text-text-secondary hover:text-text-muted dark:hover:text-text-primary rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors"
         >
           <RefreshCw className={cn('w-4 h-4', chatsLoading && 'animate-spin')} />
         </button>
@@ -163,7 +163,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
       <div className="flex-1 overflow-y-auto">
         {chatsLoading && sortedChats.length === 0 ? (
           <div className="flex items-center justify-center h-32">
-            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+            <Loader2 className="w-6 h-6 text-text-secondary animate-spin" />
           </div>
         ) : chatsError ? (
           <div className="flex flex-col items-center justify-center h-32 text-red-500 px-4">
@@ -177,7 +177,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
             </button>
           </div>
         ) : sortedChats.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400 px-4">
+          <div className="flex flex-col items-center justify-center h-32 text-text-muted dark:text-text-secondary px-4">
             <MessageSquare className="w-8 h-8 mb-2 opacity-50" />
             <p className="text-sm text-center">
               {chatSearchQuery ? 'No chats match your search' : 'No chats yet'}
@@ -198,7 +198,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
                   transition={{ delay: index * 0.02 }}
                   onClick={() => selectChat(chat.id)}
                   className={cn(
-                    'w-full flex items-start gap-3 p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left',
+                    'w-full flex items-start gap-3 p-4 border-b border-border hover:bg-background-secondary dark:hover:bg-surface-hover/50 transition-colors text-left',
                     isSelected && 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-500'
                   )}
                 >
@@ -220,22 +220,22 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-gray-900 dark:text-white truncate">
+                      <span className="font-medium text-text-primary truncate">
                         {getChatName(chat)}
                       </span>
                       {chat.last_message_at && (
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                        <span className="text-xs text-text-secondary flex-shrink-0 ml-2">
                           {formatDistanceToNow(new Date(chat.last_message_at), { addSuffix: false })}
                         </span>
                       )}
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-sm text-text-muted dark:text-text-secondary truncate">
                         {formatLastMessage(chat)}
                       </p>
                       {chat.unread_count > 0 && (
-                        <span className="ml-2 px-2 py-0.5 bg-blue-500 text-white text-xs font-medium rounded-full flex-shrink-0">
+                        <span className="ml-2 px-2 py-0.5 bg-blue-500 text-text-primary text-xs font-medium rounded-full flex-shrink-0">
                           {chat.unread_count > 99 ? '99+' : chat.unread_count}
                         </span>
                       )}
@@ -247,13 +247,13 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
                         {chat.labels.slice(0, 3).map((label, i) => (
                           <span
                             key={i}
-                            className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded"
+                            className="px-1.5 py-0.5 bg-surface-hover dark:bg-surface-hover text-text-muted dark:text-text-secondary text-xs rounded"
                           >
                             {label}
                           </span>
                         ))}
                         {chat.labels.length > 3 && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-text-secondary">
                             +{chat.labels.length - 3}
                           </span>
                         )}
@@ -264,7 +264,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
                   {/* Status indicators */}
                   <div className="flex flex-col items-end gap-1">
                     {chat.is_muted && (
-                      <span className="text-gray-400" title="Muted">
+                      <span className="text-text-secondary" title="Muted">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
@@ -272,7 +272,7 @@ export function TelegramChatList({ className }: TelegramChatListProps) {
                       </span>
                     )}
                     {chat.is_archived && (
-                      <Archive className="w-4 h-4 text-gray-400"  />
+                      <Archive className="w-4 h-4 text-text-secondary"  />
                     )}
                   </div>
                 </motion.button>

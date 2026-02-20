@@ -201,8 +201,8 @@ export function EditorToolbar({
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all',
             isExecuting
-              ? 'bg-primary/50 text-white cursor-not-allowed'
-              : 'bg-primary hover:bg-primary-hover text-white'
+              ? 'bg-primary/50 text-text-primary cursor-not-allowed'
+              : 'bg-primary hover:bg-primary-hover text-gray-900'
           )}
         >
           {isExecuting ? (

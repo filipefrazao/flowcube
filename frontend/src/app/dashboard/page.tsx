@@ -173,8 +173,8 @@ export default function DashboardPage() {
               className="lg:col-span-2"
             >
               <GlassCard hover={false} padding="sm">
-                <div className="flex items-center justify-between p-4 border-b border-gray-700/50">
-                  <h2 className="text-sm font-medium text-white flex items-center gap-2">
+                <div className="flex items-center justify-between p-4 border-b border-border/50">
+                  <h2 className="text-sm font-medium text-text-primary flex items-center gap-2">
                     <Zap className="w-4 h-4 text-purple-400" />
                     Recent Workflows
                   </h2>
@@ -186,11 +186,11 @@ export default function DashboardPage() {
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
-                <div className="divide-y divide-gray-700/50">
+                <div className="divide-y divide-border/50">
                   {data.workflows.length === 0 ? (
                     <div className="p-8 text-center">
-                      <GitBranch className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-                      <p className="text-gray-400 text-sm">No workflows yet</p>
+                      <GitBranch className="w-10 h-10 text-text-muted mx-auto mb-3" />
+                      <p className="text-text-secondary text-sm">No workflows yet</p>
                       <Link
                         href="/workflows/create"
                         className="text-purple-400 text-sm hover:underline mt-2 inline-block"
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                       >
                         <Link
                           href={'/workflows/' + workflow.id}
-                          className="flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors"
+                          className="flex items-center justify-between p-4 hover:bg-surface-hover/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div
@@ -216,7 +216,7 @@ export default function DashboardPage() {
                                 "w-9 h-9 rounded-lg flex items-center justify-center",
                                 workflow.is_published
                                   ? "bg-green-500/20"
-                                  : "bg-gray-700/50"
+                                  : "bg-surface-hover/50"
                               )}
                             >
                               <GitBranch
@@ -224,15 +224,15 @@ export default function DashboardPage() {
                                   "w-4 h-4",
                                   workflow.is_published
                                     ? "text-green-400"
-                                    : "text-gray-500"
+                                    : "text-text-muted"
                                 )}
                               />
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-white">
+                              <p className="text-sm font-medium text-text-primary">
                                 {workflow.name}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-text-muted">
                                 {formatRelativeTime(workflow.updated_at)}
                               </p>
                             </div>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
                               "px-2 py-0.5 rounded text-xs font-medium",
                               workflow.is_published
                                 ? "bg-green-500/20 text-green-400"
-                                : "bg-gray-700/50 text-gray-400"
+                                : "bg-surface-hover/50 text-text-secondary"
                             )}
                           >
                             {workflow.is_published ? "Active" : "Draft"}
@@ -262,16 +262,16 @@ export default function DashboardPage() {
               transition={{ duration: 0.4, delay: 0.3 }}
             >
               <GlassCard hover={false} glow="purple" padding="sm">
-                <div className="flex items-center justify-between p-4 border-b border-gray-700/50">
-                  <h2 className="text-sm font-medium text-white flex items-center gap-2">
+                <div className="flex items-center justify-between p-4 border-b border-border/50">
+                  <h2 className="text-sm font-medium text-text-primary flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-cyan-400" />
                     Execution Stats
                   </h2>
                 </div>
                 {!data.execStats ? (
                   <div className="p-8 text-center">
-                    <Play className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-                    <p className="text-gray-400 text-sm">No executions yet</p>
+                    <Play className="w-10 h-10 text-text-muted mx-auto mb-3" />
+                    <p className="text-text-secondary text-sm">No executions yet</p>
                   </div>
                 ) : (
                   <div className="p-4 space-y-4">
@@ -280,9 +280,9 @@ export default function DashboardPage() {
                       <StatusBadge label="Failed" value={data.execStats.by_status?.failed ?? 0} variant="error" />
                       <StatusBadge label="Running" value={data.execStats.by_status?.running ?? 0} variant="info" />
                     </div>
-                    <div className="pt-4 border-t border-gray-700/50 space-y-3">
+                    <div className="pt-4 border-t border-border/50 space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Success Rate</span>
+                        <span className="text-text-secondary">Success Rate</span>
                         <span className={cn(
                           "font-medium",
                           successRate >= 95 ? "text-green-400" : successRate >= 80 ? "text-yellow-400" : "text-red-400"
@@ -291,8 +291,8 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Avg. Duration</span>
-                        <span className="text-white font-medium">
+                        <span className="text-text-secondary">Avg. Duration</span>
+                        <span className="text-text-primary font-medium">
                           {formatDuration(data.execStats.avg_duration_ms)}
                         </span>
                       </div>
@@ -310,7 +310,7 @@ export default function DashboardPage() {
             transition={{ duration: 0.4, delay: 0.4 }}
             className="mt-6"
           >
-            <h3 className="text-sm font-medium text-gray-400 mb-4">Quick Actions</h3>
+            <h3 className="text-sm font-medium text-text-secondary mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <QuickActionCard
                 title="Create Workflow"
@@ -393,17 +393,17 @@ function QuickActionCard({ title, description, href, icon, color }: QuickActionC
         whileHover={{ y: -2, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className={cn(
-          "p-4 rounded-xl border border-gray-700/50 bg-gradient-to-br transition-colors cursor-pointer",
+          "p-4 rounded-xl border border-border/50 bg-gradient-to-br transition-colors cursor-pointer",
           colors[color]
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gray-800/50">
+          <div className="p-2 rounded-lg bg-surface/50">
             {icon}
           </div>
           <div>
-            <p className="font-medium text-white text-sm">{title}</p>
-            <p className="text-xs text-gray-500">{description}</p>
+            <p className="font-medium text-text-primary text-sm">{title}</p>
+            <p className="text-xs text-text-muted">{description}</p>
           </div>
         </div>
       </motion.div>

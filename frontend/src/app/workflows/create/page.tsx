@@ -132,7 +132,7 @@ export default function NewWorkflowPage() {
               {/* Card Header */}
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border/50">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <GitBranch className="w-6 h-6 text-white" />
+                  <GitBranch className="w-6 h-6 text-text-primary" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-text-primary">

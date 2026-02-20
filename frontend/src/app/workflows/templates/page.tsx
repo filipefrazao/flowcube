@@ -185,9 +185,9 @@ export default function TemplatesPage() {
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
           <LayoutGrid className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-gray-100">Template Gallery</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Template Gallery</h1>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-text-muted">
           Start with a pre-built workflow and customize it for your needs
         </p>
       </div>
@@ -196,13 +196,13 @@ export default function TemplatesPage() {
       <div className="max-w-7xl mx-auto mb-6 flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search templates..."
-            className="w-full pl-10 pr-4 py-2.5 bg-surface border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -216,7 +216,7 @@ export default function TemplatesPage() {
                 "px-3 py-2 text-xs rounded-lg border transition-colors",
                 category === cat.value
                   ? "bg-primary/20 border-primary text-primary"
-                  : "border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-300"
+                  : "border-border text-text-secondary hover:border-border hover:text-text-primary"
               )}
             >
               {cat.label}
@@ -229,9 +229,9 @@ export default function TemplatesPage() {
       <div className="max-w-7xl mx-auto">
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-16">
-            <Sparkles className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-400 mb-2">No templates found</h3>
-            <p className="text-sm text-gray-600">Try adjusting your search or category filter</p>
+            <Sparkles className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-text-secondary mb-2">No templates found</h3>
+            <p className="text-sm text-text-muted">Try adjusting your search or category filter</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

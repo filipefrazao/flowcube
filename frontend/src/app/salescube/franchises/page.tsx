@@ -136,16 +136,16 @@ export default function FranchisesPage() {
   const activeCount = franchises.filter((f) => f.is_active).length;
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Building2 className="h-7 w-7 text-orange-400" />
-          <h1 className="text-2xl font-bold text-gray-100">Franquias & Polos</h1>
+          <h1 className="text-2xl font-bold text-text-primary">Franquias & Polos</h1>
         </div>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-orange-700"
+          className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-orange-700"
         >
           <Plus className="h-4 w-4" />
           Nova Franquia
@@ -154,21 +154,21 @@ export default function FranchisesPage() {
 
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Franquias</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{franchises.length}</p>
+              <p className="text-sm text-text-secondary">Franquias</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{franchises.length}</p>
             </div>
             <div className="rounded-lg bg-orange-500/20 p-2.5 text-orange-400">
               <Building2 className="h-5 w-5" />
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Ativas</p>
+              <p className="text-sm text-text-secondary">Ativas</p>
               <p className="mt-1 text-2xl font-bold text-green-400">{activeCount}</p>
             </div>
             <div className="rounded-lg bg-green-500/20 p-2.5 text-green-400">
@@ -176,11 +176,11 @@ export default function FranchisesPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Polos</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{poles.length}</p>
+              <p className="text-sm text-text-secondary">Polos</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{poles.length}</p>
             </div>
             <div className="rounded-lg bg-blue-500/20 p-2.5 text-blue-400">
               <MapPin className="h-5 w-5" />
@@ -192,23 +192,23 @@ export default function FranchisesPage() {
       {/* Filters */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Buscar franquias..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-800 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-orange-600"
+            className="w-full rounded-lg border border-border bg-background-secondary py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted outline-none focus:border-orange-600"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+      <div className="overflow-hidden rounded-xl border border-border bg-background-secondary">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-gray-400">
+              <tr className="border-b border-border text-text-secondary">
                 <th className="px-4 py-3 font-medium">Nome</th>
                 <th className="px-4 py-3 font-medium">Codigo</th>
                 <th className="px-4 py-3 font-medium">Polos</th>
@@ -220,13 +220,13 @@ export default function FranchisesPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
                     Carregando franquias...
                   </td>
                 </tr>
               ) : franchises.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-text-muted">
                     Nenhuma franquia encontrada.
                   </td>
                 </tr>
@@ -235,48 +235,48 @@ export default function FranchisesPage() {
                   const franchisePoles = poles.filter((p) => p.franchise === franchise.id);
                   const isExpanded = expandedId === franchise.id;
                   return (
-                    <tr key={franchise.id} className="border-b border-gray-800/50">
+                    <tr key={franchise.id} className="border-b border-border/50">
                       <td colSpan={6} className="p-0">
                         <div
-                          className="flex cursor-pointer items-center transition hover:bg-gray-800/40"
+                          className="flex cursor-pointer items-center transition hover:bg-surface-hover/40"
                           onClick={() => setExpandedId(isExpanded ? null : franchise.id)}
                         >
-                          <td className="px-4 py-3 font-medium text-gray-100">{franchise.name}</td>
-                          <td className="px-4 py-3 text-gray-400 font-mono text-xs">{franchise.code || "—"}</td>
+                          <td className="px-4 py-3 font-medium text-text-primary">{franchise.name}</td>
+                          <td className="px-4 py-3 text-text-secondary font-mono text-xs">{franchise.code || "—"}</td>
                           <td className="px-4 py-3">
-                            <span className="inline-flex items-center gap-1 text-gray-300">
-                              <MapPin className="h-3.5 w-3.5 text-gray-500" />
+                            <span className="inline-flex items-center gap-1 text-text-primary">
+                              <MapPin className="h-3.5 w-3.5 text-text-muted" />
                               {franchisePoles.length}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span className={cn(
                               "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                              franchise.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"
+                              franchise.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-text-secondary"
                             )}>
                               {franchise.is_active ? "Ativa" : "Inativa"}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-500">{fmtDate(franchise.created_at)}</td>
+                          <td className="px-4 py-3 text-text-muted">{fmtDate(franchise.created_at)}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={() => openPoleModal(franchise.id)}
-                                className="rounded p-1.5 text-gray-500 transition hover:bg-blue-500/10 hover:text-blue-400"
+                                className="rounded p-1.5 text-text-muted transition hover:bg-blue-500/10 hover:text-blue-400"
                                 title="Adicionar Polo"
                               >
                                 <MapPin className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => openEditModal(franchise)}
-                                className="rounded p-1.5 text-gray-500 transition hover:bg-orange-500/10 hover:text-orange-400"
+                                className="rounded p-1.5 text-text-muted transition hover:bg-orange-500/10 hover:text-orange-400"
                                 title="Editar"
                               >
                                 <Edit2 className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(franchise.id)}
-                                className="rounded p-1.5 text-gray-500 transition hover:bg-red-500/10 hover:text-red-400"
+                                className="rounded p-1.5 text-text-muted transition hover:bg-red-500/10 hover:text-red-400"
                                 title="Excluir"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -286,25 +286,25 @@ export default function FranchisesPage() {
                         </div>
                         {/* Expanded Poles */}
                         {isExpanded && franchisePoles.length > 0 && (
-                          <div className="border-t border-gray-800/30 bg-gray-950/50 px-8 py-3">
-                            <p className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wider">Polos</p>
+                          <div className="border-t border-border/30 bg-background/50 px-8 py-3">
+                            <p className="mb-2 text-xs font-medium text-text-muted uppercase tracking-wider">Polos</p>
                             <div className="space-y-1">
                               {franchisePoles.map((pole) => (
-                                <div key={pole.id} className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-800/30">
+                                <div key={pole.id} className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-hover/30">
                                   <div className="flex items-center gap-2">
                                     <MapPin className="h-3.5 w-3.5 text-blue-400" />
-                                    <span className="text-sm text-gray-300">{pole.name}</span>
+                                    <span className="text-sm text-text-primary">{pole.name}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <span className={cn(
                                       "text-[10px] px-2 py-0.5 rounded-full",
-                                      pole.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"
+                                      pole.is_active ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-text-secondary"
                                     )}>
                                       {pole.is_active ? "Ativo" : "Inativo"}
                                     </span>
                                     <button
                                       onClick={() => handleDeletePole(pole.id)}
-                                      className="rounded p-1 text-gray-600 transition hover:text-red-400"
+                                      className="rounded p-1 text-text-muted transition hover:text-red-400"
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
                                     </button>
@@ -327,38 +327,38 @@ export default function FranchisesPage() {
       {/* Franchise Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-100">
+          <div className="w-full max-w-md rounded-xl border border-border bg-background-secondary shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-text-primary">
                 {editingFranchise ? "Editar Franquia" : "Nova Franquia"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-300">
+              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-primary">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Nome *</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Nome *</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Nome da franquia"
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-orange-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-orange-600"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Codigo</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Codigo</label>
                 <input
                   type="text"
                   value={form.code}
                   onChange={(e) => setForm({ ...form, code: e.target.value })}
                   placeholder="Ex: FRZ-SP, FEB-RJ..."
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-orange-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-orange-600"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Status</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Status</label>
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, is_active: !form.is_active })}
@@ -366,7 +366,7 @@ export default function FranchisesPage() {
                     "flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm transition",
                     form.is_active
                       ? "border-green-700/50 bg-green-950/20 text-green-400"
-                      : "border-gray-700 bg-gray-950 text-gray-400"
+                      : "border-border bg-background text-text-secondary"
                   )}
                 >
                   {form.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
@@ -374,14 +374,14 @@ export default function FranchisesPage() {
                 </button>
               </div>
             </div>
-            <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">
-              <button onClick={() => setShowModal(false)} className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition hover:bg-gray-800">
+            <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
+              <button onClick={() => setShowModal(false)} className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary transition hover:bg-surface-hover">
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.name.trim()}
-                className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-orange-700 disabled:opacity-50"
               >
                 {saving ? "Salvando..." : editingFranchise ? "Salvar" : "Criar Franquia"}
               </button>
@@ -393,33 +393,33 @@ export default function FranchisesPage() {
       {/* Pole Modal */}
       {showPoleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-100">Novo Polo</h2>
-              <button onClick={() => setShowPoleModal(false)} className="text-gray-500 hover:text-gray-300">
+          <div className="w-full max-w-md rounded-xl border border-border bg-background-secondary shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-text-primary">Novo Polo</h2>
+              <button onClick={() => setShowPoleModal(false)} className="text-text-muted hover:text-text-primary">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Nome *</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Nome *</label>
                 <input
                   type="text"
                   value={poleForm.name}
                   onChange={(e) => setPoleForm({ ...poleForm, name: e.target.value })}
                   placeholder="Nome do polo"
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-blue-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">
-              <button onClick={() => setShowPoleModal(false)} className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition hover:bg-gray-800">
+            <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
+              <button onClick={() => setShowPoleModal(false)} className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary transition hover:bg-surface-hover">
                 Cancelar
               </button>
               <button
                 onClick={handleSavePole}
                 disabled={savingPole || !poleForm.name.trim()}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-blue-700 disabled:opacity-50"
               >
                 {savingPole ? "Salvando..." : "Criar Polo"}
               </button>

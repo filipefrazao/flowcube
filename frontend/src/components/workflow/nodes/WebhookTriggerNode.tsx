@@ -40,7 +40,7 @@ const sourceColors: Record<string, { bg: string; text: string; border: string }>
 const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
   const config = data.config || {};
   const source = config.source || "custom";
-  const defaultColors = { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', iconBg: 'bg-gray-100' };
+  const defaultColors = { bg: 'bg-background-secondary', border: 'border-border', text: 'text-text-secondary', iconBg: 'bg-surface-hover' };
   const colors = sourceColors[source] || sourceColors.custom || defaultColors;
 
   const webhookUrl = useMemo(() => {
@@ -76,7 +76,7 @@ const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
         );
       default:
         return (
-          <span className="flex items-center gap-1 text-xs text-gray-400">
+          <span className="flex items-center gap-1 text-xs text-text-secondary">
             <span className="w-2 h-2 bg-gray-400 rounded-full" />
             Inactive
           </span>
@@ -87,7 +87,7 @@ const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
   return (
     <div
       className={cn(
-        "relative rounded-lg shadow-md transition-all duration-200 min-w-[240px] bg-white",
+        "relative rounded-lg shadow-md transition-all duration-200 min-w-[240px] bg-surface",
         selected ? "ring-2 ring-yellow-500" : "",
         "border-2 border-yellow-300 hover:shadow-lg"
       )}
@@ -98,15 +98,15 @@ const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
       </div>
 
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 pt-4 border-b border-gray-100 bg-gradient-to-r from-yellow-50 to-orange-50">
+      <div className="flex items-center gap-3 p-3 pt-4 border-b border-border bg-gradient-to-r from-yellow-50 to-orange-50">
         <div className="p-2 rounded-lg bg-yellow-100">
           <Webhook className="w-5 h-5 text-yellow-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-800 truncate">
+          <div className="font-semibold text-sm text-text-primary truncate">
             {data.label || "Webhook Trigger"}
           </div>
-          <div className="text-xs text-gray-500">Webhook Entry Point</div>
+          <div className="text-xs text-text-muted">Webhook Entry Point</div>
         </div>
         {statusIndicator}
       </div>
@@ -115,7 +115,7 @@ const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
       <div className="p-3 space-y-2">
         {/* Source Badge */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">Source</span>
+          <span className="text-xs text-text-muted">Source</span>
           <span className={cn(
             "px-2 py-0.5 rounded text-xs font-medium capitalize",
             colors.bg, colors.text
@@ -125,29 +125,29 @@ const WebhookTriggerNode = ({ data, selected }: WebhookTriggerNodeProps) => {
         </div>
 
         {/* Webhook URL */}
-        <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+        <div className="mt-2 p-2 bg-background-secondary rounded border border-border">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-400">Endpoint</span>
-            <button className="text-gray-400 hover:text-gray-600 transition-colors">
+            <span className="text-xs text-text-secondary">Endpoint</span>
+            <button className="text-text-secondary hover:text-text-muted transition-colors">
               <Copy className="w-3 h-3" />
             </button>
           </div>
           <div className="flex items-center gap-1">
-            <code className="text-xs font-mono text-gray-600 truncate flex-1">
+            <code className="text-xs font-mono text-text-muted truncate flex-1">
               {displayUrl}
             </code>
-            <ExternalLink className="w-3 h-3 text-gray-400" />
+            <ExternalLink className="w-3 h-3 text-text-secondary" />
           </div>
         </div>
 
         {/* Stats */}
         {data.stats && (
-          <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-gray-100">
-            <span className="text-gray-500">
+          <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border">
+            <span className="text-text-muted">
               <span className="font-medium">{data.stats.totalReceived}</span> received
             </span>
             {data.stats.lastReceived && (
-              <span className="text-gray-400">
+              <span className="text-text-secondary">
                 Last: {new Date(data.stats.lastReceived).toLocaleTimeString()}
               </span>
             )}

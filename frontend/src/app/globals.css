@@ -8,46 +8,58 @@
 
 /* Default (dark) fallback */
 :root {
-  --background: #192838;
-  --background-secondary: #0f1a24;
-  --surface: #152332;
-  --surface-hover: #1e3044;
+  --background: #0d1117;
+  --background-secondary: #0a0e14;
+  --surface: #161b22;
+  --surface-hover: #1c2129;
+  --surface-elevated: #1a1f27;
   --primary: #F59E0B;
   --primary-hover: #D97706;
-  --border: #2a4058;
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --border: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --input-bg: #0d1117;
+  --input-border: #30363d;
+  --ring: rgba(245, 158, 11, 0.4);
   color-scheme: dark;
 }
 
 /* Dark theme (explicit class from next-themes) */
 html.dark {
-  --background: #192838;
-  --background-secondary: #0f1a24;
-  --surface: #152332;
-  --surface-hover: #1e3044;
+  --background: #0d1117;
+  --background-secondary: #0a0e14;
+  --surface: #161b22;
+  --surface-hover: #1c2129;
+  --surface-elevated: #1a1f27;
   --primary: #F59E0B;
   --primary-hover: #D97706;
-  --border: #2a4058;
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --border: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --input-bg: #0d1117;
+  --input-border: #30363d;
+  --ring: rgba(245, 158, 11, 0.4);
   color-scheme: dark;
 }
 
 /* Light theme */
 html.light {
-  --background: #f8fafc;
-  --background-secondary: #f1f5f9;
+  --background: #ffffff;
+  --background-secondary: #f6f8fa;
   --surface: #ffffff;
-  --surface-hover: #f8fafc;
-  --primary: #F59E0B;
-  --primary-hover: #D97706;
-  --border: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --surface-hover: #f3f4f6;
+  --surface-elevated: #ffffff;
+  --primary: #D97706;
+  --primary-hover: #B45309;
+  --border: #d0d7de;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8b949e;
+  --input-bg: #f6f8fa;
+  --input-border: #d0d7de;
+  --ring: rgba(217, 119, 6, 0.4);
   color-scheme: light;
 }
 
@@ -85,7 +97,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d5a7a;
+  background: var(--surface-hover);
 }
 
 /* ========================================

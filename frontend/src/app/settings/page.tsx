@@ -129,7 +129,7 @@ export default function SettingsPage() {
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
               hasChanges
-                ? "bg-primary hover:bg-primary-hover text-white"
+                ? "bg-primary hover:bg-primary-hover text-gray-900"
                 : "bg-surface text-text-muted cursor-not-allowed"
             )}
           >
@@ -163,7 +163,7 @@ export default function SettingsPage() {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors flex-1 justify-center",
                     activeTab === tab.id
-                      ? "bg-primary text-white"
+                      ? "bg-primary text-gray-900"
                       : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
                   )}
                 >
@@ -473,7 +473,7 @@ function AccountTab() {
             />
           </div>
 
-          <button className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors">
+          <button className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium transition-colors">
             Update Password
           </button>
         </div>
@@ -539,7 +539,7 @@ function ToggleSetting({ icon, label, description, checked, onChange }: ToggleSe
       >
         <span
           className={cn(
-            "absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform",
+            "absolute top-1 left-1 w-4 h-4 rounded-full bg-surface transition-transform",
             checked && "translate-x-5"
           )}
         />

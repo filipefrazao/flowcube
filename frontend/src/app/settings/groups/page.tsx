@@ -40,44 +40,44 @@ export default function GroupsPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-background-secondary">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-gray-700 bg-gray-900 flex items-center justify-between px-6">
+        <header className="h-14 border-b border-border bg-background-secondary flex items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-indigo-400" />
-            <h1 className="text-lg font-semibold text-gray-100">Grupos de Usuarios</h1>
+            <Users className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-text-primary">Grupos de Usuarios</h1>
           </div>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium">
             <Plus className="w-4 h-4" /> Novo Grupo
           </button>
         </header>
 
         <div className="p-6 flex-1 overflow-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
           ) : groups.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-text-secondary">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Nenhum grupo encontrado</p>
             </div>
           ) : (
-            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+            <div className="bg-surface rounded-lg border border-border overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-700">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Nome</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Descricao</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase">Membros</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase">Acoes</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase">Nome</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase">Descricao</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase">Membros</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-text-secondary uppercase">Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {groups.map((g) => (
-                    <tr key={g.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                      <td className="px-4 py-3 text-sm text-gray-100 font-medium">{g.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{g.description || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{g.members_count || 0}</td>
+                    <tr key={g.id} className="border-b border-border/50 hover:bg-surface-hover/30">
+                      <td className="px-4 py-3 text-sm text-text-primary font-medium">{g.name}</td>
+                      <td className="px-4 py-3 text-sm text-text-primary">{g.description || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-text-primary">{g.members_count || 0}</td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => handleDelete(g.id)} className="text-red-400 hover:text-red-300"><Trash2 className="w-4 h-4" /></button>
                       </td>
@@ -91,25 +91,25 @@ export default function GroupsPage() {
 
         {showForm && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 w-full max-w-md">
+            <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-100">Novo Grupo</h2>
-                <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-gray-400" /></button>
+                <h2 className="text-lg font-semibold text-text-primary">Novo Grupo</h2>
+                <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-text-secondary" /></button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-300 mb-1">Nome</label>
+                  <label className="block text-sm text-text-primary mb-1">Nome</label>
                   <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" />
+                    className="w-full px-3 py-2 bg-background-secondary border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-300 mb-1">Descricao</label>
+                  <label className="block text-sm text-text-primary mb-1">Descricao</label>
                   <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500" rows={3} />
+                    className="w-full px-3 py-2 bg-background-secondary border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary" rows={3} />
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
-                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-300 hover:text-gray-100">Cancelar</button>
-                  <button onClick={handleCreate} disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
+                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-text-primary hover:text-text-primary">Cancelar</button>
+                  <button onClick={handleCreate} disabled={saving} className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 flex items-center gap-2">
                     {saving && <Loader2 className="w-4 h-4 animate-spin" />} Criar Grupo
                   </button>
                 </div>

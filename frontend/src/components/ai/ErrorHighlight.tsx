@@ -39,7 +39,7 @@ export function ErrorHighlight({ nodeId, error, onDebug }: ErrorHighlightProps) 
         <div className="relative">
           <div className="absolute inset-0 bg-red-500 rounded-full blur-md animate-pulse"></div>
           <div className="relative bg-red-600 rounded-full p-1 border-2 border-red-400">
-            <AlertCircle className="w-4 h-4 text-white" />
+            <AlertCircle className="w-4 h-4 text-text-primary" />
           </div>
         </div>
       </div>
@@ -51,18 +51,18 @@ export function ErrorHighlight({ nodeId, error, onDebug }: ErrorHighlightProps) 
             <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-red-300 font-medium">Execution Failed</p>
           </div>
-          <p className="text-xs text-gray-300 mb-3 line-clamp-3">{error}</p>
+          <p className="text-xs text-text-primary mb-3 line-clamp-3">{error}</p>
           {onDebug && (
             <button
               onClick={onDebug}
-              className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-all"
+              className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 text-text-primary text-xs rounded transition-all"
             >
               Debug with AI
             </button>
           )}
           <button
             onClick={() => setVisible(false)}
-            className="absolute -top-1 -right-1 w-5 h-5 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-white text-xs"
+            className="absolute -top-1 -right-1 w-5 h-5 bg-surface hover:bg-surface-hover rounded-full flex items-center justify-center text-text-secondary hover:text-text-primary text-xs"
           >
             ✕
           </button>

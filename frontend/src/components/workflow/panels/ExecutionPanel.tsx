@@ -23,19 +23,19 @@ interface ExecutionPanelProps {
 }
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
-  pending: <Clock className="w-3.5 h-3.5 text-gray-400" />,
+  pending: <Clock className="w-3.5 h-3.5 text-text-secondary" />,
   running: <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />,
   success: <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />,
   error: <XCircle className="w-3.5 h-3.5 text-red-400" />,
-  skipped: <Clock className="w-3.5 h-3.5 text-gray-600" />,
+  skipped: <Clock className="w-3.5 h-3.5 text-text-muted" />,
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "border-gray-700",
+  pending: "border-border",
   running: "border-blue-600 bg-blue-900/10",
   success: "border-green-800",
   error: "border-red-800 bg-red-900/10",
-  skipped: "border-gray-800",
+  skipped: "border-border",
 };
 
 export default function ExecutionPanel({
@@ -110,12 +110,12 @@ export default function ExecutionPanel({
   });
 
   return (
-    <div className={cn("w-80 bg-surface border-l border-gray-800 flex flex-col h-full", className)}>
+    <div className={cn("w-80 bg-surface border-l border-border flex flex-col h-full", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Play className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-gray-200">
+          <h2 className="text-sm font-semibold text-text-primary">
             {isExecuting ? "Executing..." : "Execution"}
           </h2>
           {isExecuting && (
@@ -123,32 +123,32 @@ export default function ExecutionPanel({
           )}
         </div>
         {onClose && (
-          <button onClick={onClose} className="p-1 hover:bg-gray-800 rounded">
-            <X className="w-4 h-4 text-gray-400" />
+          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded">
+            <X className="w-4 h-4 text-text-secondary" />
           </button>
         )}
       </div>
 
       {/* Summary */}
       {activeExecutionId && (
-        <div className="px-4 py-2 border-b border-gray-800 text-xs space-y-1">
+        <div className="px-4 py-2 border-b border-border text-xs space-y-1">
           <div className="flex justify-between">
-            <span className="text-gray-500">Execution</span>
-            <span className="text-gray-400 font-mono">
+            <span className="text-text-muted">Execution</span>
+            <span className="text-text-secondary font-mono">
               {activeExecutionId.slice(0, 8)}...
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Nodes</span>
-            <span className="text-gray-400">
+            <span className="text-text-muted">Nodes</span>
+            <span className="text-text-secondary">
               {Object.values(nodeStatuses).filter((s) => s === "success").length}/
               {Object.keys(nodeStatuses).length}
             </span>
           </div>
           {executionDetail?.duration_ms && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Duration</span>
-              <span className="text-gray-400">{executionDetail.duration_ms}ms</span>
+              <span className="text-text-muted">Duration</span>
+              <span className="text-text-secondary">{executionDetail.duration_ms}ms</span>
             </div>
           )}
         </div>
@@ -157,11 +157,11 @@ export default function ExecutionPanel({
       {/* Node List */}
       <div className="flex-1 overflow-y-auto">
         {sortedEntries.length === 0 ? (
-          <div className="p-4 text-center text-sm text-gray-500">
+          <div className="p-4 text-center text-sm text-text-muted">
             No execution data yet. Click Execute to run the workflow.
           </div>
         ) : (
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-border">
             {sortedEntries.map(([nodeId, nodeStatus]) => {
               const log = nodeLogs.find((l) => l.node_id === nodeId);
               const isExpanded = expandedNodes.has(nodeId);
@@ -172,24 +172,24 @@ export default function ExecutionPanel({
                   {/* Node Header */}
                   <button
                     onClick={() => toggleNode(nodeId)}
-                    className="w-full flex items-center gap-2 p-3 hover:bg-gray-800/50 text-left"
+                    className="w-full flex items-center gap-2 p-3 hover:bg-surface-hover/50 text-left"
                   >
                     {isExpanded ? (
-                      <ChevronDown className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                      <ChevronDown className="w-3 h-3 text-text-muted flex-shrink-0" />
                     ) : (
-                      <ChevronRight className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                      <ChevronRight className="w-3 h-3 text-text-muted flex-shrink-0" />
                     )}
                     {STATUS_ICONS[nodeStatus]}
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-gray-200 truncate">
+                      <div className="text-xs font-medium text-text-primary truncate">
                         {log?.node_label || nodeId.slice(0, 12)}
                       </div>
                       {log?.node_type && (
-                        <div className="text-[10px] text-gray-500">{log.node_type}</div>
+                        <div className="text-[10px] text-text-muted">{log.node_type}</div>
                       )}
                     </div>
                     {log?.duration_ms !== undefined && (
-                      <span className="text-[10px] text-gray-500 flex-shrink-0">
+                      <span className="text-[10px] text-text-muted flex-shrink-0">
                         {log.duration_ms}ms
                       </span>
                     )}
@@ -206,7 +206,7 @@ export default function ExecutionPanel({
                             "flex items-center gap-1 px-2 py-1 rounded text-[10px]",
                             isPinned
                               ? "bg-amber-900/30 text-amber-400 border border-amber-800"
-                              : "bg-gray-800 text-gray-400 hover:text-gray-300"
+                              : "bg-surface text-text-secondary hover:text-text-primary"
                           )}
                           title={isPinned ? "Unpin data" : "Pin output for replay"}
                         >
@@ -215,7 +215,7 @@ export default function ExecutionPanel({
                         </button>
                         <button
                           onClick={() => handleReplay(nodeId)}
-                          className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-gray-800 text-gray-400 hover:text-gray-300"
+                          className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-surface text-text-secondary hover:text-text-primary"
                           title="Replay from this node"
                         >
                           <RotateCcw className="w-3 h-3" />
@@ -224,7 +224,7 @@ export default function ExecutionPanel({
                         {log.output_data && (
                           <button
                             onClick={() => copyOutput(log.output_data)}
-                            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-gray-800 text-gray-400 hover:text-gray-300"
+                            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-surface text-text-secondary hover:text-text-primary"
                             title="Copy output"
                           >
                             <Copy className="w-3 h-3" />
@@ -235,8 +235,8 @@ export default function ExecutionPanel({
                       {/* Output */}
                       {log.output_data && (
                         <div>
-                          <div className="text-[10px] text-gray-500 mb-1">Output</div>
-                          <pre className="text-[10px] text-gray-300 bg-gray-900 rounded p-2 overflow-x-auto max-h-32 overflow-y-auto font-mono">
+                          <div className="text-[10px] text-text-muted mb-1">Output</div>
+                          <pre className="text-[10px] text-text-primary bg-background-secondary rounded p-2 overflow-x-auto max-h-32 overflow-y-auto font-mono">
                             {JSON.stringify(log.output_data, null, 2)}
                           </pre>
                         </div>

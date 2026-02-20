@@ -30,21 +30,21 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-background-secondary">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-gray-700 bg-gray-900 flex items-center px-6">
+        <header className="h-14 border-b border-border bg-background-secondary flex items-center px-6">
           <div className="flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-indigo-400" />
-            <h1 className="text-lg font-semibold text-gray-100">Relatorios</h1>
+            <BarChart3 className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-text-primary">Relatorios</h1>
           </div>
         </header>
 
         <div className="p-6 flex-1 overflow-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+            <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
           ) : reports.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-text-secondary">
               <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Nenhum relatorio disponivel</p>
             </div>
@@ -53,21 +53,21 @@ export default function ReportsPage() {
               {reports.map((r) => {
                 const Icon = chartIcons[r.chart_type] || BarChart3;
                 return (
-                  <div key={r.id} className="bg-gray-800 rounded-lg border border-gray-700 p-5 hover:border-indigo-500/50 transition-colors flex flex-col">
+                  <div key={r.id} className="bg-surface rounded-lg border border-border p-5 hover:border-primary/50 transition-colors flex flex-col">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-indigo-500/10 rounded-lg">
-                        <Icon className="w-5 h-5 text-indigo-400" />
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-100">{r.name}</h3>
-                        <span className="text-xs text-gray-500">{r.chart_type}</span>
+                        <h3 className="text-sm font-semibold text-text-primary">{r.name}</h3>
+                        <span className="text-xs text-text-muted">{r.chart_type}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-400 mb-4 flex-1 line-clamp-2">{r.description}</p>
+                    <p className="text-sm text-text-secondary mb-4 flex-1 line-clamp-2">{r.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">{r.parameters.length} parametro(s)</span>
+                      <span className="text-xs text-text-muted">{r.parameters.length} parametro(s)</span>
                       <Link href={`/reports/${r.slug}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium">
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-xs font-medium">
                         <Play className="w-3 h-3" /> Executar
                       </Link>
                     </div>

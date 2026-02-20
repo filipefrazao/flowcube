@@ -113,9 +113,9 @@ export default function NewInstancePage() {
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
                       idx < currentStep
-                        ? "bg-accent-green text-white"
+                        ? "bg-accent-green text-text-primary"
                         : idx === currentStep
-                        ? "bg-primary text-white"
+                        ? "bg-primary text-gray-900"
                         : "bg-surface border border-border text-text-muted"
                     )}
                   >
@@ -386,7 +386,7 @@ export default function NewInstancePage() {
                 <button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors"
                 >
                   Next
                   <ArrowRight className="w-4 h-4" />
@@ -395,7 +395,7 @@ export default function NewInstancePage() {
                 <button
                   onClick={handleCreate}
                   disabled={creating || !canProceed()}
-                  className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
+                  className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors"
                 >
                   {creating ? (
                     <>

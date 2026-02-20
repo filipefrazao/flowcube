@@ -157,7 +157,7 @@ export default function QueuesPage() {
           </div>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium text-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Nova Fila
           </button>
@@ -172,7 +172,7 @@ export default function QueuesPage() {
             <div className="text-center py-20 text-text-muted">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Nenhuma fila de atendimento configurada</p>
-              <button onClick={openCreate} className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors">
+              <button onClick={openCreate} className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors">
                 Criar primeira fila
               </button>
             </div>
@@ -303,7 +303,7 @@ export default function QueuesPage() {
                   Cancelar
                 </button>
                 <button onClick={handleSave} disabled={saving || !formName}
-                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors">
+                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 transition-colors">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? "Salvar" : "Criar"}
                 </button>
               </div>
@@ -346,7 +346,7 @@ export default function QueuesPage() {
                   Cancelar
                 </button>
                 <button onClick={addMember} disabled={!memberExt}
-                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors">
+                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 transition-colors">
                   Adicionar
                 </button>
               </div>

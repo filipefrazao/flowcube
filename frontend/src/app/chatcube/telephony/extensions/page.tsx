@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
   AVAILABLE: { label: "Disponivel", color: "text-green-400", bg: "bg-green-400/10" },
-  UNAVAILABLE: { label: "Indisponivel", color: "text-gray-400", bg: "bg-gray-400/10" },
+  UNAVAILABLE: { label: "Indisponivel", color: "text-text-secondary", bg: "bg-gray-400/10" },
   ON_CALL: { label: "Em Chamada", color: "text-red-400", bg: "bg-red-400/10" },
   RINGING: { label: "Tocando", color: "text-yellow-400", bg: "bg-yellow-400/10" },
   DND: { label: "Nao Perturbe", color: "text-orange-400", bg: "bg-orange-400/10" },
@@ -120,7 +120,7 @@ export default function ExtensionsPage() {
           </div>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium text-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Novo Ramal
           </button>
@@ -284,7 +284,7 @@ export default function ExtensionsPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving || !formNumber}
-                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 transition-colors"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? "Salvar" : "Criar"}
                 </button>

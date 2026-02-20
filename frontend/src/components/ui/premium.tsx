@@ -1,5 +1,5 @@
 /**
- * FlowCube Premium UI Components
+ * FRZ Platform Premium UI Components
  */
 'use client';
 
@@ -40,18 +40,18 @@ export function PremiumButton({
   type = 'button',
 }: PremiumButtonProps) {
   const baseStyles =
-    'relative inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed';
+    'relative inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
     primary:
-      'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/25',
+      'bg-primary text-gray-900 hover:bg-primary-hover shadow-lg shadow-primary/25',
     secondary:
-      'bg-gray-800 text-white hover:bg-gray-700 border border-gray-700',
+      'bg-surface text-text-primary hover:bg-surface-hover border border-border',
     outline:
-      'border-2 border-purple-500 text-purple-400 hover:bg-purple-500/10',
-    ghost: 'text-gray-300 hover:bg-gray-800 hover:text-white',
+      'border-2 border-primary text-primary hover:bg-primary/10',
+    ghost: 'text-text-secondary hover:bg-surface-hover hover:text-text-primary',
     gradient:
-      'bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-500 text-white shadow-lg hover:shadow-purple-500/40 bg-[length:200%_auto] hover:bg-right-top',
+      'bg-gradient-to-r from-amber-500 via-primary to-yellow-500 text-gray-900 shadow-lg hover:shadow-primary/40 bg-[length:200%_auto] hover:bg-right-top',
   };
 
   const sizes = {
@@ -74,7 +74,7 @@ export function PremiumButton({
       >
         {glow && (
           <motion.div
-            className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 blur-xl opacity-50"
+            className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 blur-xl opacity-50"
             animate={{ opacity: [0.3, 0.6, 0.3] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           />
@@ -103,7 +103,7 @@ interface GlassCardProps {
   children: ReactNode;
   className?: string;
   hover?: boolean;
-  glow?: 'purple' | 'cyan' | 'pink' | 'none';
+  glow?: 'amber' | 'cyan' | 'blue' | 'none';
   padding?: 'sm' | 'md' | 'lg';
 }
 
@@ -115,9 +115,9 @@ export function GlassCard({
   padding = 'md',
 }: GlassCardProps) {
   const glowColors = {
-    purple: 'hover:shadow-purple-500/20',
+    amber: 'hover:shadow-primary/20',
     cyan: 'hover:shadow-cyan-500/20',
-    pink: 'hover:shadow-pink-500/20',
+    blue: 'hover:shadow-blue-500/20',
     none: '',
   };
 
@@ -133,16 +133,15 @@ export function GlassCard({
       transition={{ duration: 0.2 }}
       className={cn(
         'relative rounded-xl',
-        'bg-gray-900/60 backdrop-blur-xl',
-        'border border-gray-700/50',
+        'bg-surface backdrop-blur-xl',
+        'border border-border',
         'shadow-lg',
-        hover && 'hover:border-gray-600/50 hover:shadow-xl',
+        hover && 'hover:border-border-light hover:shadow-xl',
         glowColors[glow],
         paddings[padding],
         className
       )}
     >
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/10 via-transparent to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
       <div className="relative">{children}</div>
     </motion.div>
   );
@@ -197,15 +196,15 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ title, value, change, icon, trend = 'neutral', className }: StatsCardProps) {
-  const trendColors = { up: 'text-green-400', down: 'text-red-400', neutral: 'text-gray-400' };
+  const trendColors = { up: 'text-green-400', down: 'text-red-400', neutral: 'text-text-secondary' };
 
   return (
     <GlassCard className={className} padding="md">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-400 font-medium">{title}</p>
+          <p className="text-sm text-text-secondary font-medium">{title}</p>
           <motion.p
-            className="text-3xl font-bold text-white mt-1"
+            className="text-3xl font-bold text-text-primary mt-1"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -215,11 +214,11 @@ export function StatsCard({ title, value, change, icon, trend = 'neutral', class
           {change !== undefined && (
             <p className={cn('text-sm mt-1', trendColors[trend])}>
               {change > 0 ? '+' : ''}{change}%
-              <span className="text-gray-500 ml-1">vs last period</span>
+              <span className="text-text-muted ml-1">vs last period</span>
             </p>
           )}
         </div>
-        {icon && <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400">{icon}</div>}
+        {icon && <div className="p-3 rounded-xl bg-primary/10 text-primary">{icon}</div>}
       </div>
     </GlassCard>
   );

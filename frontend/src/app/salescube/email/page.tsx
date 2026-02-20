@@ -41,7 +41,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   suporte: "bg-blue-500/20 text-blue-400",
   onboarding: "bg-orange-500/20 text-orange-400",
   cobranca: "bg-red-500/20 text-red-400",
-  geral: "bg-gray-500/20 text-gray-400",
+  geral: "bg-gray-500/20 text-text-secondary",
 };
 
 const EMPTY_FORM: TemplateForm = {
@@ -264,14 +264,14 @@ export default function EmailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Templates de Email</h1>
-          <p className="text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-text-primary">Templates de Email</h1>
+          <p className="text-sm text-text-secondary">
             {filtered.length} {filtered.length === 1 ? "template" : "templates"}
           </p>
         </div>
         <button
           onClick={openCreateEditor}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm transition-colors"
         >
           <Plus className="w-4 h-4" />
           Novo Template
@@ -281,19 +281,19 @@ export default function EmailPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
             type="text"
             placeholder="Buscar templates..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+            className="w-full bg-surface border border-border rounded-lg pl-10 pr-3 py-2 text-sm text-text-primary placeholder-text-muted"
           />
         </div>
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm"
+          className="bg-surface border border-border text-text-primary rounded-lg px-3 py-2 text-sm"
         >
           {CATEGORY_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -306,15 +306,15 @@ export default function EmailPage() {
       {/* Template Gallery */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Mail className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">Nenhum template encontrado</p>
+          <Mail className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <p className="text-text-secondary text-sm">Nenhum template encontrado</p>
           <button
             onClick={openCreateEditor}
-            className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="mt-3 text-xs text-primary hover:text-primary transition-colors"
           >
             + Criar primeiro template
           </button>
@@ -328,13 +328,13 @@ export default function EmailPage() {
             return (
               <div
                 key={template.id}
-                className="bg-gray-800 border border-gray-700 rounded-xl p-5 hover:border-gray-600 transition-colors group flex flex-col"
+                className="bg-surface border border-border rounded-xl p-5 hover:border-border transition-colors group flex flex-col"
               >
                 {/* Card header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-semibold text-white truncate">
+                      <h3 className="text-sm font-semibold text-text-primary truncate">
                         {template.name}
                       </h3>
                       {!template.is_active && (
@@ -343,7 +343,7 @@ export default function EmailPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 truncate">
+                    <p className="text-xs text-text-secondary truncate">
                       Assunto: {template.subject}
                     </p>
                   </div>
@@ -360,12 +360,12 @@ export default function EmailPage() {
                 {/* Variables */}
                 {template.variables && template.variables.length > 0 && (
                   <div className="mb-3">
-                    <p className="text-[10px] text-gray-500 mb-1">Variaveis:</p>
+                    <p className="text-[10px] text-text-muted mb-1">Variaveis:</p>
                     <div className="flex flex-wrap gap-1">
                       {template.variables.map((v) => (
                         <span
                           key={v}
-                          className="text-[10px] px-1.5 py-0.5 bg-gray-700 text-gray-300 rounded font-mono"
+                          className="text-[10px] px-1.5 py-0.5 bg-surface-hover text-text-primary rounded font-mono"
                         >
                           {`{{${v}}}`}
                         </span>
@@ -377,7 +377,7 @@ export default function EmailPage() {
                 {/* Preview snippet */}
                 <div className="flex-1 mb-4">
                   <div
-                    className="text-xs text-gray-500 line-clamp-3 leading-relaxed"
+                    className="text-xs text-text-muted line-clamp-3 leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html:
                         template.body_html?.replace(/<[^>]*>/g, " ").slice(0, 150) ||
@@ -387,10 +387,10 @@ export default function EmailPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 pt-3 border-t border-gray-700">
+                <div className="flex items-center gap-1 pt-3 border-t border-border">
                   <button
                     onClick={() => openPreview(template)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg transition-colors"
                     title="Visualizar"
                   >
                     <Eye className="w-3.5 h-3.5" />
@@ -398,7 +398,7 @@ export default function EmailPage() {
                   </button>
                   <button
                     onClick={() => openEditEditor(template)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg transition-colors"
                     title="Editar"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -407,7 +407,7 @@ export default function EmailPage() {
                   <div className="flex-1" />
                   <button
                     onClick={() => openSendDialog(template)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs text-indigo-400 hover:text-white hover:bg-indigo-600 rounded-lg transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs text-primary hover:text-text-primary hover:bg-primary rounded-lg transition-colors"
                     title="Enviar"
                   >
                     <Send className="w-3.5 h-3.5" />
@@ -415,7 +415,7 @@ export default function EmailPage() {
                   </button>
                   <button
                     onClick={() => handleDelete(template.id)}
-                    className="p-1.5 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                    className="p-1.5 text-text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                     title="Excluir"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -437,16 +437,16 @@ export default function EmailPage() {
           onClick={() => setShowEditor(false)}
         >
           <div
-            className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto"
+            className="bg-surface border border-border rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-text-primary">
                 {editingTemplate ? "Editar Template" : "Novo Template"}
               </h2>
               <button
                 onClick={() => setShowEditor(false)}
-                className="text-gray-400 hover:text-gray-100"
+                className="text-text-secondary hover:text-text-primary"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -456,7 +456,7 @@ export default function EmailPage() {
               {/* Name + Category */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
-                  <label className="text-xs text-gray-500 mb-1 block">
+                  <label className="text-xs text-text-muted mb-1 block">
                     Nome *
                   </label>
                   <input
@@ -464,18 +464,18 @@ export default function EmailPage() {
                     placeholder="Nome do template"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+                    className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">
+                  <label className="text-xs text-text-muted mb-1 block">
                     Categoria
                   </label>
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-gray-900 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm"
+                    className="w-full bg-background-secondary border border-border text-text-primary rounded-lg px-3 py-2 text-sm"
                   >
                     {CATEGORY_OPTIONS.filter((o) => o.value).map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -488,7 +488,7 @@ export default function EmailPage() {
 
               {/* Subject */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
+                <label className="text-xs text-text-muted mb-1 block">
                   Assunto *
                 </label>
                 <input
@@ -496,13 +496,13 @@ export default function EmailPage() {
                   placeholder="Assunto do e-mail"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted"
                 />
               </div>
 
               {/* Body HTML */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
+                <label className="text-xs text-text-muted mb-1 block">
                   Corpo HTML
                 </label>
                 <textarea
@@ -512,13 +512,13 @@ export default function EmailPage() {
                     setForm({ ...form, body_html: e.target.value })
                   }
                   rows={10}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 resize-none font-mono"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted resize-none font-mono"
                 />
               </div>
 
               {/* Body Text (fallback) */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
+                <label className="text-xs text-text-muted mb-1 block">
                   Texto alternativo (opcional)
                 </label>
                 <textarea
@@ -528,13 +528,13 @@ export default function EmailPage() {
                     setForm({ ...form, body_text: e.target.value })
                   }
                   rows={3}
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 resize-none"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted resize-none"
                 />
               </div>
 
               {/* Variables */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
+                <label className="text-xs text-text-muted mb-1 block">
                   Variaveis (separadas por virgula)
                 </label>
                 <input
@@ -544,9 +544,9 @@ export default function EmailPage() {
                   onChange={(e) =>
                     setForm({ ...form, variables: e.target.value })
                   }
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500 font-mono"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted font-mono"
                 />
-                <p className="text-[10px] text-gray-600 mt-1">
+                <p className="text-[10px] text-text-muted mt-1">
                   Use {`{{variavel}}`} no corpo do e-mail para substituicao automatica
                 </p>
               </div>
@@ -559,17 +559,17 @@ export default function EmailPage() {
                   }
                   className={cn(
                     "w-10 h-5 rounded-full transition-colors relative",
-                    form.is_active ? "bg-indigo-600" : "bg-gray-600"
+                    form.is_active ? "bg-primary" : "bg-text-muted"
                   )}
                 >
                   <div
                     className={cn(
-                      "w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform",
+                      "w-4 h-4 rounded-full bg-surface absolute top-0.5 transition-transform",
                       form.is_active ? "translate-x-5" : "translate-x-0.5"
                     )}
                   />
                 </button>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-text-secondary">
                   {form.is_active ? "Ativo" : "Inativo"}
                 </span>
               </div>
@@ -578,14 +578,14 @@ export default function EmailPage() {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowEditor(false)}
-                className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100"
+                className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={!form.name.trim() || !form.subject.trim() || saving}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm disabled:opacity-50 transition-colors"
               >
                 {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Salvar
@@ -605,26 +605,26 @@ export default function EmailPage() {
           onClick={() => setShowSendDialog(false)}
         >
           <div
-            className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md"
+            className="bg-surface border border-border rounded-xl p-6 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Enviar Email</h2>
+              <h2 className="text-lg font-semibold text-text-primary">Enviar Email</h2>
               <button
                 onClick={() => setShowSendDialog(false)}
-                className="text-gray-400 hover:text-gray-100"
+                className="text-text-secondary hover:text-text-primary"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Template info */}
-            <div className="bg-gray-900 rounded-lg p-3 mb-4">
-              <p className="text-xs text-gray-500">Template</p>
-              <p className="text-sm text-white font-medium">
+            <div className="bg-background-secondary rounded-lg p-3 mb-4">
+              <p className="text-xs text-text-muted">Template</p>
+              <p className="text-sm text-text-primary font-medium">
                 {sendingTemplate.name}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-text-secondary mt-0.5">
                 Assunto: {sendingTemplate.subject}
               </p>
             </div>
@@ -632,7 +632,7 @@ export default function EmailPage() {
             <div className="space-y-3">
               {/* Recipient */}
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
+                <label className="text-xs text-text-muted mb-1 block">
                   Destinatario *
                 </label>
                 <input
@@ -642,7 +642,7 @@ export default function EmailPage() {
                   onChange={(e) =>
                     setSendForm({ ...sendForm, to: e.target.value })
                   }
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+                  className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted"
                   autoFocus
                 />
               </div>
@@ -650,10 +650,10 @@ export default function EmailPage() {
               {/* Variables */}
               {sendingTemplate.variables && sendingTemplate.variables.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs text-gray-500">Variaveis</p>
+                  <p className="text-xs text-text-muted">Variaveis</p>
                   {sendingTemplate.variables.map((varName) => (
                     <div key={varName}>
-                      <label className="text-[11px] text-gray-400 mb-0.5 block font-mono">
+                      <label className="text-[11px] text-text-secondary mb-0.5 block font-mono">
                         {`{{${varName}}}`}
                       </label>
                       <input
@@ -669,7 +669,7 @@ export default function EmailPage() {
                             },
                           })
                         }
-                        className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-500"
+                        className="w-full bg-background-secondary border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted"
                       />
                     </div>
                   ))}
@@ -698,14 +698,14 @@ export default function EmailPage() {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowSendDialog(false)}
-                className="px-4 py-2 text-sm text-gray-400 hover:text-gray-100"
+                className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSend}
                 disabled={!sendForm.to.trim() || sending}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm disabled:opacity-50 transition-colors"
               >
                 {sending ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -729,43 +729,43 @@ export default function EmailPage() {
           onClick={() => setShowPreview(false)}
         >
           <div
-            className="bg-gray-800 border border-gray-700 rounded-xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col"
+            className="bg-surface border border-border rounded-xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Preview header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+            <div className="flex items-center justify-between p-4 border-b border-border">
               <div>
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold text-text-primary">
                   Visualizacao
                 </h2>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-text-secondary">
                   {previewTemplate.name}
                 </p>
               </div>
               <button
                 onClick={() => setShowPreview(false)}
-                className="text-gray-400 hover:text-gray-100"
+                className="text-text-secondary hover:text-text-primary"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Email header simulation */}
-            <div className="px-6 py-3 bg-gray-900 border-b border-gray-700">
+            <div className="px-6 py-3 bg-background-secondary border-b border-border">
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-gray-500 w-16">De:</span>
-                <span className="text-gray-300">noreply@frzgroup.com.br</span>
+                <span className="text-text-muted w-16">De:</span>
+                <span className="text-text-primary">noreply@frzgroup.com.br</span>
               </div>
               <div className="flex items-center gap-2 text-xs mt-1">
-                <span className="text-gray-500 w-16">Assunto:</span>
-                <span className="text-white font-medium">
+                <span className="text-text-muted w-16">Assunto:</span>
+                <span className="text-text-primary font-medium">
                   {previewTemplate.subject}
                 </span>
               </div>
               {previewTemplate.variables && previewTemplate.variables.length > 0 && (
                 <div className="flex items-center gap-2 text-xs mt-1">
-                  <span className="text-gray-500 w-16">Variaveis:</span>
-                  <span className="text-indigo-400 font-mono">
+                  <span className="text-text-muted w-16">Variaveis:</span>
+                  <span className="text-primary font-mono">
                     {previewTemplate.variables.map((v) => `{{${v}}}`).join(", ")}
                   </span>
                 </div>
@@ -775,7 +775,7 @@ export default function EmailPage() {
             {/* HTML preview */}
             <div className="flex-1 overflow-y-auto p-6">
               <div
-                className="bg-white rounded-lg p-6 min-h-[200px] text-gray-900"
+                className="bg-surface rounded-lg p-6 min-h-[200px] text-gray-900"
                 dangerouslySetInnerHTML={{
                   __html: getRenderedHtml(previewTemplate),
                 }}
@@ -783,8 +783,8 @@ export default function EmailPage() {
             </div>
 
             {/* Preview footer */}
-            <div className="flex items-center justify-between p-4 border-t border-gray-700">
-              <span className="text-xs text-gray-500">
+            <div className="flex items-center justify-between p-4 border-t border-border">
+              <span className="text-xs text-text-muted">
                 Criado em{" "}
                 {new Date(previewTemplate.created_at).toLocaleDateString("pt-BR")}
               </span>
@@ -794,7 +794,7 @@ export default function EmailPage() {
                     setShowPreview(false);
                     openEditEditor(previewTemplate);
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg transition-colors"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   Editar
@@ -804,7 +804,7 @@ export default function EmailPage() {
                     setShowPreview(false);
                     openSendDialog(previewTemplate);
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-indigo-400 hover:text-white hover:bg-indigo-600 rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-primary hover:text-text-primary hover:bg-primary rounded-lg transition-colors"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Enviar

@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<InstanceStatus, { label: string; dotColor: string; b
     label: "Disconnected",
     dotColor: "bg-gray-400",
     bgColor: "bg-gray-400/10",
-    textColor: "text-gray-400",
+    textColor: "text-text-secondary",
   },
   banned: {
     label: "Banned",

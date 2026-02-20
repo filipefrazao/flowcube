@@ -63,25 +63,25 @@ interface ParameterEditorProps {
 
 function ParameterEditor({ parameter, onChange, onDelete }: ParameterEditorProps) {
   return (
-    <div className="p-4 rounded-lg border border-gray-200 bg-gray-50 space-y-3">
+    <div className="p-4 rounded-lg border border-border bg-background-secondary space-y-3">
       <div className="flex items-start justify-between">
         <div className="flex-1 grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Name</label>
             <input
               type="text"
               value={parameter.key}
               onChange={(e) => onChange({ ...parameter, key: e.target.value, name: e.target.value })}
               placeholder="parameter_name"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="w-full px-3 py-2 rounded-lg border border-border text-sm font-mono focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Type</label>
             <select
               value={parameter.type}
               onChange={(e) => onChange({ ...parameter, type: e.target.value as typeof PARAM_TYPES[number] })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             >
               {PARAM_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
@@ -91,19 +91,19 @@ function ParameterEditor({ parameter, onChange, onDelete }: ParameterEditorProps
         </div>
         <button
           onClick={onDelete}
-          className="ml-2 p-2 rounded-lg hover:bg-red-100 text-gray-400 hover:text-red-500"
+          className="ml-2 p-2 rounded-lg hover:bg-red-100 text-text-secondary hover:text-red-500"
         >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
+        <label className="block text-xs font-medium text-text-muted mb-1">Description</label>
         <input
           type="text"
           value={parameter.description}
           onChange={(e) => onChange({ ...parameter, description: e.target.value })}
           placeholder="Describe this parameter..."
-          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+          className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
         />
       </div>
       <div className="flex items-center gap-4">
@@ -112,7 +112,7 @@ function ParameterEditor({ parameter, onChange, onDelete }: ParameterEditorProps
             type="checkbox"
             checked={parameter.required}
             onChange={(e) => onChange({ ...parameter, required: e.target.checked })}
-            className="rounded border-gray-300 text-pink-500 focus:ring-pink-500"
+            className="rounded border-border text-pink-500 focus:ring-pink-500"
           />
           Required
         </label>
@@ -123,7 +123,7 @@ function ParameterEditor({ parameter, onChange, onDelete }: ParameterEditorProps
               value={String(parameter.default ?? "")}
               onChange={(e) => onChange({ ...parameter, default: e.target.value || undefined })}
               placeholder="Default value"
-              className="w-full px-3 py-1.5 rounded border border-gray-200 text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="w-full px-3 py-1.5 rounded border border-border text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
         )}
@@ -341,11 +341,11 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
           <div className="space-y-4">
             <div className="grid grid-cols-4 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Method</label>
                 <select
                   value={httpMethod}
                   onChange={(e) => setHttpMethod(e.target.value as typeof HTTP_METHODS[number])}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  className="w-full px-3 py-2 rounded-lg border border-border focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 >
                   {HTTP_METHODS.map((method) => (
                     <option key={method} value={method}>{method}</option>
@@ -353,7 +353,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                 </select>
               </div>
               <div className="col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   URL <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -363,7 +363,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                   placeholder="https://api.example.com/endpoint"
                   className={cn(
                     "w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                    errors.httpUrl ? "border-red-300" : "border-gray-200"
+                    errors.httpUrl ? "border-red-300" : "border-border"
                   )}
                 />
                 {errors.httpUrl && (
@@ -372,26 +372,26 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Headers (JSON)</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Headers (JSON)</label>
               <textarea
                 value={httpHeaders}
                 onChange={(e) => setHttpHeaders(e.target.value)}
                 rows={3}
                 placeholder='{"Content-Type": "application/json"}'
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-3 py-2 rounded-lg border border-border font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Body Template
-                <span className="text-xs text-gray-500 ml-2">Use {'{'}{'{'} param_name {'}'}{'}' } for variables</span>
+                <span className="text-xs text-text-muted ml-2">Use {'{'}{'{'} param_name {'}'}{'}' } for variables</span>
               </label>
               <textarea
                 value={httpBodyTemplate}
                 onChange={(e) => setHttpBodyTemplate(e.target.value)}
                 rows={4}
                 placeholder='{"query": "{{query}}", "limit": {{limit}}}'
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-3 py-2 rounded-lg border border-border font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -401,20 +401,20 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Language</label>
               <select
                 value={codeLanguage}
                 onChange={(e) => setCodeLanguage(e.target.value as "javascript" | "python")}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-3 py-2 rounded-lg border border-border focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               >
                 <option value="javascript">JavaScript</option>
                 <option value="python">Python</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Code <span className="text-red-500">*</span>
-                <span className="text-xs text-gray-500 ml-2">Parameters available as variables</span>
+                <span className="text-xs text-text-muted ml-2">Parameters available as variables</span>
               </label>
               <textarea
                 value={code}
@@ -426,7 +426,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                 }
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                  errors.code ? "border-red-300" : "border-gray-200"
+                  errors.code ? "border-red-300" : "border-border"
                 )}
               />
               {errors.code && (
@@ -440,7 +440,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Knowledge Base <span className="text-red-500">*</span>
               </label>
               <select
@@ -448,7 +448,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                 onChange={(e) => setKnowledgeBaseId(e.target.value)}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                  errors.knowledgeBaseId ? "border-red-300" : "border-gray-200"
+                  errors.knowledgeBaseId ? "border-red-300" : "border-border"
                 )}
               >
                 <option value="">Select a knowledge base...</option>
@@ -461,14 +461,14 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Top K Results</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Top K Results</label>
               <input
                 type="number"
                 min={1}
                 max={20}
                 value={topK}
                 onChange={(e) => setTopK(parseInt(e.target.value))}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-3 py-2 rounded-lg border border-border focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -476,7 +476,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
 
       default:
         return (
-          <div className="text-sm text-gray-500 text-center py-8">
+          <div className="text-sm text-text-muted text-center py-8">
             Configure parameters below. The function will be called with these parameters.
           </div>
         );
@@ -489,26 +489,26 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-600">
-              <Wrench className="w-6 h-6 text-white" />
+              <Wrench className="w-6 h-6 text-text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-text-primary">
                 {tool ? "Edit Tool" : "Create New Tool"}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-muted">
                 Define a tool for AI agents to use
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+            className="p-2 rounded-lg hover:bg-surface-hover text-text-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -519,7 +519,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Tool Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -529,7 +529,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                 placeholder="get_weather"
                 className={cn(
                   "w-full px-4 py-3 rounded-lg border font-mono focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                  errors.name ? "border-red-300" : "border-gray-200"
+                  errors.name ? "border-red-300" : "border-border"
                 )}
               />
               {errors.name && (
@@ -537,7 +537,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -547,7 +547,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                 rows={2}
                 className={cn(
                   "w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-pink-500 focus:border-transparent",
-                  errors.description ? "border-red-300" : "border-gray-200"
+                  errors.description ? "border-red-300" : "border-border"
                 )}
               />
               {errors.description && (
@@ -558,7 +558,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
 
           {/* Tool Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tool Type</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Tool Type</label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {TOOL_TYPES.map(({ value, label, icon: Icon, description }) => (
                 <button
@@ -568,33 +568,33 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                     "p-3 rounded-lg border-2 text-left transition-all",
                     toolType === value
                       ? "border-pink-500 bg-pink-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-border hover:border-border"
                   )}
                 >
                   <Icon className={cn(
                     "w-5 h-5 mb-1",
-                    toolType === value ? "text-pink-500" : "text-gray-500"
+                    toolType === value ? "text-pink-500" : "text-text-muted"
                   )} />
-                  <div className="font-medium text-sm text-gray-900">{label}</div>
-                  <div className="text-xs text-gray-500">{description}</div>
+                  <div className="font-medium text-sm text-text-primary">{label}</div>
+                  <div className="text-xs text-text-muted">{description}</div>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Type-specific Config */}
-          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
-            <h3 className="font-medium text-gray-900 mb-4">Configuration</h3>
+          <div className="p-4 rounded-lg border border-border bg-background-secondary">
+            <h3 className="font-medium text-text-primary mb-4">Configuration</h3>
             {renderTypeConfig()}
           </div>
 
           {/* Parameters */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-gray-900">Parameters</h3>
+              <h3 className="font-medium text-text-primary">Parameters</h3>
               <button
                 onClick={addParameter}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm text-gray-700"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-hover hover:bg-surface text-sm text-text-secondary"
               >
                 <Plus className="w-4 h-4" />
                 Add Parameter
@@ -610,7 +610,7 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                 />
               ))}
               {parameters.length === 0 && (
-                <div className="text-center py-8 text-gray-500 border border-dashed border-gray-300 rounded-lg">
+                <div className="text-center py-8 text-text-muted border border-dashed border-border rounded-lg">
                   No parameters defined. Click "Add Parameter" to add one.
                 </div>
               )}
@@ -619,11 +619,11 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
 
           {/* Test Section (only for existing tools) */}
           {tool && (
-            <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
-              <h3 className="font-medium text-gray-900 mb-3">Test Tool</h3>
+            <div className="p-4 rounded-lg border border-border bg-background-secondary">
+              <h3 className="font-medium text-text-primary mb-3">Test Tool</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-text-muted mb-1">
                     Test Arguments (JSON)
                   </label>
                   <textarea
@@ -631,13 +631,13 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
                     onChange={(e) => setTestArgs(e.target.value)}
                     rows={3}
                     placeholder='{"param_name": "value"}'
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 rounded-lg border border-border font-mono text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
                 <button
                   onClick={handleTest}
                   disabled={isTesting}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-text-primary hover:bg-blue-600 disabled:opacity-50"
                 >
                   {isTesting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -677,17 +677,17 @@ export default function ToolEditor({ tool, onClose, onSave }: ToolEditorProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-background-secondary">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-200"
+            className="px-4 py-2 rounded-lg text-text-secondary hover:bg-surface-hover"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium hover:from-pink-600 hover:to-purple-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-text-primary font-medium hover:from-pink-600 hover:to-purple-700 disabled:opacity-50"
           >
             {isSaving ? (
               <>

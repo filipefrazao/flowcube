@@ -101,23 +101,23 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
 
   if (loading) {
     return (
-      <div className={cn("w-80 bg-surface border-l border-gray-800 flex items-center justify-center", className)}>
-        <RefreshCw className="w-5 h-5 text-gray-400 animate-spin" />
+      <div className={cn("w-80 bg-surface border-l border-border flex items-center justify-center", className)}>
+        <RefreshCw className="w-5 h-5 text-text-secondary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className={cn("w-80 bg-surface border-l border-gray-800 flex flex-col h-full", className)}>
+    <div className={cn("w-80 bg-surface border-l border-border flex flex-col h-full", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-gray-200">Schedule</h2>
+          <h2 className="text-sm font-semibold text-text-primary">Schedule</h2>
         </div>
         {onClose && (
-          <button onClick={onClose} className="p-1 hover:bg-gray-800 rounded">
-            <X className="w-4 h-4 text-gray-400" />
+          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded">
+            <X className="w-4 h-4 text-text-secondary" />
           </button>
         )}
       </div>
@@ -126,7 +126,7 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Active Toggle */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-300">Active</span>
+          <span className="text-sm text-text-primary">Active</span>
           <button
             onClick={() => updateField("is_active", !schedule.is_active)}
             className="flex items-center gap-1"
@@ -134,18 +134,18 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
             {schedule.is_active ? (
               <ToggleRight className="w-8 h-5 text-green-500" />
             ) : (
-              <ToggleLeft className="w-8 h-5 text-gray-500" />
+              <ToggleLeft className="w-8 h-5 text-text-muted" />
             )}
           </button>
         </div>
 
         {/* Schedule Type */}
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-2">Type</label>
+          <label className="block text-xs font-medium text-text-secondary mb-2">Type</label>
           <select
             value={schedule.schedule_type}
             onChange={(e) => updateField("schedule_type", e.target.value)}
-            className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           >
             {SCHEDULE_TYPES.map((type) => (
               <option key={type.value} value={type.value}>
@@ -153,7 +153,7 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-text-muted mt-1">
             {SCHEDULE_TYPES.find((t) => t.value === schedule.schedule_type)?.description}
           </p>
         </div>
@@ -161,7 +161,7 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
         {/* Type-specific fields */}
         {schedule.schedule_type === "interval" && (
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-2">
               Interval (minutes)
             </label>
             <input
@@ -169,14 +169,14 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
               min={1}
               value={schedule.interval_minutes || 5}
               onChange={(e) => updateField("interval_minutes", parseInt(e.target.value) || 5)}
-              className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         )}
 
         {schedule.schedule_type === "cron" && (
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-2">
               Cron Expression
             </label>
             <input
@@ -184,35 +184,35 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
               value={schedule.cron_expression || ""}
               onChange={(e) => updateField("cron_expression", e.target.value)}
               placeholder="*/5 * * * *"
-              className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
-            <p className="text-xs text-gray-500 mt-1">min hour dom month dow</p>
+            <p className="text-xs text-text-muted mt-1">min hour dom month dow</p>
           </div>
         )}
 
         {["daily", "weekly", "monthly"].includes(schedule.schedule_type) && (
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-2">
               Time of Day
             </label>
             <input
               type="time"
               value={schedule.time_of_day || "09:00"}
               onChange={(e) => updateField("time_of_day", e.target.value)}
-              className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         )}
 
         {schedule.schedule_type === "weekly" && (
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-2">
               Day of Week
             </label>
             <select
               value={schedule.day_of_week ?? 1}
               onChange={(e) => updateField("day_of_week", parseInt(e.target.value))}
-              className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               {DAYS_OF_WEEK.map((day) => (
                 <option key={day.value} value={day.value}>
@@ -225,7 +225,7 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
 
         {schedule.schedule_type === "monthly" && (
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-2">
               Day of Month
             </label>
             <input
@@ -234,47 +234,47 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
               max={31}
               value={schedule.day_of_month || 1}
               onChange={(e) => updateField("day_of_month", parseInt(e.target.value) || 1)}
-              className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         )}
 
         {schedule.schedule_type === "once" && (
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-2">
               Run At
             </label>
             <input
               type="datetime-local"
               value={schedule.run_at?.slice(0, 16) || ""}
               onChange={(e) => updateField("run_at", e.target.value)}
-              className="w-full px-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         )}
 
         {/* Stats */}
         {(schedule.last_run || schedule.run_count) && (
-          <div className="pt-2 border-t border-gray-800 space-y-2">
-            <h3 className="text-xs font-medium text-gray-400">Stats</h3>
+          <div className="pt-2 border-t border-border space-y-2">
+            <h3 className="text-xs font-medium text-text-secondary">Stats</h3>
             {schedule.run_count !== undefined && (
               <div className="flex justify-between text-xs">
-                <span className="text-gray-500">Total Runs</span>
-                <span className="text-gray-300">{schedule.run_count}</span>
+                <span className="text-text-muted">Total Runs</span>
+                <span className="text-text-primary">{schedule.run_count}</span>
               </div>
             )}
             {schedule.last_run && (
               <div className="flex justify-between text-xs">
-                <span className="text-gray-500">Last Run</span>
-                <span className="text-gray-300">
+                <span className="text-text-muted">Last Run</span>
+                <span className="text-text-primary">
                   {new Date(schedule.last_run).toLocaleString()}
                 </span>
               </div>
             )}
             {schedule.next_run && (
               <div className="flex justify-between text-xs">
-                <span className="text-gray-500">Next Run</span>
-                <span className="text-gray-300">
+                <span className="text-text-muted">Next Run</span>
+                <span className="text-text-primary">
                   {new Date(schedule.next_run).toLocaleString()}
                 </span>
               </div>
@@ -291,11 +291,11 @@ export default function SchedulePanel({ workflowId, className, onClose }: Schedu
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-800 flex gap-2">
+      <div className="p-4 border-t border-border flex gap-2">
         <button
           onClick={saveSchedule}
           disabled={saving}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-gray-900 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
           {saving ? "Saving..." : "Save Schedule"}

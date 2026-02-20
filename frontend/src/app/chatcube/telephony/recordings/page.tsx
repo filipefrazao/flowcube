@@ -32,15 +32,15 @@ function formatDuration(seconds: number): string {
 const directionIcons: Record<string, React.ReactNode> = {
   INBOUND: <PhoneIncoming className="w-4 h-4 text-green-400" />,
   OUTBOUND: <PhoneOutgoing className="w-4 h-4 text-blue-400" />,
-  INTERNAL: <Phone className="w-4 h-4 text-gray-400" />,
+  INTERNAL: <Phone className="w-4 h-4 text-text-secondary" />,
 };
 
 const transcriptionStatusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  pending: { label: "Pendente", color: "text-gray-400", bg: "bg-gray-400/10" },
+  pending: { label: "Pendente", color: "text-text-secondary", bg: "bg-gray-400/10" },
   processing: { label: "Processando", color: "text-yellow-400", bg: "bg-yellow-400/10" },
   completed: { label: "Transcrita", color: "text-green-400", bg: "bg-green-400/10" },
   failed: { label: "Falhou", color: "text-red-400", bg: "bg-red-400/10" },
-  skipped: { label: "Ignorada", color: "text-gray-500", bg: "bg-gray-500/10" },
+  skipped: { label: "Ignorada", color: "text-text-muted", bg: "bg-gray-500/10" },
 };
 
 export default function RecordingsPage() {
@@ -153,7 +153,7 @@ export default function RecordingsPage() {
               />
             </div>
             <button onClick={() => { setPage(1); loadCalls(); }}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors">
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors">
               <Filter className="w-4 h-4" /> Buscar
             </button>
           </div>

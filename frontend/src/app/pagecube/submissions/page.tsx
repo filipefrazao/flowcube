@@ -166,7 +166,7 @@ function SubmissionsContent() {
                 Quando alguem preencher um formulario, as respostas aparecerao aqui.
               </p>
               <Link href="/pagecube/forms"
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium transition-colors text-sm">
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium transition-colors text-sm">
                 <ClipboardList className="w-4 h-4" /> Ver Formularios
               </Link>
             </div>

@@ -52,7 +52,7 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
   }, [achievement, celebrateWithSound, onComplete]);
 
   const rarityColors = {
-    common: 'from-gray-500 to-gray-700',
+    common: 'from-gray-500 to-surface-hover',
     rare: 'from-blue-500 to-blue-700',
     epic: 'from-purple-500 to-pink-500',
     legendary: 'from-yellow-500 to-orange-500'
@@ -66,7 +66,7 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
   };
 
   const rarityTextColor = {
-    common: 'text-gray-400',
+    common: 'text-text-secondary',
     rare: 'text-blue-400',
     epic: 'text-purple-400',
     legendary: 'text-yellow-400'
@@ -115,7 +115,7 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
               repeat: Infinity
             }}
           >
-            <Icon className="w-24 h-24 text-white relative z-10" />
+            <Icon className="w-24 h-24 text-text-primary relative z-10" />
           </motion.div>
 
           <motion.div
@@ -126,16 +126,16 @@ export function AchievementUnlock({ achievement, onComplete }: AchievementUnlock
             <p className={`text-sm uppercase tracking-wider mb-2 ${rarityTextColor[achievement.rarity]}`}>
               Achievement Unlocked!
             </p>
-            <h2 className="text-4xl font-bold text-white mb-3">
+            <h2 className="text-4xl font-bold text-text-primary mb-3">
               {achievement.name}
             </h2>
-            <p className="text-lg text-gray-300 mb-4">
+            <p className="text-lg text-text-primary mb-4">
               {achievement.description}
             </p>
             
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${rarityColors[achievement.rarity]} backdrop-blur`}>
-              <Star className="w-4 h-4 text-white" />
-              <span className="capitalize font-semibold text-white">{achievement.rarity}</span>
+              <Star className="w-4 h-4 text-text-primary" />
+              <span className="capitalize font-semibold text-text-primary">{achievement.rarity}</span>
             </div>
 
             <motion.div

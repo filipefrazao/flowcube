@@ -113,18 +113,18 @@ function TelegramButtonsNodeComponent({ data, selected }: TelegramButtonsNodePro
       </div>
 
       {/* Content */}
-      <div className="p-3 bg-white/50 dark:bg-gray-900/50 space-y-2">
+      <div className="p-3 bg-surface/50 dark:bg-background-secondary/50 space-y-2">
         {keyboardType === 'remove' ? (
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+          <p className="text-xs text-text-muted dark:text-text-secondary text-center py-2">
             Removes the current keyboard
           </p>
         ) : keyboardType === 'force_reply' ? (
           <div className="space-y-2">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-text-muted dark:text-text-secondary">
               Forces user to reply to this message
             </p>
             {data.config?.input_field_placeholder && (
-              <p className="text-xs text-gray-600 dark:text-gray-400 italic">
+              <p className="text-xs text-text-muted dark:text-text-secondary italic">
                 "{data.config.input_field_placeholder}"
               </p>
             )}
@@ -133,8 +133,8 @@ function TelegramButtonsNodeComponent({ data, selected }: TelegramButtonsNodePro
           <>
             {/* Message preview */}
             {data.config?.text_template && (
-              <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+              <div className="p-2 bg-surface-hover dark:bg-surface rounded-lg">
+                <p className="text-xs text-text-muted dark:text-text-secondary truncate">
                   {data.config.text_template.substring(0, 50)}
                   {data.config.text_template.length > 50 ? '...' : ''}
                 </p>
@@ -154,8 +154,8 @@ function TelegramButtonsNodeComponent({ data, selected }: TelegramButtonsNodePro
                           className={cn(
                             'flex-1 px-2 py-1 text-xs rounded text-center truncate flex items-center justify-center gap-1',
                             keyboardType === 'inline'
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                              ? 'bg-blue-500 text-text-primary'
+                              : 'bg-surface-hover text-text-primary'
                           )}
                         >
                           {btn.url || btn.web_app ? (
@@ -166,30 +166,30 @@ function TelegramButtonsNodeComponent({ data, selected }: TelegramButtonsNodePro
                       );
                     })}
                     {row.length > 3 && (
-                      <span className="text-xs text-gray-400 self-center">+{row.length - 3}</span>
+                      <span className="text-xs text-text-secondary self-center">+{row.length - 3}</span>
                     )}
                   </div>
                 ))}
                 {buttons.length > 3 && (
-                  <p className="text-xs text-gray-400 text-center">
+                  <p className="text-xs text-text-secondary text-center">
                     +{buttons.length - 3} more rows
                   </p>
                 )}
               </div>
             ) : (
-              <p className="text-xs text-gray-400 text-center py-2">
+              <p className="text-xs text-text-secondary text-center py-2">
                 No buttons configured
               </p>
             )}
 
             {/* Keyboard stats */}
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
-              <span className="text-gray-500 flex items-center gap-1">
+            <div className="flex items-center justify-between text-xs pt-2 border-t border-border/50 dark:border-border/50">
+              <span className="text-text-muted flex items-center gap-1">
                 <Grid3X3 className="w-3 h-3" />
                 {buttons.length} rows, {totalButtons} buttons
               </span>
               {keyboardType === 'reply' && (
-                <span className="text-gray-500">
+                <span className="text-text-muted">
                   {data.config?.one_time_keyboard ? 'One-time' : 'Persistent'}
                 </span>
               )}
@@ -199,9 +199,9 @@ function TelegramButtonsNodeComponent({ data, selected }: TelegramButtonsNodePro
 
         {/* Click stats */}
         {data.stats && data.stats.clicks_total > 0 && (
-          <div className="text-xs pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
-            <span className="text-gray-500">Total clicks:</span>
-            <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+          <div className="text-xs pt-2 border-t border-border/50 dark:border-border/50">
+            <span className="text-text-muted">Total clicks:</span>
+            <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
               {data.stats.clicks_total}
             </span>
           </div>

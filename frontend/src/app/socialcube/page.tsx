@@ -35,7 +35,7 @@ export default function SocialCubeDashboard() {
     { label: "Accounts", href: "/socialcube/accounts", icon: Users, color: "bg-orange-600 hover:bg-orange-700" },
     { label: "SmartLinks", href: "/socialcube/smartlinks", icon: Link2, color: "bg-pink-600 hover:bg-pink-700" },
     { label: "Competitors", href: "/socialcube/competitors", icon: FileText, color: "bg-red-600 hover:bg-red-700" },
-    { label: "Lead Ads", href: "/socialcube/leadads", icon: FileText, color: "bg-indigo-600 hover:bg-indigo-700" },
+    { label: "Lead Ads", href: "/socialcube/leadads", icon: FileText, color: "bg-primary hover:bg-primary-hover" },
     { label: "Telegram", href: "/telegram", icon: Send, color: "bg-sky-600 hover:bg-sky-700" },
   ];
 
@@ -53,7 +53,7 @@ export default function SocialCubeDashboard() {
           </div>
           <button
             onClick={() => router.push("/socialcube/posts/new")}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-text-primary rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Post
@@ -83,7 +83,7 @@ export default function SocialCubeDashboard() {
               <button
                 key={action.label}
                 onClick={() => router.push(action.href)}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl text-white transition-all ${action.color}`}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl text-text-primary transition-all ${action.color}`}
               >
                 <action.icon className="w-6 h-6" />
                 <span className="text-sm font-medium">{action.label}</span>

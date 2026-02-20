@@ -29,7 +29,7 @@ const NOTE_TYPE_CONFIG: Record<
   call: { label: "Ligacao", icon: Phone, color: "bg-green-500/20 text-green-400" },
   email: { label: "E-mail", icon: Mail, color: "bg-purple-500/20 text-purple-400" },
   meeting: { label: "Reuniao", icon: Users, color: "bg-orange-500/20 text-orange-400" },
-  task: { label: "Tarefa", icon: CheckSquare, color: "bg-indigo-500/20 text-indigo-400" },
+  task: { label: "Tarefa", icon: CheckSquare, color: "bg-primary/20 text-primary" },
 };
 
 const PAGE_SIZE = 20;
@@ -187,8 +187,8 @@ export default function NotesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Notas</h1>
-          <p className="text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-text-primary">Notas</h1>
+          <p className="text-sm text-text-secondary">
             {totalCount} {totalCount === 1 ? "nota" : "notas"} em todos os leads
           </p>
         </div>
@@ -200,13 +200,13 @@ export default function NotesPage() {
           const Icon = cfg.icon;
           const count = notes.filter((n) => n.note_type === key).length;
           return (
-            <div key={key} className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg">
+            <div key={key} className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-lg">
               <div className={cn("w-7 h-7 rounded-md flex items-center justify-center", cfg.color)}>
                 <Icon className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="text-xs text-gray-500 block leading-tight">{cfg.label}</span>
-                <span className="text-sm font-bold text-gray-200">{count}</span>
+                <span className="text-xs text-text-muted block leading-tight">{cfg.label}</span>
+                <span className="text-sm font-bold text-text-primary">{count}</span>
               </div>
             </div>
           );
@@ -216,18 +216,18 @@ export default function NotesPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
             type="text"
             placeholder="Buscar no conteudo das notas..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-8 py-2 text-sm text-gray-100 placeholder-gray-500"
+            className="w-full bg-surface border border-border rounded-lg pl-10 pr-8 py-2 text-sm text-text-primary placeholder-text-muted"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -245,8 +245,8 @@ export default function NotesPage() {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border",
                   active
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-600"
+                    ? "bg-surface-hover border-border text-text-primary"
+                    : "bg-surface border-border text-text-secondary hover:text-text-primary hover:border-border"
                 )}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -257,7 +257,7 @@ export default function NotesPage() {
           {filterType && (
             <button
               onClick={() => setFilterType("")}
-              className="text-xs text-gray-500 hover:text-gray-300 px-2"
+              className="text-xs text-text-muted hover:text-text-primary px-2"
             >
               Limpar
             </button>
@@ -268,14 +268,14 @@ export default function NotesPage() {
       {/* Notes List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : notes.length === 0 ? (
         <div className="text-center py-16">
-          <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">Nenhuma nota encontrada</p>
+          <FileText className="w-12 h-12 text-text-muted mx-auto mb-3" />
+          <p className="text-text-secondary text-sm">Nenhuma nota encontrada</p>
           {(searchQuery || filterType) && (
-            <p className="text-gray-500 text-xs mt-1">
+            <p className="text-text-muted text-xs mt-1">
               Tente ajustar os filtros de busca
             </p>
           )}
@@ -289,7 +289,7 @@ export default function NotesPage() {
             return (
               <div
                 key={note.id}
-                className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-colors group"
+                className="bg-surface border border-border rounded-lg p-4 hover:border-border transition-colors group"
               >
                 <div className="flex items-start gap-3">
                   {/* Type icon */}
@@ -309,13 +309,13 @@ export default function NotesPage() {
                       {note.lead_name ? (
                         <button
                           onClick={() => navigateToLead(note.lead)}
-                          className="text-sm font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+                          className="text-sm font-medium text-primary hover:text-primary flex items-center gap-1 transition-colors"
                         >
                           {note.lead_name}
                           <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100" />
                         </button>
                       ) : (
-                        <span className="text-sm font-medium text-gray-300">
+                        <span className="text-sm font-medium text-text-primary">
                           Lead removido
                         </span>
                       )}
@@ -330,12 +330,12 @@ export default function NotesPage() {
                     </div>
 
                     {/* Note content */}
-                    <p className="text-sm text-gray-300 whitespace-pre-wrap line-clamp-4 leading-relaxed">
+                    <p className="text-sm text-text-primary whitespace-pre-wrap line-clamp-4 leading-relaxed">
                       {note.content}
                     </p>
 
                     {/* Bottom meta */}
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
                       {note.user_name && (
                         <span>Por {note.user_name}</span>
                       )}
@@ -355,8 +355,8 @@ export default function NotesPage() {
           {/* Loading more indicator */}
           {loadingMore && (
             <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
-              <span className="ml-2 text-sm text-gray-500">
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              <span className="ml-2 text-sm text-text-muted">
                 Carregando mais...
               </span>
             </div>
@@ -364,7 +364,7 @@ export default function NotesPage() {
 
           {/* End of list */}
           {!hasMore && notes.length > 0 && (
-            <div className="text-center py-4 text-xs text-gray-600">
+            <div className="text-center py-4 text-xs text-text-muted">
               Todas as {totalCount} notas carregadas
             </div>
           )}

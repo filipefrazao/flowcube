@@ -110,11 +110,11 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
       </div>
 
       {/* Content */}
-      <div className="p-3 bg-white/50 dark:bg-gray-900/50 space-y-2">
+      <div className="p-3 bg-surface/50 dark:bg-background-secondary/50 space-y-2">
         {/* Actions summary */}
         <div className="text-xs">
-          <span className="text-gray-500">Actions:</span>
-          <span className="ml-1 text-gray-700 dark:text-gray-300">
+          <span className="text-text-muted">Actions:</span>
+          <span className="ml-1 text-text-secondary dark:text-text-primary">
             {actionSummary}
           </span>
         </div>
@@ -125,12 +125,12 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
             'p-2 rounded-lg flex items-start gap-2',
             data.config.show_alert
               ? 'bg-yellow-100 dark:bg-yellow-900/30'
-              : 'bg-gray-100 dark:bg-gray-800'
+              : 'bg-surface-hover dark:bg-surface'
           )}>
             {data.config.show_alert && (
               <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
             )}
-            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+            <p className="text-xs text-text-muted dark:text-text-secondary truncate">
               {data.config.answer_text}
             </p>
           </div>
@@ -146,7 +146,7 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
 
         {/* Cache time */}
         {data.config?.cache_time && data.config.cache_time > 0 && (
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-text-muted">
             <Timer className="w-3 h-3" />
             Cache: {data.config.cache_time}s
           </div>
@@ -155,7 +155,7 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
         {/* Routes */}
         {hasRoutes && (
           <div className="space-y-1">
-            <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+            <div className="flex items-center gap-1 text-xs text-text-muted font-medium">
               <GitBranch className="w-3 h-3" />
               Callback Routes
             </div>
@@ -164,9 +164,9 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
               return (
                 <div
                   key={index}
-                  className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs"
+                  className="flex items-center gap-2 p-2 bg-surface-hover dark:bg-surface rounded text-xs"
                 >
-                  <code className="flex-1 font-mono text-gray-600 dark:text-gray-400 truncate">
+                  <code className="flex-1 font-mono text-text-muted dark:text-text-secondary truncate">
                     {route.pattern}
                   </code>
                   <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
@@ -177,7 +177,7 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
               );
             })}
             {routes.length > 3 && (
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-xs text-text-secondary text-center">
                 +{routes.length - 3} more routes
               </p>
             )}
@@ -191,7 +191,7 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
               <Edit3 className="w-3 h-3" />
               Edit to:
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+            <p className="text-xs text-text-muted dark:text-text-secondary truncate">
               {data.config.new_text_template.substring(0, 50)}
               {data.config.new_text_template.length > 50 ? '...' : ''}
             </p>
@@ -200,17 +200,17 @@ function TelegramCallbackNodeComponent({ data, selected }: TelegramCallbackNodeP
 
         {/* Stats */}
         {data.stats && (
-          <div className="flex justify-between text-xs pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex justify-between text-xs pt-2 border-t border-border/50 dark:border-border/50">
             <div>
-              <span className="text-gray-500">Handled:</span>
-              <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-text-muted">Handled:</span>
+              <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
                 {data.stats.callbacks_handled}
               </span>
             </div>
             {data.stats.avg_response_ms && (
               <div>
-                <span className="text-gray-500">Avg:</span>
-                <span className="ml-1 font-mono font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-text-muted">Avg:</span>
+                <span className="ml-1 font-mono font-medium text-text-secondary dark:text-text-primary">
                   {data.stats.avg_response_ms}ms
                 </span>
               </div>

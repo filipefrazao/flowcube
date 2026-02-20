@@ -7,10 +7,10 @@ interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Badge({ className = '', variant = 'default', children, ...props }: BadgeProps) {
   const base = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors'
   const variants: Record<string, string> = {
-    default: 'border-transparent bg-primary text-primary-foreground',
-    secondary: 'border-transparent bg-secondary text-secondary-foreground',
-    destructive: 'border-transparent bg-destructive text-destructive-foreground',
-    outline: 'text-foreground',
+    default: 'border-transparent bg-primary text-gray-900',
+    secondary: 'border-transparent bg-surface-hover text-text-secondary',
+    destructive: 'border-transparent bg-red-600 text-text-primary',
+    outline: 'border-border text-text-primary',
   }
   return <div className={[base, variants[variant], className].join(' ')} {...props}>{children}</div>
 }

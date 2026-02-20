@@ -26,11 +26,11 @@ export function FlowChart({ projectId, days }: Props) {
     return (
       <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <GitBranch className="w-4 h-4 text-indigo-400" />
-          <h3 className="text-sm font-medium text-white">User Flow</h3>
+          <GitBranch className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-medium text-text-primary">User Flow</h3>
         </div>
         <div className="h-48 flex items-center justify-center">
-          <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+          <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>
       </div>
     );
@@ -40,10 +40,10 @@ export function FlowChart({ projectId, days }: Props) {
     return (
       <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <GitBranch className="w-4 h-4 text-indigo-400" />
-          <h3 className="text-sm font-medium text-white">User Flow</h3>
+          <GitBranch className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-medium text-text-primary">User Flow</h3>
         </div>
-        <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
+        <div className="h-48 flex items-center justify-center text-text-muted text-sm">
           Not enough data for flow analysis
         </div>
       </div>
@@ -64,10 +64,10 @@ export function FlowChart({ projectId, days }: Props) {
     <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <GitBranch className="w-4 h-4 text-indigo-400" />
-          <h3 className="text-sm font-medium text-white">User Flow</h3>
+          <GitBranch className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-medium text-text-primary">User Flow</h3>
         </div>
-        <div className="flex items-center gap-4 text-xs text-gray-500">
+        <div className="flex items-center gap-4 text-xs text-text-muted">
           <span>{data.nodes.length} pages</span>
           <span>{data.links.length} transitions</span>
           <span>{data.total_transitions.toLocaleString()} total</span>
@@ -82,10 +82,10 @@ export function FlowChart({ projectId, days }: Props) {
           .map((node) => (
             <span
               key={node.id}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-xs text-indigo-300"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-lg text-xs text-primary"
             >
               {node.label}
-              <span className="text-indigo-500">{node.value}</span>
+              <span className="text-primary">{node.value}</span>
             </span>
           ))}
       </div>
@@ -102,35 +102,35 @@ export function FlowChart({ projectId, days }: Props) {
           return (
             <div
               key={i}
-              className="group flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-800/30 transition-colors"
+              className="group flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-surface-hover/30 transition-colors"
             >
               {/* Rank */}
-              <span className="w-5 text-xs text-gray-600 shrink-0 text-right">
+              <span className="w-5 text-xs text-text-muted shrink-0 text-right">
                 {i + 1}
               </span>
 
               {/* Flow path */}
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <span className="text-sm text-gray-300 truncate max-w-[200px]">
+                <span className="text-sm text-text-primary truncate max-w-[200px]">
                   {sourceLabel}
                 </span>
-                <ArrowRight className="w-3.5 h-3.5 text-gray-600 shrink-0" />
-                <span className="text-sm text-gray-300 truncate max-w-[200px]">
+                <ArrowRight className="w-3.5 h-3.5 text-text-muted shrink-0" />
+                <span className="text-sm text-text-primary truncate max-w-[200px]">
                   {targetLabel}
                 </span>
               </div>
 
               {/* Value and bar */}
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-xs text-gray-500 w-10 text-right">
+                <span className="text-xs text-text-muted w-10 text-right">
                   {pct}%
                 </span>
-                <span className="text-sm text-white font-medium w-12 text-right">
+                <span className="text-sm text-text-primary font-medium w-12 text-right">
                   {link.value}
                 </span>
-                <div className="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <div className="w-24 h-1.5 bg-surface rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-400 rounded-full transition-all"
+                    className="h-full bg-gradient-to-r from-primary to-amber-400 rounded-full transition-all"
                     style={{
                       width: `${(link.value / maxLinkValue) * 100}%`,
                     }}
@@ -143,7 +143,7 @@ export function FlowChart({ projectId, days }: Props) {
       </div>
 
       {sortedLinks.length > 20 && (
-        <div className="mt-3 text-center text-xs text-gray-600">
+        <div className="mt-3 text-center text-xs text-text-muted">
           Showing top 20 of {sortedLinks.length} transitions
         </div>
       )}

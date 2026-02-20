@@ -58,11 +58,11 @@ const TRIGGER_TYPES = [
 ];
 
 const STATUS_COLORS: Record<SequenceStatus, string> = {
-  [SequenceStatus.DRAFT]: "bg-gray-500/20 text-gray-400",
+  [SequenceStatus.DRAFT]: "bg-gray-500/20 text-text-secondary",
   [SequenceStatus.ACTIVE]: "bg-green-500/20 text-green-400",
   [SequenceStatus.PAUSED]: "bg-yellow-500/20 text-yellow-400",
   [SequenceStatus.COMPLETED]: "bg-blue-500/20 text-blue-400",
-  [SequenceStatus.ARCHIVED]: "bg-gray-500/20 text-gray-400",
+  [SequenceStatus.ARCHIVED]: "bg-gray-500/20 text-text-secondary",
 };
 
 const DELAY_UNITS = [
@@ -301,7 +301,7 @@ export function EmailSequenceBuilder({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Sequence name"
-                className="bg-transparent text-lg font-semibold text-white placeholder-gray-500 focus:outline-none border-b border-transparent hover:border-white/20 focus:border-blue-500 px-1 py-0.5"
+                className="bg-transparent text-lg font-semibold text-text-primary placeholder-text-muted focus:outline-none border-b border-transparent hover:border-white/20 focus:border-primary px-1 py-0.5"
               />
               {sequenceId && (
                 <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium ml-2", STATUS_COLORS[currentStatus])}>
@@ -337,12 +337,12 @@ export function EmailSequenceBuilder({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Save
             </button>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-surface/5 text-text-secondary hover:text-text-primary transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -352,20 +352,20 @@ export function EmailSequenceBuilder({
         <div className="px-6 py-2 border-b border-white/5 flex items-center gap-1">
           <button
             onClick={() => setActiveTab("steps")}
-            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", activeTab === "steps" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}
+            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", activeTab === "steps" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}
           >
             Steps
           </button>
           <button
             onClick={() => setActiveTab("settings")}
-            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", activeTab === "settings" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}
+            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", activeTab === "settings" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}
           >
             Settings
           </button>
           {sequenceId && (
             <button
               onClick={() => setActiveTab("stats")}
-              className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", activeTab === "stats" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}
+              className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", activeTab === "stats" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}
             >
               Statistics
             </button>
@@ -384,14 +384,14 @@ export function EmailSequenceBuilder({
           {activeTab === "steps" && (
             <div className="space-y-6">
               {/* Trigger */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-surface/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 rounded-lg bg-yellow-500/20">
                     <Zap className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-white">Trigger</h3>
-                    <p className="text-sm text-gray-400">When should this sequence start?</p>
+                    <h3 className="font-medium text-text-primary">Trigger</h3>
+                    <p className="text-sm text-text-secondary">When should this sequence start?</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
@@ -403,26 +403,26 @@ export function EmailSequenceBuilder({
                         "flex items-start gap-3 p-3 rounded-lg border transition-all text-left",
                         triggerType === trigger.value
                           ? "bg-yellow-500/10 border-yellow-500/50"
-                          : "bg-white/5 border-white/10 hover:bg-white/10"
+                          : "bg-surface/5 border-white/10 hover:bg-surface/10"
                       )}
                     >
-                      <trigger.icon className={cn("w-5 h-5 mt-0.5", triggerType === trigger.value ? "text-yellow-400" : "text-gray-400")} />
+                      <trigger.icon className={cn("w-5 h-5 mt-0.5", triggerType === trigger.value ? "text-yellow-400" : "text-text-secondary")} />
                       <div>
-                        <div className="font-medium text-white text-sm">{trigger.label}</div>
-                        <div className="text-xs text-gray-500">{trigger.description}</div>
+                        <div className="font-medium text-text-primary text-sm">{trigger.label}</div>
+                        <div className="text-xs text-text-muted">{trigger.description}</div>
                       </div>
                     </button>
                   ))}
                 </div>
                 {triggerType === TriggerType.TAG_ADDED && (
                   <div className="mt-4">
-                    <label className="block text-sm text-gray-400 mb-2">Tag Name</label>
+                    <label className="block text-sm text-text-secondary mb-2">Tag Name</label>
                     <input
                       type="text"
                       value={triggerTagName}
                       onChange={(e) => setTriggerTagName(e.target.value)}
                       placeholder="Enter tag name"
-                      className="w-full max-w-xs px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                      className="w-full max-w-xs px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
                     />
                   </div>
                 )}
@@ -431,7 +431,7 @@ export function EmailSequenceBuilder({
               {/* Steps */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-white">Email Steps</h3>
+                  <h3 className="font-medium text-text-primary">Email Steps</h3>
                   {sequenceId && (
                     <button
                       onClick={() => setIsAddingStep(true)}
@@ -444,19 +444,19 @@ export function EmailSequenceBuilder({
                 </div>
 
                 {!sequenceId ? (
-                  <div className="p-8 bg-white/5 border border-white/10 rounded-xl text-center">
-                    <p className="text-gray-400 mb-4">Save the sequence first to add steps</p>
-                    <button onClick={handleSave} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
+                  <div className="p-8 bg-surface/5 border border-white/10 rounded-xl text-center">
+                    <p className="text-text-secondary mb-4">Save the sequence first to add steps</p>
+                    <button onClick={handleSave} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors">
                       Save Sequence
                     </button>
                   </div>
                 ) : steps.length === 0 && !isAddingStep ? (
-                  <div className="p-8 bg-white/5 border border-white/10 rounded-xl text-center">
-                    <Mail className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-4">No steps added yet</p>
+                  <div className="p-8 bg-surface/5 border border-white/10 rounded-xl text-center">
+                    <Mail className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                    <p className="text-text-secondary mb-4">No steps added yet</p>
                     <button
                       onClick={() => setIsAddingStep(true)}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto"
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto"
                     >
                       <Plus className="w-4 h-4" />
                       Add First Step
@@ -466,24 +466,24 @@ export function EmailSequenceBuilder({
                   <Reorder.Group axis="y" values={steps} onReorder={handleReorder} className="space-y-2">
                     {steps.map((step, index) => (
                       <Reorder.Item key={step.id} value={step}>
-                        <div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-grab active:cursor-grabbing">
+                        <div className="bg-surface/5 border border-white/10 rounded-xl p-4 hover:border-blue-500/30 transition-all cursor-grab active:cursor-grabbing">
                           <div className="flex items-center gap-4">
-                            <GripVertical className="w-5 h-5 text-gray-500" />
+                            <GripVertical className="w-5 h-5 text-text-muted" />
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-medium text-sm">
                               {index + 1}
                             </div>
                             {index > 0 && (
-                              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg">
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-300">
+                              <div className="flex items-center gap-2 px-3 py-1 bg-surface/5 rounded-lg">
+                                <Clock className="w-4 h-4 text-text-secondary" />
+                                <span className="text-sm text-text-primary">
                                   {step.delay_value} {step.delay_unit}
                                 </span>
                               </div>
                             )}
-                            <ArrowRight className="w-4 h-4 text-gray-500" />
+                            <ArrowRight className="w-4 h-4 text-text-muted" />
                             <div className="flex-1">
-                              <div className="font-medium text-white">{step.name}</div>
-                              <div className="text-sm text-gray-400">
+                              <div className="font-medium text-text-primary">{step.name}</div>
+                              <div className="text-sm text-text-secondary">
                                 {templates.find((t) => t.id === step.template_id)?.name || "Unknown template"}
                               </div>
                             </div>
@@ -495,20 +495,20 @@ export function EmailSequenceBuilder({
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={() => setEditingStepId(step.id)}
-                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                className="p-2 hover:bg-surface/10 rounded-lg text-text-secondary hover:text-text-primary transition-colors"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDeleteStep(step.id)}
-                                className="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                                className="p-2 hover:bg-red-500/20 rounded-lg text-text-secondary hover:text-red-400 transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </div>
                           {step.stats && (
-                            <div className="flex items-center gap-6 mt-3 pt-3 border-t border-white/5 text-xs text-gray-500">
+                            <div className="flex items-center gap-6 mt-3 pt-3 border-t border-white/5 text-xs text-text-muted">
                               <span className="flex items-center gap-1">
                                 <Mail className="w-3 h-3" />
                                 {step.stats.total_sent} sent
@@ -538,24 +538,24 @@ export function EmailSequenceBuilder({
                       exit={{ opacity: 0, height: 0 }}
                       className="bg-blue-500/5 border border-blue-500/30 rounded-xl p-4 overflow-hidden"
                     >
-                      <h4 className="font-medium text-white mb-4">Add New Step</h4>
+                      <h4 className="font-medium text-text-primary mb-4">Add New Step</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm text-gray-400 mb-2">Step Name</label>
+                          <label className="block text-sm text-text-secondary mb-2">Step Name</label>
                           <input
                             type="text"
                             value={newStepName}
                             onChange={(e) => setNewStepName(e.target.value)}
                             placeholder="e.g., Welcome Email"
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-gray-400 mb-2">Template</label>
+                          <label className="block text-sm text-text-secondary mb-2">Template</label>
                           <select
                             value={newStepTemplateId}
                             onChange={(e) => setNewStepTemplateId(e.target.value)}
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             <option value="">Select template</option>
                             {templates.map((t) => (
@@ -565,21 +565,21 @@ export function EmailSequenceBuilder({
                         </div>
                         <div className="flex gap-2">
                           <div className="flex-1">
-                            <label className="block text-sm text-gray-400 mb-2">Delay</label>
+                            <label className="block text-sm text-text-secondary mb-2">Delay</label>
                             <input
                               type="number"
                               value={newStepDelayValue}
                               onChange={(e) => setNewStepDelayValue(parseInt(e.target.value) || 1)}
                               min={0}
-                              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                              className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                           </div>
                           <div className="flex-1">
-                            <label className="block text-sm text-gray-400 mb-2">Unit</label>
+                            <label className="block text-sm text-text-secondary mb-2">Unit</label>
                             <select
                               value={newStepDelayUnit}
                               onChange={(e) => setNewStepDelayUnit(e.target.value as DelayUnit)}
-                              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                              className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                               {DELAY_UNITS.map((u) => (
                                 <option key={u.value} value={u.value}>{u.label}</option>
@@ -588,11 +588,11 @@ export function EmailSequenceBuilder({
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm text-gray-400 mb-2">Condition</label>
+                          <label className="block text-sm text-text-secondary mb-2">Condition</label>
                           <select
                             value={newStepCondition}
                             onChange={(e) => setNewStepCondition(e.target.value as StepCondition)}
-                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             {CONDITIONS.map((c) => (
                               <option key={c.value} value={c.value}>{c.label}</option>
@@ -603,14 +603,14 @@ export function EmailSequenceBuilder({
                       <div className="flex justify-end gap-2 mt-4">
                         <button
                           onClick={() => setIsAddingStep(false)}
-                          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                          className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={handleAddStep}
                           disabled={!newStepName.trim() || !newStepTemplateId}
-                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50"
                         >
                           Add Step
                         </button>
@@ -625,22 +625,22 @@ export function EmailSequenceBuilder({
           {activeTab === "settings" && (
             <div className="space-y-6 max-w-2xl">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                <label className="block text-sm font-medium text-text-primary mb-2">Description</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe this sequence..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+                  className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email Provider</label>
+                <label className="block text-sm font-medium text-text-primary mb-2">Email Provider</label>
                 <select
                   value={providerId}
                   onChange={(e) => setProviderId(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Select provider</option>
                   {providers.map((p) => (
@@ -650,11 +650,11 @@ export function EmailSequenceBuilder({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
+                <label className="block text-sm font-medium text-text-primary mb-2">Timezone</label>
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full px-4 py-3 bg-surface/5 border border-white/10 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="America/Sao_Paulo">America/Sao Paulo (BRT)</option>
                   <option value="America/New_York">America/New York (EST)</option>
@@ -665,26 +665,26 @@ export function EmailSequenceBuilder({
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-gray-300">Options</h4>
+                <h4 className="text-sm font-medium text-text-primary">Options</h4>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={skipWeekends} onChange={(e) => setSkipWeekends(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50" />
-                  <span className="text-gray-300">Skip weekends</span>
+                  <input type="checkbox" checked={skipWeekends} onChange={(e) => setSkipWeekends(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring" />
+                  <span className="text-text-primary">Skip weekends</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={exitOnUnsubscribe} onChange={(e) => setExitOnUnsubscribe(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50" />
-                  <span className="text-gray-300">Exit on unsubscribe</span>
+                  <input type="checkbox" checked={exitOnUnsubscribe} onChange={(e) => setExitOnUnsubscribe(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring" />
+                  <span className="text-text-primary">Exit on unsubscribe</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={exitOnReply} onChange={(e) => setExitOnReply(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50" />
-                  <span className="text-gray-300">Exit on reply</span>
+                  <input type="checkbox" checked={exitOnReply} onChange={(e) => setExitOnReply(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring" />
+                  <span className="text-text-primary">Exit on reply</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={trackOpens} onChange={(e) => setTrackOpens(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50" />
-                  <span className="text-gray-300">Track opens</span>
+                  <input type="checkbox" checked={trackOpens} onChange={(e) => setTrackOpens(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring" />
+                  <span className="text-text-primary">Track opens</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={trackClicks} onChange={(e) => setTrackClicks(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50" />
-                  <span className="text-gray-300">Track clicks</span>
+                  <input type="checkbox" checked={trackClicks} onChange={(e) => setTrackClicks(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-surface/5 text-primary focus:ring-ring" />
+                  <span className="text-text-primary">Track clicks</span>
                 </label>
               </div>
             </div>
@@ -692,37 +692,37 @@ export function EmailSequenceBuilder({
 
           {activeTab === "stats" && initialSequence?.stats && (
             <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-surface/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <Users className="w-5 h-5 text-blue-400" />
-                  <span className="text-gray-400">Enrolled</span>
+                  <span className="text-text-secondary">Enrolled</span>
                 </div>
-                <div className="text-2xl font-semibold text-white">{initialSequence.stats.total_enrolled}</div>
-                <div className="text-sm text-gray-500">{initialSequence.stats.active_enrollments} active</div>
+                <div className="text-2xl font-semibold text-text-primary">{initialSequence.stats.total_enrolled}</div>
+                <div className="text-sm text-text-muted">{initialSequence.stats.active_enrollments} active</div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-surface/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <MailOpen className="w-5 h-5 text-green-400" />
-                  <span className="text-gray-400">Open Rate</span>
+                  <span className="text-text-secondary">Open Rate</span>
                 </div>
-                <div className="text-2xl font-semibold text-white">{(initialSequence.stats.open_rate * 100).toFixed(1)}%</div>
-                <div className="text-sm text-gray-500">{initialSequence.stats.total_opened} opened</div>
+                <div className="text-2xl font-semibold text-text-primary">{(initialSequence.stats.open_rate * 100).toFixed(1)}%</div>
+                <div className="text-sm text-text-muted">{initialSequence.stats.total_opened} opened</div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-surface/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <Link className="w-5 h-5 text-purple-400" />
-                  <span className="text-gray-400">Click Rate</span>
+                  <span className="text-text-secondary">Click Rate</span>
                 </div>
-                <div className="text-2xl font-semibold text-white">{(initialSequence.stats.click_rate * 100).toFixed(1)}%</div>
-                <div className="text-sm text-gray-500">{initialSequence.stats.total_clicked} clicked</div>
+                <div className="text-2xl font-semibold text-text-primary">{(initialSequence.stats.click_rate * 100).toFixed(1)}%</div>
+                <div className="text-sm text-text-muted">{initialSequence.stats.total_clicked} clicked</div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-surface/5 border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <BarChart3 className="w-5 h-5 text-orange-400" />
-                  <span className="text-gray-400">Completed</span>
+                  <span className="text-text-secondary">Completed</span>
                 </div>
-                <div className="text-2xl font-semibold text-white">{initialSequence.stats.completed}</div>
-                <div className="text-sm text-gray-500">{initialSequence.stats.total_bounced} bounced</div>
+                <div className="text-2xl font-semibold text-text-primary">{initialSequence.stats.completed}</div>
+                <div className="text-sm text-text-muted">{initialSequence.stats.total_bounced} bounced</div>
               </div>
             </div>
           )}

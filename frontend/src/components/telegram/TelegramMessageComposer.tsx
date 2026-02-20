@@ -139,7 +139,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
   }
 
   return (
-    <div className={cn('bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700', className)}>
+    <div className={cn('bg-surface dark:bg-background-secondary border-t border-border', className)}>
       {/* Reply Preview */}
       <AnimatePresence>
         {messageReplyTo && (
@@ -147,7 +147,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700"
+            className="px-4 py-2 bg-background-secondary dark:bg-surface/50 border-b border-border"
           >
             <div className="flex items-center gap-3">
               <Reply className="w-4 h-4 text-blue-500" />
@@ -155,13 +155,13 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
                 <p className="text-xs font-medium text-blue-500">
                   Replying to {messageReplyTo.from_user?.first_name || 'message'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p className="text-xs text-text-muted dark:text-text-secondary truncate">
                   {messageReplyTo.text || messageReplyTo.caption || 'Media'}
                 </p>
               </div>
               <button
                 onClick={handleCancelReply}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="p-1 text-text-secondary hover:text-text-muted dark:hover:text-text-primary"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -177,7 +177,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700"
+            className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-border"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1">
@@ -197,7 +197,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
                   {row.map((btn, j) => (
                     <span
                       key={j}
-                      className="flex-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs text-center truncate"
+                      className="flex-1 px-2 py-1 bg-surface border border-border rounded text-xs text-center truncate"
                     >
                       {btn.text}
                     </span>
@@ -205,7 +205,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
                 </div>
               ))}
               {draftKeyboard.inline_keyboard.length > 2 && (
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs text-text-secondary text-center">
                   +{draftKeyboard.inline_keyboard.length - 2} more rows
                 </p>
               )}
@@ -238,7 +238,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
           <div className="relative">
             <button
               onClick={() => setShowAttachMenu(!showAttachMenu)}
-              className="p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2.5 text-text-secondary hover:text-text-muted dark:hover:text-text-primary rounded-full hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors"
             >
               <Paperclip className="w-5 h-5" />
             </button>
@@ -249,18 +249,18 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
                   initial={{ opacity: 0, scale: 0.95, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  className="absolute bottom-full left-0 mb-2 w-40 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10"
+                  className="absolute bottom-full left-0 mb-2 w-40 py-1 bg-surface rounded-lg shadow-lg border border-border z-10"
                 >
                   <button
                     onClick={() => handleFileSelect('image')}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-secondary dark:text-text-primary hover:bg-surface-hover dark:hover:bg-surface-hover"
                   >
                     <ImageIcon className="w-4 h-4 text-blue-500" />
                     Image
                   </button>
                   <button
                     onClick={() => handleFileSelect('document')}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-secondary dark:text-text-primary hover:bg-surface-hover dark:hover:bg-surface-hover"
                   >
                     <FileText className="w-4 h-4 text-green-500" />
                     Document
@@ -279,7 +279,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               rows={1}
-              className="w-full px-4 py-2.5 pr-20 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2.5 pr-20 border border-border rounded-2xl bg-surface text-text-primary placeholder-text-muted text-sm focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
               style={{ minHeight: '44px', maxHeight: '150px' }}
             />
 
@@ -289,7 +289,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
               <select
                 value={parseMode}
                 onChange={(e) => setParseMode(e.target.value as ParseMode)}
-                className="px-1.5 py-1 text-xs bg-gray-100 dark:bg-gray-700 border-0 rounded text-gray-600 dark:text-gray-400 cursor-pointer focus:ring-0"
+                className="px-1.5 py-1 text-xs bg-surface-hover dark:bg-surface-hover border-0 rounded text-text-muted dark:text-text-secondary cursor-pointer focus:ring-0"
               >
                 {PARSE_MODES.map((mode) => (
                   <option key={mode.value} value={mode.value}>
@@ -305,7 +305,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
                   'p-1.5 rounded transition-colors',
                   showKeyboardBuilder || draftKeyboard
                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                    : 'text-text-secondary hover:text-text-muted dark:hover:text-text-primary'
                 )}
                 title="Inline Keyboard"
               >
@@ -318,7 +318,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
           <button
             onClick={handleSend}
             disabled={!draftMessage.trim() || isSendingMessage}
-            className="p-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-full transition-colors flex-shrink-0"
+            className="p-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-surface-hover text-text-primary rounded-full transition-colors flex-shrink-0"
           >
             {isSendingMessage ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -329,7 +329,7 @@ export function TelegramMessageComposer({ className }: TelegramMessageComposerPr
         </div>
 
         {/* Keyboard hint */}
-        <p className="mt-2 text-xs text-gray-400 text-center">
+        <p className="mt-2 text-xs text-text-secondary text-center">
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>

@@ -34,14 +34,14 @@ export function ToastNotification({ id, message, type, onDismiss }: ToastProps) 
 
   return (
     <motion.div
-      className={`flex items-center gap-3 min-w-[300px] p-4 rounded-lg shadow-lg bg-gradient-to-r ${toastColors[type]} text-white`}
+      className={`flex items-center gap-3 min-w-[300px] p-4 rounded-lg shadow-lg bg-gradient-to-r ${toastColors[type]} text-text-primary`}
       initial={{ opacity: 0, y: -20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
     >
       <Icon className="w-5 h-5" />
       <p className="flex-1 text-sm font-medium">{message}</p>
-      <button onClick={() => onDismiss(id)} className="p-1 hover:bg-white/20 rounded">
+      <button onClick={() => onDismiss(id)} className="p-1 hover:bg-surface/20 rounded">
         <X className="w-4 h-4" />
       </button>
     </motion.div>

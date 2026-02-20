@@ -52,11 +52,11 @@ export function OverviewMetrics({ data }: OverviewMetricsProps) {
           >
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${m.color} flex items-center justify-center`}>
-                <Icon className="w-3.5 h-3.5 text-white" />
+                <Icon className="w-3.5 h-3.5 text-text-primary" />
               </div>
             </div>
-            <div className="text-lg font-bold text-white">{m.format(value)}</div>
-            <div className="text-xs text-gray-500">{m.label}</div>
+            <div className="text-lg font-bold text-text-primary">{m.format(value)}</div>
+            <div className="text-xs text-text-muted">{m.label}</div>
           </motion.div>
         );
       })}

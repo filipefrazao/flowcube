@@ -50,7 +50,7 @@ const categoryColors: Record<BlockCategory, string> = {
   triggers: 'text-amber-400',
   inputs: 'text-blue-400',
   ai: 'text-purple-400',
-  logic: 'text-emerald-400',
+  logic: 'text-primary',
   outputs: 'text-rose-400',
 };
 
@@ -123,13 +123,13 @@ export function NodesSidebar({ isCollapsed = false, onToggle }: NodesSidebarProp
 
   if (isCollapsed) {
     return (
-      <div className="w-12 bg-surface border-r border-gray-800 flex flex-col items-center py-4 gap-4">
+      <div className="w-12 bg-surface border-r border-border flex flex-col items-center py-4 gap-4">
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+          className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
           title="Expand sidebar"
         >
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          <ChevronRight className="w-5 h-5 text-text-secondary" />
         </button>
         {Object.entries(categoryIcons).map(([category, icon]) => (
           <div
@@ -145,30 +145,30 @@ export function NodesSidebar({ isCollapsed = false, onToggle }: NodesSidebarProp
   }
 
   return (
-    <div className="w-64 bg-surface border-r border-gray-800 flex flex-col h-full">
+    <div className="w-64 bg-surface border-r border-border flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-800">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-200">Blocks</h2>
+          <h2 className="text-sm font-semibold text-text-primary">Blocks</h2>
           {onToggle && (
             <button
               onClick={onToggle}
-              className="p-1 rounded hover:bg-gray-800 transition-colors"
+              className="p-1 rounded hover:bg-surface-hover transition-colors"
             >
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-text-secondary" />
             </button>
           )}
         </div>
         
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
             type="text"
             placeholder="Search blocks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -180,19 +180,19 @@ export function NodesSidebar({ isCollapsed = false, onToggle }: NodesSidebarProp
             {/* Category Header */}
             <button
               onClick={() => toggleCategory(category as BlockCategory)}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-800/50 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-surface-hover/50 transition-colors"
             >
               <span className={categoryColors[category as BlockCategory]}>
                 {categoryIcons[category as BlockCategory]}
               </span>
-              <span className="text-sm font-medium text-gray-300 flex-1 text-left">
+              <span className="text-sm font-medium text-text-primary flex-1 text-left">
                 {categoryLabels[category as BlockCategory]}
               </span>
-              <span className="text-xs text-gray-500">{blocks.length}</span>
+              <span className="text-xs text-text-muted">{blocks.length}</span>
               {expandedCategories.has(category as BlockCategory) ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-4 h-4 text-text-muted" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
+                <ChevronRight className="w-4 h-4 text-text-muted" />
               )}
             </button>
 
@@ -204,13 +204,13 @@ export function NodesSidebar({ isCollapsed = false, onToggle }: NodesSidebarProp
                     key={block.type}
                     draggable
                     onDragStart={(e) => onDragStart(e, block.type)}
-                    className="flex items-center gap-2 px-3 py-2 ml-2 rounded-lg bg-gray-800/30 hover:bg-gray-800/60 cursor-grab active:cursor-grabbing transition-colors group"
+                    className="flex items-center gap-2 px-3 py-2 ml-2 rounded-lg bg-surface/30 hover:bg-surface-hover/60 cursor-grab active:cursor-grabbing transition-colors group"
                   >
-                    <GripVertical className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <GripVertical className="w-3 h-3 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                     <span className={categoryColors[block.category]}>
                       {blockIcons[block.type]}
                     </span>
-                    <span className="text-sm text-gray-300">{block.label}</span>
+                    <span className="text-sm text-text-primary">{block.label}</span>
                   </div>
                 ))}
               </div>
@@ -220,14 +220,14 @@ export function NodesSidebar({ isCollapsed = false, onToggle }: NodesSidebarProp
 
         {Object.keys(filteredBlocksByCategory).length === 0 && (
           <div className="text-center py-8">
-            <p className="text-sm text-gray-500">No blocks found</p>
+            <p className="text-sm text-text-muted">No blocks found</p>
           </div>
         )}
       </div>
 
       {/* Help Footer */}
-      <div className="p-4 border-t border-gray-800">
-        <p className="text-xs text-gray-500 text-center">
+      <div className="p-4 border-t border-border">
+        <p className="text-xs text-text-muted text-center">
           Drag blocks to the canvas
         </p>
       </div>

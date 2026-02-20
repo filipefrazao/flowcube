@@ -1,5 +1,5 @@
 /**
- * FlowCube Premium - Command Palette
+ * FRZ Platform - Command Palette
  *
  * VS Code / Notion style command palette using kbar
  * Accessible with Cmd+K / Ctrl+K
@@ -201,20 +201,20 @@ function RenderResults() {
       items={results}
       onRender={({ item, active }) =>
         typeof item === 'string' ? (
-          <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <div className="px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
             {item}
           </div>
         ) : (
           <div
             className={`px-4 py-3 flex items-center gap-3 cursor-pointer transition-colors ${
-              active ? 'bg-purple-500/10 text-white' : 'text-gray-300'
+              active ? 'bg-primary/10 text-text-primary' : 'text-text-secondary'
             }`}
           >
-            <span className="text-gray-400">{item.icon}</span>
+            <span className="text-text-secondary">{item.icon}</span>
             <div className="flex-1">
               <div className="font-medium">{item.name}</div>
               {item.subtitle && (
-                <div className="text-xs text-gray-500">{item.subtitle}</div>
+                <div className="text-xs text-text-muted">{item.subtitle}</div>
               )}
             </div>
             {item.shortcut?.length ? (
@@ -222,7 +222,7 @@ function RenderResults() {
                 {item.shortcut.map((sc) => (
                   <kbd
                     key={sc}
-                    className="px-2 py-1 text-xs font-mono bg-gray-800 rounded border border-gray-700"
+                    className="px-2 py-1 text-xs font-mono bg-surface rounded border border-border"
                   >
                     {sc}
                   </kbd>
@@ -263,15 +263,15 @@ export function CommandPaletteProvider({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
-            <KBarAnimator className="w-full max-w-xl overflow-hidden rounded-xl bg-gray-900 border border-gray-700 shadow-2xl">
+            <KBarAnimator className="w-full max-w-xl overflow-hidden rounded-xl bg-background-secondary border border-border shadow-2xl">
               {/* Search input */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-700">
-                <Search className="w-5 h-5 text-gray-500" />
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+                <Search className="w-5 h-5 text-text-muted" />
                 <KBarSearch
-                  className="flex-1 bg-transparent text-white text-lg placeholder-gray-500 outline-none"
+                  className="flex-1 bg-transparent text-text-primary text-lg placeholder-text-muted outline-none"
                   placeholder="Type a command or search..."
                 />
-                <kbd className="px-2 py-1 text-xs font-mono bg-gray-800 text-gray-400 rounded border border-gray-700">
+                <kbd className="px-2 py-1 text-xs font-mono bg-surface text-text-secondary rounded border border-border">
                   esc
                 </kbd>
               </div>
@@ -282,13 +282,13 @@ export function CommandPaletteProvider({
               </div>
 
               {/* Footer */}
-              <div className="px-4 py-2 border-t border-gray-700 text-xs text-gray-500 flex items-center justify-between">
+              <div className="px-4 py-2 border-t border-border text-xs text-text-muted flex items-center justify-between">
                 <div className="flex gap-4">
                   <span>↑↓ Navigate</span>
                   <span>↵ Select</span>
                   <span>esc Close</span>
                 </div>
-                <span className="text-purple-400">FlowCube Command Palette</span>
+                <span className="text-primary">FRZ Platform</span>
               </div>
             </KBarAnimator>
           </motion.div>
@@ -301,7 +301,6 @@ export function CommandPaletteProvider({
 
 // Hook to trigger command palette
 export function useCommandPalette() {
-  // This would be implemented with kbar's useKBar hook
   return {
     toggle: () => {
       // kbar handles Cmd+K automatically

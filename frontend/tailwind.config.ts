@@ -17,6 +17,7 @@ const config: Config = {
         surface: {
           DEFAULT: "var(--surface)",
           hover: "var(--surface-hover)",
+          elevated: "var(--surface-elevated)",
           active: "#2a4058",
         },
         // Amber/Orange accent (hex - same for both themes, needs opacity modifiers)
@@ -46,6 +47,13 @@ const config: Config = {
           primary: "var(--text-primary)",
           secondary: "var(--text-secondary)",
           muted: "var(--text-muted)",
+        },
+        input: {
+          DEFAULT: "var(--input-bg)",
+          border: "var(--input-border)",
+        },
+        ring: {
+          DEFAULT: "var(--ring)",
         },
         border: {
           DEFAULT: "var(--border)",

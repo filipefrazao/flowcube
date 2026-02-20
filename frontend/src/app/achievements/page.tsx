@@ -29,7 +29,7 @@ function rarityBadge(rarity: string) {
     case "rare":
       return "bg-cyan-500/15 text-cyan-400 border-cyan-500/30";
     default:
-      return "bg-gray-500/15 text-gray-300 border-gray-500/30";
+      return "bg-gray-500/15 text-text-primary border-gray-500/30";
   }
 }
 
@@ -124,7 +124,7 @@ export default function AchievementsPage() {
               type="button"
               onClick={handleCheckUnlocks}
               disabled={loading || checking}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-text-primary font-medium transition-colors"
             >
               {checking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
               Verificar

@@ -233,7 +233,7 @@ export function EmailTemplateEditor({
       >
         <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-text-primary">
               {template ? "Edit Template" : "New Template"}
             </h2>
             <input
@@ -241,51 +241,51 @@ export function EmailTemplateEditor({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Template name"
-              className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-64"
+              className="px-3 py-1.5 bg-surface/5 border border-white/10 rounded-lg text-text-primary text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring w-64"
             />
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Save
             </button>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-surface/5 text-text-secondary hover:text-text-primary transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         <div className="px-6 py-3 border-b border-white/5 flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-surface/5 rounded-lg p-1">
             <button
               onClick={() => setEditorTab("design")}
-              className={cn("px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2", editorTab === "design" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}
+              className={cn("px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2", editorTab === "design" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}
             >
               <Palette className="w-4 h-4" />Design
             </button>
             <button
               onClick={() => setEditorTab("html")}
-              className={cn("px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2", editorTab === "html" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}
+              className={cn("px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2", editorTab === "html" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}
             >
               <Code className="w-4 h-4" />HTML
             </button>
             <button
               onClick={() => setEditorTab("preview")}
-              className={cn("px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2", editorTab === "preview" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}
+              className={cn("px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2", editorTab === "preview" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}
             >
               <Eye className="w-4 h-4" />Preview
             </button>
           </div>
 
-          <div className="h-6 w-px bg-white/10" />
+          <div className="h-6 w-px bg-surface/10" />
 
           <button
             onClick={() => setShowVariables(!showVariables)}
-            className={cn("px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2", showVariables ? "bg-purple-500/20 text-purple-400" : "bg-white/5 text-gray-400 hover:text-white")}
+            className={cn("px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2", showVariables ? "bg-purple-500/20 text-purple-400" : "bg-surface/5 text-text-secondary hover:text-text-primary")}
           >
             <Variable className="w-4 h-4" />Variables
             <ChevronDown className={cn("w-4 h-4 transition-transform", showVariables && "rotate-180")} />
@@ -293,12 +293,12 @@ export function EmailTemplateEditor({
 
           {editorTab === "preview" && (
             <>
-              <div className="h-6 w-px bg-white/10" />
-              <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-                <button onClick={() => setPreviewDevice("desktop")} className={cn("p-1.5 rounded-md transition-colors", previewDevice === "desktop" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}>
+              <div className="h-6 w-px bg-surface/10" />
+              <div className="flex items-center gap-1 bg-surface/5 rounded-lg p-1">
+                <button onClick={() => setPreviewDevice("desktop")} className={cn("p-1.5 rounded-md transition-colors", previewDevice === "desktop" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}>
                   <Monitor className="w-4 h-4" />
                 </button>
-                <button onClick={() => setPreviewDevice("mobile")} className={cn("p-1.5 rounded-md transition-colors", previewDevice === "mobile" ? "bg-blue-500/20 text-blue-400" : "text-gray-400 hover:text-white")}>
+                <button onClick={() => setPreviewDevice("mobile")} className={cn("p-1.5 rounded-md transition-colors", previewDevice === "mobile" ? "bg-blue-500/20 text-blue-400" : "text-text-secondary hover:text-text-primary")}>
                   <Smartphone className="w-4 h-4" />
                 </button>
               </div>
@@ -310,7 +310,7 @@ export function EmailTemplateEditor({
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as TemplateCategory)}
-            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="px-3 py-1.5 bg-surface/5 border border-white/10 rounded-lg text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -323,17 +323,17 @@ export function EmailTemplateEditor({
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-b border-white/5 overflow-hidden">
               <div className="px-6 py-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-300">Template Variables</h4>
+                  <h4 className="text-sm font-medium text-text-primary">Template Variables</h4>
                   <button onClick={addVariable} className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded text-xs flex items-center gap-1 transition-colors">
                     <Plus className="w-3 h-3" />Add
                   </button>
                 </div>
                 <div className="grid grid-cols-4 gap-3 max-h-32 overflow-y-auto">
                   {variables.map((variable, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-white/5 rounded-lg p-2">
-                      <input type="text" value={variable.name} onChange={(e) => updateVariable(index, "name", e.target.value)} placeholder="name" className="flex-1 px-2 py-1 bg-transparent border-none text-white text-sm placeholder-gray-500 focus:outline-none min-w-0" />
-                      <input type="text" value={variable.default_value || ""} onChange={(e) => updateVariable(index, "default_value", e.target.value)} placeholder="default" className="flex-1 px-2 py-1 bg-white/5 border border-white/10 rounded text-white text-xs placeholder-gray-500 focus:outline-none min-w-0" />
-                      <button onClick={() => removeVariable(index)} className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded transition-colors">
+                    <div key={index} className="flex items-center gap-2 bg-surface/5 rounded-lg p-2">
+                      <input type="text" value={variable.name} onChange={(e) => updateVariable(index, "name", e.target.value)} placeholder="name" className="flex-1 px-2 py-1 bg-transparent border-none text-text-primary text-sm placeholder-text-muted focus:outline-none min-w-0" />
+                      <input type="text" value={variable.default_value || ""} onChange={(e) => updateVariable(index, "default_value", e.target.value)} placeholder="default" className="flex-1 px-2 py-1 bg-surface/5 border border-white/10 rounded text-text-primary text-xs placeholder-text-muted focus:outline-none min-w-0" />
+                      <button onClick={() => removeVariable(index)} className="p-1 hover:bg-red-500/20 text-text-secondary hover:text-red-400 rounded transition-colors">
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
@@ -348,19 +348,19 @@ export function EmailTemplateEditor({
           <div className="w-80 border-r border-white/10 flex flex-col">
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Subject Line *</label>
-                <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Your email subject" className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                <label className="block text-sm font-medium text-text-primary mb-2">Subject Line *</label>
+                <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Your email subject" className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Preview Text</label>
-                <textarea value={previewText} onChange={(e) => setPreviewText(e.target.value)} placeholder="Text shown in inbox preview" rows={2} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none" />
+                <label className="block text-sm font-medium text-text-primary mb-2">Preview Text</label>
+                <textarea value={previewText} onChange={(e) => setPreviewText(e.target.value)} placeholder="Text shown in inbox preview" rows={2} className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Plain Text Version</label>
-                <textarea value={textContent} onChange={(e) => setTextContent(e.target.value)} placeholder="Plain text fallback (optional)" rows={4} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none font-mono text-sm" />
+                <label className="block text-sm font-medium text-text-primary mb-2">Plain Text Version</label>
+                <textarea value={textContent} onChange={(e) => setTextContent(e.target.value)} placeholder="Plain text fallback (optional)" rows={4} className="w-full px-3 py-2 bg-surface/5 border border-white/10 rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring resize-none font-mono text-sm" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Tags</label>
+                <label className="block text-sm font-medium text-text-primary mb-2">Tags</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {tags.map((tag) => (
                     <span key={tag} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">
@@ -370,7 +370,7 @@ export function EmailTemplateEditor({
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTag()} placeholder="Add tag" className="flex-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTag()} placeholder="Add tag" className="flex-1 px-3 py-1.5 bg-surface/5 border border-white/10 rounded-lg text-text-primary text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-ring" />
                   <button onClick={addTag} className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors">Add</button>
                 </div>
               </div>
@@ -387,25 +387,25 @@ export function EmailTemplateEditor({
 
           <div className="flex-1 flex flex-col overflow-hidden">
             {editorTab === "html" && (
-              <textarea name="htmlContent" value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} className="flex-1 w-full p-4 bg-[#0d0d1a] text-white font-mono text-sm resize-none focus:outline-none" spellCheck={false} />
+              <textarea name="htmlContent" value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} className="flex-1 w-full p-4 bg-[#0d0d1a] text-text-primary font-mono text-sm resize-none focus:outline-none" spellCheck={false} />
             )}
             {editorTab === "design" && (
               <div className="flex-1 p-4 overflow-auto">
-                <div className="bg-white/5 rounded-lg p-4 min-h-full">
-                  <p className="text-gray-400 text-center py-8">Visual editor coming soon. Use HTML tab for now.</p>
-                  <textarea name="htmlContent" value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} className="w-full h-96 p-4 bg-[#0d0d1a] text-white font-mono text-sm rounded-lg resize-none focus:outline-none" spellCheck={false} />
+                <div className="bg-surface/5 rounded-lg p-4 min-h-full">
+                  <p className="text-text-secondary text-center py-8">Visual editor coming soon. Use HTML tab for now.</p>
+                  <textarea name="htmlContent" value={htmlContent} onChange={(e) => setHtmlContent(e.target.value)} className="w-full h-96 p-4 bg-[#0d0d1a] text-text-primary font-mono text-sm rounded-lg resize-none focus:outline-none" spellCheck={false} />
                 </div>
               </div>
             )}
             {editorTab === "preview" && (
-              <div className="flex-1 flex items-center justify-center bg-gray-100 p-8 overflow-auto">
-                <div className={cn("bg-white shadow-xl rounded-lg overflow-hidden transition-all", previewDevice === "mobile" ? "w-[375px]" : "w-full max-w-[700px]")}>
-                  <div className="bg-gray-50 px-4 py-3 border-b">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex-1 flex items-center justify-center bg-surface-hover p-8 overflow-auto">
+                <div className={cn("bg-surface shadow-xl rounded-lg overflow-hidden transition-all", previewDevice === "mobile" ? "w-[375px]" : "w-full max-w-[700px]")}>
+                  <div className="bg-background-secondary px-4 py-3 border-b">
+                    <div className="flex items-center gap-2 text-sm text-text-muted">
                       <span className="font-medium">Subject:</span>
                       <span>{subject || "No subject"}</span>
                     </div>
-                    {previewText && <div className="text-xs text-gray-400 mt-1 truncate">{previewText}</div>}
+                    {previewText && <div className="text-xs text-text-secondary mt-1 truncate">{previewText}</div>}
                   </div>
                   <iframe ref={iframeRef} srcDoc={previewHtml} className="w-full min-h-[500px] border-none" title="Email Preview" />
                 </div>

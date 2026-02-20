@@ -76,23 +76,23 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
   return (
     <div
       className={cn(
-        'w-64 bg-white border-r border-gray-200 flex flex-col h-full',
+        'w-64 bg-surface border-r border-border flex flex-col h-full',
         className
       )}
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-border">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Elements</h2>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
           <input
             type="text"
             placeholder="Search elements..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
@@ -104,13 +104,13 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
             {/* Category Header */}
             <button
               onClick={() => toggleCategory(category.id)}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-background-secondary transition-colors"
               aria-label={`Toggle ${category.label} category`}
             >
               {expandedCategories.has(category.id) ? (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-4 h-4 text-text-muted" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500" />
+                <ChevronRight className="w-4 h-4 text-text-muted" />
               )}
               <span
                 className="w-3 h-3 rounded-full"
@@ -118,12 +118,12 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
                 aria-hidden="true"
               />
               <span 
-                className="flex-1 text-left text-sm font-medium text-gray-700"
+                className="flex-1 text-left text-sm font-medium text-text-secondary"
                 id={`category-${category.id}`}
               >
                 {category.label}
               </span>
-              <span className="text-xs text-gray-400" aria-label={`${category.nodes.length} items`}>
+              <span className="text-xs text-text-secondary" aria-label={`${category.nodes.length} items`}>
                 {category.nodes.length}
               </span>
             </button>
@@ -141,20 +141,20 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
                     draggable
                     onDragStart={(e) => onDragStart(e, node.type, node.label)}
                     onClick={() => handleAddNode(node.type, node.label)}
-                    className="group flex items-center gap-2 px-3 py-2 rounded-lg cursor-grab hover:bg-gray-100 transition-colors active:cursor-grabbing"
+                    className="group flex items-center gap-2 px-3 py-2 rounded-lg cursor-grab hover:bg-surface-hover transition-colors active:cursor-grabbing"
                     role="listitem"
                     aria-label={`${node.label} - ${category.label} element`}
                   >
-                    <Grip className="w-3 h-3 text-gray-300 group-hover:text-gray-400" aria-hidden="true" />
+                    <Grip className="w-3 h-3 text-text-primary group-hover:text-text-secondary" aria-hidden="true" />
                     <span
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: category.color }}
                       aria-hidden="true"
                     />
-                    <span className="flex-1 text-sm text-gray-600 group-hover:text-gray-900">
+                    <span className="flex-1 text-sm text-text-muted group-hover:text-gray-900">
                       {node.label}
                     </span>
-                    <Plus className="w-4 h-4 text-gray-300 group-hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                    <Plus className="w-4 h-4 text-text-primary group-hover:text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </div>
                 ))}
               </div>
@@ -164,14 +164,14 @@ export default function ElementsPalette({ onAddNode, className }: ElementsPalett
 
         {/* No results */}
         {filteredCategories.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm" role="status">
+          <div className="text-center py-8 text-text-muted text-sm" role="status">
             No elements found for "{searchQuery}"
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
+      <div className="p-4 border-t border-border bg-background-secondary">
         <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
           <Plus className="w-4 h-4" aria-hidden="true" />
           Create Custom Element

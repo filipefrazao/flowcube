@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string }> = {
-  draft: { label: "Rascunho", bg: "bg-gray-500/20 text-gray-400" },
+  draft: { label: "Rascunho", bg: "bg-gray-500/20 text-text-secondary" },
   active: { label: "Ativa", bg: "bg-green-500/20 text-green-400" },
   paused: { label: "Pausada", bg: "bg-amber-500/20 text-amber-400" },
   completed: { label: "Concluida", bg: "bg-blue-500/20 text-blue-400" },
@@ -173,16 +173,16 @@ export default function CampaignsPage() {
   const activeCount = filteredCampaigns.filter((c) => c.status === "active").length;
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Megaphone className="h-7 w-7 text-indigo-400" />
-          <h1 className="text-2xl font-bold text-gray-100">Campanhas</h1>
+          <Megaphone className="h-7 w-7 text-primary" />
+          <h1 className="text-2xl font-bold text-text-primary">Campanhas</h1>
         </div>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-primary-hover"
         >
           <Plus className="h-4 w-4" />
           Nova Campanha
@@ -191,21 +191,21 @@ export default function CampaignsPage() {
 
       {/* Summary Cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Total de Campanhas</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{filteredCampaigns.length}</p>
+              <p className="text-sm text-text-secondary">Total de Campanhas</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{filteredCampaigns.length}</p>
             </div>
-            <div className="rounded-lg bg-indigo-500/20 p-2.5 text-indigo-400">
+            <div className="rounded-lg bg-primary/20 p-2.5 text-primary">
               <Megaphone className="h-5 w-5" />
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Ativas</p>
+              <p className="text-sm text-text-secondary">Ativas</p>
               <p className="mt-1 text-2xl font-bold text-green-400">{activeCount}</p>
             </div>
             <div className="rounded-lg bg-green-500/20 p-2.5 text-green-400">
@@ -213,11 +213,11 @@ export default function CampaignsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+        <div className="rounded-xl border border-border bg-background-secondary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Orcamento Total</p>
-              <p className="mt-1 text-2xl font-bold text-gray-100">{fmtCurrency(totalBudget)}</p>
+              <p className="text-sm text-text-secondary">Orcamento Total</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">{fmtCurrency(totalBudget)}</p>
             </div>
             <div className="rounded-lg bg-blue-500/20 p-2.5 text-blue-400">
               <DollarSign className="h-5 w-5" />
@@ -227,22 +227,22 @@ export default function CampaignsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
+      <div className="bg-surface/80 border border-border/50 rounded-xl p-4 backdrop-blur-sm space-y-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               placeholder="Buscar campanhas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-900/80 py-2 pl-10 pr-4 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+              className="w-full rounded-lg border border-border bg-background-secondary/80 py-2 pl-10 pr-4 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all"
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all"
           >
             <option value="">Todos os Status</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -252,7 +252,7 @@ export default function CampaignsPage() {
           <select
             value={filterPipeline}
             onChange={(e) => setFilterPipeline(e.target.value)}
-            className="bg-gray-900/80 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-all"
+            className="bg-background-secondary/80 border border-border text-text-primary rounded-lg px-3 py-2 text-sm focus:border-primary transition-all"
           >
             <option value="">Todos os Pipelines</option>
             {pipelines.map((p) => (
@@ -261,43 +261,43 @@ export default function CampaignsPage() {
           </select>
           <button onClick={() => setShowFilters(!showFilters)}
             className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all",
-              showFilters ? "bg-indigo-600/20 border-indigo-500/50 text-indigo-400" : "bg-gray-900/80 border-gray-700 text-gray-400 hover:text-gray-100")}>
-            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-indigo-400 rounded-full" />}
+              showFilters ? "bg-primary/20 border-primary/50 text-primary" : "bg-background-secondary/80 border-border text-text-secondary hover:text-text-primary")}>
+            <Filter className="w-4 h-4" /> Filtros {hasActiveFilters && <span className="w-2 h-2 bg-primary rounded-full" />}
           </button>
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-gray-400 hover:text-gray-100 transition-colors">
+            <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-2 text-xs text-text-secondary hover:text-text-primary transition-colors">
               <RotateCcw className="w-3.5 h-3.5" /> Limpar
             </button>
           )}
         </div>
         {showFilters && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-700/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border/50">
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Inicio De</label>
-              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Data Inicio De</label>
+              <input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Data Fim Ate</label>
-              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Data Fim Ate</label>
+              <input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Orcamento Min (R$)</label>
-              <input type="number" placeholder="0,00" value={filterBudgetMin} onChange={(e) => setFilterBudgetMin(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Orcamento Min (R$)</label>
+              <input type="number" placeholder="0,00" value={filterBudgetMin} onChange={(e) => setFilterBudgetMin(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:border-primary transition-all" />
             </div>
             <div>
-              <label className="text-[11px] text-gray-500 mb-1 block font-medium uppercase tracking-wide">Orcamento Max (R$)</label>
-              <input type="number" placeholder="0,00" value={filterBudgetMax} onChange={(e) => setFilterBudgetMax(e.target.value)} className="w-full bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 transition-all" />
+              <label className="text-[11px] text-text-muted mb-1 block font-medium uppercase tracking-wide">Orcamento Max (R$)</label>
+              <input type="number" placeholder="0,00" value={filterBudgetMax} onChange={(e) => setFilterBudgetMax(e.target.value)} className="w-full bg-background-secondary/80 border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted focus:border-primary transition-all" />
             </div>
           </div>
         )}
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
+      <div className="overflow-hidden rounded-xl border border-border bg-background-secondary">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-gray-400">
+              <tr className="border-b border-border text-text-secondary">
                 <th className="px-4 py-3 font-medium">Nome</th>
                 <th className="px-4 py-3 font-medium">Pipeline</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -310,13 +310,13 @@ export default function CampaignsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-4 py-12 text-center text-text-muted">
                     Carregando campanhas...
                   </td>
                 </tr>
               ) : filteredCampaigns.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-4 py-12 text-center text-text-muted">
                     Nenhuma campanha encontrada.
                   </td>
                 </tr>
@@ -326,28 +326,28 @@ export default function CampaignsPage() {
                   return (
                     <tr
                       key={campaign.id}
-                      className="border-b border-gray-800/50 transition hover:bg-gray-800/40"
+                      className="border-b border-border/50 transition hover:bg-surface-hover/40"
                     >
-                      <td className="px-4 py-3 font-medium text-gray-100">{campaign.name}</td>
-                      <td className="px-4 py-3 text-gray-300">{campaign.pipeline_name || "—"}</td>
+                      <td className="px-4 py-3 font-medium text-text-primary">{campaign.name}</td>
+                      <td className="px-4 py-3 text-text-primary">{campaign.pipeline_name || "—"}</td>
                       <td className="px-4 py-3">
                         <Badge text={st.label} className={st.bg} />
                       </td>
-                      <td className="px-4 py-3 font-medium text-gray-100">{fmtCurrency(campaign.budget)}</td>
-                      <td className="px-4 py-3 text-gray-400">{fmtDate(campaign.start_date)}</td>
-                      <td className="px-4 py-3 text-gray-400">{fmtDate(campaign.end_date)}</td>
+                      <td className="px-4 py-3 font-medium text-text-primary">{fmtCurrency(campaign.budget)}</td>
+                      <td className="px-4 py-3 text-text-secondary">{fmtDate(campaign.start_date)}</td>
+                      <td className="px-4 py-3 text-text-secondary">{fmtDate(campaign.end_date)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => openEditModal(campaign)}
-                            className="rounded p-1.5 text-gray-500 transition hover:bg-indigo-500/10 hover:text-indigo-400"
+                            className="rounded p-1.5 text-text-muted transition hover:bg-primary/10 hover:text-primary"
                             title="Editar"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(campaign.id)}
-                            className="rounded p-1.5 text-gray-500 transition hover:bg-red-500/10 hover:text-red-400"
+                            className="rounded p-1.5 text-text-muted transition hover:bg-red-500/10 hover:text-red-400"
                             title="Excluir"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -366,43 +366,43 @@ export default function CampaignsPage() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-100">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-background-secondary shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold text-text-primary">
                 {editingCampaign ? "Editar Campanha" : "Nova Campanha"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-300">
+              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-primary">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 px-6 py-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Nome *</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Nome *</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="Nome da campanha"
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-indigo-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-400">Descricao</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Descricao</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={2}
                   placeholder="Descricao da campanha..."
-                  className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-indigo-600"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Pipeline</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Pipeline</label>
                   <select
                     value={form.pipeline}
                     onChange={(e) => setForm({ ...form, pipeline: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-indigo-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-primary"
                   >
                     <option value="">Nenhum</option>
                     {pipelines.map((p) => (
@@ -411,11 +411,11 @@ export default function CampaignsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Status</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Status</label>
                   <select
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-indigo-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-primary"
                   >
                     {Object.entries(STATUS_CONFIG).map(([k, v]) => (
                       <option key={k} value={k}>{v.label}</option>
@@ -425,47 +425,47 @@ export default function CampaignsPage() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Orcamento</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Orcamento</label>
                   <input
                     type="number"
                     step="0.01"
                     value={form.budget}
                     onChange={(e) => setForm({ ...form, budget: e.target.value })}
                     placeholder="0,00"
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-indigo-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Inicio</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Inicio</label>
                   <input
                     type="date"
                     value={form.start_date}
                     onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-indigo-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-400">Fim</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Fim</label>
                   <input
                     type="date"
                     value={form.end_date}
                     onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-gray-300 outline-none focus:border-indigo-600"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-primary"
                   />
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 border-t border-gray-800 px-6 py-4">
+            <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition hover:bg-gray-800"
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary transition hover:bg-surface-hover"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.name.trim()}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-primary-hover disabled:opacity-50"
               >
                 {saving ? "Salvando..." : editingCampaign ? "Salvar" : "Criar Campanha"}
               </button>

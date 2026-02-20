@@ -194,7 +194,7 @@ export default function IVRPage() {
           </div>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white font-medium text-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary font-medium text-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Novo Menu
           </button>
@@ -209,7 +209,7 @@ export default function IVRPage() {
             <div className="text-center py-20 text-text-muted">
               <Settings2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Nenhum menu URA configurado</p>
-              <button onClick={openCreate} className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors">
+              <button onClick={openCreate} className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors">
                 Criar primeiro menu
               </button>
             </div>
@@ -328,7 +328,7 @@ export default function IVRPage() {
                 <button onClick={() => setShowDialog(false)}
                   className="px-4 py-2 text-sm text-text-secondary border border-border rounded-lg hover:bg-surface-hover transition-colors">Cancelar</button>
                 <button onClick={handleSave} disabled={saving || !formName}
-                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors">
+                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 transition-colors">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? "Salvar" : "Criar"}
                 </button>
               </div>
@@ -379,7 +379,7 @@ export default function IVRPage() {
                 <button onClick={() => setShowOptionDialog(null)}
                   className="px-4 py-2 text-sm text-text-secondary border border-border rounded-lg hover:bg-surface-hover transition-colors">Cancelar</button>
                 <button onClick={handleSaveOption} disabled={savingOption || !optDigit || !optLabel}
-                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors">
+                  className="px-4 py-2 text-sm bg-primary hover:bg-primary-hover text-gray-900 rounded-lg font-medium disabled:opacity-50 transition-colors">
                   {savingOption ? <Loader2 className="w-4 h-4 animate-spin" /> : editingOption ? "Salvar" : "Criar"}
                 </button>
               </div>

@@ -86,15 +86,15 @@ export default function AIBuilderModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface border border-gray-700 rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
+      <div className="bg-surface border border-border rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-semibold text-gray-100">AI Workflow Builder</h2>
+            <h2 className="text-lg font-semibold text-text-primary">AI Workflow Builder</h2>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-gray-800 rounded">
-            <X className="w-5 h-5 text-gray-400" />
+          <button onClick={onClose} className="p-1 hover:bg-surface-hover rounded">
+            <X className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
 
@@ -102,7 +102,7 @@ export default function AIBuilderModal({
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {/* Description Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-2">
               Describe your workflow
             </label>
             <textarea
@@ -110,19 +110,19 @@ export default function AIBuilderModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
               placeholder="Describe what you want to automate in plain language..."
-              className="w-full px-4 py-3 bg-background border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+              className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
             />
           </div>
 
           {/* Example Prompts */}
           <div>
-            <label className="block text-xs text-gray-500 mb-2">Examples (click to use)</label>
+            <label className="block text-xs text-text-muted mb-2">Examples (click to use)</label>
             <div className="flex flex-wrap gap-2">
               {EXAMPLE_PROMPTS.map((prompt, i) => (
                 <button
                   key={i}
                   onClick={() => setDescription(prompt)}
-                  className="text-[11px] px-2.5 py-1.5 bg-gray-800 text-gray-400 rounded-full hover:bg-gray-700 hover:text-gray-300 transition-colors text-left"
+                  className="text-[11px] px-2.5 py-1.5 bg-surface text-text-secondary rounded-full hover:bg-surface-hover hover:text-text-primary transition-colors text-left"
                 >
                   {prompt.length > 60 ? prompt.slice(0, 60) + "..." : prompt}
                 </button>
@@ -132,7 +132,7 @@ export default function AIBuilderModal({
 
           {/* Provider Selection */}
           <div className="flex items-center gap-3">
-            <label className="text-xs text-gray-500">Provider:</label>
+            <label className="text-xs text-text-muted">Provider:</label>
             <div className="flex gap-1">
               {(["openai", "claude"] as const).map((p) => (
                 <button
@@ -142,7 +142,7 @@ export default function AIBuilderModal({
                     "px-3 py-1 text-xs rounded-full border transition-colors",
                     provider === p
                       ? "bg-primary/20 border-primary text-primary"
-                      : "border-gray-700 text-gray-400 hover:border-gray-600"
+                      : "border-border text-text-secondary hover:border-border"
                   )}
                 >
                   {p === "openai" ? "OpenAI" : "Claude"}
@@ -163,19 +163,19 @@ export default function AIBuilderModal({
           {generatedGraph && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-300">
+                <label className="text-sm font-medium text-text-primary">
                   Generated Graph ({generatedGraph.nodes?.length || 0} nodes,{" "}
                   {generatedGraph.edges?.length || 0} edges)
                 </label>
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-300"
+                  className="flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary"
                 >
                   {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                   {copied ? "Copied" : "Copy JSON"}
                 </button>
               </div>
-              <pre className="text-xs text-gray-300 bg-gray-900 rounded-lg p-4 overflow-auto max-h-48 font-mono border border-gray-800">
+              <pre className="text-xs text-text-primary bg-background-secondary rounded-lg p-4 overflow-auto max-h-48 font-mono border border-border">
                 {JSON.stringify(generatedGraph, null, 2)}
               </pre>
             </div>
@@ -183,10 +183,10 @@ export default function AIBuilderModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-800 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300"
+            className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary"
           >
             Cancel
           </button>
@@ -195,7 +195,7 @@ export default function AIBuilderModal({
               <>
                 <button
                   onClick={handleGenerate}
-                  className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800"
+                  className="flex items-center gap-2 px-4 py-2 text-sm border border-border text-text-primary rounded-lg hover:bg-surface-hover"
                 >
                   <Wand2 className="w-4 h-4" />
                   Regenerate
@@ -203,7 +203,7 @@ export default function AIBuilderModal({
                 {onGraphGenerated && (
                   <button
                     onClick={handleUseGraph}
-                    className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90"
+                    className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-gray-900 rounded-lg hover:bg-primary/90"
                   >
                     Use in Editor
                   </button>
@@ -211,7 +211,7 @@ export default function AIBuilderModal({
                 <button
                   onClick={handleCreateWorkflow}
                   disabled={generating}
-                  className="flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-text-primary rounded-lg hover:bg-green-500 disabled:opacity-50"
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   Create Workflow
@@ -221,7 +221,7 @@ export default function AIBuilderModal({
               <button
                 onClick={handleGenerate}
                 disabled={generating || !description.trim()}
-                className="flex items-center gap-2 px-5 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2 text-sm bg-primary text-gray-900 rounded-lg hover:bg-primary/90 disabled:opacity-50"
               >
                 {generating ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

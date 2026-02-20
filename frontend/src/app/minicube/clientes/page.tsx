@@ -18,7 +18,7 @@ const STATES_BR = [
 ];
 const STATUS_OPTIONS = [
   { value: "ativo", label: "Ativo", color: "bg-green-500/20 text-green-400 border-green-500/30" },
-  { value: "inativo", label: "Inativo", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
+  { value: "inativo", label: "Inativo", color: "bg-gray-500/20 text-text-secondary border-border" },
   { value: "prospect", label: "Prospect", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
 ];
 const TIPO_PESSOA_OPTIONS = [
@@ -216,7 +216,7 @@ export default function ClientesPage() {
 
   function getStatusBadge(status: string) {
     const opt = STATUS_OPTIONS.find((s) => s.value === status);
-    return <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", opt?.color || "bg-gray-500/20 text-gray-400 border-gray-500/30")}>{opt?.label || status}</span>;
+    return <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", opt?.color || "bg-gray-500/20 text-text-secondary border-border")}>{opt?.label || status}</span>;
   }
 
   function clearFilters() {
@@ -226,43 +226,43 @@ export default function ClientesPage() {
 
   const hasActiveFilters = filterStatus || filterTipoPessoa || filterState || filterCity || filterPole || filterCreatedAfter || filterCreatedBefore || search;
 
-  const inputClass = "w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-sm text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500 transition-colors";
-  const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
-  const selectClass = "px-3 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-indigo-500";
+  const inputClass = "w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors";
+  const labelClass = "block text-sm font-medium text-text-primary mb-1.5";
+  const selectClass = "px-3 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary";
 
   return (
-    <div className="flex h-screen bg-gray-950">
+    <div className="flex h-screen bg-background">
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-14 border-b border-gray-800 bg-gray-950 flex items-center justify-between px-6 shrink-0">
+        <header className="h-14 border-b border-border bg-background flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-indigo-400" />
-            <h1 className="text-lg font-semibold text-gray-100">Clientes</h1>
-            <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">{totalCount}</span>
+            <Users className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-semibold text-text-primary">Clientes</h1>
+            <span className="text-xs text-text-muted bg-surface px-2 py-0.5 rounded-full">{totalCount}</span>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium transition-colors">
             <Plus className="w-4 h-4" /> Novo Cliente
           </button>
         </header>
 
         {/* Filters */}
-        <div className="border-b border-gray-800 bg-gray-950/50 px-6 py-3 shrink-0">
+        <div className="border-b border-border bg-background/50 px-6 py-3 shrink-0">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input type="text" placeholder="Buscar nome, email, CPF, telefone..." value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-800 rounded-lg text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-indigo-500 transition-colors" />
+                className="w-full pl-10 pr-4 py-2 bg-background-secondary border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors" />
             </div>
             <button onClick={() => setShowFilters(!showFilters)}
               className={cn("flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors",
-                showFilters ? "border-indigo-500 text-indigo-400 bg-indigo-500/10" : "border-gray-800 text-gray-400 hover:border-gray-600")}>
+                showFilters ? "border-primary text-primary bg-primary/10" : "border-border text-text-secondary hover:border-border")}>
               <Filter className="w-4 h-4" /> Filtros
-              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-indigo-400" />}
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
             </button>
             {hasActiveFilters && (
-              <button onClick={clearFilters} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Limpar filtros</button>
+              <button onClick={clearFilters} className="text-xs text-text-muted hover:text-text-primary transition-colors">Limpar filtros</button>
             )}
           </div>
           {showFilters && (
@@ -309,47 +309,47 @@ export default function ClientesPage() {
           {/* Table */}
           <div className={cn("flex-1 overflow-auto p-6 transition-all", selectedCustomer ? "w-1/2" : "w-full")}>
             {loading ? (
-              <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+              <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
             ) : customers.length === 0 ? (
-              <div className="text-center py-20 text-gray-500">
+              <div className="text-center py-20 text-text-muted">
                 <Users className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium text-gray-400">Nenhum cliente encontrado</p>
+                <p className="text-lg font-medium text-text-secondary">Nenhum cliente encontrado</p>
                 <p className="text-sm mt-1">Cadastre um novo cliente para comecar.</p>
               </div>
             ) : (
               <>
-                <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+                <div className="bg-background-secondary rounded-xl border border-border overflow-hidden">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-800">
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">CPF/CNPJ</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">UF</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cadastro</th>
+                      <tr className="border-b border-border">
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Nome</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">CPF/CNPJ</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Email</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Telefone</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Cidade</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">UF</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Tipo</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Cadastro</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-800/50">
+                    <tbody className="divide-y divide-border/50">
                       {customers.map((c) => (
                         <tr key={c.id} onClick={() => openDetail(c)}
-                          className={cn("hover:bg-gray-800/40 transition-colors cursor-pointer",
-                            selectedCustomer?.id === c.id && "bg-indigo-500/10 border-l-2 border-l-indigo-500")}>
+                          className={cn("hover:bg-surface-hover/40 transition-colors cursor-pointer",
+                            selectedCustomer?.id === c.id && "bg-primary/10 border-l-2 border-l-primary")}>
                           <td className="px-4 py-3">
-                            <span className="text-sm font-medium text-gray-100">{c.name}</span>
-                            {c.company && <p className="text-xs text-gray-500">{c.company}</p>}
+                            <span className="text-sm font-medium text-text-primary">{c.name}</span>
+                            {c.company && <p className="text-xs text-text-muted">{c.company}</p>}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-300">{c.cpf || c.cnpj || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-gray-300 max-w-[150px] truncate">{c.email || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-gray-300">{c.phone || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-gray-300">{c.city || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-gray-300">{c.state || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-gray-400">{c.tipo_pessoa === "juridica" ? "PJ" : "PF"}</td>
+                          <td className="px-4 py-3 text-sm text-text-primary">{c.cpf || c.cnpj || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-text-primary max-w-[150px] truncate">{c.email || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-text-primary">{c.phone || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-text-primary">{c.city || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-text-primary">{c.state || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-text-secondary">{c.tipo_pessoa === "juridica" ? "PJ" : "PF"}</td>
                           <td className="px-4 py-3">{getStatusBadge(c.status)}</td>
-                          <td className="px-4 py-3 text-sm text-gray-400">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
+                          <td className="px-4 py-3 text-sm text-text-secondary">{new Date(c.created_at).toLocaleDateString("pt-BR")}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -357,16 +357,16 @@ export default function ClientesPage() {
                 </div>
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+                  <div className="flex items-center justify-between mt-4 text-sm text-text-secondary">
                     <span>{totalCount} cliente{totalCount !== 1 ? "s" : ""}</span>
                     <div className="flex items-center gap-2">
                       <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}
-                        className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                        className="p-2 rounded-lg border border-border hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                         <ChevronLeft className="w-4 h-4" />
                       </button>
-                      <span className="px-3 py-1 text-gray-300">Pagina {page} de {totalPages}</span>
+                      <span className="px-3 py-1 text-text-primary">Pagina {page} de {totalPages}</span>
                       <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page >= totalPages}
-                        className="p-2 rounded-lg border border-gray-800 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                        className="p-2 rounded-lg border border-border hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                         <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -378,24 +378,24 @@ export default function ClientesPage() {
 
           {/* Detail Drawer */}
           {selectedCustomer && (
-            <div className="w-1/2 border-l border-gray-800 bg-gray-950 flex flex-col overflow-hidden">
+            <div className="w-1/2 border-l border-border bg-background flex flex-col overflow-hidden">
               {/* Drawer header */}
-              <div className="border-b border-gray-800 px-6 py-4 shrink-0">
+              <div className="border-b border-border px-6 py-4 shrink-0">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">{selectedCustomer.name}</h2>
+                  <h2 className="text-lg font-semibold text-text-primary">{selectedCustomer.name}</h2>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => openEdit(selectedCustomer)} className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-indigo-400 transition-colors">
+                    <button onClick={() => openEdit(selectedCustomer)} className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-primary transition-colors">
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(selectedCustomer.id)} className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-red-400 transition-colors">
+                    <button onClick={() => handleDelete(selectedCustomer.id)} className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-red-400 transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setSelectedCustomer(null)} className="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-gray-200 transition-colors">
+                    <button onClick={() => setSelectedCustomer(null)} className="p-1.5 rounded-md hover:bg-surface-hover text-text-secondary hover:text-text-primary transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-400">
+                <div className="flex items-center gap-3 text-xs text-text-secondary">
                   {selectedCustomer.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {selectedCustomer.email}</span>}
                   {selectedCustomer.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {selectedCustomer.phone}</span>}
                   {selectedCustomer.city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {selectedCustomer.city}/{selectedCustomer.state}</span>}
@@ -403,7 +403,7 @@ export default function ClientesPage() {
               </div>
 
               {/* Tabs */}
-              <div className="border-b border-gray-800 px-6 shrink-0 overflow-x-auto">
+              <div className="border-b border-border px-6 shrink-0 overflow-x-auto">
                 <div className="flex gap-0 min-w-max">
                   {TABS.map((tab) => {
                     const Icon = tab.icon;
@@ -411,8 +411,8 @@ export default function ClientesPage() {
                       <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                         className={cn("flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap",
                           activeTab === tab.key
-                            ? "border-indigo-500 text-indigo-400"
-                            : "border-transparent text-gray-500 hover:text-gray-300")}>
+                            ? "border-primary text-primary"
+                            : "border-transparent text-text-muted hover:text-text-primary")}>
                         <Icon className="w-3.5 h-3.5" /> {tab.label}
                       </button>
                     );
@@ -423,7 +423,7 @@ export default function ClientesPage() {
               {/* Tab Content */}
               <div className="flex-1 overflow-auto p-6">
                 {detailLoading ? (
-                  <div className="flex items-center justify-center py-10"><Loader2 className="w-6 h-6 text-indigo-400 animate-spin" /></div>
+                  <div className="flex items-center justify-center py-10"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
                 ) : (
                   <>
                     {/* TAB: Info */}
@@ -458,7 +458,7 @@ export default function ClientesPage() {
                         </div>
                         <div className="flex justify-end pt-2">
                           <button onClick={handleDetailSave} disabled={saving}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                            className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                             {saving && <Loader2 className="w-4 h-4 animate-spin" />} Salvar Alteracoes
                           </button>
                         </div>
@@ -491,17 +491,17 @@ export default function ClientesPage() {
                             </select>
                           </div>
                         </div>
-                        <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-                          <p className="text-xs text-gray-500 mb-1">Data de Cadastro</p>
-                          <p className="text-sm text-gray-200">{new Date(selectedCustomer.created_at).toLocaleString("pt-BR")}</p>
+                        <div className="bg-background-secondary rounded-lg border border-border p-4">
+                          <p className="text-xs text-text-muted mb-1">Data de Cadastro</p>
+                          <p className="text-sm text-text-primary">{new Date(selectedCustomer.created_at).toLocaleString("pt-BR")}</p>
                         </div>
-                        <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-                          <p className="text-xs text-gray-500 mb-1">Ultima Atualizacao</p>
-                          <p className="text-sm text-gray-200">{new Date(selectedCustomer.updated_at).toLocaleString("pt-BR")}</p>
+                        <div className="bg-background-secondary rounded-lg border border-border p-4">
+                          <p className="text-xs text-text-muted mb-1">Ultima Atualizacao</p>
+                          <p className="text-sm text-text-primary">{new Date(selectedCustomer.updated_at).toLocaleString("pt-BR")}</p>
                         </div>
                         <div className="flex justify-end pt-2">
                           <button onClick={handleDetailSave} disabled={saving}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                            className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                             {saving && <Loader2 className="w-4 h-4 animate-spin" />} Salvar Alteracoes
                           </button>
                         </div>
@@ -510,32 +510,32 @@ export default function ClientesPage() {
 
                     {/* TAB: Chat */}
                     {activeTab === "chat" && (
-                      <div className="text-center py-10 text-gray-500">
+                      <div className="text-center py-10 text-text-muted">
                         <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
                         <p className="text-sm">Conversas vinculadas ao cliente</p>
-                        <p className="text-xs text-gray-600 mt-1">Integracao com ChatCube/WhatsApp em breve.</p>
+                        <p className="text-xs text-text-muted mt-1">Integracao com ChatCube/WhatsApp em breve.</p>
                       </div>
                     )}
 
                     {/* TAB: Leads */}
                     {activeTab === "leads" && (
-                      <div className="text-center py-10 text-gray-500">
+                      <div className="text-center py-10 text-text-muted">
                         <Eye className="w-10 h-10 mx-auto mb-3 opacity-30" />
                         <p className="text-sm">Leads associados ao cliente</p>
                         {selectedCustomer.lead ? (
-                          <p className="text-xs text-indigo-400 mt-2">Lead vinculado: {selectedCustomer.lead}</p>
+                          <p className="text-xs text-primary mt-2">Lead vinculado: {selectedCustomer.lead}</p>
                         ) : (
-                          <p className="text-xs text-gray-600 mt-1">Nenhum lead vinculado.</p>
+                          <p className="text-xs text-text-muted mt-1">Nenhum lead vinculado.</p>
                         )}
                       </div>
                     )}
 
                     {/* TAB: Vendas */}
                     {activeTab === "vendas" && (
-                      <div className="text-center py-10 text-gray-500">
+                      <div className="text-center py-10 text-text-muted">
                         <ShoppingCart className="w-10 h-10 mx-auto mb-3 opacity-30" />
                         <p className="text-sm">Vendas associadas ao cliente</p>
-                        <p className="text-xs text-gray-600 mt-1">Integracao com SalesCube em breve.</p>
+                        <p className="text-xs text-text-muted mt-1">Integracao com SalesCube em breve.</p>
                       </div>
                     )}
 
@@ -543,24 +543,24 @@ export default function ClientesPage() {
                     {activeTab === "turmas" && (
                       <div>
                         {customerEnrollments.length === 0 ? (
-                          <div className="text-center py-10 text-gray-500">
+                          <div className="text-center py-10 text-text-muted">
                             <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-30" />
                             <p className="text-sm">Nenhuma matricula encontrada.</p>
                           </div>
                         ) : (
                           <div className="space-y-2">
                             {customerEnrollments.map((e) => (
-                              <div key={e.id} className="bg-gray-900 rounded-lg border border-gray-800 p-4 flex items-center justify-between">
+                              <div key={e.id} className="bg-background-secondary rounded-lg border border-border p-4 flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm font-medium text-gray-200">{e.class_name || "Turma"}</p>
-                                  <p className="text-xs text-gray-500">Matriculado em {new Date(e.enrolled_at).toLocaleDateString("pt-BR")}</p>
+                                  <p className="text-sm font-medium text-text-primary">{e.class_name || "Turma"}</p>
+                                  <p className="text-xs text-text-muted">Matriculado em {new Date(e.enrolled_at).toLocaleDateString("pt-BR")}</p>
                                 </div>
                                 <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border",
                                   e.status === "confirmado" ? "bg-green-500/20 text-green-400 border-green-500/30" :
                                   e.status === "pendente" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
                                   e.status === "ausente" ? "bg-red-500/20 text-red-400 border-red-500/30" :
                                   e.status === "transferido" ? "bg-purple-500/20 text-purple-400 border-purple-500/30" :
-                                  "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                                  "bg-gray-500/20 text-text-secondary border-border"
                                 )}>
                                   {e.status === "pendente" ? "Pendente" : e.status === "confirmado" ? "Confirmado" : e.status === "ausente" ? "Ausente" : e.status === "sem_contato" ? "Sem Contato" : e.status === "transferido" ? "Transferido" : e.status}
                                 </span>
@@ -573,10 +573,10 @@ export default function ClientesPage() {
 
                     {/* TAB: Tarefas */}
                     {activeTab === "tarefas" && (
-                      <div className="text-center py-10 text-gray-500">
+                      <div className="text-center py-10 text-text-muted">
                         <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-30" />
                         <p className="text-sm">Tarefas vinculadas ao cliente</p>
-                        <p className="text-xs text-gray-600 mt-1">Integracao com SalesCube Tasks em breve.</p>
+                        <p className="text-xs text-text-muted mt-1">Integracao com SalesCube Tasks em breve.</p>
                       </div>
                     )}
 
@@ -590,21 +590,21 @@ export default function ClientesPage() {
                               onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
                               className={cn(inputClass, "flex-1")} />
                             <button onClick={handleAddNote} disabled={!noteText.trim()}
-                              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors">
+                              className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors">
                               Adicionar
                             </button>
                           </div>
                         </div>
                         {customerNotes ? (
-                          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4 space-y-2">
+                          <div className="bg-background-secondary rounded-lg border border-border p-4 space-y-2">
                             {customerNotes.split("\n").filter(Boolean).reverse().map((note, i) => (
-                              <div key={i} className="text-sm text-gray-300 border-b border-gray-800 pb-2 last:border-0 last:pb-0">
+                              <div key={i} className="text-sm text-text-primary border-b border-border pb-2 last:border-0 last:pb-0">
                                 {note}
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-8 text-gray-500">
+                          <div className="text-center py-8 text-text-muted">
                             <StickyNote className="w-8 h-8 mx-auto mb-2 opacity-30" />
                             <p className="text-sm">Nenhuma nota.</p>
                           </div>
@@ -615,11 +615,11 @@ export default function ClientesPage() {
                     {/* TAB: Foto */}
                     {activeTab === "foto" && (
                       <div className="text-center">
-                        <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gray-900 border-2 border-gray-800 flex items-center justify-center overflow-hidden">
+                        <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-background-secondary border-2 border-border flex items-center justify-center overflow-hidden">
                           {selectedCustomer.photo_url ? (
                             <img src={selectedCustomer.photo_url} alt={selectedCustomer.name} className="w-full h-full object-cover" />
                           ) : (
-                            <User className="w-16 h-16 text-gray-700" />
+                            <User className="w-16 h-16 text-text-secondary" />
                           )}
                         </div>
                         <div className="max-w-sm mx-auto">
@@ -627,7 +627,7 @@ export default function ClientesPage() {
                           <input type="url" value={form.photo_url || ""} onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
                             placeholder="https://..." className={inputClass} />
                           <button onClick={handleDetailSave} disabled={saving}
-                            className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors w-full">
+                            className="mt-3 px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors w-full">
                             Salvar Foto
                           </button>
                         </div>
@@ -643,11 +643,11 @@ export default function ClientesPage() {
         {/* Create/Edit Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-background-secondary rounded-xl border border-border p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-100">{editingId ? "Editar Cliente" : "Novo Cliente"}</h2>
-                <button onClick={() => setShowForm(false)} className="p-1 rounded-md hover:bg-gray-800 transition-colors">
-                  <X className="w-5 h-5 text-gray-400" />
+                <h2 className="text-lg font-semibold text-text-primary">{editingId ? "Editar Cliente" : "Novo Cliente"}</h2>
+                <button onClick={() => setShowForm(false)} className="p-1 rounded-md hover:bg-surface-hover transition-colors">
+                  <X className="w-5 h-5 text-text-secondary" />
                 </button>
               </div>
               <div className="space-y-4">
@@ -691,10 +691,10 @@ export default function ClientesPage() {
                     </select>
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
-                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-400 hover:text-gray-200 text-sm transition-colors">Cancelar</button>
+                <div className="flex justify-end gap-3 pt-3 border-t border-border">
+                  <button onClick={() => setShowForm(false)} className="px-4 py-2 text-text-secondary hover:text-text-primary text-sm transition-colors">Cancelar</button>
                   <button onClick={handleSave} disabled={saving || !form.name}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                     {saving && <Loader2 className="w-4 h-4 animate-spin" />} {editingId ? "Salvar" : "Criar Cliente"}
                   </button>
                 </div>

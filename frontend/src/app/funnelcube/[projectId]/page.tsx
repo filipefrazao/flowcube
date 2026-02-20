@@ -144,7 +144,7 @@ export default function ProjectDashboardPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowSnippet(!showSnippet)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm text-gray-300 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-hover border border-border rounded-lg text-sm text-text-primary transition-colors"
               >
                 <Code2 className="w-3.5 h-3.5" />
                 Setup
@@ -163,7 +163,7 @@ export default function ProjectDashboardPage() {
                 className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
                   tab === t.key
                     ? 'text-purple-400 border-purple-400 bg-purple-500/5'
-                    : 'text-gray-500 border-transparent hover:text-gray-300'
+                    : 'text-text-muted border-transparent hover:text-text-primary'
                 }`}
               >
                 {t.label}
@@ -178,19 +178,19 @@ export default function ProjectDashboardPage() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-b border-border/50 bg-gray-900/80 backdrop-blur-sm px-6 py-4 z-10"
+            className="border-b border-border/50 bg-background-secondary/80 backdrop-blur-sm px-6 py-4 z-10"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400 font-medium">Tracking Snippet</span>
+              <span className="text-xs text-text-secondary font-medium">Tracking Snippet</span>
               <button
                 onClick={copySnippet}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors"
               >
                 {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                 {copied ? 'Copied!' : 'Copy'}
               </button>
             </div>
-            <pre className="text-xs text-gray-400 bg-black/40 rounded-lg p-3 overflow-x-auto font-mono">
+            <pre className="text-xs text-text-secondary bg-black/40 rounded-lg p-3 overflow-x-auto font-mono">
               {snippet}
             </pre>
           </motion.div>

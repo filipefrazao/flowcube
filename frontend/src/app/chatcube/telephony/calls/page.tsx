@@ -35,7 +35,7 @@ const directionLabels: Record<string, string> = {
 const directionIcons: Record<string, React.ReactNode> = {
   INBOUND: <PhoneIncoming className="w-4 h-4 text-green-400" />,
   OUTBOUND: <PhoneOutgoing className="w-4 h-4 text-blue-400" />,
-  INTERNAL: <Phone className="w-4 h-4 text-gray-400" />,
+  INTERNAL: <Phone className="w-4 h-4 text-text-secondary" />,
 };
 
 const statusLabels: Record<string, string> = {
@@ -193,7 +193,7 @@ export default function CallsPage() {
             </div>
             <button
               onClick={applyFilters}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover rounded-lg text-text-primary text-sm font-medium transition-colors"
             >
               <Filter className="w-4 h-4" /> Filtrar
             </button>

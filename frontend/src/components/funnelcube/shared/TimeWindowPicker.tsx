@@ -26,8 +26,8 @@ export function TimeWindowPicker({ value, onChange, className }: TimeWindowPicke
           className={cn(
             'px-3 py-1.5 text-xs font-medium rounded-md transition-all',
             value === p.days
-              ? 'bg-purple-600 text-white shadow-sm'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              ? 'bg-purple-600 text-text-primary shadow-sm'
+              : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover/50'
           )}
         >
           {p.label}
@@ -60,8 +60,8 @@ export function IntervalPicker({ value, onChange, className }: IntervalPickerPro
           className={cn(
             'px-3 py-1.5 text-xs font-medium rounded-md transition-all',
             value === i.value
-              ? 'bg-cyan-600 text-white shadow-sm'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              ? 'bg-cyan-600 text-text-primary shadow-sm'
+              : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover/50'
           )}
         >
           {i.label}

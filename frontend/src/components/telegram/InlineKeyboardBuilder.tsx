@@ -165,16 +165,16 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
         initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-2xl bg-background-secondary rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-text-primary">
             Inline Keyboard Builder
           </h3>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 text-text-secondary hover:text-text-muted dark:hover:text-text-primary rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover"
           >
             <X className="w-5 h-5" />
           </button>
@@ -184,16 +184,16 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
         <div className="p-6 max-h-[60vh] overflow-y-auto">
           {/* Preview */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-text-secondary dark:text-text-primary mb-3">
               Preview
             </label>
-            <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-xl space-y-2">
+            <div className="p-4 bg-surface-hover dark:bg-surface rounded-xl space-y-2">
               {rows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex gap-2">
                   {row.map((btn, colIndex) => (
                     <button
                       key={colIndex}
-                      className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors truncate"
+                      className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary text-sm font-medium rounded-lg transition-colors truncate"
                     >
                       {btn.text || 'Button'}
                     </button>
@@ -205,20 +205,20 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
 
           {/* Editor */}
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-text-secondary dark:text-text-primary">
               Rows
             </label>
 
             {rows.map((row, rowIndex) => (
               <div
                 key={rowIndex}
-                className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700"
+                className="p-4 bg-background-secondary dark:bg-surface/50 rounded-xl border border-border"
               >
                 {/* Row header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <GripVertical className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <GripVertical className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm font-medium text-text-muted dark:text-text-secondary">
                       Row {rowIndex + 1}
                     </span>
                   </div>
@@ -226,14 +226,14 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
                     <button
                       onClick={() => moveRow(rowIndex, 'up')}
                       disabled={rowIndex === 0}
-                      className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50"
+                      className="p-1 text-text-secondary hover:text-text-muted dark:hover:text-text-primary disabled:opacity-50"
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => moveRow(rowIndex, 'down')}
                       disabled={rowIndex === rows.length - 1}
-                      className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50"
+                      className="p-1 text-text-secondary hover:text-text-muted dark:hover:text-text-primary disabled:opacity-50"
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
@@ -269,7 +269,7 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
                           'p-3 rounded-lg border transition-colors',
                           isEditing
                             ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
-                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                            : 'bg-surface border-border'
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -281,7 +281,7 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
                               onChange={(e) => updateButton(rowIndex, colIndex, { text: e.target.value })}
                               onFocus={() => setEditingButton({ row: rowIndex, col: colIndex })}
                               placeholder="Button text"
-                              className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
 
                             {/* Button type & value */}
@@ -289,7 +289,7 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
                               <select
                                 value={btn.type}
                                 onChange={(e) => updateButton(rowIndex, colIndex, { type: e.target.value as ButtonType })}
-                                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="px-3 py-1.5 text-sm border border-border rounded-lg bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
                               >
                                 {BUTTON_TYPES.map((type) => (
                                   <option key={type.value} value={type.value}>
@@ -307,14 +307,14 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
                                   btn.type === 'web_app' ? 'https://webapp.example.com' :
                                   'callback_data'
                                 }
-                                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                                className="flex-1 px-3 py-1.5 text-sm border border-border rounded-lg bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-transparent font-mono"
                               />
                             </div>
                           </div>
 
                           <button
                             onClick={() => removeButton(rowIndex, colIndex)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                            className="p-1.5 text-text-secondary hover:text-red-500 transition-colors"
                             title="Remove button"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -330,7 +330,7 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
             {/* Add row button */}
             <button
               onClick={addRow}
-              className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 dark:text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 border-2 border-dashed border-border rounded-xl text-text-muted dark:text-text-secondary hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Add Row
@@ -351,7 +351,7 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between">
           <button
             onClick={handleClear}
             className="px-4 py-2 text-red-500 hover:text-red-600 text-sm font-medium"
@@ -361,13 +361,13 @@ export function InlineKeyboardBuilder({ keyboard, onUpdate, onClose }: InlineKey
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium"
+              className="px-4 py-2 text-text-muted dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary text-sm font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-text-primary rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               Save Keyboard

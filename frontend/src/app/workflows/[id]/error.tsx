@@ -19,23 +19,23 @@ export default function Error({
   return (
     <div className='mx-auto max-w-3xl px-6 py-10'>
       <h2 className='text-lg font-semibold text-red-600'>O editor encontrou um erro</h2>
-      <p className='mt-2 text-sm text-gray-600'>
+      <p className='mt-2 text-sm text-text-muted'>
         Se isso aconteceu ao adicionar um node (principalmente premium), recarregar normalmente resolve.
       </p>
 
       {error?.digest && (
-        <p className='mt-2 text-xs text-gray-500'>Digest: {error.digest}</p>
+        <p className='mt-2 text-xs text-text-muted'>Digest: {error.digest}</p>
       )}
 
       <div className='mt-6 flex flex-wrap gap-3'>
         <button
-          className='rounded bg-black px-4 py-2 text-sm text-white hover:opacity-90'
+          className='rounded bg-black px-4 py-2 text-sm text-text-primary hover:opacity-90'
           onClick={() => window.location.reload()}
         >
           Recarregar a pagina
         </button>
         <button
-          className='rounded border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50'
+          className='rounded border border-border px-4 py-2 text-sm hover:bg-background-secondary'
           onClick={() => reset()}
         >
           Tentar novamente

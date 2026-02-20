@@ -50,27 +50,27 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function TemplateCard({ template, onPreview, onUse }: TemplateCardProps) {
-  const categoryColor = CATEGORY_COLORS[template.category] || "bg-gray-800 text-gray-400 border-gray-700";
+  const categoryColor = CATEGORY_COLORS[template.category] || "bg-surface text-text-secondary border-border";
   const categoryIcon = CATEGORY_ICONS[template.category] || <Zap className="w-4 h-4" />;
 
   return (
-    <div className="bg-surface border border-gray-800 rounded-xl hover:border-gray-700 transition-all group">
+    <div className="bg-surface border border-border rounded-xl hover:border-border transition-all group">
       {/* Mini Graph Preview */}
-      <div className="h-32 bg-gray-900/50 rounded-t-xl flex items-center justify-center relative overflow-hidden">
+      <div className="h-32 bg-background-secondary/50 rounded-t-xl flex items-center justify-center relative overflow-hidden">
         {/* Simple node visualization */}
         <div className="flex items-center gap-3">
           {(template.graph?.nodes || []).slice(0, 4).map((node: any, i: number) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center">
                 <div className="w-2 h-2 rounded-full bg-primary" />
               </div>
               {i < Math.min((template.graph?.nodes?.length || 0) - 1, 3) && (
-                <ArrowRight className="w-3 h-3 text-gray-600" />
+                <ArrowRight className="w-3 h-3 text-text-muted" />
               )}
             </div>
           ))}
           {(template.graph?.nodes?.length || 0) > 4 && (
-            <span className="text-xs text-gray-600">+{template.graph.nodes.length - 4}</span>
+            <span className="text-xs text-text-muted">+{template.graph.nodes.length - 4}</span>
           )}
         </div>
 
@@ -78,7 +78,7 @@ export default function TemplateCard({ template, onPreview, onUse }: TemplateCar
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             onClick={() => onPreview(template)}
-            className="px-3 py-1.5 bg-gray-800/90 text-gray-200 rounded-lg text-xs flex items-center gap-1 hover:bg-gray-700"
+            className="px-3 py-1.5 bg-surface/90 text-text-primary rounded-lg text-xs flex items-center gap-1 hover:bg-surface-hover"
           >
             <Eye className="w-3 h-3" /> Preview
           </button>
@@ -95,12 +95,12 @@ export default function TemplateCard({ template, onPreview, onUse }: TemplateCar
 
         {/* Title & Description */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-200 line-clamp-1">{template.name}</h3>
-          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{template.description}</p>
+          <h3 className="text-sm font-semibold text-text-primary line-clamp-1">{template.name}</h3>
+          <p className="text-xs text-text-muted mt-1 line-clamp-2">{template.description}</p>
         </div>
 
         {/* Meta */}
-        <div className="flex items-center justify-between text-[10px] text-gray-500">
+        <div className="flex items-center justify-between text-[10px] text-text-muted">
           <span>{template.node_count} nodes</span>
           {template.usage_count !== undefined && (
             <span>{template.usage_count} uses</span>
@@ -113,7 +113,7 @@ export default function TemplateCard({ template, onPreview, onUse }: TemplateCar
             {template.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="px-1.5 py-0.5 bg-gray-800 text-gray-400 rounded text-[10px]"
+                className="px-1.5 py-0.5 bg-surface text-text-secondary rounded text-[10px]"
               >
                 {tag}
               </span>

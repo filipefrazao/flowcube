@@ -48,25 +48,25 @@ function DeviceSection({
 
   return (
     <div>
-      <h4 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+      <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
         {title}
       </h4>
       {items.length === 0 ? (
-        <p className="text-xs text-gray-600">No data</p>
+        <p className="text-xs text-text-muted">No data</p>
       ) : (
         <div className="space-y-1.5">
           {items.slice(0, 6).map((item, i) => (
             <div key={i} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-sm text-gray-300 truncate">
+                  <span className="text-sm text-text-primary truncate">
                     {getItemName(item, section)}
                   </span>
-                  <span className="text-xs text-gray-500 ml-2 shrink-0">
+                  <span className="text-xs text-text-muted ml-2 shrink-0">
                     {item.count}
                   </span>
                 </div>
-                <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-1 bg-surface rounded-full overflow-hidden">
                   <div
                     className={`h-full bg-gradient-to-r ${colors.from} ${colors.to} rounded-full transition-all`}
                     style={{ width: `${(item.count / maxCount) * 100}%` }}
@@ -98,15 +98,15 @@ export function OverviewDevices({ projectId, days }: Props) {
     <div className="bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-4">
         <Monitor className="w-4 h-4 text-blue-400" />
-        <h3 className="text-sm font-medium text-white">Devices</h3>
+        <h3 className="text-sm font-medium text-text-primary">Devices</h3>
       </div>
 
       {loading ? (
         <div className="h-48 flex items-center justify-center">
-          <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+          <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>
       ) : !data ? (
-        <div className="h-48 flex items-center justify-center text-gray-500 text-sm">
+        <div className="h-48 flex items-center justify-center text-text-muted text-sm">
           No device data yet
         </div>
       ) : (
