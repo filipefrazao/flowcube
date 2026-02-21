@@ -196,49 +196,6 @@ class FacebookLeadAdsWebhookView(APIView):
             return {}
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class EvolutionWebhookView(View):
-    """
-    Receive webhooks from Evolution API
-    URL: /api/webhooks/evolution/<workflow_id>/
-    """
-
-    def post(self, request, workflow_id: str):
-        try:
-            payload = json.loads(request.body)
-            
-            # Log the webhook
-            log = WhatsAppWebhookLog.objects.create(
-                instance=payload.get("instance", ""),
-                event_type=payload.get("event", ""),
-                payload=payload,
-                processed=False
-            )
-            
-            logger.info(f"Received Evolution webhook: {payload.get('event')} for workflow {workflow_id}")
-            
-            # Process asynchronously via Celery
-            process_webhook_async.delay(workflow_id, payload)
-            
-            return JsonResponse({
-                "status": "accepted",
-                "log_id": str(log.id)
-            }, status=202)
-            
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON in webhook payload")
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
-        except Exception as e:
-            logger.exception(f"Error processing webhook: {e}")
-            return JsonResponse({"error": str(e)}, status=500)
-
-    def get(self, request, workflow_id: str):
-        """Health check / verification endpoint"""
-        return JsonResponse({
-            "status": "ok",
-            "workflow_id": workflow_id,
-            "timestamp": timezone.now().isoformat()
-        })
 
 
 @method_decorator(csrf_exempt, name="dispatch")

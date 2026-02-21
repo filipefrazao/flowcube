@@ -10,7 +10,7 @@ Usage:
     my_plugin = "my_plugin.apps:MyPluginConfig"
 
     # In your plugin's apps.py:
-    from flowcube_core.plugin_base import FlowCubePluginConfig
+    from platform_core.plugin_base import FlowCubePluginConfig
 
     class MyPluginConfig(FlowCubePluginConfig):
         name = "my_plugin"
@@ -18,4 +18,4 @@ Usage:
         plugin_label = "My Plugin"
         plugin_icon = "puzzle"
 """
-default_app_config = "flowcube_core.apps.FlowCubeCoreConfig"
+default_app_config = "platform_core.apps.FlowCubeCoreConfig"

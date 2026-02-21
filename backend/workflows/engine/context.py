@@ -12,6 +12,9 @@ from typing import Any, Optional
 logger = logging.getLogger("flowcube.engine")
 
 
+MAX_EXECUTION_DEPTH = 10  # Prevent infinite subworkflow recursion
+
+
 class ExecutionContext:
     """
     Mutable context passed through every node during execution.

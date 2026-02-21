@@ -104,6 +104,14 @@ export interface WorkflowState {
   reset: () => void;
 }
 
+
+// Trigger node types (cannot have incoming connections)
+const TRIGGER_TYPES = new Set([
+  'webhook_trigger', 'schedule', 'manual_trigger', 'whatsapp_trigger',
+  'evolution_trigger', 'facebook_lead_ads', 'premium_trigger',
+  'email_trigger', 'form_trigger', 'api_trigger',
+]);
+
 const initialState = {
   workflowId: null,
   workflowName: 'Untitled Workflow',
@@ -171,14 +179,35 @@ export const useWorkflowStore = create<WorkflowState>()(
       },
 
       onConnect: (connection) => {
-        set((state) => ({
-          edges: addEdgeUtil({
-            ...connection,
-            id: `edge-${Date.now()}`,
-            type: 'smoothstep',
-          }, state.edges),
-          isDirty: true,
-        }));
+        set((state) => {
+          // Validate: no self-loops
+          if (connection.source === connection.target) return state;
+
+          // Validate: no duplicate edges (same source + target + handle)
+          const handle = connection.sourceHandle || 'default';
+          const isDuplicate = state.edges.some(
+            (e) => e.source === connection.source &&
+                   e.target === connection.target &&
+                   (e.sourceHandle || 'default') === handle
+          );
+          if (isDuplicate) return state;
+
+          // Validate: trigger nodes cannot receive connections
+          const targetNode = state.nodes.find((n) => n.id === connection.target);
+          if (targetNode) {
+            const targetType = targetNode.data?.type || targetNode.type || '';
+            if (TRIGGER_TYPES.has(targetType)) return state;
+          }
+
+          return {
+            edges: addEdgeUtil({
+              ...connection,
+              id: `edge-${Date.now()}`,
+              type: 'smoothstep',
+            }, state.edges),
+            isDirty: true,
+          };
+        });
       },
 
       // Selection actions

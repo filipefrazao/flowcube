@@ -135,8 +135,11 @@ def _distribute_webhook(submission, config):
 
 
 def _distribute_whatsapp(submission, config):
-    """Send WhatsApp message via Evolution API"""
-    instance_name = config.get('instance_name', 'API Oficial - Suporte FRZ')
+    """Send WhatsApp message via ChatCube EngineClient"""
+    from chatcube.engine_client import EngineClient, EngineClientError
+    from chatcube.models import WhatsAppInstance
+
+    instance_name = config.get('instance_name', 'Suporte FRZ')
     phone = submission.data.get('phone', submission.data.get('telefone', submission.data.get('whatsapp', '')))
     message_template = config.get('message_template', 'Olá {name}! Recebemos seu cadastro. Em breve entraremos em contato.')
 
@@ -153,18 +156,21 @@ def _distribute_whatsapp(submission, config):
     if len(phone) == 11:
         phone = f'55{phone}'
 
-    evolution_url = getattr(settings, 'EVOLUTION_API_URL', 'https://evolution.frzgroup.com.br')
-    api_key = getattr(settings, 'EVOLUTION_API_KEY', '')
+    try:
+        wa_instance = WhatsAppInstance.objects.filter(name__icontains=instance_name).first()
+        if not wa_instance or not wa_instance.engine_instance_id:
+            return {'error': f'WhatsApp instance "{instance_name}" not found or not connected'}
 
-    with httpx.Client(timeout=30) as client:
-        resp = client.post(
-            f'{evolution_url}/message/sendText/{instance_name}',
-            json={'number': phone, 'text': message},
-            headers={'apikey': api_key}
+        client = EngineClient()
+        result = client.send_message(
+            wa_instance.engine_instance_id,
+            to=phone,
+            message_type='text',
+            content=message,
         )
-        return {'status_code': resp.status_code, 'response': resp.json() if resp.status_code < 400 else resp.text}
-
-
+        return {'status': 'sent', 'response': result}
+    except EngineClientError as e:
+        return {'error': str(e)}
 @shared_task(queue='pages')
 def verify_domain(domain_id):
     """Verify DNS for a custom domain"""

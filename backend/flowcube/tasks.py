@@ -1,14 +1,13 @@
 """
 Celery Tasks for FlowCube
 flowcube/tasks.py
+— Evolution API references removed, now uses ChatCube EngineClient
 """
 import logging
 import httpx
 from typing import Dict, Any, List, Optional
 from celery import shared_task
-from celery.exceptions import MaxRetriesExceededError
 from django.conf import settings
-from asgiref.sync import async_to_sync
 
 logger = logging.getLogger('flowcube.tasks')
 
@@ -22,71 +21,63 @@ logger = logging.getLogger('flowcube.tasks')
     retry_backoff_max=600,
     retry_jitter=True,
     max_retries=3,
-    queue='webhooks'
+    queue='webhooks',
 )
 def process_webhook_async(self, workflow_id: str, payload: Dict[str, Any]):
-    """
-    Process incoming webhook asynchronously
-
-    Args:
-        workflow_id: ID of the workflow to execute
-        payload: Webhook payload data
-    """
+    """Process incoming webhook asynchronously."""
     try:
         logger.info(f"Processing webhook for workflow {workflow_id}")
 
         from flowcube.engine.runtime import ChatbotRuntime, send_responses
-        from workflows.models import Workflow
+        from asgiref.sync import async_to_sync
 
-        # Extract message data from payload
-        # Evolution API format
-        event = payload.get('event', '')
-        data = payload.get('data', {})
-        instance = payload.get('instance', '')
+        # Generic webhook processing — source-agnostic
+        source = payload.get('source', 'unknown')
 
-        if event == 'MESSAGES_UPSERT':
-            message_data = data.get('message', {})
-            if message_data.get('fromMe'):
-                logger.debug("Ignoring own message")
-                return {'status': 'ignored', 'reason': 'own_message'}
+        # ChatCube engine webhook format
+        if source == 'chatcube' or payload.get('engine_event'):
+            event = payload.get('engine_event', payload.get('event', ''))
+            data = payload.get('data', {})
 
-            # Extract phone and text
-            key = message_data.get('key', {})
-            remote_jid = key.get('remoteJid', '')
-            phone = remote_jid.split('@')[0] if '@' in remote_jid else remote_jid
+            if event in ('message.received', 'MESSAGES_UPSERT'):
+                phone = data.get('from', data.get('remote_jid', ''))
+                if '@' in phone:
+                    phone = phone.split('@')[0]
+                text = data.get('content', data.get('text', ''))
+                contact_name = data.get('push_name', data.get('pushName', ''))
+                message_id = data.get('wa_message_id', data.get('id', ''))
+                instance = data.get('instance_id', '')
 
-            message_content = message_data.get('message', {})
-            text = (
-                message_content.get('conversation') or
-                message_content.get('extendedTextMessage', {}).get('text') or
-                ''
-            )
+                if not text:
+                    return {'status': 'ignored', 'reason': 'no_text'}
 
-            contact_name = data.get('pushName', '')
-            message_id = key.get('id', '')
+                runtime = ChatbotRuntime(workflow_id)
+                responses = async_to_sync(runtime.process_message)(
+                    phone=phone,
+                    message_text=text,
+                    instance=instance,
+                    contact_name=contact_name,
+                    message_id=message_id,
+                )
 
-            if not text:
-                logger.debug("No text content in message")
-                return {'status': 'ignored', 'reason': 'no_text'}
+                if responses:
+                    async_to_sync(send_responses)(instance, phone, responses)
 
-            # Process message
-            runtime = ChatbotRuntime(workflow_id)
-            responses = async_to_sync(runtime.process_message)(
-                phone=phone,
-                message_text=text,
-                instance=instance,
-                contact_name=contact_name,
-                message_id=message_id
-            )
+                logger.info(f"Processed message from {phone}, {len(responses)} responses sent")
+                return {'status': 'success', 'responses': len(responses)}
 
-            # Send responses
-            if responses:
-                async_to_sync(send_responses)(instance, phone, responses)
+            return {'status': 'ignored', 'reason': 'unsupported_event'}
 
-            logger.info(f"Processed message from {phone}, {len(responses)} responses sent")
-            return {'status': 'success', 'responses': len(responses)}
-
-        return {'status': 'ignored', 'reason': 'unsupported_event'}
+        # Generic / N8N / SalesCube webhook — just dispatch to runtime
+        runtime = ChatbotRuntime(workflow_id)
+        responses = async_to_sync(runtime.process_message)(
+            phone=payload.get('phone', ''),
+            message_text=payload.get('text', payload.get('message', '')),
+            instance=payload.get('instance', ''),
+            contact_name=payload.get('name', ''),
+            message_id='',
+        )
+        return {'status': 'success', 'responses': len(responses) if responses else 0}
 
     except Exception as e:
         logger.error(f"Error processing webhook: {e}")
@@ -101,24 +92,10 @@ def process_webhook_async(self, workflow_id: str, payload: Dict[str, Any]):
     retry_backoff=True,
     retry_backoff_max=300,
     max_retries=3,
-    queue='http'
+    queue='http',
 )
 def execute_http_request(self, config: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Execute an HTTP request
-
-    Args:
-        config: {
-            'method': 'POST',
-            'url': 'https://example.com/webhook',
-            'headers': {'Authorization': 'Bearer xxx'},
-            'body': {'key': 'value'},
-            'timeout': 30
-        }
-
-    Returns:
-        Response data
-    """
+    """Execute an HTTP request."""
     try:
         method = config.get('method', 'GET').upper()
         url = config.get('url', '')
@@ -134,14 +111,13 @@ def execute_http_request(self, config: Dict[str, Any]) -> Dict[str, Any]:
                 url=url,
                 headers=headers,
                 json=body if isinstance(body, dict) else None,
-                content=body if isinstance(body, (str, bytes)) else None
+                content=body if isinstance(body, (str, bytes)) else None,
             )
 
-            # Parse response
             try:
                 response_body = response.json()
                 is_json = True
-            except:
+            except Exception:
                 response_body = response.text
                 is_json = False
 
@@ -150,7 +126,7 @@ def execute_http_request(self, config: Dict[str, Any]) -> Dict[str, Any]:
                 'headers': dict(response.headers),
                 'body': response_body,
                 'is_json': is_json,
-                'success': 200 <= response.status_code < 300
+                'success': 200 <= response.status_code < 300,
             }
 
             logger.info(f"HTTP {method} {url} -> {response.status_code}")
@@ -169,27 +145,16 @@ def execute_http_request(self, config: Dict[str, Any]) -> Dict[str, Any]:
     retry_backoff=True,
     retry_backoff_max=60,
     max_retries=2,
-    queue='ai'
+    queue='ai',
 )
 def execute_ai_completion(
     self,
     provider: str,
     model: str,
     messages: List[Dict[str, str]],
-    config: Dict[str, Any] = None
+    config: Dict[str, Any] = None,
 ) -> Dict[str, Any]:
-    """
-    Execute AI completion request
-
-    Args:
-        provider: 'openai' or 'anthropic'
-        model: Model name (e.g., 'gpt-4o', 'claude-3-5-sonnet')
-        messages: List of {'role': 'user/assistant/system', 'content': '...'}
-        config: Additional config (temperature, max_tokens, etc.)
-
-    Returns:
-        AI response
-    """
+    """Execute AI completion request."""
     config = config or {}
     temperature = config.get('temperature', 0.7)
     max_tokens = config.get('max_tokens', 2000)
@@ -201,19 +166,12 @@ def execute_ai_completion(
             return _call_anthropic(model, messages, temperature, max_tokens)
         else:
             raise ValueError(f"Unsupported AI provider: {provider}")
-
     except Exception as e:
         logger.error(f"AI completion failed: {e}")
         raise
 
 
-def _call_openai(
-    model: str,
-    messages: List[Dict[str, str]],
-    temperature: float,
-    max_tokens: int
-) -> Dict[str, Any]:
-    """Call OpenAI API"""
+def _call_openai(model, messages, temperature, max_tokens):
     api_key = getattr(settings, 'OPENAI_API_KEY', '')
     if not api_key:
         raise ValueError("OPENAI_API_KEY not configured")
@@ -221,52 +179,32 @@ def _call_openai(
     with httpx.Client(timeout=120) as client:
         response = client.post(
             'https://api.openai.com/v1/chat/completions',
-            headers={
-                'Authorization': f'Bearer {api_key}',
-                'Content-Type': 'application/json'
-            },
-            json={
-                'model': model,
-                'messages': messages,
-                'temperature': temperature,
-                'max_tokens': max_tokens
-            }
+            headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+            json={'model': model, 'messages': messages, 'temperature': temperature, 'max_tokens': max_tokens},
         )
         response.raise_for_status()
         data = response.json()
-
         return {
             'provider': 'openai',
             'model': model,
             'content': data['choices'][0]['message']['content'],
             'usage': data.get('usage', {}),
-            'finish_reason': data['choices'][0].get('finish_reason')
+            'finish_reason': data['choices'][0].get('finish_reason'),
         }
 
 
-def _call_anthropic(
-    model: str,
-    messages: List[Dict[str, str]],
-    temperature: float,
-    max_tokens: int
-) -> Dict[str, Any]:
-    """Call Anthropic API"""
+def _call_anthropic(model, messages, temperature, max_tokens):
     api_key = getattr(settings, 'ANTHROPIC_API_KEY', '')
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY not configured")
 
-    # Convert messages format for Anthropic
     system_prompt = ""
     anthropic_messages = []
-
     for msg in messages:
         if msg['role'] == 'system':
             system_prompt = msg['content']
         else:
-            anthropic_messages.append({
-                'role': msg['role'],
-                'content': msg['content']
-            })
+            anthropic_messages.append({'role': msg['role'], 'content': msg['content']})
 
     with httpx.Client(timeout=120) as client:
         response = client.post(
@@ -274,111 +212,95 @@ def _call_anthropic(
             headers={
                 'x-api-key': api_key,
                 'Content-Type': 'application/json',
-                'anthropic-version': '2023-06-01'
+                'anthropic-version': '2023-06-01',
             },
             json={
                 'model': model,
                 'max_tokens': max_tokens,
                 'temperature': temperature,
                 'system': system_prompt,
-                'messages': anthropic_messages
-            }
+                'messages': anthropic_messages,
+            },
         )
         response.raise_for_status()
         data = response.json()
-
         return {
             'provider': 'anthropic',
             'model': model,
             'content': data['content'][0]['text'],
             'usage': data.get('usage', {}),
-            'stop_reason': data.get('stop_reason')
+            'stop_reason': data.get('stop_reason'),
         }
 
 
-# ==================== WHATSAPP TASKS ====================
+# ==================== WHATSAPP TASKS (via ChatCube EngineClient) ==============
 
 @shared_task(
     bind=True,
-    autoretry_for=(httpx.RequestError, httpx.TimeoutException),
+    autoretry_for=(Exception,),
     retry_backoff=True,
     retry_backoff_max=60,
     max_retries=3,
-    queue='whatsapp'
+    queue='whatsapp',
 )
 def send_whatsapp_message(
     self,
     instance: str,
     to: str,
     message_type: str,
-    content: Dict[str, Any]
+    content: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Send WhatsApp message via Evolution API
+    Send WhatsApp message via ChatCube EngineClient.
 
     Args:
-        instance: Evolution API instance name
+        instance: WhatsApp instance name or engine_instance_id
         to: Phone number (e.g., '5511999999999')
         message_type: 'text', 'image', 'audio', 'document', 'buttons', 'list', 'template'
-        content: Message content based on type
-
-    Returns:
-        API response
+        content: Message content dict
     """
-    from flowcube.integrations.whatsapp import evolution_client
-    from asgiref.sync import async_to_sync
+    from chatcube.engine_client import EngineClient, EngineClientError
+    from chatcube.models import WhatsAppInstance
 
     try:
         logger.info(f"Sending {message_type} to {to} via {instance}")
 
-        if message_type == 'text':
-            result = async_to_sync(evolution_client.send_text)(
-                instance, to, content.get('text', '')
-            )
-        elif message_type == 'image':
-            result = async_to_sync(evolution_client.send_image)(
-                instance, to,
-                content.get('url', ''),
-                content.get('caption', '')
-            )
-        elif message_type == 'audio':
-            result = async_to_sync(evolution_client.send_audio)(
-                instance, to, content.get('url', '')
-            )
-        elif message_type == 'document':
-            result = async_to_sync(evolution_client.send_document)(
-                instance, to,
-                content.get('url', ''),
-                content.get('filename', 'document')
-            )
-        elif message_type == 'buttons':
-            result = async_to_sync(evolution_client.send_buttons)(
-                instance, to,
-                content.get('text', ''),
-                content.get('buttons', []),
-                content.get('footer', '')
-            )
-        elif message_type == 'list':
-            result = async_to_sync(evolution_client.send_list)(
-                instance, to,
-                content.get('title', ''),
-                content.get('description', ''),
-                content.get('button_text', 'Selecionar'),
-                content.get('sections', [])
-            )
-        elif message_type == 'template':
-            result = async_to_sync(evolution_client.send_template)(
-                instance, to,
-                content.get('template_name', ''),
-                content.get('language', 'pt_BR'),
-                content.get('components', [])
-            )
-        else:
-            raise ValueError(f"Unsupported message type: {message_type}")
+        # Resolve engine_instance_id from instance name
+        try:
+            wa_instance = WhatsAppInstance.objects.get(name=instance)
+            engine_id = wa_instance.engine_instance_id
+        except WhatsAppInstance.DoesNotExist:
+            # Maybe it's already an engine_instance_id
+            engine_id = instance
+
+        if not engine_id:
+            return {'status': 'error', 'message': f'No engine_instance_id for instance {instance}'}
+
+        client = EngineClient()
+
+        text_content = content.get('text', content.get('content', ''))
+        media_url = content.get('url', content.get('media_url', None))
+        metadata = None
+
+        if message_type in ('buttons', 'list', 'template'):
+            metadata = content
+            text_content = content.get('text', content.get('title', ''))
+
+        result = client.send_message(
+            engine_id,
+            to=to,
+            message_type=message_type,
+            content=text_content,
+            media_url=media_url,
+            metadata=metadata,
+        )
 
         logger.info(f"Message sent to {to}: {result}")
         return {'status': 'sent', 'result': result}
 
+    except EngineClientError as e:
+        logger.error(f"ChatCube engine error: {e}")
+        raise self.retry(exc=e)
     except Exception as e:
         logger.error(f"Failed to send WhatsApp message: {e}")
         raise
@@ -391,19 +313,10 @@ def send_whatsapp_message(
     autoretry_for=(Exception,),
     retry_backoff=True,
     max_retries=2,
-    queue='workflows'
+    queue='workflows',
 )
-def execute_workflow_node(
-    self,
-    workflow_id: str,
-    session_id: str,
-    node_id: str
-) -> Dict[str, Any]:
-    """
-    Execute a single workflow node
-
-    Used for async/delayed node execution
-    """
+def execute_workflow_node(self, workflow_id: str, session_id: str, node_id: str) -> Dict[str, Any]:
+    """Execute a single workflow node."""
     from flowcube.engine.runtime import ChatbotRuntime
     from flowcube.models import ChatSession
     from asgiref.sync import async_to_sync
@@ -412,18 +325,12 @@ def execute_workflow_node(
         session = ChatSession.objects.get(id=session_id)
         runtime = ChatbotRuntime(workflow_id)
 
-        # Get node and execute
         node = runtime.get_node(node_id)
         if not node:
             return {'status': 'error', 'message': f'Node {node_id} not found'}
 
         response = async_to_sync(runtime._execute_node)(node, session)
-
-        return {
-            'status': 'success',
-            'node_id': node_id,
-            'response': response
-        }
+        return {'status': 'success', 'node_id': node_id, 'response': response}
 
     except Exception as e:
         logger.error(f"Failed to execute node {node_id}: {e}")
@@ -437,38 +344,21 @@ def execute_workflow_node(
     autoretry_for=(httpx.RequestError,),
     retry_backoff=True,
     max_retries=3,
-    queue='webhooks'
+    queue='webhooks',
 )
-def forward_to_n8n(
-    self,
-    webhook_path: str,
-    payload: Dict[str, Any],
-    headers: Dict[str, str] = None
-) -> Dict[str, Any]:
-    """
-    Forward data to N8N webhook
-
-    Args:
-        webhook_path: Path after /webhook/ (e.g., 'flowcube-lead')
-        payload: Data to send
-        headers: Additional headers
-    """
+def forward_to_n8n(self, webhook_path: str, payload: Dict[str, Any], headers: Dict[str, str] = None) -> Dict[str, Any]:
+    """Forward data to N8N webhook."""
     n8n_base = getattr(settings, 'N8N_WEBHOOK_URL', 'https://n8n.frzgroup.com.br/webhook')
     url = f"{n8n_base}/{webhook_path}"
 
     logger.info(f"Forwarding to N8N: {url}")
 
     with httpx.Client(timeout=30) as client:
-        response = client.post(
-            url,
-            json=payload,
-            headers=headers or {}
-        )
-
+        response = client.post(url, json=payload, headers=headers or {})
         return {
             'status_code': response.status_code,
             'body': response.text,
-            'success': 200 <= response.status_code < 300
+            'success': 200 <= response.status_code < 300,
         }
 
 
@@ -477,29 +367,16 @@ def forward_to_n8n(
     autoretry_for=(httpx.RequestError,),
     retry_backoff=True,
     max_retries=3,
-    queue='webhooks'
+    queue='webhooks',
 )
-def create_salescube_lead(
-    self,
-    lead_data: Dict[str, Any]
-) -> Dict[str, Any]:
-    """
-    Create lead in SalesCube
-
-    Args:
-        lead_data: {
-            'name': 'John Doe',
-            'phone': '5511999999999',
-            'email': 'john@example.com',
-            'channel': 78,
-            'column': 48,
-            'origin': 11,
-            'responsibles': [78],
-            'is_ai_enabled': False
-        }
-    """
+def create_salescube_lead(self, lead_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Create lead in SalesCube."""
     api_url = getattr(settings, 'SALESCUBE_API_URL', 'https://api.frzglobal.com.br')
-    api_token = getattr(settings, 'SALESCUBE_API_TOKEN', '6550a421c3efbb107bfd4d1ef68a3320e06345ae')
+    api_token = getattr(settings, 'SALESCUBE_API_TOKEN', '')
+
+    if not api_token:
+        logger.error("SALESCUBE_API_TOKEN not configured")
+        return {'status': 'error', 'message': 'SALESCUBE_API_TOKEN not configured'}
 
     logger.info(f"Creating lead in SalesCube: {lead_data.get('name')}")
 
@@ -507,14 +384,11 @@ def create_salescube_lead(
         response = client.post(
             f"{api_url}/api/leads/",
             json=lead_data,
-            headers={
-                'Authorization': f'Token {api_token}',
-                'Content-Type': 'application/json'
-            }
+            headers={'Authorization': f'Token {api_token}', 'Content-Type': 'application/json'},
         )
 
         if response.status_code == 201:
-            logger.info(f"Lead created successfully: {response.json().get('id')}")
+            logger.info(f"Lead created: {response.json().get('id')}")
             return {'status': 'created', 'lead': response.json()}
         else:
             logger.error(f"Failed to create lead: {response.status_code} - {response.text}")

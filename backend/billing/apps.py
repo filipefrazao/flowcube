@@ -1,4 +1,4 @@
-from flowcube_core.plugin_base import FlowCubePluginConfig
+from platform_core.plugin_base import FlowCubePluginConfig
 
 
 class BillingConfig(FlowCubePluginConfig):

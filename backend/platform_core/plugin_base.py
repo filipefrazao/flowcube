@@ -33,7 +33,7 @@ class FlowCubePluginConfig(AppConfig):
     def ready(self):
         """Auto-register this plugin with the core registry."""
         super().ready()
-        from flowcube_core.plugin_loader import PluginRegistry
+        from platform_core.plugin_loader import PluginRegistry
         PluginRegistry.register(self)
 
     def get_urls(self):

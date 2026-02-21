@@ -109,7 +109,7 @@ urlpatterns = [
     path('api/v1/whatsapp/', include('whatsapp.urls')),
     path('api/v1/', include('analytics.urls')),
     # Plugin framework
-    path('api/v1/plugins/', include('flowcube_core.urls')),
+    path('api/v1/plugins/', include('platform_core.urls')),
     # PageCube public pages
     path('p/<slug:slug>/', include(('pagecube.public_urls', 'pagecube'), namespace='pagecube-public')),
     path('api/', api_root, name='api-root'),

@@ -5,6 +5,7 @@ Groups messages by (instance, remote_jid) and presents them as "conversations"
 for the /conversations frontend page. This bridges the ChatCube messaging system
 with the conversations UI.
 """
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Max, Q, F, Value
 from django.db.models.functions import Replace
@@ -40,6 +41,7 @@ def conversation_list(request):
 
     A conversation = unique (instance, remote_jid) pair that has messages.
     Uses Contact for name/phone, falls back to parsing remote_jid.
+    Supports pagination: ?page=1&per_page=50
     """
     user = request.user
     instance_ids = list(
@@ -47,11 +49,20 @@ def conversation_list(request):
     )
 
     if not instance_ids:
-        return Response([])
+        return Response({"results": [], "count": 0, "page": 1, "per_page": 50})
 
-    # Aggregate unique conversations from messages, normalizing JID format
-    # Strip @s.whatsapp.net for consistent grouping (some msgs have it, some don't)
-    # Exclude group chats (@g.us), broadcast lists (status@broadcast), and lid contacts (@lid)
+    # Pagination params
+    page = max(int(request.query_params.get("page", 1)), 1)
+    per_page = min(int(request.query_params.get("per_page", 50)), 100)
+    search = request.query_params.get("search", "").strip().lower()
+
+    # Check cache (15s TTL, invalidated by new messages)
+    cache_key = f"conv_list_{user.id}_{page}_{per_page}_{search}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return Response(cached)
+
+    # Aggregate unique conversations from messages
     convs = (
         Message.objects.filter(instance_id__in=instance_ids)
         .exclude(remote_jid__endswith="@g.us")
@@ -70,21 +81,18 @@ def conversation_list(request):
         .order_by("-last_message_at")
     )
 
-    # Build a lookup of contacts by (instance_id, phone) for flexible matching
+    # Build lookups
     contacts = Contact.objects.filter(instance_id__in=instance_ids)
     contact_map = {}
     for c in contacts:
         phone = _phone_from_jid(c.jid)
         contact_map[(str(c.instance_id), phone)] = c
 
-    # Build a lookup of instance names
     instances = WhatsAppInstance.objects.filter(id__in=instance_ids)
     instance_map = {str(i.id): i.name for i in instances}
 
-    # Apply optional status / search filters
-    search = request.query_params.get("search", "").strip().lower()
-
-    result = []
+    # Build result list with search filter
+    all_results = []
     for conv in convs:
         inst_id = str(conv["instance_id"])
         phone = conv["normalized_jid"]
@@ -96,32 +104,43 @@ def conversation_list(request):
             contact_name = contact.name or contact_phone
             contact_phone = contact.phone or contact_phone
 
-        # Simple search filter
         if search:
             if search not in contact_name.lower() and search not in contact_phone.lower():
                 continue
 
-        # Use contact UUID as conversation ID if available, else composite
         conv_id = str(contact.id) if contact else f"{inst_id}_{phone}"
+        all_results.append({
+            "id": conv_id,
+            "contact_name": contact_name or contact_phone,
+            "contact_phone": contact_phone,
+            "status": "active",
+            "message_count": conv["message_count"],
+            "last_message_at": (
+                conv["last_message_at"].isoformat()
+                if conv["last_message_at"]
+                else None
+            ),
+            "instance_id": inst_id,
+            "instance_name": instance_map.get(inst_id, ""),
+        })
 
-        result.append(
-            {
-                "id": conv_id,
-                "contact_name": contact_name or contact_phone,
-                "contact_phone": contact_phone,
-                "status": "active",
-                "message_count": conv["message_count"],
-                "last_message_at": (
-                    conv["last_message_at"].isoformat()
-                    if conv["last_message_at"]
-                    else None
-                ),
-                "instance_id": inst_id,
-                "instance_name": instance_map.get(inst_id, ""),
-            }
-        )
+    # Paginate
+    total = len(all_results)
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated = all_results[start:end]
 
-    return Response(result)
+    response_data = {
+        "results": paginated,
+        "count": total,
+        "page": page,
+        "per_page": per_page,
+    }
+
+    # Cache for 15 seconds
+    cache.set(cache_key, response_data, timeout=15)
+
+    return Response(response_data)
 
 
 @api_view(["GET"])
@@ -161,10 +180,18 @@ def conversation_detail(request, conversation_id):
     # Get messages matching both JID formats (with and without @s.whatsapp.net)
     phone = _phone_from_jid(remote_jid)
     full_jid = _normalize_jid(remote_jid)
-    messages = Message.objects.filter(
+    # Paginate messages
+    limit = min(int(request.query_params.get("limit", 50)), 200)
+    before = request.query_params.get("before")
+    messages_qs = Message.objects.filter(
         instance=instance,
         remote_jid__in=[phone, full_jid],
-    ).order_by("timestamp")
+    )
+    if before:
+        messages_qs = messages_qs.filter(timestamp__lt=before)
+    messages = messages_qs.order_by("-timestamp")[:limit]
+    # Re-order chronologically for display
+    messages = list(reversed(list(messages)))
 
     contact_name = ""
     contact_phone = phone

@@ -78,15 +78,8 @@ def _resolve_instance(payload: Dict[str, Any]) -> WhatsAppInstance:
             except (WhatsAppInstance.DoesNotExist, ValueError):
                 pass
 
-            # Last resort: wait briefly and retry
-            time.sleep(1.5)
-            try:
-                return WhatsAppInstance.objects.get(engine_instance_id=engine_instance_id)
-            except WhatsAppInstance.DoesNotExist:
-                try:
-                    return WhatsAppInstance.objects.get(id=engine_instance_id)
-                except (WhatsAppInstance.DoesNotExist, ValueError):
-                    pass
+            # Instance not found - will be retried by Celery if called async
+            pass
 
     raise WhatsAppInstance.DoesNotExist(
         f"Missing instance identifier (instance_id={instance_id}, engine_instance_id={engine_instance_id})."
@@ -114,7 +107,6 @@ def _upsert_contact_or_group(instance: WhatsAppInstance, remote_jid: str, *, nam
     )
 
 
-@transaction.atomic
 def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Process webhook events emitted by chatcube-engine.
@@ -198,15 +190,16 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
             "metadata": message_data,
         }
 
-        if wa_message_id:
-            msg, created = Message.objects.update_or_create(
-                instance=instance,
-                wa_message_id=wa_message_id,
-                defaults=defaults,
-            )
-        else:
-            msg = Message.objects.create(instance=instance, wa_message_id=None, **defaults)
-            created = True
+        with transaction.atomic():
+            if wa_message_id:
+                msg, created = Message.objects.update_or_create(
+                    instance=instance,
+                    wa_message_id=wa_message_id,
+                    defaults=defaults,
+                )
+            else:
+                msg = Message.objects.create(instance=instance, wa_message_id=None, **defaults)
+                created = True
 
         # Upsert conversation contact/group
         _upsert_contact_or_group(instance, remote_jid, name=sender_name, phone="")
@@ -262,43 +255,86 @@ def process_engine_webhook(payload: Dict[str, Any]) -> Dict[str, Any]:
     if event == "history_sync":
         data = payload.get("data") or payload
         messages = data.get("messages") or []
-        imported = 0
         import datetime as _dt
+
+        msg_type_map = {
+            "conversation": "text", "extendedTextMessage": "text",
+            "imageMessage": "image", "videoMessage": "video",
+            "audioMessage": "audio", "documentMessage": "document",
+            "stickerMessage": "sticker", "locationMessage": "location",
+            "reactionMessage": "reaction",
+        }
+
+        # Parse all messages first
+        parsed = []
         for item in messages:
             remote_jid = item.get("remoteJid") or ""
-            wa_id = item.get("messageId") or ""
-            from_me = bool(item.get("fromMe", False))
             msg_type_raw = item.get("messageType") or "conversation"
-            msg_type_map = {"conversation": "text", "extendedTextMessage": "text", "imageMessage": "image", "videoMessage": "video", "audioMessage": "audio", "documentMessage": "document", "stickerMessage": "sticker", "locationMessage": "location", "reactionMessage": "reaction"}
-            msg_type = msg_type_map.get(msg_type_raw, "text")
+            if not remote_jid or msg_type_raw == "protocolMessage":
+                continue
+            wa_id = item.get("messageId") or ""
             ts = item.get("messageTimestamp")
             try:
                 timestamp = _dt.datetime.fromtimestamp(int(ts), tz=_dt.timezone.utc) if ts else timezone.now()
             except Exception:
                 timestamp = timezone.now()
-            if not remote_jid or msg_type_raw == "protocolMessage":
-                continue
-            push_name = item.get("pushName") or ""
             msg_obj = item.get("message") or {}
-            # Extract content
             content_str = msg_obj.get("conversation") or (msg_obj.get("extendedTextMessage") or {}).get("text") or ""
             if not content_str and msg_type_raw not in ("conversation", "extendedTextMessage"):
                 content_str = f"[{msg_type_raw}]"
-            if wa_id:
-                _, created = Message.objects.update_or_create(
-                    instance=instance,
-                    wa_message_id=wa_id,
-                    defaults={"remote_jid": remote_jid, "from_me": from_me, "message_type": msg_type, "content": content_str, "status": "read", "timestamp": timestamp, "metadata": item},
-                )
-            else:
-                Message.objects.create(instance=instance, wa_message_id=None, remote_jid=remote_jid, from_me=from_me, message_type=msg_type, content=content_str, status="read", timestamp=timestamp, metadata=item)
-                created = True
-            if created:
-                imported += 1
-                sender_jid = item.get("participant") or remote_jid
-                if sender_jid and not sender_jid.endswith("@g.us"):
-                    phone = sender_jid.split("@")[0] if "@" in sender_jid else ""
-                    Contact.objects.update_or_create(instance=instance, jid=sender_jid, defaults={"name": push_name, "phone": phone})
+            parsed.append({
+                "remote_jid": remote_jid,
+                "wa_id": wa_id,
+                "from_me": bool(item.get("fromMe", False)),
+                "msg_type": msg_type_map.get(msg_type_raw, "text"),
+                "content": content_str,
+                "timestamp": timestamp,
+                "metadata": item,
+                "push_name": item.get("pushName") or "",
+                "participant": item.get("participant") or remote_jid,
+            })
+
+        # Bulk check existing messages
+        existing_wa_ids = set(
+            Message.objects.filter(
+                instance=instance,
+                wa_message_id__in=[p["wa_id"] for p in parsed if p["wa_id"]]
+            ).values_list("wa_message_id", flat=True)
+        )
+
+        # Bulk create new messages
+        to_create = []
+        contacts_to_upsert = {}
+        for p in parsed:
+            if p["wa_id"] and p["wa_id"] in existing_wa_ids:
+                continue
+            to_create.append(Message(
+                instance=instance,
+                wa_message_id=p["wa_id"] or None,
+                remote_jid=p["remote_jid"],
+                from_me=p["from_me"],
+                message_type=p["msg_type"],
+                content=p["content"],
+                status="read",
+                timestamp=p["timestamp"],
+                metadata=p["metadata"],
+            ))
+            sender_jid = p["participant"]
+            if sender_jid and not sender_jid.endswith("@g.us"):
+                phone = sender_jid.split("@")[0] if "@" in sender_jid else ""
+                contacts_to_upsert[sender_jid] = {"name": p["push_name"], "phone": phone}
+
+        with transaction.atomic():
+            created_msgs = Message.objects.bulk_create(to_create, ignore_conflicts=True)
+            imported = len(created_msgs)
+
+        # Bulk upsert contacts
+        for jid, data in contacts_to_upsert.items():
+            Contact.objects.update_or_create(
+                instance=instance, jid=jid,
+                defaults=data,
+            )
+
         sync_type = data.get("syncType", "")
         logger.info("history_sync: imported=%d sync_type=%s instance=%s", imported, sync_type, instance.id)
         return {"ok": True, "event": event, "imported": imported, "sync_type": sync_type}

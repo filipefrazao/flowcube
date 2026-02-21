@@ -3,30 +3,43 @@
  *
  * Connects to ws/executions/<id>/ and updates the executionStore
  * with real-time node progress events from the backend.
+ * Includes exponential backoff reconnection.
  */
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useExecutionStore, NodeStatus } from '../stores/executionStore';
 
 const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+const MAX_RETRIES = 10;
+const BASE_DELAY = 1000;
+const MAX_DELAY = 16000;
 
 export function useExecutionWebSocket(executionId: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const retryCountRef = useRef(0);
+  const executionDoneRef = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
   const { setNodeStatus, addNodeLog, finishExecution } = useExecutionStore();
 
   const connect = useCallback(() => {
-    if (!executionId) return;
+    if (!executionId || executionDoneRef.current) return;
 
-    // Build WS URL
+    // Clean up existing connection
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
     const url = `${WS_BASE_URL}/ws/executions/${executionId}/`;
-
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => {
       console.log('[WS] Connected to execution', executionId);
+      retryCountRef.current = 0;
+      setIsConnected(true);
     };
 
     ws.onmessage = (event) => {
@@ -63,6 +76,7 @@ export function useExecutionWebSocket(executionId: string | null) {
             timestamp: new Date().toISOString(),
           });
         } else if (eventType === 'execution_complete') {
+          executionDoneRef.current = true;
           finishExecution();
         }
       } catch (err) {
@@ -73,7 +87,15 @@ export function useExecutionWebSocket(executionId: string | null) {
     ws.onclose = (event) => {
       console.log('[WS] Disconnected:', event.code);
       wsRef.current = null;
-      // Don't reconnect if execution is done or component unmounted
+      setIsConnected(false);
+
+      // Reconnect if execution is still running
+      if (!executionDoneRef.current && retryCountRef.current < MAX_RETRIES) {
+        const delay = Math.min(BASE_DELAY * Math.pow(2, retryCountRef.current), MAX_DELAY);
+        retryCountRef.current += 1;
+        console.log(`[WS] Reconnecting in ${delay}ms (attempt ${retryCountRef.current}/${MAX_RETRIES})`);
+        reconnectTimerRef.current = setTimeout(connect, delay);
+      }
     };
 
     ws.onerror = (error) => {
@@ -84,6 +106,8 @@ export function useExecutionWebSocket(executionId: string | null) {
   // Connect when executionId changes
   useEffect(() => {
     if (executionId) {
+      executionDoneRef.current = false;
+      retryCountRef.current = 0;
       connect();
     }
 
@@ -95,6 +119,7 @@ export function useExecutionWebSocket(executionId: string | null) {
         wsRef.current.close();
         wsRef.current = null;
       }
+      setIsConnected(false);
     };
   }, [executionId, connect]);
 
@@ -111,7 +136,5 @@ export function useExecutionWebSocket(executionId: string | null) {
     return () => clearInterval(interval);
   }, [executionId]);
 
-  return {
-    isConnected: wsRef.current?.readyState === WebSocket.OPEN,
-  };
+  return { isConnected };
 }

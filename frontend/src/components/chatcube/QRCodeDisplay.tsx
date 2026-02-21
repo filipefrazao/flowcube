@@ -80,29 +80,28 @@ export function QRCodeDisplay({ instanceId, onConnected }: QRCodeDisplayProps) {
     }
   }, [instanceId]);
 
-  // On mount: trigger reconnect to wake up the Baileys socket, then start polling
+  // On mount: only reconnect if disconnected, then start polling
   useEffect(() => {
-    chatcubeApi.reconnect(instanceId).catch(() => {
-      // Ignore reconnect errors — instance may already be connecting
-    });
+    chatcubeApi.getStatus(instanceId).then((data) => {
+      const status = extractStatus(data);
+      if (status !== "connected" && status !== "open") {
+        chatcubeApi.reconnect(instanceId).catch(() => {});
+      }
+    }).catch(() => {});
     fetchQRCode();
   }, [instanceId, fetchQRCode]);
 
-  // Poll for QR when it's not yet available (retry every 3s)
+  // Unified QR polling: retry every 3s if no QR, countdown every 1s if QR displayed
   useEffect(() => {
-    if (qrCode || loading || showPairing) return;
+    if (loading || showPairing) return;
 
-    const pollTimer = setInterval(() => {
-      fetchQRCode();
-    }, 3000);
+    if (!qrCode) {
+      // No QR yet - poll every 3s
+      const pollTimer = setInterval(fetchQRCode, 3000);
+      return () => clearInterval(pollTimer);
+    }
 
-    return () => clearInterval(pollTimer);
-  }, [qrCode, loading, showPairing, fetchQRCode]);
-
-  // Auto-refresh countdown when QR is displayed
-  useEffect(() => {
-    if (!qrCode || loading) return;
-
+    // QR displayed - countdown and refresh when expired
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -112,9 +111,8 @@ export function QRCodeDisplay({ instanceId, onConnected }: QRCodeDisplayProps) {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(interval);
-  }, [qrCode, loading, fetchQRCode]);
+  }, [qrCode, loading, showPairing, fetchQRCode]);
 
   // Poll for connection status
   useEffect(() => {

@@ -6,7 +6,7 @@ each plugin's URLs with /api/v1/{plugin_slug}/.
 """
 from django.urls import path, include
 
-from flowcube_core.plugin_loader import PluginRegistry
+from platform_core.plugin_loader import PluginRegistry
 
 
 def get_plugin_urlpatterns():

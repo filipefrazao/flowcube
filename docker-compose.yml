@@ -1,7 +1,7 @@
 services:
-  flowcube-postgres:
+  frz-postgres:
     image: postgres:16-alpine
-    container_name: flowcube-postgres
+    container_name: frz-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -10,31 +10,31 @@ services:
     volumes:
       - flowcube-postgres-data:/var/lib/postgresql/data
     networks:
-      - flowcube-network
+      - frz-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U flowcube"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  flowcube-redis:
+  frz-redis:
     image: redis:7-alpine
-    container_name: flowcube-redis
+    container_name: frz-redis
     restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
     networks:
-      - flowcube-network
+      - frz-network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  flowcube-backend:
+  frz-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowcube-backend
+    container_name: frz-backend
     restart: unless-stopped
     command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     volumes:
@@ -45,17 +45,15 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_HOST=frz-postgres
       - POSTGRES_PORT=${POSTGRES_PORT}
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_HOST=${REDIS_HOST}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@frz-postgres:5432/${POSTGRES_DB}
+      - REDIS_HOST=frz-redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@frz-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@frz-redis:6379/1
       - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - EVOLUTION_API_URL=${EVOLUTION_API_URL}
-      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
       - SALESCUBE_API_URL=${SALESCUBE_API_URL}
       - SALESCUBE_API_TOKEN=${SALESCUBE_API_TOKEN}
       - SALESCUBE_PROD_TOKEN=${SALESCUBE_PROD_TOKEN}
@@ -78,12 +76,12 @@ services:
       - AUTO_TRANSCRIBE_CALLS=${AUTO_TRANSCRIBE_CALLS}
       - RECORDING_RETENTION_DAYS=${RECORDING_RETENTION_DAYS}
     depends_on:
-      flowcube-postgres:
+      frz-postgres:
         condition: service_healthy
-      flowcube-redis:
+      frz-redis:
         condition: service_healthy
     networks:
-      - flowcube-network
+      - frz-network
       - coolify
     deploy:
       resources:
@@ -94,13 +92,13 @@ services:
           cpus: 0.5
           memory: 512M
 
-  flowcube-celery:
+  frz-celery:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowcube-celery
+    container_name: frz-celery
     restart: unless-stopped
-    command: celery -A flowcube_project worker -l info --concurrency=2 -Q default,webhooks,http,ai,whatsapp,workflows,telegram,analytics,social,pages,telephony
+    command: celery -A config worker -l info --concurrency=2 -Q default,webhooks,http,ai,whatsapp,workflows,telegram,analytics,social,pages,telephony
     volumes:
       - ./backend:/app
     environment:
@@ -109,15 +107,13 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_HOST=frz-postgres
       - POSTGRES_PORT=${POSTGRES_PORT}
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_HOST=${REDIS_HOST}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@frz-postgres:5432/${POSTGRES_DB}
+      - REDIS_HOST=frz-redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
-      - EVOLUTION_API_URL=${EVOLUTION_API_URL}
-      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@frz-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@frz-redis:6379/1
       - SALESCUBE_API_URL=${SALESCUBE_API_URL}
       - SALESCUBE_API_TOKEN=${SALESCUBE_API_TOKEN}
       - SALESCUBE_PROD_TOKEN=${SALESCUBE_PROD_TOKEN}
@@ -140,12 +136,12 @@ services:
       - AUTO_TRANSCRIBE_CALLS=${AUTO_TRANSCRIBE_CALLS}
       - RECORDING_RETENTION_DAYS=${RECORDING_RETENTION_DAYS}
     depends_on:
-      flowcube-postgres:
+      frz-postgres:
         condition: service_healthy
-      flowcube-redis:
+      frz-redis:
         condition: service_healthy
     networks:
-      - flowcube-network
+      - frz-network
     deploy:
       resources:
         limits:
@@ -155,13 +151,13 @@ services:
           cpus: 0.5
           memory: 4G
 
-  flowcube-celery-beat:
+  frz-celery-beat:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowcube-celery-beat
+    container_name: frz-celery-beat
     restart: unless-stopped
-    command: celery -A flowcube_project beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ./backend:/app
     environment:
@@ -170,13 +166,13 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_HOST=frz-postgres
       - POSTGRES_PORT=${POSTGRES_PORT}
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_HOST=${REDIS_HOST}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@frz-postgres:5432/${POSTGRES_DB}
+      - REDIS_HOST=frz-redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@frz-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@frz-redis:6379/1
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CREDENTIAL_ENCRYPTION_KEY=${CREDENTIAL_ENCRYPTION_KEY}
       - CHATCUBE_ENGINE_URL=http://chatcube-engine:3100
@@ -193,12 +189,12 @@ services:
       - AUTO_TRANSCRIBE_CALLS=${AUTO_TRANSCRIBE_CALLS}
       - RECORDING_RETENTION_DAYS=${RECORDING_RETENTION_DAYS}
     depends_on:
-      flowcube-postgres:
+      frz-postgres:
         condition: service_healthy
-      flowcube-redis:
+      frz-redis:
         condition: service_healthy
     networks:
-      - flowcube-network
+      - frz-network
     deploy:
       resources:
         limits:
@@ -208,19 +204,19 @@ services:
           cpus: 0.25
           memory: 256M
 
-  flowcube-frontend:
+  frz-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: flowcube-frontend
+    container_name: frz-frontend
     restart: unless-stopped
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NODE_ENV=production
     depends_on:
-      - flowcube-backend
+      - frz-backend
     networks:
-      - flowcube-network
+      - frz-network
       - coolify
     deploy:
       resources:
@@ -240,17 +236,17 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3100
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@flowcube-postgres:5432/${POSTGRES_DB}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@flowcube-redis:6379/3
-      - DJANGO_WEBHOOK_URL=http://flowcube-backend:8000/api/v1/chatcube/webhook/engine/
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@frz-postgres:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@frz-redis:6379/3
+      - DJANGO_WEBHOOK_URL=http://frz-backend:8000/api/v1/chatcube/webhook/engine/
       - ENGINE_API_KEY=${CHATCUBE_ENGINE_API_KEY}
     depends_on:
-      flowcube-postgres:
+      frz-postgres:
         condition: service_healthy
-      flowcube-redis:
+      frz-redis:
         condition: service_healthy
     networks:
-      - flowcube-network
+      - frz-network
     deploy:
       resources:
         limits:
@@ -261,7 +257,7 @@ services:
           memory: 256M
 
 networks:
-  flowcube-network:
+  frz-network:
     driver: bridge
   coolify:
     external: true

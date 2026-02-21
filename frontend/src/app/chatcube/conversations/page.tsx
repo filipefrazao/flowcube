@@ -57,6 +57,21 @@ import { chatcubeApi } from "@/lib/chatcubeApi";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { cn } from "@/lib/utils";
 
+
+// ============================================================================
+// Page Visibility Hook
+// ============================================================================
+
+function usePageVisible(): boolean {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const handler = () => setVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
+  }, []);
+  return visible;
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -718,29 +733,88 @@ export default function ChatCubeConversationsPage() {
   const [showRightPanel, setShowRightPanel] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const isPageVisible = usePageVisible();
+  const lastMsgTimestampRef = useRef<string | null>(null);
 
   const selectedSessionRef = useRef<string | null>(null);
   selectedSessionRef.current = selectedSession;
 
   useEffect(() => {
     fetchSessions();
-    // Poll conversation list every 15s for new messages
-    const listTimer = setInterval(() => fetchSessionsSilent(), 15000);
-    return () => clearInterval(listTimer);
   }, []);
 
+  // Visibility-aware list polling: 15s when visible, pause when hidden
   useEffect(() => {
-    if (selectedSession) fetchDetail(selectedSession);
-    // Poll open conversation every 10s for new messages
+    if (!isPageVisible) return;
+    const listTimer = setInterval(() => fetchSessionsSilent(), 15000);
+    return () => clearInterval(listTimer);
+  }, [isPageVisible]);
+
+  useEffect(() => {
+    if (selectedSession) {
+      lastMsgTimestampRef.current = null;
+      fetchDetail(selectedSession);
+    }
+  }, [selectedSession]);
+
+  // Visibility-aware detail polling: 10s when visible, pause when hidden
+  useEffect(() => {
+    if (!isPageVisible || !selectedSession) return;
     const detailTimer = setInterval(() => {
       if (selectedSessionRef.current) fetchDetailSilent(selectedSessionRef.current);
     }, 10000);
     return () => clearInterval(detailTimer);
-  }, [selectedSession]);
+  }, [isPageVisible, selectedSession]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [sessionDetail?.messages]);
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger in input fields (except Escape)
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+
+      if (e.key === "Escape") {
+        if (showRightPanel) setShowRightPanel(false);
+        else if (selectedSession) setSelectedSession(null);
+        return;
+      }
+
+      if (isInput) return;
+
+      // Ctrl/Cmd + K = focus search
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[placeholder*="Buscar"]') as HTMLInputElement;
+        searchInput?.focus();
+        return;
+      }
+
+      // Arrow Up/Down = navigate conversations
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const currentIdx = filtered.findIndex((s) => s.id === selectedSession);
+        const nextIdx = e.key === "ArrowDown"
+          ? Math.min(currentIdx + 1, filtered.length - 1)
+          : Math.max(currentIdx - 1, 0);
+        if (filtered[nextIdx]) {
+          handleSelectSession(filtered[nextIdx].id);
+        }
+        return;
+      }
+
+      // P = toggle right panel
+      if (e.key === "p" && selectedSession) {
+        setShowRightPanel((prev) => !prev);
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedSession, filtered, showRightPanel]);
+
 
   // Silent refresh: updates list without showing full-page spinner
   const fetchSessionsSilent = async () => {
@@ -754,7 +828,12 @@ export default function ChatCubeConversationsPage() {
   const fetchDetailSilent = async (id: string) => {
     try {
       const data = await chatApi.getSession(id);
-      setSessionDetail(data);
+      // Only update if there are new messages (avoids unnecessary re-renders)
+      const newLastMsg = data?.messages?.[data.messages.length - 1]?.created_at;
+      if (newLastMsg !== lastMsgTimestampRef.current) {
+        lastMsgTimestampRef.current = newLastMsg || null;
+        setSessionDetail(data);
+      }
     } catch (_) {}
   };
 
@@ -783,14 +862,36 @@ export default function ChatCubeConversationsPage() {
   };
 
   const handleSend = async () => {
-    if (!messageText.trim() || !selectedSession) return;
+    if (!messageText.trim() || !selectedSession || !sessionDetail) return;
+    const text = messageText;
+    setMessageText("");
     setSending(true);
+
+    // Optimistic: add message immediately with "pending" status
+    const optimisticMsg: ChatMessage = {
+      id: `optimistic-${Date.now()}`,
+      content: text,
+      direction: "outbound",
+      created_at: new Date().toISOString(),
+      whatsapp_status: "pending",
+      is_ai_generated: false,
+    } as ChatMessage;
+
+    setSessionDetail((prev) =>
+      prev ? { ...prev, messages: [...(prev.messages || []), optimisticMsg] } : prev
+    );
+
     try {
-      await chatApi.sendMessage(selectedSession, messageText);
-      setMessageText("");
+      await chatApi.sendMessage(selectedSession, text);
+      // Refresh to get real message with server ID
       await fetchDetail(selectedSession);
     } catch (err) {
       console.error(err);
+      // Remove optimistic message on failure
+      setSessionDetail((prev) =>
+        prev ? { ...prev, messages: (prev.messages || []).filter((m) => m.id !== optimisticMsg.id) } : prev
+      );
+      setMessageText(text); // Restore text so user can retry
     } finally {
       setSending(false);
     }

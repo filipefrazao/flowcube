@@ -166,6 +166,13 @@ class WhatsAppInstanceSerializer(serializers.ModelSerializer):
         ]
 
     def get_stats(self, obj):
+        # Use pre-annotated fields if available (from ViewSet queryset optimization)
+        if hasattr(obj, '_prefetched_sent_today'):
+            return {
+                "messages_sent_today": obj._prefetched_sent_today,
+                "messages_received_today": obj._prefetched_received_today,
+            }
+
         now = timezone.now()
         start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         end = start + timedelta(days=1)

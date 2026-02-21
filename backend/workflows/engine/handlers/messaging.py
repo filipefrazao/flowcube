@@ -1,9 +1,11 @@
 """
-Messaging node handlers: Email (SMTP) and WhatsApp (Evolution API).
+Messaging node handlers: Email (SMTP) and WhatsApp (via ChatCube EngineClient).
+— Evolution API references removed.
 """
 import logging
 
 import httpx
+from asgiref.sync import sync_to_async
 from django.conf import settings as django_settings
 
 from workflows.engine.base import BaseNodeHandler, NodeResult
@@ -15,9 +17,8 @@ logger = logging.getLogger("flowcube.engine")
 
 @NodeRegistry.register
 class SendEmailHandler(BaseNodeHandler):
-    """
-    Send email via SMTP using aiosmtplib.
-    """
+    """Send email via SMTP using aiosmtplib."""
+
     node_type = "send_email"
 
     def validate(self, node_data: dict) -> str | None:
@@ -62,7 +63,6 @@ class SendEmailHandler(BaseNodeHandler):
                 password=smtp_pass,
                 start_tls=True,
             )
-
             return NodeResult(output={"sent": True, "to": to, "subject": subject})
         except Exception as exc:
             return NodeResult(error=f"Email send failed: {exc}")
@@ -70,9 +70,8 @@ class SendEmailHandler(BaseNodeHandler):
 
 @NodeRegistry.register
 class WhatsAppSendHandler(BaseNodeHandler):
-    """
-    Send WhatsApp message via Evolution API.
-    """
+    """Send WhatsApp message via ChatCube EngineClient."""
+
     node_type = "whatsapp_send"
 
     def validate(self, node_data: dict) -> str | None:
@@ -83,30 +82,35 @@ class WhatsAppSendHandler(BaseNodeHandler):
 
     async def execute(self, node_data: dict, context: ExecutionContext) -> NodeResult:
         config = node_data.get("config", node_data)
-        instance = context.resolve_template(config.get("instance", ""))
+        instance_name = context.resolve_template(config.get("instance", ""))
         to = context.resolve_template(config.get("to", config.get("phone", "")))
         message = context.resolve_template(config.get("message", config.get("content", "")))
 
-        evolution_url = getattr(django_settings, "EVOLUTION_API_URL", "https://evolution.frzgroup.com.br")
-        evolution_key = getattr(django_settings, "EVOLUTION_API_KEY", "")
-
-        if not instance:
+        if not instance_name:
             return NodeResult(error="WhatsApp instance is required")
 
         try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(
-                    f"{evolution_url}/message/sendText/{instance}",
-                    headers={
-                        "apikey": evolution_key,
-                        "Content-Type": "application/json",
-                    },
-                    json={"number": to, "text": message},
-                )
-                response.raise_for_status()
-                data = response.json()
+            from chatcube.engine_client import EngineClient
+            from chatcube.models import WhatsAppInstance
 
-            return NodeResult(output={"sent": True, "to": to, "response": data})
+            # Resolve engine_instance_id from instance name
+            try:
+                wa_instance = await sync_to_async(WhatsAppInstance.objects.get)(name=instance_name)
+                engine_id = wa_instance.engine_instance_id
+            except WhatsAppInstance.DoesNotExist:
+                engine_id = instance_name  # fallback: treat as engine_instance_id
+
+            if not engine_id:
+                return NodeResult(error=f"No engine_instance_id for instance {instance_name}")
+
+            client = EngineClient()
+            result = await sync_to_async(client.send_message)(
+                engine_id,
+                to=to,
+                message_type="text",
+                content=message,
+            )
+            return NodeResult(output={"sent": True, "to": to, "response": result})
         except Exception as exc:
             return NodeResult(error=f"WhatsApp send failed: {exc}")
 
@@ -114,6 +118,7 @@ class WhatsAppSendHandler(BaseNodeHandler):
 @NodeRegistry.register
 class SalesCubeCreateLeadHandler(BaseNodeHandler):
     """Create a lead in SalesCube CRM."""
+
     node_type = "salescube_create_lead"
 
     async def execute(self, node_data: dict, context: ExecutionContext) -> NodeResult:
@@ -133,7 +138,7 @@ class SalesCubeCreateLeadHandler(BaseNodeHandler):
         }
 
         if not lead_data["name"]:
-            lead_data["name"] = "Lead FlowCube"
+            lead_data["name"] = "Lead FRZ Platform"
 
         try:
             async with httpx.AsyncClient(timeout=30) as client:

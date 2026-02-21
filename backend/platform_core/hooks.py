@@ -5,7 +5,7 @@ Plugins register hooks to extend core behavior without direct imports.
 
 Usage:
     # In a plugin's hooks.py:
-    from flowcube_core.hooks import hooks
+    from platform_core.hooks import hooks
 
     @hooks.register("user_created")
     def on_user_created(user):
@@ -13,7 +13,7 @@ Usage:
         Subscription.objects.create(user=user, plan="free")
 
     # In core code that fires the hook:
-    from flowcube_core.hooks import hooks
+    from platform_core.hooks import hooks
 
     hooks.run("user_created", user=new_user)
 """

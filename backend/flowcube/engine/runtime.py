@@ -15,7 +15,8 @@ from django.db import transaction
 from asgiref.sync import sync_to_async
 
 from flowcube.models import ChatSession, ChatMessage, HandoffRequest
-from flowcube.integrations.whatsapp import evolution_client
+from chatcube.engine_client import EngineClient as _EngineClient
+from chatcube.models import WhatsAppInstance as _WhatsAppInstance
 from flowcube.integrations.http_client import GenericHTTPClient, WebhookClient
 from workflows.models import Workflow
 
@@ -491,13 +492,40 @@ class ChatbotRuntime:
 
 
 async def send_responses(instance: str, to: str, responses: List[Dict]) -> None:
+    """Send responses via ChatCube EngineClient."""
+    from asgiref.sync import sync_to_async
+
+    # Resolve engine_instance_id from instance name
+    try:
+        wa_inst = await sync_to_async(_WhatsAppInstance.objects.get)(name=instance)
+        engine_id = wa_inst.engine_instance_id
+    except _WhatsAppInstance.DoesNotExist:
+        engine_id = instance  # fallback: treat as engine_instance_id
+
+    if not engine_id:
+        logger.error(f"No engine_instance_id for instance {instance}")
+        return
+
+    client = _EngineClient()
+
     for response in responses:
         try:
-            if response["type"] == "text":
-                await evolution_client.send_text(instance, to, response["content"])
-            elif response["type"] == "image":
-                await evolution_client.send_image(instance, to, response["url"], response.get("caption", ""))
-            elif response["type"] == "buttons":
-                await evolution_client.send_buttons(instance, to, response["text"], response["buttons"])
+            msg_type = response.get("type", "text")
+            content = response.get("content", response.get("text", ""))
+            media_url = response.get("url")
+            metadata = None
+
+            if msg_type == "buttons":
+                metadata = {"buttons": response.get("buttons", [])}
+                content = response.get("text", "")
+
+            await sync_to_async(client.send_message)(
+                engine_id,
+                to=to,
+                message_type=msg_type if msg_type in ("text", "image", "audio", "document") else "text",
+                content=content,
+                media_url=media_url,
+                metadata=metadata,
+            )
         except Exception as e:
             logger.error(f"Failed to send response: {e}")

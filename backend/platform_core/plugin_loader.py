@@ -56,7 +56,7 @@ class PluginRegistry:
             logger.debug("No entry_points found for group 'flowcube.plugins'")
 
         # Phase 2: INSTALLED_APPS introspection
-        from flowcube_core.plugin_base import FlowCubePluginConfig
+        from platform_core.plugin_base import FlowCubePluginConfig
 
         for app_config in apps.get_app_configs():
             if (

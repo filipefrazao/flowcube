@@ -1,3 +1,6 @@
+import logging
+
+logger = logging.getLogger('chatcube')
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
@@ -98,7 +101,19 @@ class InstanceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return WhatsAppInstance.objects.filter(owner=self.request.user)
+        from django.db.models import Count, Q
+        from datetime import timedelta
+        now = timezone.now()
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=1)
+        return WhatsAppInstance.objects.filter(owner=self.request.user).annotate(
+            _prefetched_sent_today=Count(
+                "messages", filter=Q(messages__from_me=True, messages__timestamp__gte=start, messages__timestamp__lt=end)
+            ),
+            _prefetched_received_today=Count(
+                "messages", filter=Q(messages__from_me=False, messages__timestamp__gte=start, messages__timestamp__lt=end)
+            ),
+        )
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -395,7 +410,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
 
             run_campaign.delay(str(campaign.id))
         except Exception:
-            pass
+            logger.exception("Unexpected error in ChatCube view")
         return Response({"detail": "Campaign started."})
 
     @action(detail=True, methods=["post"], url_path="pause")
@@ -413,7 +428,7 @@ class InstanceViewSet(viewsets.ModelViewSet):
 
             run_campaign.delay(str(campaign.id))
         except Exception:
-            pass
+            logger.exception("Unexpected error in ChatCube view")
         return Response({"detail": "Campaign resumed."})
 
 
@@ -569,7 +584,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             from .tasks import run_campaign
             run_campaign.delay(str(campaign.id))
         except Exception:
-            pass
+            logger.exception("Unexpected error in ChatCube view")
         return Response({"detail": "Campaign started."})
 
     @action(detail=True, methods=["post"], url_path="pause")
@@ -586,34 +601,52 @@ class CampaignViewSet(viewsets.ModelViewSet):
             from .tasks import run_campaign
             run_campaign.delay(str(campaign.id))
         except Exception:
-            pass
+            logger.exception("Unexpected error in ChatCube view")
         return Response({"detail": "Campaign resumed."})
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def chatcube_stats(request):
+    from django.db.models import Sum
     start, end = _today_range()
     user = request.user
 
-    instances = WhatsAppInstance.objects.filter(owner=user)
-    instance_ids = list(instances.values_list("id", flat=True))
+    # Single aggregate query for instances
+    inst_agg = WhatsAppInstance.objects.filter(owner=user).aggregate(
+        total=Count("id"),
+        connected=Count("id", filter=Q(status="connected")),
+        disconnected=Count("id", filter=Q(status="disconnected")),
+    )
+    instance_ids = list(
+        WhatsAppInstance.objects.filter(owner=user).values_list("id", flat=True)
+    )
 
-    msg_qs = Message.objects.filter(instance_id__in=instance_ids, timestamp__gte=start, timestamp__lt=end)
-    sent_today = msg_qs.filter(from_me=True).count()
-    received_today = msg_qs.filter(from_me=False).count()
+    # Single aggregate query for today's messages
+    msg_agg = Message.objects.filter(
+        instance_id__in=instance_ids, timestamp__gte=start, timestamp__lt=end
+    ).aggregate(
+        sent=Count("id", filter=Q(from_me=True)),
+        received=Count("id", filter=Q(from_me=False)),
+    )
 
-    campaigns = Campaign.objects.filter(owner=user)
+    # Single aggregate query for campaigns
+    camp_agg = Campaign.objects.filter(owner=user).aggregate(
+        total=Count("id"),
+        running=Count("id", filter=Q(status="running")),
+        scheduled=Count("id", filter=Q(status="scheduled")),
+        failed=Count("id", filter=Q(status="failed")),
+    )
 
     data = {
-        "instances_total": instances.count(),
-        "instances_connected": instances.filter(status="connected").count(),
-        "instances_disconnected": instances.filter(status="disconnected").count(),
-        "messages_sent_today": sent_today,
-        "messages_received_today": received_today,
-        "campaigns_total": campaigns.count(),
-        "campaigns_running": campaigns.filter(status="running").count(),
-        "campaigns_scheduled": campaigns.filter(status="scheduled").count(),
-        "campaigns_failed": campaigns.filter(status="failed").count(),
+        "instances_total": inst_agg["total"] or 0,
+        "instances_connected": inst_agg["connected"] or 0,
+        "instances_disconnected": inst_agg["disconnected"] or 0,
+        "messages_sent_today": msg_agg["sent"] or 0,
+        "messages_received_today": msg_agg["received"] or 0,
+        "campaigns_total": camp_agg["total"] or 0,
+        "campaigns_running": camp_agg["running"] or 0,
+        "campaigns_scheduled": camp_agg["scheduled"] or 0,
+        "campaigns_failed": camp_agg["failed"] or 0,
     }
     return Response(data)
 

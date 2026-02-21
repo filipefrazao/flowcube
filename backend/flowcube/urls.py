@@ -6,7 +6,6 @@ from rest_framework.routers import DefaultRouter
 from .views.api import UserPreferenceViewSet, CredentialViewSet
 from .views.chat import ChatSessionViewSet, HandoffQueueViewSet
 from .views.webhooks import (
-    EvolutionWebhookView,
     FacebookLeadAdsWebhookView,
     GenericWebhookView,
     WebhookTestView,
@@ -21,12 +20,6 @@ router.register(r"chat/sessions", ChatSessionViewSet, basename="chat-sessions")
 router.register(r"chat/handoffs", HandoffQueueViewSet, basename="handoff-queue")
 
 urlpatterns = router.urls + [
-    # Evolution API Webhook
-    path(
-        "webhooks/evolution/<str:workflow_id>/",
-        EvolutionWebhookView.as_view(),
-        name="evolution-webhook",
-    ),
     # Generic Webhook (any source)
     path(
         "webhooks/generic/<str:workflow_id>/",

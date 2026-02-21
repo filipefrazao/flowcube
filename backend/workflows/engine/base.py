@@ -21,6 +21,8 @@ class NodeResult:
     error: Optional[str] = None
     # Which source handle to follow (for branching nodes like Router/Condition)
     source_handle: str = "default"
+    # For parallel routing: list of handles to follow simultaneously
+    source_handles: list = field(default_factory=list)
     # Extra metadata (timing, provider info, etc.)
     metadata: dict = field(default_factory=dict)
 

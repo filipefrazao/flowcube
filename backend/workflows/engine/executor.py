@@ -104,6 +104,11 @@ class WorkflowExecutor:
         """
         Run the full workflow.  Returns a summary dict.
         """
+        # Recursion guard for subworkflows
+        if hasattr(self.context, 'depth') and self.context.depth > 10:
+            logger.error("Execution depth exceeded (max 10). Possible infinite recursion.")
+            return {"status": "error", "message": "Maximum subworkflow depth exceeded (10 levels)"}
+
         start_nodes = self.find_start_nodes()
         if not start_nodes:
             return {"status": "error", "message": "No start nodes found"}
@@ -148,10 +153,13 @@ class WorkflowExecutor:
                     continue
 
             # Find downstream nodes via the result's source_handle
-            downstream = self.get_downstream(node_id, result.source_handle)
-            for next_node in downstream:
-                if next_node["id"] not in visited:
-                    queue.append(next_node)
+            # Support parallel routing via source_handles list
+            handles = result.source_handles if result.source_handles else [result.source_handle]
+            for handle in handles:
+                downstream = self.get_downstream(node_id, handle)
+                for next_node in downstream:
+                    if next_node["id"] not in visited:
+                        queue.append(next_node)
 
         await self._broadcast("execution_complete", {
             "execution_id": self.context.execution_id,

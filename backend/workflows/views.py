@@ -13,6 +13,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import Workflow, Group, Block, Edge, Variable, Execution, WorkflowSchedule
+from .validators import graph_validator
 from .serializers import (
     WorkflowListSerializer, WorkflowDetailSerializer, WorkflowCreateSerializer,
     GroupSerializer, BlockSerializer, EdgeSerializer, VariableSerializer,
@@ -256,6 +257,17 @@ class WorkflowViewSet(viewsets.ModelViewSet):
 
 
 
+
+
+    @action(detail=True, methods=["post"], url_path="validate")
+    def validate_graph(self, request, pk=None):
+        """Validate workflow graph without publishing."""
+        workflow = self.get_object()
+        errors = graph_validator.validate(workflow.graph or {})
+        return Response({
+            "valid": len(errors) == 0,
+            "errors": errors,
+        })
 
     def _link_leadads_forms(self, workflow):
         """Auto-configure SocialCube LeadAds forms when workflow has facebook_lead_ads trigger."""

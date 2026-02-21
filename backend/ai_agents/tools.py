@@ -464,7 +464,7 @@ class WhatsAppMessageTool(FlowCubeBaseTool):
     description: str = 'Send WhatsApp messages using Evolution API.'
     args_schema: Type[BaseModel] = WhatsAppMessageInput
     
-    evolution_url: str = 'https://evolution.frzgroup.com.br'
+    # WhatsApp sending is handled via ChatCube EngineClient
     api_key: str = ''
     default_instance: str = 'default'
     
@@ -500,14 +500,14 @@ class WhatsAppMessageTool(FlowCubeBaseTool):
                         'caption': message,
                         'media': media_url,
                     }
-                    endpoint = f'{self.evolution_url}/message/sendMedia/{inst}'
+                    # Media sending via ChatCube EngineClient
                 else:
                     # Send text message
                     payload = {
                         'number': phone,
                         'text': message,
                     }
-                    endpoint = f'{self.evolution_url}/message/sendText/{inst}'
+                    # Text sending via ChatCube EngineClient
                 
                 response = await client.post(
                     endpoint,
@@ -765,7 +765,6 @@ class ToolFactory:
         tool = WhatsAppMessageTool()
         tool.name = tool_def.name
         tool.description = tool_def.description
-        tool.evolution_url = config.get('evolution_url', 'https://evolution.frzgroup.com.br')
         tool.api_key = config.get('api_key', '')
         tool.default_instance = config.get('default_instance', 'default')
         tool.timeout = tool_def.timeout_seconds

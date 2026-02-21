@@ -7,8 +7,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from flowcube_core.plugin_loader import PluginRegistry
-from flowcube_core.hooks import hooks
+from platform_core.plugin_loader import PluginRegistry
+from platform_core.hooks import hooks
 
 
 @api_view(["GET"])

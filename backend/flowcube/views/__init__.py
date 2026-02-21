@@ -1,7 +1,7 @@
 from .api import UserPreferenceViewSet, CredentialViewSet
 from .chat import ChatSessionViewSet, HandoffQueueViewSet
 from .webhooks import (
-    EvolutionWebhookView,
+    FacebookLeadAdsWebhookView,
     GenericWebhookView,
     WebhookTestView,
     N8NWebhookView,
@@ -13,7 +13,7 @@ __all__ = [
     "CredentialViewSet",
     "ChatSessionViewSet",
     "HandoffQueueViewSet",
-    "EvolutionWebhookView",
+    "FacebookLeadAdsWebhookView",
     "GenericWebhookView",
     "WebhookTestView",
     "N8NWebhookView",

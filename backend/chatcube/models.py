@@ -46,7 +46,7 @@ class WhatsAppInstance(models.Model):
     warmup_day = models.IntegerField(default=30)
 
     # Engine internal reference
-    engine_instance_id = models.CharField(max_length=100, blank=True, null=True)
+    engine_instance_id = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     evolution_instance_name = models.CharField(max_length=100, blank=True, null=True, help_text="Nome da instância na Evolution API para sync de histórico")
 
     # Timestamps
@@ -97,8 +97,10 @@ class Message(models.Model):
     class Meta:
         ordering = ["-timestamp"]
         indexes = [
-            models.Index(fields=["instance", "-timestamp"]),
-            models.Index(fields=["remote_jid", "-timestamp"]),
+            models.Index(fields=["instance", "remote_jid", "-timestamp"], name="msg_conv_timeline_idx"),
+            models.Index(fields=["wa_message_id"], name="msg_wa_id_idx"),
+            models.Index(fields=["instance", "-timestamp"], name="msg_instance_time_idx"),
+            models.Index(fields=["remote_jid", "-timestamp"], name="msg_jid_time_idx"),
         ]
 
     def __str__(self):

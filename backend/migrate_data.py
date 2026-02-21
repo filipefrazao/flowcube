@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'flowcube_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 import django
 django.setup()
 

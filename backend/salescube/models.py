@@ -737,7 +737,7 @@ class EmailTemplate(models.Model):
     variables = models.JSONField(default=list, blank=True)
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="email_templates"
+        User, on_delete=models.SET_NULL, null=True, related_name="sc_email_templates"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

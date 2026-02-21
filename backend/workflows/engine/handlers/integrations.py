@@ -7,6 +7,7 @@ Handlers:
   - SalesCubePushHandler: Action that creates a lead in SalesCube PROD
 """
 import logging
+import unicodedata
 import random
 
 import httpx
@@ -17,6 +18,35 @@ from workflows.engine.registry import NodeRegistry
 
 logger = logging.getLogger("flowcube.engine")
 
+
+
+
+def _normalize_field(name: str) -> str:
+    """Strip punctuation, accents, and normalize for matching."""
+    name = name.lower().strip().rstrip("?").replace("?", "").replace("_", " ")
+    name = unicodedata.normalize('NFD', name)
+    name = ''.join(c for c in name if unicodedata.category(c) != 'Mn')
+    name = name.replace("e-mail", "email").replace("e mail", "email")
+    name = name.replace("-", " ").replace("  ", " ").strip()
+    return name
+
+# Field name aliases for Facebook Lead Ads forms
+_FIELD_ALIASES = {
+    "name": {"full_name", "nome_completo", "nome", "qual o seu nome", "qual seu nome", "name"},
+    "phone": {"phone_number", "telefone", "phone", "whatsapp", "celular", "celular ddd numero",
+              "celular (ddd+numero)", "qual o seu whatsapp", "qual seu whatsapp", "numero"},
+    "email": {"email", "e mail", "qual seu melhor email", "qual o seu email"},
+    "profession": {"cargo", "profissao", "profession", "qual sua profissao", "qual a sua profissao"},
+}
+
+def _match_field(raw_name: str) -> str | None:
+    """Match a raw field name to a normalized field category."""
+    normalized = _normalize_field(raw_name)
+    for category, aliases in _FIELD_ALIASES.items():
+        for alias in aliases:
+            if _normalize_field(alias) == normalized:
+                return category
+    return None
 
 @NodeRegistry.register
 class FacebookLeadAdsHandler(BaseNodeHandler):
@@ -52,21 +82,14 @@ class FacebookLeadAdsHandler(BaseNodeHandler):
             "raw": td,
         }
 
-        # Also extract from Facebook field_data array (SocialCube format)
+        # Extract from Facebook field_data array with normalized field matching
         for field in td.get("field_data", []):
-            fname = field.get("name", "").lower().strip()
+            fname = field.get("name", "")
             values = field.get("values", [])
             val = values[0] if values else ""
-            if fname in ("full_name", "nome_completo", "nome", "qual_o_seu_nome"):
-                output["name"] = output["name"] or val
-            elif fname in ("phone_number", "telefone", "phone", "whatsapp",
-                           "celular_(ddd+numero)", "qual_o_seu_whatsapp"):
-                output["phone"] = output["phone"] or val
-            elif fname in ("email", "e-mail", "qual_seu_melhor_email"):
-                output["email"] = output["email"] or val
-            elif fname in ("cargo", "profissao", "profession",
-                           "qual_sua_profissao"):
-                output["profession"] = output["profession"] or val
+            category = _match_field(fname)
+            if category and not output.get(category):
+                output[category] = val
 
         # SocialCube context: page and form info
         output["page_name"] = td.get("page_name", "")

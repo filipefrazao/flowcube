@@ -12,7 +12,6 @@ from flowcube.integrations.http_client import (
     get_n8n_client,
     get_webhook_client,
 )
-from flowcube.integrations.whatsapp import evolution_client
 
 __all__ = [
     "GenericHTTPClient",
@@ -23,5 +22,4 @@ __all__ = [
     "get_salescube_client",
     "get_n8n_client",
     "get_webhook_client",
-    "evolution_client",
 ]

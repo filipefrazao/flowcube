@@ -2,23 +2,48 @@ import os
 from typing import Any, Dict, Optional, Union
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 class EngineClientError(RuntimeError):
     pass
 
 
+# Singleton session with connection pooling and retry
+_session: Optional[requests.Session] = None
+
+
+def _get_session() -> requests.Session:
+    global _session
+    if _session is None:
+        _session = requests.Session()
+        retry = Retry(
+            total=3,
+            backoff_factor=0.5,
+            status_forcelist=[502, 503, 504],
+            allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+        )
+        adapter = HTTPAdapter(
+            max_retries=retry,
+            pool_connections=10,
+            pool_maxsize=20,
+        )
+        _session.mount("http://", adapter)
+        _session.mount("https://", adapter)
+    return _session
+
+
 class EngineClient:
     """
     Minimal HTTP client for chatcube-engine.
+    Uses a singleton session with connection pooling and automatic retries.
     """
 
     def __init__(self, base_url: Optional[str] = None, timeout: int = 15):
         self.base_url = (base_url or os.getenv("CHATCUBE_ENGINE_URL", "http://chatcube-engine:3100")).rstrip("/")
         self.api_key = os.getenv("CHATCUBE_ENGINE_API_KEY", "")
         self.timeout = timeout
-        self.session = requests.Session()
-        self.session.headers.update({"X-Engine-Key": self.api_key})
 
     def _request(
         self,
@@ -29,8 +54,12 @@ class EngineClient:
         params: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         url = f"{self.base_url}{path}"
+        session = _get_session()
         try:
-            resp = self.session.request(method, url, json=json, params=params, timeout=self.timeout)
+            resp = session.request(
+                method, url, json=json, params=params, timeout=self.timeout,
+                headers={"X-Engine-Key": self.api_key},
+            )
         except requests.RequestException as e:
             raise EngineClientError(f"Engine request error ({method} {url}): {e}") from e
 
@@ -47,13 +76,11 @@ class EngineClient:
         return {"data": data}
 
     def create_instance(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        # Engine expects "id" and "name" as top-level fields
         engine_payload: Dict[str, Any] = {
             "id": payload.get("instance_id") or payload.get("id"),
             "name": payload.get("name"),
             "engine": payload.get("engine", "baileys"),
         }
-        # Pass Cloud API credentials via config
         config: Dict[str, Any] = {}
         if payload.get("phone_number_id"):
             config["phoneNumberId"] = payload["phone_number_id"]
@@ -105,7 +132,6 @@ class EngineClient:
         return self._request("POST", f"/api/instances/{engine_instance_id}/reconnect")
 
     def get_status(self, engine_instance_id: str) -> Dict[str, Any]:
-        # Engine returns status as part of GET /api/instances/:id
         return self._request("GET", f"/api/instances/{engine_instance_id}")
 
     def get_contacts(self, engine_instance_id: str) -> Dict[str, Any]:
@@ -137,4 +163,3 @@ class EngineClient:
 
     def fetch_history(self, engine_instance_id: str, jid: str, count: int = 50) -> Dict[str, Any]:
         return self._request("POST", f"/api/instances/{engine_instance_id}/fetch-history", json={"jid": jid, "count": count})
-

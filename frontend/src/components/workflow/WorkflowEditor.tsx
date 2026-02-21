@@ -30,7 +30,10 @@ import ElementsPalette from './panels/ElementsPalette';
 import PropertiesPanel from './panels/PropertiesPanel';
 import { EditorToolbar } from './EditorToolbar';
 import { CommandPalette } from '../command-palette';
+import { DataInspector } from './panels/DataInspector';
+import { ExecutionTimeline } from './panels/ExecutionTimeline';
 import { cn } from '../../lib/utils';
+import { autoLayout } from '../../lib/autoLayout';
 import {
   Undo2,
   Redo2,
@@ -43,6 +46,7 @@ import {
   Loader2,
   Keyboard,
   HelpCircle,
+  Wand2,
 } from 'lucide-react';
 
 interface WorkflowEditorProps {
@@ -54,6 +58,7 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
   const { screenToFlowPosition, fitView, zoomIn, zoomOut, getZoom } = useReactFlow();
 
   const [showPalette, setShowPalette] = useState(true);
+  const [inspectedNodeId, setInspectedNodeId] = useState<string | null>(null);
   const [showProperties, setShowProperties] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(100);
 
@@ -87,30 +92,54 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
   const { activeExecutionId, nodeStatuses, isExecuting } = useExecutionStore();
   useExecutionWebSocket(activeExecutionId);
 
-  // Apply execution status overlay to nodes (border colors)
+  // Compute connected node IDs for orphan detection
+  const connectedIds = useMemo(() => {
+    const ids = new Set<string>();
+    edges.forEach((e) => { ids.add(e.source); ids.add(e.target); });
+    return ids;
+  }, [edges]);
+
+  // Apply execution status overlay + disconnected node highlight
   const styledNodes = useMemo(() => {
-    if (!isExecuting && Object.keys(nodeStatuses).length === 0) return nodes;
     return nodes.map((node: Node) => {
+      // Execution status styling
       const status = nodeStatuses[node.id];
-      if (!status || status === 'idle') return node;
-      const borderColor =
-        status === 'running' ? '#3B82F6' :  // blue
-        status === 'success' ? '#22C55E' :  // green
-        status === 'error'   ? '#EF4444' :  // red
-        status === 'skipped' ? '#6B7280' :  // gray
-        undefined;
-      if (!borderColor) return node;
-      return {
-        ...node,
-        style: {
-          ...node.style,
-          border: `2px solid ${borderColor}`,
-          boxShadow: status === 'running' ? `0 0 12px ${borderColor}40` : undefined,
-          transition: 'border-color 0.3s, box-shadow 0.3s',
-        },
-      };
+      if (status && status !== 'idle') {
+        const borderColor =
+          status === 'running' ? '#3B82F6' :
+          status === 'success' ? '#22C55E' :
+          status === 'error'   ? '#EF4444' :
+          status === 'skipped' ? '#6B7280' :
+          undefined;
+        if (borderColor) {
+          return {
+            ...node,
+            style: {
+              ...node.style,
+              border: `2px solid ${borderColor}`,
+              boxShadow: status === 'running' ? `0 0 12px ${borderColor}40` : undefined,
+              transition: 'border-color 0.3s, box-shadow 0.3s',
+            },
+          };
+        }
+      }
+
+      // Disconnected node styling (only when multiple nodes exist)
+      if (nodes.length > 1 && !connectedIds.has(node.id)) {
+        return {
+          ...node,
+          style: {
+            ...node.style,
+            border: '2px dashed #EAB308',
+            opacity: 0.7,
+            transition: 'border-color 0.3s, opacity 0.3s',
+          },
+        };
+      }
+
+      return node;
     });
-  }, [nodes, nodeStatuses, isExecuting]);
+  }, [nodes, edges, nodeStatuses, connectedIds]);
 
   // Load workflow on mount - FETCH FROM API FIRST!
   useEffect(() => {
@@ -212,6 +241,13 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
     [screenToFlowPosition, addNode, setSelectedNodeId]
   );
 
+
+
+  // Auto-layout handler
+  const handleAutoLayout = useCallback(() => {
+    const layoutedNodes = autoLayout(nodes, edges, 'LR');
+    useWorkflowStore.getState().setNodes(layoutedNodes);
+  }, [nodes, edges]);
 
   // Command Palette - Add Node Handler
   const handleCommandAddNode = useCallback(
@@ -488,6 +524,15 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
                 </button>
               </div>
 
+              {/* Auto Layout */}
+              <button
+                onClick={handleAutoLayout}
+                className="p-2.5 bg-surface rounded-lg border border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+                title="Auto Layout (dagre)"
+              >
+                <Wand2 className="w-4 h-4" />
+              </button>
+
               {/* View Options */}
               <div className="flex bg-surface rounded-lg border border-border overflow-hidden">
                 <button
@@ -536,11 +581,23 @@ function WorkflowEditorInner({ workflowId }: WorkflowEditorProps) {
           </ReactFlow>
         </div>
 
-        {/* Right Sidebar - Properties Panel */}
-        {showProperties && selectedNodeId && (
+        {/* Right Sidebar - Properties Panel or Data Inspector */}
+        {inspectedNodeId ? (
+          <DataInspector
+            nodeId={inspectedNodeId}
+            onClose={() => setInspectedNodeId(null)}
+          />
+        ) : showProperties && selectedNodeId ? (
           <PropertiesPanel onClose={() => setShowProperties(false)} />
-        )}
+        ) : null}
       </div>
+
+      {/* Execution Timeline - Bottom Panel */}
+      <ExecutionTimeline
+        onNodeClick={(nodeId) => {
+          setInspectedNodeId(nodeId);
+        }}
+      />
     </div>
   );
 }

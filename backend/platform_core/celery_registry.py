@@ -4,7 +4,7 @@ Celery queue auto-registration for FlowCube plugins.
 Plugins declare their Celery queues in plugin_celery_queues and
 task routes are auto-generated.
 """
-from flowcube_core.plugin_loader import PluginRegistry
+from platform_core.plugin_loader import PluginRegistry
 
 
 def get_plugin_queues() -> dict:
